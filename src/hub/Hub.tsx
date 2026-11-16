@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { KANJI, type Sentence } from '../content';
-import { app, commit, go, kanjimonSave, replaceSave, tick, type Screen } from '../core/app';
+import { app, commit, go, kanjimonSave, replaceSave, screen, tick, type Screen } from '../core/app';
 import { hasJapaneseVoice, sfx, speak } from '../core/audio';
 import { levelInfo, readingMeter, recentDays } from '../core/progress';
 import { exportSave } from '../core/save';
@@ -17,7 +17,7 @@ interface Tile {
 const TILES: Tile[] = [
   { id: 'kanjimon', title: 'KanjiMon', jp: '漢字モン', blurb: 'Cace kanji, quebre os selos, complete a coleção.', screen: 'kanjimon' },
   { id: 'kanabeat', title: 'Kana Beat', jp: 'かなビート', blurb: 'Digite no ritmo. Kana e palavras no tempo da batida.', screen: 'kanabeat' },
-  { id: 'roguelike', title: 'Roguelike de cartas', jp: 'ローグ', blurb: 'Runs curtas, builds e chefes. Na fila.' },
+  { id: 'roguelike', title: 'Kotodama', jp: '言霊', blurb: 'Roguelike de cartas. Runs curtas, relíquias e um chefe no topo.', screen: 'roguelike' },
   { id: 'aventura', title: 'Aventura', jp: '冒険', blurb: 'História com japonês de verdade. Na fila.' },
   { id: 'voz', title: 'Conversa por voz', jp: '会話', blurb: 'Personagens com IA rodando no seu PC. Na fila.' },
 ];
@@ -48,12 +48,14 @@ export function Hub() {
   const km = kanjimonSave();
   const sentences = readableSentences();
   const sentence = sentences.length > 0 ? sentences[sentences.length - 1] : undefined;
-  const nextGame: Screen = profile.lastGame === 'kanabeat' ? 'kanabeat' : 'kanjimon';
-  const nextLabel = nextGame === 'kanabeat' ? 'Kana Beat · Próxima música' : 'KanjiMon · Caçada';
+  const nextGame: Screen = profile.lastGame === 'kanabeat' || profile.lastGame === 'roguelike' ? profile.lastGame : 'kanjimon';
+  const nextLabel = { kanabeat: 'Kana Beat · Próxima música', roguelike: 'Kotodama · Nova run', kanjimon: 'KanjiMon · Caçada' }[nextGame];
   const booster = canOpenBooster(profile, km, cards);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      // Na troca de tela este ouvinte ainda vive por um instante: tecla de outro jogo não é do fliperama.
+      if (screen.value !== 'hub') return;
       if (showSettings) {
         if (e.key === 'Escape') setShowSettings(false);
         return;
@@ -65,6 +67,7 @@ export function Hub() {
       else if (e.key.toLowerCase() === 'b' && booster === 'ok') go('booster');
       else if (e.key.toLowerCase() === 'k') go('kanabeat');
       else if (e.key.toLowerCase() === 'c') go('kanjimon');
+      else if (e.key.toLowerCase() === 'r') go('roguelike');
     };
     addEventListener('keydown', onKey);
     return () => removeEventListener('keydown', onKey);
@@ -140,6 +143,7 @@ export function Hub() {
               {t.title}
               {t.id === 'kanjimon' && <kbd>C</kbd>}
               {t.id === 'kanabeat' && <kbd>K</kbd>}
+              {t.id === 'roguelike' && <kbd>R</kbd>}
             </span>
             <span class="tile-blurb">{t.blurb}</span>
           </button>
