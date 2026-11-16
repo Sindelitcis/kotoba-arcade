@@ -18,7 +18,7 @@ const TILES: Tile[] = [
   { id: 'kanjimon', title: 'KanjiMon', jp: '漢字モン', blurb: 'Cace kanji, quebre os selos, complete a coleção.', screen: 'kanjimon' },
   { id: 'kanabeat', title: 'Kana Beat', jp: 'かなビート', blurb: 'Digite no ritmo. Kana e palavras no tempo da batida.', screen: 'kanabeat' },
   { id: 'roguelike', title: 'Kotodama', jp: '言霊', blurb: 'Roguelike de cartas. Runs curtas, relíquias e um chefe no topo.', screen: 'roguelike' },
-  { id: 'aventura', title: 'Aventura', jp: '冒険', blurb: 'História com japonês de verdade. Na fila.' },
+  { id: 'aventura', title: 'Aventura', jp: '冒険', blurb: 'Você chegou ao Japão. Cenas curtas com japonês de verdade.', screen: 'aventura' },
   { id: 'voz', title: 'Conversa por voz', jp: '会話', blurb: 'Personagens com IA rodando no seu PC. Na fila.' },
 ];
 
@@ -48,8 +48,9 @@ export function Hub() {
   const km = kanjimonSave();
   const sentences = readableSentences();
   const sentence = sentences.length > 0 ? sentences[sentences.length - 1] : undefined;
-  const nextGame: Screen = profile.lastGame === 'kanabeat' || profile.lastGame === 'roguelike' ? profile.lastGame : 'kanjimon';
-  const nextLabel = { kanabeat: 'Kana Beat · Próxima música', roguelike: 'Kotodama · Nova run', kanjimon: 'KanjiMon · Caçada' }[nextGame];
+  const nextGame: Screen =
+    profile.lastGame === 'kanabeat' || profile.lastGame === 'roguelike' || profile.lastGame === 'aventura' ? profile.lastGame : 'kanjimon';
+  const nextLabel = { kanabeat: 'Kana Beat · Próxima música', roguelike: 'Kotodama · Nova run', aventura: 'Aventura · Próxima cena', kanjimon: 'KanjiMon · Caçada' }[nextGame];
   const booster = canOpenBooster(profile, km, cards);
 
   useEffect(() => {
@@ -68,6 +69,7 @@ export function Hub() {
       else if (e.key.toLowerCase() === 'k') go('kanabeat');
       else if (e.key.toLowerCase() === 'c') go('kanjimon');
       else if (e.key.toLowerCase() === 'r') go('roguelike');
+      else if (e.key.toLowerCase() === 'a') go('aventura');
     };
     addEventListener('keydown', onKey);
     return () => removeEventListener('keydown', onKey);
@@ -144,6 +146,7 @@ export function Hub() {
               {t.id === 'kanjimon' && <kbd>C</kbd>}
               {t.id === 'kanabeat' && <kbd>K</kbd>}
               {t.id === 'roguelike' && <kbd>R</kbd>}
+              {t.id === 'aventura' && <kbd>A</kbd>}
             </span>
             <span class="tile-blurb">{t.blurb}</span>
           </button>
