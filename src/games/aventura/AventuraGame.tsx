@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'preact/hooks';
+import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { findWord } from '../../content/vida';
 import { app, aventuraSave, commit, go, screen } from '../../core/app';
 import { sfx, speak } from '../../core/audio';
@@ -148,7 +148,8 @@ export function AventuraGame() {
     diaryEl.current?.querySelector('.on')?.scrollIntoView({ block: 'nearest' });
   }, [mode, diaryIndex]);
 
-  useEffect(() => {
+  // Ouvinte ligado junto com o desenho da tela: tecla apertada logo que a tela aparece não se perde.
+  useLayoutEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       // Na troca de tela este ouvinte ainda vive por um instante.
       if (screen.value !== 'aventura') return;

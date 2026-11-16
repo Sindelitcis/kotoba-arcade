@@ -10,6 +10,14 @@ async function openGame(page: Page) {
   await expect(page.getByTestId('av-menu')).toBeVisible();
 }
 
+/** Enter na lista de cenas abre a cena da vez. Repete se a tecla chegar antes de a tela estar pronta. */
+async function startScene(page: Page) {
+  await expect(async () => {
+    if (await page.getByTestId('av-menu').isVisible()) await page.keyboard.press('Enter');
+    await expect(page.getByTestId('av-stage')).toBeVisible({ timeout: 500 });
+  }).toPass();
+}
+
 /** Segue a conversa até aparecer uma escolha. */
 async function toChoice(page: Page) {
   for (let i = 0; i < 60; i++) {
@@ -37,7 +45,7 @@ test('do fliperama para a primeira fala só no teclado, e palavra nova já vem c
     await page.keyboard.press('a');
     await expect(page.getByTestId('av-menu')).toBeVisible({ timeout: 500 });
   }).toPass();
-  await page.keyboard.press('Enter');
+  await startScene(page);
   await expect(page.getByTestId('av-narra')).toContainText('Narita');
   await page.keyboard.press('Enter');
   await expect(page.getByTestId('av-who')).toHaveText('Fiscal da imigração');
@@ -51,7 +59,7 @@ test('do fliperama para a primeira fala só no teclado, e palavra nova já vem c
 
 test('resposta que não faz sentido não dá tela de erro: a pessoa estranha e a conversa volta', async ({ page }) => {
   await openGame(page);
-  await page.keyboard.press('Enter');
+  await startScene(page);
   await toChoice(page);
   await expect(page.getByTestId('av-line')).toContainText('パスポート');
   const odd = await page.locator('.av-option').evaluateAll((els) => els.findIndex((e) => e.getAttribute('data-result') === 'odd'));
@@ -73,7 +81,7 @@ test('resposta que não faz sentido não dá tela de erro: a pessoa estranha e a
 test('as três cenas se jogam em sequência e o progresso fica salvo', async ({ page }) => {
   await openGame(page);
   await expect(page.locator('.av-scenes .tile:disabled')).toHaveCount(2);
-  await page.keyboard.press('Enter');
+  await startScene(page);
 
   await playScene(page);
   await expect(page.getByTestId('av-summary')).toContainText('Chegada');
@@ -108,7 +116,7 @@ test('as três cenas se jogam em sequência e o progresso fica salvo', async ({ 
 test('o diário guarda as falas vividas e dá para andar nele pelo teclado', async ({ page }) => {
   await openGame(page);
   await expect(page.getByRole('button', { name: /Diário/ })).toBeDisabled();
-  await page.keyboard.press('Enter');
+  await startScene(page);
   await playScene(page);
   await page.keyboard.press('d');
   const entries = page.locator('.av-entry');
@@ -127,7 +135,7 @@ test('o diário guarda as falas vividas e dá para andar nele pelo teclado', asy
 
 test('sair no meio da cena volta para a lista de cenas sem perder o que foi visto', async ({ page }) => {
   await openGame(page);
-  await page.keyboard.press('Enter');
+  await startScene(page);
   await toChoice(page);
   await page.keyboard.press('Escape');
   await expect(page.getByTestId('av-menu')).toBeVisible();
