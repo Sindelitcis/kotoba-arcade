@@ -1,0 +1,60 @@
+# Kotoba Arcade
+
+Fliperama de jogos para aprender japonês, feito pensando em quem tem TDAH. A regra da casa é simples: primeiro tem que ser um jogo bom. O estudo acontece por dentro dele.
+
+O primeiro jogo é o [KanjiMon](https://github.com/Sindelitcis/KanjiMon), refeito aqui dentro. Os próximos são um jogo de ritmo e digitação, um roguelike de cartas, uma aventura com história e conversa por voz com IA rodando local.
+
+## Como rodar
+
+Precisa de Node 22 ou mais novo.
+
+```bash
+npm install
+npm run dev
+```
+
+Abre em http://localhost:5173. Para gerar a versão final, `npm run build` (sai na pasta `dist`).
+
+## Testes
+
+```bash
+npm test          # regras do jogo, memória, save (Vitest)
+npm run e2e       # joga de verdade no Chrome (Playwright)
+npm run check     # tipos + testes + build + e2e, tudo de uma vez
+```
+
+Todo bug corrigido entra com um teste que reproduz o caso. Rode `npm run check` antes de publicar.
+
+## Como o jogo ensina
+
+Essas escolhas vêm do que se sabe sobre TDAH e sobre memória, e do que costuma fazer a gente largar app de estudo.
+
+- **Começar custa uma tecla.** Abriu, apertou Enter, está jogando. Sem login, sem menu.
+- **Não existe pilha de revisão.** O agendamento usa FSRS, mas nenhum contador de "atrasadas" aparece. Quem some por uns dias volta e recebe primeiro o que mais vale rever. Coisa nova pausa sozinha enquanto tem muita coisa mole.
+- **Faltar um dia não zera nada.** Em vez de sequência que quebra, o fliperama mostra os últimos sete dias.
+- **Primeiro contato não tem como errar.** Kanji novo aparece com o significado, uma historinha e a resposta destacada. A cobrança vem minutos depois, quando lembrar já dá trabalho.
+- **Cada acerto responde na hora.** Som que sobe com o combo, partículas, selo quebrando. Resposta rápida ganha bônus, resposta lenta não perde nada.
+- **A pergunta muda conforme você melhora.** Começa em reconhecer o significado, passa por ler a palavra e chega em digitar a leitura.
+- **Tem ponto de parada.** A cada cinco capturas vem um baú com o resumo da sessão. Dá para parar ali ou seguir por horas.
+- **O progresso é concreto.** O fliperama mostra quantos kanji e palavras você já reconhece e as frases que já consegue ler.
+
+Kanji nunca vem sozinho: toda carta traz palavras de verdade, com leitura em kana e áudio (voz japonesa do navegador).
+
+## Organização
+
+```
+src/core      memória espaçada, seletor de cartas, save, kana, som, efeitos
+src/content   kanji, palavras e frases (hoje os 94 kanji do KanjiMon original)
+src/hub       o fliperama
+src/games     um jogo por pasta; as regras ficam separadas da tela
+tests         testes das regras
+e2e           testes jogando no navegador
+```
+
+As regras de cada jogo ficam em `engine.ts`, sem nada de tela, para dar para testar tudo. Os jogos não conversam entre si. O que eles dividem é a memória do jogador: uma palavra aprendida em um jogo já conta nos outros.
+
+O save fica no navegador. Em Ajustes dá para exportar e importar um arquivo de backup.
+
+## Créditos
+
+As artes das cartas e o conteúdo dos 94 kanji vêm do KanjiMon original, feito com Leonardo Carvalho.

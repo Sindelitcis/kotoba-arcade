@@ -1,0 +1,3788 @@
+[
+ {
+  "n": 1,
+  "kanji": "一",
+  "romaji": [
+   "ichi",
+   "hito",
+   "itsu",
+   "iti",
+   "itu"
+  ],
+  "pt": [
+   "um",
+   "1"
+  ],
+  "story": "Apenas uma linha horizontal. Representa o número 1.",
+  "hp": 20,
+  "atk": 3,
+  "words": [
+   {
+    "jp": "一日",
+    "romaji": "tsuitachi",
+    "pt": "1º dia do mês"
+   },
+   {
+    "jp": "一人",
+    "romaji": "hitori",
+    "pt": "1 pessoa"
+   },
+   {
+    "jp": "一緒に",
+    "romaji": "issho ni",
+    "pt": "juntos"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "一人で行きます。",
+    "romaji": "hitori de ikimasu",
+    "pt": "Vou sozinho."
+   }
+  ]
+ },
+ {
+  "n": 2,
+  "kanji": "二",
+  "romaji": [
+   "ni",
+   "futa",
+   "huta"
+  ],
+  "pt": [
+   "dois",
+   "2"
+  ],
+  "story": "Duas linhas. O número 2. Simples assim.",
+  "hp": 20,
+  "atk": 3,
+  "words": [
+   {
+    "jp": "二日",
+    "romaji": "futsuka",
+    "pt": "dia 2"
+   },
+   {
+    "jp": "二人",
+    "romaji": "futari",
+    "pt": "2 pessoas"
+   },
+   {
+    "jp": "二つ",
+    "romaji": "futatsu",
+    "pt": "duas coisas"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "二つください。",
+    "romaji": "futatsu kudasai",
+    "pt": "Me dê dois, por favor."
+   }
+  ]
+ },
+ {
+  "n": 3,
+  "kanji": "三",
+  "romaji": [
+   "san",
+   "mi"
+  ],
+  "pt": [
+   "tres",
+   "3"
+  ],
+  "story": "Três linhas. O número 3.",
+  "hp": 25,
+  "atk": 4,
+  "words": [
+   {
+    "jp": "三日",
+    "romaji": "mikka",
+    "pt": "dia 3"
+   },
+   {
+    "jp": "三人",
+    "romaji": "sannin",
+    "pt": "3 pessoas"
+   },
+   {
+    "jp": "三月",
+    "romaji": "sangatsu",
+    "pt": "março"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "三人家族です。",
+    "romaji": "sannin kazoku desu",
+    "pt": "Somos uma família de três."
+   }
+  ]
+ },
+ {
+  "n": 4,
+  "kanji": "四",
+  "romaji": [
+   "yon",
+   "shi",
+   "yo",
+   "si"
+  ],
+  "pt": [
+   "quatro",
+   "4"
+  ],
+  "story": "Lembra uma janela quadrada com cortinas. Quatro cantos.",
+  "hp": 25,
+  "atk": 4,
+  "words": [
+   {
+    "jp": "四月",
+    "romaji": "shigatsu",
+    "pt": "abril"
+   },
+   {
+    "jp": "四人",
+    "romaji": "yonin",
+    "pt": "4 pessoas"
+   },
+   {
+    "jp": "四つ",
+    "romaji": "yottsu",
+    "pt": "quatro coisas"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "四時に会いましょう。",
+    "romaji": "yoji ni aimashou",
+    "pt": "Vamos nos encontrar às quatro horas."
+   }
+  ]
+ },
+ {
+  "n": 5,
+  "kanji": "五",
+  "romaji": [
+   "go",
+   "itsu",
+   "itu"
+  ],
+  "pt": [
+   "cinco",
+   "5"
+  ],
+  "story": "Parece uma cadeira dobrável vista de lado.",
+  "hp": 25,
+  "atk": 4,
+  "words": [
+   {
+    "jp": "五日",
+    "romaji": "itsuka",
+    "pt": "dia 5"
+   },
+   {
+    "jp": "五円",
+    "romaji": "goen",
+    "pt": "moeda de 5 ienes"
+   },
+   {
+    "jp": "五つ",
+    "romaji": "itsutsu",
+    "pt": "cinco coisas"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "五分待ってください。",
+    "romaji": "gofun matte kudasai",
+    "pt": "Espere cinco minutos."
+   }
+  ]
+ },
+ {
+  "n": 6,
+  "kanji": "六",
+  "romaji": [
+   "roku",
+   "mu"
+  ],
+  "pt": [
+   "seis",
+   "6"
+  ],
+  "story": "Lembra um homenzinho gordinho com pernas abertas. O número seis.",
+  "hp": 25,
+  "atk": 4,
+  "words": [
+   {
+    "jp": "六日",
+    "romaji": "muika",
+    "pt": "dia 6"
+   },
+   {
+    "jp": "六百",
+    "romaji": "roppyaku",
+    "pt": "600"
+   },
+   {
+    "jp": "六つ",
+    "romaji": "muttsu",
+    "pt": "seis coisas"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "毎日六時に起きます。",
+    "romaji": "mainichi rokuji ni okimasu",
+    "pt": "Acordo às seis todos os dias."
+   }
+  ]
+ },
+ {
+  "n": 7,
+  "kanji": "七",
+  "romaji": [
+   "nana",
+   "shichi",
+   "siti"
+  ],
+  "pt": [
+   "sete",
+   "7"
+  ],
+  "story": "Parece o número 7 de cabeça para baixo cortado por um traço.",
+  "hp": 25,
+  "atk": 5,
+  "words": [
+   {
+    "jp": "七日",
+    "romaji": "nanoka",
+    "pt": "dia 7"
+   },
+   {
+    "jp": "七時",
+    "romaji": "shichiji",
+    "pt": "7 horas"
+   },
+   {
+    "jp": "七つ",
+    "romaji": "nanatsu",
+    "pt": "sete coisas"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "七月に行きます。",
+    "romaji": "shichigatsu ni ikimasu",
+    "pt": "Vou em julho."
+   }
+  ]
+ },
+ {
+  "n": 8,
+  "kanji": "八",
+  "romaji": [
+   "hachi",
+   "ya",
+   "hati"
+  ],
+  "pt": [
+   "oito",
+   "8"
+  ],
+  "story": "Duas linhas se abrindo para baixo, como um vulcão de oito pontas.",
+  "hp": 25,
+  "atk": 5,
+  "words": [
+   {
+    "jp": "八日",
+    "romaji": "youka",
+    "pt": "dia 8"
+   },
+   {
+    "jp": "八百屋",
+    "romaji": "yaoya",
+    "pt": "quitanda"
+   },
+   {
+    "jp": "八つ",
+    "romaji": "yattsu",
+    "pt": "oito coisas"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "八時に始まります。",
+    "romaji": "hachiji ni hajimarimasu",
+    "pt": "Começa às oito horas."
+   }
+  ]
+ },
+ {
+  "n": 9,
+  "kanji": "九",
+  "romaji": [
+   "kyuu",
+   "ku",
+   "kokono"
+  ],
+  "pt": [
+   "nove",
+   "9"
+  ],
+  "story": "Parece uma pessoa no chão fazendo uma flexão.",
+  "hp": 30,
+  "atk": 5,
+  "words": [
+   {
+    "jp": "九月",
+    "romaji": "kugatsu",
+    "pt": "setembro"
+   },
+   {
+    "jp": "九州",
+    "romaji": "kyuushuu",
+    "pt": "região de Kyushu"
+   },
+   {
+    "jp": "九つ",
+    "romaji": "kokonotsu",
+    "pt": "nove coisas"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "妹は九歳です。",
+    "romaji": "imouto wa kyuusai desu",
+    "pt": "Minha irmã mais nova tem nove anos."
+   }
+  ]
+ },
+ {
+  "n": 10,
+  "kanji": "十",
+  "romaji": [
+   "juu",
+   "tou",
+   "ji",
+   "zyuu",
+   "zi"
+  ],
+  "pt": [
+   "dez",
+   "10"
+  ],
+  "story": "Uma cruz marcando o centro de dez direções.",
+  "hp": 30,
+  "atk": 5,
+  "words": [
+   {
+    "jp": "十日",
+    "romaji": "tooka",
+    "pt": "dia 10"
+   },
+   {
+    "jp": "十分",
+    "romaji": "juubun",
+    "pt": "suficiente"
+   },
+   {
+    "jp": "十字路",
+    "romaji": "juujiro",
+    "pt": "cruzamento"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "十分な時間があります。",
+    "romaji": "juubun na jikan ga arimasu",
+    "pt": "Temos tempo suficiente."
+   }
+  ]
+ },
+ {
+  "n": 11,
+  "kanji": "百",
+  "romaji": [
+   "hyaku",
+   "byaku",
+   "pyaku"
+  ],
+  "pt": [
+   "cem",
+   "100"
+  ],
+  "story": "Um número '1' (一) acima de um sol branco (白). Cem graus!",
+  "hp": 35,
+  "atk": 6,
+  "words": [
+   {
+    "jp": "百円",
+    "romaji": "hyakuen",
+    "pt": "100 ienes"
+   },
+   {
+    "jp": "三百",
+    "romaji": "sanbyaku",
+    "pt": "300"
+   },
+   {
+    "jp": "百貨店",
+    "romaji": "hyakukaten",
+    "pt": "loja de departamento"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "これは百円です。",
+    "romaji": "kore wa hyakuen desu",
+    "pt": "Isto custa cem ienes."
+   }
+  ]
+ },
+ {
+  "n": 12,
+  "kanji": "千",
+  "romaji": [
+   "sen",
+   "chi",
+   "zen",
+   "ti"
+  ],
+  "pt": [
+   "mil",
+   "1000"
+  ],
+  "story": "Uma cruz (10) com um traço a mais em cima. Um número mil vezes maior.",
+  "hp": 40,
+  "atk": 7,
+  "words": [
+   {
+    "jp": "千円",
+    "romaji": "sen'en",
+    "pt": "1000 ienes"
+   },
+   {
+    "jp": "千葉",
+    "romaji": "chiba",
+    "pt": "província de Chiba"
+   },
+   {
+    "jp": "三千",
+    "romaji": "sanzen",
+    "pt": "3000"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "千円札ありますか？",
+    "romaji": "sen'ensatsu arimasu ka?",
+    "pt": "Tem uma nota de mil ienes?"
+   }
+  ]
+ },
+ {
+  "n": 13,
+  "kanji": "万",
+  "romaji": [
+   "man",
+   "ban"
+  ],
+  "pt": [
+   "dez mil",
+   "10000"
+  ],
+  "story": "O corte rápido de uma espada, valendo pela força de dez mil.",
+  "hp": 50,
+  "atk": 8,
+  "words": [
+   {
+    "jp": "一万円",
+    "romaji": "ichiman'en",
+    "pt": "10.000 ienes"
+   },
+   {
+    "jp": "万歳",
+    "romaji": "banzai",
+    "pt": "viva!"
+   },
+   {
+    "jp": "万一",
+    "romaji": "man'ichi",
+    "pt": "emergência/por acaso"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "一万円かかります。",
+    "romaji": "ichiman'en kakarimasu",
+    "pt": "Custa dez mil ienes."
+   }
+  ]
+ },
+ {
+  "n": 14,
+  "kanji": "円",
+  "romaji": [
+   "en",
+   "maru"
+  ],
+  "pt": [
+   "iene",
+   "circulo",
+   "dinheiro"
+  ],
+  "story": "Lembra a moldura de uma moeda furada antiga ou uma caixa registradora.",
+  "hp": 45,
+  "atk": 7,
+  "words": [
+   {
+    "jp": "百円",
+    "romaji": "hyakuen",
+    "pt": "100 ienes"
+   },
+   {
+    "jp": "円い",
+    "romaji": "marui",
+    "pt": "redondo"
+   },
+   {
+    "jp": "円安",
+    "romaji": "enyasu",
+    "pt": "iene fraco"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "千円を払いました。",
+    "romaji": "senen o haraimashita",
+    "pt": "Paguei mil ienes."
+   }
+  ]
+ },
+ {
+  "n": 15,
+  "kanji": "日",
+  "romaji": [
+   "hi",
+   "nichi",
+   "jitsu",
+   "bi",
+   "ka",
+   "niti",
+   "zitu"
+  ],
+  "pt": [
+   "sol",
+   "dia"
+  ],
+  "story": "Originalmente era desenhado como um círculo com um ponto no meio (o sol).",
+  "hp": 35,
+  "atk": 6,
+  "words": [
+   {
+    "jp": "日本",
+    "romaji": "nihon",
+    "pt": "Japão"
+   },
+   {
+    "jp": "今日",
+    "romaji": "kyou",
+    "pt": "hoje"
+   },
+   {
+    "jp": "日曜日",
+    "romaji": "nichiyoubi",
+    "pt": "domingo"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "日本へようこそ。",
+    "romaji": "nihon e youkoso",
+    "pt": "Bem-vindo ao Japão."
+   }
+  ]
+ },
+ {
+  "n": 16,
+  "kanji": "月",
+  "romaji": [
+   "tsuki",
+   "getsu",
+   "gatsu",
+   "tuki",
+   "getu",
+   "gatu"
+  ],
+  "pt": [
+   "lua",
+   "mes"
+  ],
+  "story": "O formato de uma lua crescente com nuvens passando pelo meio dela.",
+  "hp": 35,
+  "atk": 6,
+  "words": [
+   {
+    "jp": "月曜日",
+    "romaji": "getsuyoubi",
+    "pt": "2ª feira"
+   },
+   {
+    "jp": "今月",
+    "romaji": "kongetsu",
+    "pt": "este mês"
+   },
+   {
+    "jp": "一ヶ月",
+    "romaji": "ikkagetsu",
+    "pt": "um mês"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "月が綺麗ですね。",
+    "romaji": "tsuki ga kirei desu ne",
+    "pt": "A lua está linda, não é?"
+   }
+  ]
+ },
+ {
+  "n": 17,
+  "kanji": "火",
+  "romaji": [
+   "hi",
+   "ka",
+   "bi"
+  ],
+  "pt": [
+   "fogo"
+  ],
+  "story": "Lembra uma fogueira, com as chamas subindo e faíscas dos lados.",
+  "hp": 35,
+  "atk": 7,
+  "words": [
+   {
+    "jp": "火曜日",
+    "romaji": "kayoubi",
+    "pt": "3ª feira"
+   },
+   {
+    "jp": "花火",
+    "romaji": "hanabi",
+    "pt": "fogos de artifício"
+   },
+   {
+    "jp": "火事",
+    "romaji": "kaji",
+    "pt": "incêndio"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "火を消して。",
+    "romaji": "hi o keshite",
+    "pt": "Apague o fogo."
+   }
+  ]
+ },
+ {
+  "n": 18,
+  "kanji": "水",
+  "romaji": [
+   "mizu",
+   "sui"
+  ],
+  "pt": [
+   "agua"
+  ],
+  "story": "Representa a água fluindo. O traço do meio é o rio, os lados são os respingos.",
+  "hp": 35,
+  "atk": 5,
+  "words": [
+   {
+    "jp": "水曜日",
+    "romaji": "suiyoubi",
+    "pt": "4ª feira"
+   },
+   {
+    "jp": "お水",
+    "romaji": "omizu",
+    "pt": "água"
+   },
+   {
+    "jp": "水道",
+    "romaji": "suidou",
+    "pt": "encanamento"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "お水を一杯ください。",
+    "romaji": "omizu o ippai kudasai",
+    "pt": "Um copo de água, por favor."
+   }
+  ]
+ },
+ {
+  "n": 19,
+  "kanji": "木",
+  "romaji": [
+   "ki",
+   "moku",
+   "boku"
+  ],
+  "pt": [
+   "arvore",
+   "madeira"
+  ],
+  "story": "Lembra uma árvore. A linha reta é o tronco, a de cima os galhos e as de baixo as raízes.",
+  "hp": 40,
+  "atk": 4,
+  "words": [
+   {
+    "jp": "木曜日",
+    "romaji": "mokuyoubi",
+    "pt": "5ª feira"
+   },
+   {
+    "jp": "木村",
+    "romaji": "kimura",
+    "pt": "sobrenome"
+   },
+   {
+    "jp": "木造",
+    "romaji": "mokuzou",
+    "pt": "de madeira"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "あの木は大きいです。",
+    "romaji": "ano ki wa ookii desu",
+    "pt": "Aquela árvore é grande."
+   }
+  ]
+ },
+ {
+  "n": 20,
+  "kanji": "金",
+  "romaji": [
+   "kane",
+   "kin",
+   "kon"
+  ],
+  "pt": [
+   "ouro",
+   "dinheiro",
+   "metal"
+  ],
+  "story": "Um telhado sobre um monte de terra escondendo pepitas de ouro brilhantes.",
+  "hp": 50,
+  "atk": 8,
+  "words": [
+   {
+    "jp": "金曜日",
+    "romaji": "kin'youbi",
+    "pt": "6ª feira"
+   },
+   {
+    "jp": "お金",
+    "romaji": "okane",
+    "pt": "dinheiro"
+   },
+   {
+    "jp": "現金",
+    "romaji": "genkin",
+    "pt": "dinheiro vivo"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "お金がありません。",
+    "romaji": "okane ga arimasen",
+    "pt": "Não tenho dinheiro."
+   }
+  ]
+ },
+ {
+  "n": 21,
+  "kanji": "土",
+  "romaji": [
+   "tsuchi",
+   "do",
+   "to",
+   "tuti"
+  ],
+  "pt": [
+   "terra",
+   "solo"
+  ],
+  "story": "Uma cruz ou pequena planta cravada firmemente no solo da terra.",
+  "hp": 45,
+  "atk": 6,
+  "words": [
+   {
+    "jp": "土曜日",
+    "romaji": "doyoubi",
+    "pt": "sábado"
+   },
+   {
+    "jp": "お土産",
+    "romaji": "omiyage",
+    "pt": "lembrancinha"
+   },
+   {
+    "jp": "土地",
+    "romaji": "tochi",
+    "pt": "terreno"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "土曜日が休みです。",
+    "romaji": "doyoubi ga yasumi desu",
+    "pt": "Sábado é minha folga."
+   }
+  ]
+ },
+ {
+  "n": 22,
+  "kanji": "山",
+  "romaji": [
+   "yama",
+   "san",
+   "zan"
+  ],
+  "pt": [
+   "montanha"
+  ],
+  "story": "Um pico de montanha alto no centro, cercado por dois picos menores.",
+  "hp": 45,
+  "atk": 6,
+  "words": [
+   {
+    "jp": "富士山",
+    "romaji": "fujisan",
+    "pt": "Monte Fuji"
+   },
+   {
+    "jp": "山田",
+    "romaji": "yamada",
+    "pt": "sobrenome"
+   },
+   {
+    "jp": "火山",
+    "romaji": "kazan",
+    "pt": "vulcão"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "山に登ります。",
+    "romaji": "yama ni noborimasu",
+    "pt": "Vou escalar a montanha."
+   }
+  ]
+ },
+ {
+  "n": 23,
+  "kanji": "川",
+  "romaji": [
+   "kawa",
+   "sen",
+   "gawa"
+  ],
+  "pt": [
+   "rio"
+  ],
+  "story": "Três correntes de um rio fluindo lado a lado.",
+  "hp": 35,
+  "atk": 5,
+  "words": [
+   {
+    "jp": "川口",
+    "romaji": "kawaguchi",
+    "pt": "sobrenome"
+   },
+   {
+    "jp": "天の川",
+    "romaji": "amanogawa",
+    "pt": "via láctea"
+   },
+   {
+    "jp": "河川",
+    "romaji": "kasen",
+    "pt": "rios"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "川で泳ぎます。",
+    "romaji": "kawa de oyogimasu",
+    "pt": "Vou nadar no rio."
+   }
+  ]
+ },
+ {
+  "n": 24,
+  "kanji": "天",
+  "romaji": [
+   "ten",
+   "ama"
+  ],
+  "pt": [
+   "ceu",
+   "paraiso"
+  ],
+  "story": "Uma pessoa grande (大) com um traço acima da cabeça, apontando para o céu.",
+  "hp": 55,
+  "atk": 9,
+  "words": [
+   {
+    "jp": "天気",
+    "romaji": "tenki",
+    "pt": "tempo"
+   },
+   {
+    "jp": "天ぷら",
+    "romaji": "tenpura",
+    "pt": "tempurá"
+   },
+   {
+    "jp": "天国",
+    "romaji": "tengoku",
+    "pt": "paraíso"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "今日は天気がいいです。",
+    "romaji": "kyou wa tenki ga ii desu",
+    "pt": "O tempo está bom hoje."
+   }
+  ]
+ },
+ {
+  "n": 25,
+  "kanji": "空",
+  "romaji": [
+   "sora",
+   "kuu",
+   "a",
+   "kara"
+  ],
+  "pt": [
+   "ceu",
+   "vazio"
+  ],
+  "story": "Um teto com buracos deixando entrar o vazio do céu.",
+  "hp": 50,
+  "atk": 8,
+  "words": [
+   {
+    "jp": "空気",
+    "romaji": "kuuki",
+    "pt": "ar"
+   },
+   {
+    "jp": "空港",
+    "romaji": "kuukou",
+    "pt": "aeroporto"
+   },
+   {
+    "jp": "空いている",
+    "romaji": "aiteiru",
+    "pt": "estar vazio/livre"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "空が青いです。",
+    "romaji": "sora ga aoi desu",
+    "pt": "O céu está azul."
+   }
+  ]
+ },
+ {
+  "n": 26,
+  "kanji": "雨",
+  "romaji": [
+   "ame",
+   "u",
+   "ama"
+  ],
+  "pt": [
+   "chuva"
+  ],
+  "story": "A visão do céu (teto) com quatro gotas de chuva caindo pela janela.",
+  "hp": 40,
+  "atk": 6,
+  "words": [
+   {
+    "jp": "大雨",
+    "romaji": "ooame",
+    "pt": "chuva forte"
+   },
+   {
+    "jp": "雨水",
+    "romaji": "amamizu",
+    "pt": "água da chuva"
+   },
+   {
+    "jp": "梅雨",
+    "romaji": "tsuyu",
+    "pt": "época de chuvas"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "雨が降っています。",
+    "romaji": "ame ga futte imasu",
+    "pt": "Está chovendo."
+   }
+  ]
+ },
+ {
+  "n": 27,
+  "kanji": "花",
+  "romaji": [
+   "hana",
+   "ka",
+   "bana"
+  ],
+  "pt": [
+   "flor"
+  ],
+  "story": "O radical de 'grama' no topo de alguém se transformando... uma flor brotando!",
+  "hp": 35,
+  "atk": 5,
+  "words": [
+   {
+    "jp": "花見",
+    "romaji": "hanami",
+    "pt": "ver cerejeiras"
+   },
+   {
+    "jp": "花火",
+    "romaji": "hanabi",
+    "pt": "fogos de artifício"
+   },
+   {
+    "jp": "生け花",
+    "romaji": "ikebana",
+    "pt": "arranjo floral"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "綺麗な花ですね。",
+    "romaji": "kirei na hana desu ne",
+    "pt": "Que flor bonita, né?"
+   }
+  ]
+ },
+ {
+  "n": 28,
+  "kanji": "人",
+  "romaji": [
+   "hito",
+   "jin",
+   "nin",
+   "zin"
+  ],
+  "pt": [
+   "pessoa",
+   "humano"
+  ],
+  "story": "Uma pessoa de perfil, em pé, com as pernas abertas caminhando.",
+  "hp": 40,
+  "atk": 5,
+  "words": [
+   {
+    "jp": "日本人",
+    "romaji": "nihonjin",
+    "pt": "japonês"
+   },
+   {
+    "jp": "あの人",
+    "romaji": "ano hito",
+    "pt": "aquela pessoa"
+   },
+   {
+    "jp": "人気",
+    "romaji": "ninki",
+    "pt": "popularidade"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "彼はいい人です。",
+    "romaji": "kare wa ii hito desu",
+    "pt": "Ele é uma boa pessoa."
+   }
+  ]
+ },
+ {
+  "n": 29,
+  "kanji": "男",
+  "romaji": [
+   "otoko",
+   "dan",
+   "nan"
+  ],
+  "pt": [
+   "homem",
+   "masculino"
+  ],
+  "story": "O poder e força (力) trabalhando no campo de arroz (田) faz o homem.",
+  "hp": 45,
+  "atk": 6,
+  "words": [
+   {
+    "jp": "男の子",
+    "romaji": "otokonoko",
+    "pt": "menino"
+   },
+   {
+    "jp": "男性",
+    "romaji": "dansei",
+    "pt": "sexo masculino"
+   },
+   {
+    "jp": "長男",
+    "romaji": "chounan",
+    "pt": "filho mais velho"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "あの男の人は誰ですか？",
+    "romaji": "ano otoko no hito wa dare desu ka?",
+    "pt": "Quem é aquele homem?"
+   }
+  ]
+ },
+ {
+  "n": 30,
+  "kanji": "女",
+  "romaji": [
+   "onna",
+   "jo",
+   "nyo",
+   "zyo"
+  ],
+  "pt": [
+   "mulher",
+   "feminino"
+  ],
+  "story": "Lembra uma mulher ajoelhada cruzando as pernas e mãos graciosamente.",
+  "hp": 45,
+  "atk": 6,
+  "words": [
+   {
+    "jp": "女の子",
+    "romaji": "onnanoko",
+    "pt": "menina"
+   },
+   {
+    "jp": "女性",
+    "romaji": "josei",
+    "pt": "sexo feminino"
+   },
+   {
+    "jp": "彼女",
+    "romaji": "kanojo",
+    "pt": "namorada/ela"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "女の人がいます。",
+    "romaji": "onna no hito ga imasu",
+    "pt": "Tem uma mulher ali."
+   }
+  ]
+ },
+ {
+  "n": 31,
+  "kanji": "子",
+  "romaji": [
+   "ko",
+   "shi",
+   "su",
+   "si"
+  ],
+  "pt": [
+   "crianca",
+   "filho"
+  ],
+  "story": "A imagem de um bebê pequeno embalado com os bracinhos abertos.",
+  "hp": 30,
+  "atk": 4,
+  "words": [
+   {
+    "jp": "子供",
+    "romaji": "kodomo",
+    "pt": "criança"
+   },
+   {
+    "jp": "お菓子",
+    "romaji": "okashi",
+    "pt": "doces/snacks"
+   },
+   {
+    "jp": "帽子",
+    "romaji": "boushi",
+    "pt": "chapéu"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "子供が遊んでいます。",
+    "romaji": "kodomo ga asonde imasu",
+    "pt": "A criança está brincando."
+   }
+  ]
+ },
+ {
+  "n": 32,
+  "kanji": "目",
+  "romaji": [
+   "me",
+   "moku",
+   "boku"
+  ],
+  "pt": [
+   "olho"
+  ],
+  "story": "Um olho na vertical com duas linhas dentro representando a íris.",
+  "hp": 30,
+  "atk": 4,
+  "words": [
+   {
+    "jp": "目薬",
+    "romaji": "megusuri",
+    "pt": "colírio"
+   },
+   {
+    "jp": "目的",
+    "romaji": "mokuteki",
+    "pt": "objetivo"
+   },
+   {
+    "jp": "駄目",
+    "romaji": "dame",
+    "pt": "proibido/não pode"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "目が痛いです。",
+    "romaji": "me ga itai desu",
+    "pt": "Meu olho dói."
+   }
+  ]
+ },
+ {
+  "n": 33,
+  "kanji": "口",
+  "romaji": [
+   "kuchi",
+   "kou",
+   "ku",
+   "guchi",
+   "kuti",
+   "guti"
+  ],
+  "pt": [
+   "boca"
+  ],
+  "story": "Um quadrado que representa uma boca aberta.",
+  "hp": 30,
+  "atk": 4,
+  "words": [
+   {
+    "jp": "出口",
+    "romaji": "deguchi",
+    "pt": "saída"
+   },
+   {
+    "jp": "入口",
+    "romaji": "iriguchi",
+    "pt": "entrada"
+   },
+   {
+    "jp": "人口",
+    "romaji": "jinkou",
+    "pt": "população"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "大きく口を開けて。",
+    "romaji": "ookiku kuchi o akete",
+    "pt": "Abra bem a boca."
+   }
+  ]
+ },
+ {
+  "n": 34,
+  "kanji": "耳",
+  "romaji": [
+   "mimi",
+   "ji",
+   "zi"
+  ],
+  "pt": [
+   "orelha"
+  ],
+  "story": "O formato de uma orelha retangular cheia de cartilagens internas.",
+  "hp": 30,
+  "atk": 4,
+  "words": [
+   {
+    "jp": "耳鼻科",
+    "romaji": "jibika",
+    "pt": "otorrino"
+   },
+   {
+    "jp": "初耳",
+    "romaji": "hatsumimi",
+    "pt": "ouvir pela 1ª vez"
+   },
+   {
+    "jp": "耳栓",
+    "romaji": "mimisen",
+    "pt": "tampão de ouvido"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "耳が遠いです。",
+    "romaji": "mimi ga tooi desu",
+    "pt": "Tenho a audição ruim/sou duro de ouvido."
+   }
+  ]
+ },
+ {
+  "n": 35,
+  "kanji": "手",
+  "romaji": [
+   "te",
+   "shu",
+   "syu"
+  ],
+  "pt": [
+   "mao"
+  ],
+  "story": "As linhas principais da palma de uma mão ou os dedos dobrados.",
+  "hp": 35,
+  "atk": 5,
+  "words": [
+   {
+    "jp": "お手洗い",
+    "romaji": "otearai",
+    "pt": "banheiro/lavabos"
+   },
+   {
+    "jp": "切手",
+    "romaji": "kitte",
+    "pt": "selo postal"
+   },
+   {
+    "jp": "拍手",
+    "romaji": "hakushu",
+    "pt": "aplausos"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "手を洗ってください。",
+    "romaji": "te o aratte kudasai",
+    "pt": "Lave as mãos, por favor."
+   }
+  ]
+ },
+ {
+  "n": 36,
+  "kanji": "足",
+  "romaji": [
+   "ashi",
+   "soku",
+   "ta",
+   "asi"
+  ],
+  "pt": [
+   "pe",
+   "perna"
+  ],
+  "story": "Um rosto ou joelho dobrado em cima de uma perna em movimento.",
+  "hp": 40,
+  "atk": 6,
+  "words": [
+   {
+    "jp": "足首",
+    "romaji": "ashikubi",
+    "pt": "tornozelo"
+   },
+   {
+    "jp": "不足",
+    "romaji": "fusoku",
+    "pt": "falta/escassez"
+   },
+   {
+    "jp": "足りる",
+    "romaji": "tariru",
+    "pt": "ser suficiente"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "足が疲れました。",
+    "romaji": "ashi ga tsukaremashita",
+    "pt": "Minhas pernas cansaram."
+   }
+  ]
+ },
+ {
+  "n": 37,
+  "kanji": "父",
+  "romaji": [
+   "chichi",
+   "tou",
+   "fu",
+   "titi",
+   "hu"
+  ],
+  "pt": [
+   "pai"
+  ],
+  "story": "Duas sobrancelhas grossas e um bigode de um pai severo, ou dois machados cruzados.",
+  "hp": 45,
+  "atk": 6,
+  "words": [
+   {
+    "jp": "お父さん",
+    "romaji": "otousan",
+    "pt": "pai"
+   },
+   {
+    "jp": "祖父",
+    "romaji": "sofu",
+    "pt": "avô"
+   },
+   {
+    "jp": "父親",
+    "romaji": "chichioya",
+    "pt": "pai [formal]"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "父は会社員です。",
+    "romaji": "chichi wa kaishain desu",
+    "pt": "Meu pai é funcionário de empresa."
+   }
+  ]
+ },
+ {
+  "n": 38,
+  "kanji": "母",
+  "romaji": [
+   "haha",
+   "kaa",
+   "bo"
+  ],
+  "pt": [
+   "mae"
+  ],
+  "story": "Uma grande caixa com dois pontos dentro, representando o peito da mãe nutrindo os filhos.",
+  "hp": 45,
+  "atk": 6,
+  "words": [
+   {
+    "jp": "お母さん",
+    "romaji": "okaasan",
+    "pt": "mãe"
+   },
+   {
+    "jp": "祖母",
+    "romaji": "sobo",
+    "pt": "avó"
+   },
+   {
+    "jp": "母親",
+    "romaji": "hahaoya",
+    "pt": "mãe [formal]"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "母は料理が上手です。",
+    "romaji": "haha wa ryouri ga jouzu desu",
+    "pt": "Minha mãe cozinha bem."
+   }
+  ]
+ },
+ {
+  "n": 39,
+  "kanji": "上",
+  "romaji": [
+   "ue",
+   "jou",
+   "kami",
+   "nobo",
+   "a",
+   "uwa",
+   "zyou"
+  ],
+  "pt": [
+   "cima",
+   "acima",
+   "subir"
+  ],
+  "story": "Um pilar central e um traço apontando firmemente para cima.",
+  "hp": 40,
+  "atk": 5,
+  "words": [
+   {
+    "jp": "上着",
+    "romaji": "uwagi",
+    "pt": "casaco/jaqueta"
+   },
+   {
+    "jp": "上手",
+    "romaji": "jouzu",
+    "pt": "habilidoso"
+   },
+   {
+    "jp": "上る",
+    "romaji": "noboru",
+    "pt": "subir"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "机の上にあります。",
+    "romaji": "tsukue no ue ni arimasu",
+    "pt": "Está em cima da mesa."
+   }
+  ]
+ },
+ {
+  "n": 40,
+  "kanji": "下",
+  "romaji": [
+   "shita",
+   "ka",
+   "ge",
+   "kuda",
+   "sa",
+   "o",
+   "sita"
+  ],
+  "pt": [
+   "baixo",
+   "abaixo",
+   "descer"
+  ],
+  "story": "Um traço descendo debaixo de uma linha do teto. Para baixo.",
+  "hp": 40,
+  "atk": 5,
+  "words": [
+   {
+    "jp": "地下鉄",
+    "romaji": "chikatetsu",
+    "pt": "metrô"
+   },
+   {
+    "jp": "下着",
+    "romaji": "shitagi",
+    "pt": "roupa íntima"
+   },
+   {
+    "jp": "下さい",
+    "romaji": "kudasai",
+    "pt": "por favor"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "机の下に猫がいます。",
+    "romaji": "tsukue no shita ni neko ga imasu",
+    "pt": "Tem um gato debaixo da mesa."
+   }
+  ]
+ },
+ {
+  "n": 41,
+  "kanji": "左",
+  "romaji": [
+   "hidari",
+   "sa"
+  ],
+  "pt": [
+   "esquerda"
+  ],
+  "story": "Uma mão segurando a ferramenta 'I' (esquadro) pela esquerda.",
+  "hp": 35,
+  "atk": 5,
+  "words": [
+   {
+    "jp": "左折",
+    "romaji": "sasetsu",
+    "pt": "virar à esquerda"
+   },
+   {
+    "jp": "左側",
+    "romaji": "hidarigawa",
+    "pt": "lado esquerdo"
+   },
+   {
+    "jp": "左手",
+    "romaji": "hidarite",
+    "pt": "mão esquerda"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "左へ曲がってください。",
+    "romaji": "hidari e magatte kudasai",
+    "pt": "Vire à esquerda, por favor."
+   }
+  ]
+ },
+ {
+  "n": 42,
+  "kanji": "右",
+  "romaji": [
+   "migi",
+   "yuu",
+   "uu"
+  ],
+  "pt": [
+   "direita"
+  ],
+  "story": "Uma mão levando comida à boca (口) pela direita.",
+  "hp": 35,
+  "atk": 5,
+  "words": [
+   {
+    "jp": "右折",
+    "romaji": "usetsu",
+    "pt": "virar à direita"
+   },
+   {
+    "jp": "右手",
+    "romaji": "migite",
+    "pt": "mão direita"
+   },
+   {
+    "jp": "左右",
+    "romaji": "sayuu",
+    "pt": "esquerda e direita"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "右を見てください。",
+    "romaji": "migi o mite kudasai",
+    "pt": "Olhe para a direita, por favor."
+   }
+  ]
+ },
+ {
+  "n": 43,
+  "kanji": "中",
+  "romaji": [
+   "naka",
+   "chuu",
+   "juu",
+   "tyuu",
+   "zyuu"
+  ],
+  "pt": [
+   "dentro",
+   "meio",
+   "centro"
+  ],
+  "story": "Uma flecha (linha vertical) atingindo bem no meio do alvo (quadrado).",
+  "hp": 40,
+  "atk": 5,
+  "words": [
+   {
+    "jp": "街中",
+    "romaji": "machinaka",
+    "pt": "centro da cidade"
+   },
+   {
+    "jp": "中国",
+    "romaji": "chuugoku",
+    "pt": "China"
+   },
+   {
+    "jp": "一日中",
+    "romaji": "ichinichijuu",
+    "pt": "o dia todo"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "かばんの中にあります。",
+    "romaji": "kaban no naka ni arimasu",
+    "pt": "Está dentro da bolsa."
+   }
+  ]
+ },
+ {
+  "n": 44,
+  "kanji": "前",
+  "romaji": [
+   "mae",
+   "zen"
+  ],
+  "pt": [
+   "antes",
+   "frente"
+  ],
+  "story": "Facas cortando a carne antes (frente) de um barco avançar.",
+  "hp": 45,
+  "atk": 6,
+  "words": [
+   {
+    "jp": "名前",
+    "romaji": "namae",
+    "pt": "nome"
+   },
+   {
+    "jp": "駅前",
+    "romaji": "ekimae",
+    "pt": "em frente à estação"
+   },
+   {
+    "jp": "午前",
+    "romaji": "gozen",
+    "pt": "AM/manhã"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "駅の前で待ちましょう。",
+    "romaji": "eki no mae de machimashou",
+    "pt": "Vamos esperar na frente da estação."
+   }
+  ]
+ },
+ {
+  "n": 45,
+  "kanji": "後",
+  "romaji": [
+   "ato",
+   "ushi",
+   "go",
+   "kou",
+   "nochi",
+   "oku",
+   "usi",
+   "noti"
+  ],
+  "pt": [
+   "depois",
+   "atras"
+  ],
+  "story": "Um pé acorrentado dando passos para trás ou sendo arrastado.",
+  "hp": 45,
+  "atk": 6,
+  "words": [
+   {
+    "jp": "後ろ",
+    "romaji": "ushiro",
+    "pt": "atrás"
+   },
+   {
+    "jp": "午後",
+    "romaji": "gogo",
+    "pt": "PM/tarde"
+   },
+   {
+    "jp": "後で",
+    "romaji": "ato de",
+    "pt": "depois"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "後で電話します。",
+    "romaji": "ato de denwa shimasu",
+    "pt": "Ligo depois."
+   }
+  ]
+ },
+ {
+  "n": 46,
+  "kanji": "外",
+  "romaji": [
+   "soto",
+   "gai",
+   "ge",
+   "hoka",
+   "hazu"
+  ],
+  "pt": [
+   "fora",
+   "exterior"
+  ],
+  "story": "A lua (夕) vista à noite do lado de fora de casa.",
+  "hp": 45,
+  "atk": 6,
+  "words": [
+   {
+    "jp": "外国人",
+    "romaji": "gaikokujin",
+    "pt": "estrangeiro"
+   },
+   {
+    "jp": "海外",
+    "romaji": "kaigai",
+    "pt": "exterior/países estrangeiros"
+   },
+   {
+    "jp": "外食",
+    "romaji": "gaishoku",
+    "pt": "comer fora"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "外は寒いです。",
+    "romaji": "soto wa samui desu",
+    "pt": "Lá fora está frio."
+   }
+  ]
+ },
+ {
+  "n": 47,
+  "kanji": "北",
+  "romaji": [
+   "kita",
+   "hoku"
+  ],
+  "pt": [
+   "norte"
+  ],
+  "story": "Duas pessoas sentadas de costas uma para a outra, sentindo o vento frio do norte.",
+  "hp": 40,
+  "atk": 5,
+  "words": [
+   {
+    "jp": "北海道",
+    "romaji": "hokkaidou",
+    "pt": "região de Hokkaido"
+   },
+   {
+    "jp": "北口",
+    "romaji": "kitaguchi",
+    "pt": "saída norte"
+   },
+   {
+    "jp": "南北",
+    "romaji": "nanboku",
+    "pt": "sul e norte"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "駅の北口に出てください。",
+    "romaji": "eki no kitaguchi ni dete kudasai",
+    "pt": "Saia pela saída norte da estação."
+   }
+  ]
+ },
+ {
+  "n": 48,
+  "kanji": "南",
+  "romaji": [
+   "minami",
+   "nan"
+  ],
+  "pt": [
+   "sul"
+  ],
+  "story": "Uma cerca protegendo as plantações do vento quente do sul.",
+  "hp": 40,
+  "atk": 5,
+  "words": [
+   {
+    "jp": "南口",
+    "romaji": "minamiguchi",
+    "pt": "saída sul"
+   },
+   {
+    "jp": "東南アジア",
+    "romaji": "tounan ajia",
+    "pt": "sudeste asiático"
+   },
+   {
+    "jp": "南米",
+    "romaji": "nanbei",
+    "pt": "América do Sul"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "ブラジルは南米にあります。",
+    "romaji": "burajiru wa nanbei ni arimasu",
+    "pt": "O Brasil fica na América do Sul."
+   }
+  ]
+ },
+ {
+  "n": 49,
+  "kanji": "東",
+  "romaji": [
+   "higashi",
+   "tou",
+   "higasi"
+  ],
+  "pt": [
+   "leste"
+  ],
+  "story": "O sol (日) brilhando através dos galhos de uma árvore (木). O Leste.",
+  "hp": 40,
+  "atk": 5,
+  "words": [
+   {
+    "jp": "東京",
+    "romaji": "toukyou",
+    "pt": "Tóquio"
+   },
+   {
+    "jp": "東口",
+    "romaji": "higashiguchi",
+    "pt": "saída leste"
+   },
+   {
+    "jp": "関東",
+    "romaji": "kantou",
+    "pt": "região de Kanto"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "太陽は東から昇ります。",
+    "romaji": "taiyou wa higashi kara noborimasu",
+    "pt": "O sol nasce no leste."
+   }
+  ]
+ },
+ {
+  "n": 50,
+  "kanji": "西",
+  "romaji": [
+   "nishi",
+   "sei",
+   "sai",
+   "nisi"
+  ],
+  "pt": [
+   "oeste"
+  ],
+  "story": "Um pássaro voltando para o seu ninho no oeste durante o pôr do sol.",
+  "hp": 40,
+  "atk": 5,
+  "words": [
+   {
+    "jp": "関西",
+    "romaji": "kansai",
+    "pt": "região de Kansai"
+   },
+   {
+    "jp": "西口",
+    "romaji": "nishiguchi",
+    "pt": "saída oeste"
+   },
+   {
+    "jp": "西洋",
+    "romaji": "seiyou",
+    "pt": "ocidente"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "西口で会いましょう。",
+    "romaji": "nishiguchi de aimashou",
+    "pt": "Vamos nos ver na saída oeste."
+   }
+  ]
+ },
+ {
+  "n": 51,
+  "kanji": "年",
+  "romaji": [
+   "toshi",
+   "nen",
+   "tosi"
+  ],
+  "pt": [
+   "ano"
+  ],
+  "story": "Um trabalhador carregando as grandes colheitas do ano nas costas.",
+  "hp": 40,
+  "atk": 5,
+  "words": [
+   {
+    "jp": "去年",
+    "romaji": "kyonen",
+    "pt": "ano passado"
+   },
+   {
+    "jp": "来年",
+    "romaji": "rainen",
+    "pt": "próximo ano"
+   },
+   {
+    "jp": "お年寄り",
+    "romaji": "otoshiyori",
+    "pt": "idoso"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "来年日本へ行きます。",
+    "romaji": "rainen nihon e ikimasu",
+    "pt": "Ano que vem vou ao Japão."
+   }
+  ]
+ },
+ {
+  "n": 52,
+  "kanji": "休",
+  "romaji": [
+   "yasu",
+   "kyuu"
+  ],
+  "pt": [
+   "descanso",
+   "ferias",
+   "descansar"
+  ],
+  "story": "Uma pessoa (人) encostada em uma árvore (木) para descansar.",
+  "hp": 45,
+  "atk": 6,
+  "words": [
+   {
+    "jp": "休み",
+    "romaji": "yasumi",
+    "pt": "folga/descanso"
+   },
+   {
+    "jp": "定休日",
+    "romaji": "teikyuubi",
+    "pt": "dia de folga da loja"
+   },
+   {
+    "jp": "夏休み",
+    "romaji": "natsuyasumi",
+    "pt": "férias de verão"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "今日は仕事が休みです。",
+    "romaji": "kyou wa shigoto ga yasumi desu",
+    "pt": "Hoje é minha folga do trabalho."
+   }
+  ]
+ },
+ {
+  "n": 53,
+  "kanji": "今",
+  "romaji": [
+   "ima",
+   "kon",
+   "kin"
+  ],
+  "pt": [
+   "agora"
+  ],
+  "story": "Um teto abrigando um relógio ou um evento acontecendo exatamente agora.",
+  "hp": 40,
+  "atk": 5,
+  "words": [
+   {
+    "jp": "今週",
+    "romaji": "konshuu",
+    "pt": "esta semana"
+   },
+   {
+    "jp": "今日",
+    "romaji": "kyou",
+    "pt": "hoje"
+   },
+   {
+    "jp": "今年",
+    "romaji": "kotoshi",
+    "pt": "este ano"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "今、何時ですか？",
+    "romaji": "ima, nanji desu ka?",
+    "pt": "Que horas são agora?"
+   }
+  ]
+ },
+ {
+  "n": 54,
+  "kanji": "週",
+  "romaji": [
+   "shuu",
+   "syuu"
+  ],
+  "pt": [
+   "semana"
+  ],
+  "story": "Andar em círculos repetidamente, marcando o ciclo de uma semana.",
+  "hp": 45,
+  "atk": 6,
+  "words": [
+   {
+    "jp": "週末",
+    "romaji": "shuumatsu",
+    "pt": "fim de semana"
+   },
+   {
+    "jp": "来週",
+    "romaji": "raishuu",
+    "pt": "próxima semana"
+   },
+   {
+    "jp": "毎週",
+    "romaji": "maishuu",
+    "pt": "toda semana"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "週末は映画を見ます。",
+    "romaji": "shuumatsu wa eiga o mimasu",
+    "pt": "No fim de semana assisto filmes."
+   }
+  ]
+ },
+ {
+  "n": 55,
+  "kanji": "時",
+  "romaji": [
+   "toki",
+   "ji",
+   "to",
+   "zi"
+  ],
+  "pt": [
+   "tempo",
+   "hora"
+  ],
+  "story": "O sol (日) e um templo (寺) ditando as horas pelo relógio de sol.",
+  "hp": 50,
+  "atk": 7,
+  "words": [
+   {
+    "jp": "時間",
+    "romaji": "jikan",
+    "pt": "tempo/horas"
+   },
+   {
+    "jp": "時計",
+    "romaji": "tokei",
+    "pt": "relógio"
+   },
+   {
+    "jp": "何時",
+    "romaji": "nanji",
+    "pt": "que horas?"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "時間がありません。",
+    "romaji": "jikan ga arimasen",
+    "pt": "Não tenho tempo."
+   }
+  ]
+ },
+ {
+  "n": 56,
+  "kanji": "間",
+  "romaji": [
+   "aida",
+   "kan",
+   "ken",
+   "ma"
+  ],
+  "pt": [
+   "intervalo",
+   "espaco",
+   "entre"
+  ],
+  "story": "O sol (日) brilhando pelo espaço vazio entre os dois portões de madeira (門).",
+  "hp": 55,
+  "atk": 7,
+  "words": [
+   {
+    "jp": "この間",
+    "romaji": "kono aida",
+    "pt": "ultimamente/o outro dia"
+   },
+   {
+    "jp": "間に合う",
+    "romaji": "ma ni au",
+    "pt": "chegar a tempo"
+   },
+   {
+    "jp": "時間",
+    "romaji": "jikan",
+    "pt": "tempo"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "電車に間に合いました。",
+    "romaji": "densha ni ma ni aimashita",
+    "pt": "Cheguei a tempo do trem."
+   }
+  ]
+ },
+ {
+  "n": 57,
+  "kanji": "半",
+  "romaji": [
+   "han",
+   "naka"
+  ],
+  "pt": [
+   "metade",
+   "meio"
+  ],
+  "story": "Um eixo vertical cortando três linhas horizontais exatamente pela metade.",
+  "hp": 40,
+  "atk": 5,
+  "words": [
+   {
+    "jp": "半額",
+    "romaji": "hangaku",
+    "pt": "metade do preço"
+   },
+   {
+    "jp": "４時半",
+    "romaji": "yojihan",
+    "pt": "4 e meia"
+   },
+   {
+    "jp": "半分",
+    "romaji": "hanbun",
+    "pt": "metade"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "ピザを半分食べました。",
+    "romaji": "piza o hanbun tabemashita",
+    "pt": "Comi metade da pizza."
+   }
+  ]
+ },
+ {
+  "n": 58,
+  "kanji": "大",
+  "romaji": [
+   "oo",
+   "dai",
+   "tai"
+  ],
+  "pt": [
+   "grande"
+  ],
+  "story": "Uma pessoa de braços e pernas bem abertos para parecer muito grande.",
+  "hp": 50,
+  "atk": 8,
+  "words": [
+   {
+    "jp": "大丈夫",
+    "romaji": "daijoubu",
+    "pt": "tudo bem/sem problema"
+   },
+   {
+    "jp": "大人",
+    "romaji": "otona",
+    "pt": "adulto"
+   },
+   {
+    "jp": "大きい",
+    "romaji": "ookii",
+    "pt": "grande"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "このシャツは大きいです。",
+    "romaji": "kono shatsu wa ookii desu",
+    "pt": "Esta camisa é grande."
+   }
+  ]
+ },
+ {
+  "n": 59,
+  "kanji": "小",
+  "romaji": [
+   "chii",
+   "shou",
+   "ko",
+   "o",
+   "tii",
+   "syou"
+  ],
+  "pt": [
+   "pequeno"
+  ],
+  "story": "Um eixo central ladeado por duas pequenas marcas. Pequeno.",
+  "hp": 30,
+  "atk": 4,
+  "words": [
+   {
+    "jp": "小学校",
+    "romaji": "shougakkou",
+    "pt": "escola primária"
+   },
+   {
+    "jp": "小銭",
+    "romaji": "kozeni",
+    "pt": "troco/moedas"
+   },
+   {
+    "jp": "小さい",
+    "romaji": "chiisai",
+    "pt": "pequeno"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "小さい犬を飼っています。",
+    "romaji": "chiisai inu o katte imasu",
+    "pt": "Crio um cachorro pequeno."
+   }
+  ]
+ },
+ {
+  "n": 60,
+  "kanji": "高",
+  "romaji": [
+   "taka",
+   "kou"
+  ],
+  "pt": [
+   "alto",
+   "caro"
+  ],
+  "story": "Lembra uma torre alta ou castelo de três andares com um portão embaixo.",
+  "hp": 50,
+  "atk": 7,
+  "words": [
+   {
+    "jp": "高校生",
+    "romaji": "koukousei",
+    "pt": "estudante do ensino médio"
+   },
+   {
+    "jp": "高い",
+    "romaji": "takai",
+    "pt": "caro/alto"
+   },
+   {
+    "jp": "最高",
+    "romaji": "saikou",
+    "pt": "o melhor/incrível"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "日本の果物は高いです。",
+    "romaji": "nihon no kudamono wa takai desu",
+    "pt": "As frutas no Japão são caras."
+   }
+  ]
+ },
+ {
+  "n": 61,
+  "kanji": "安",
+  "romaji": [
+   "yasu",
+   "an"
+  ],
+  "pt": [
+   "barato",
+   "seguro",
+   "paz"
+  ],
+  "story": "Uma mulher (女) segura e relaxada debaixo de um teto (宀). Paz, barato.",
+  "hp": 40,
+  "atk": 5,
+  "words": [
+   {
+    "jp": "安い",
+    "romaji": "yasui",
+    "pt": "barato"
+   },
+   {
+    "jp": "安全",
+    "romaji": "anzen",
+    "pt": "seguro"
+   },
+   {
+    "jp": "不安",
+    "romaji": "fuan",
+    "pt": "ansiedade"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "この靴はとても安いです。",
+    "romaji": "kono kutsu wa totemo yasui desu",
+    "pt": "Este sapato é muito barato."
+   }
+  ]
+ },
+ {
+  "n": 62,
+  "kanji": "新",
+  "romaji": [
+   "atara",
+   "shin",
+   "ara",
+   "nii",
+   "sin"
+  ],
+  "pt": [
+   "novo"
+  ],
+  "story": "Usar um machado (斤) afiado para cortar a madeira de uma árvore recém-nascida (nova).",
+  "hp": 45,
+  "atk": 6,
+  "words": [
+   {
+    "jp": "新幹線",
+    "romaji": "shinkansen",
+    "pt": "trem bala"
+   },
+   {
+    "jp": "新宿",
+    "romaji": "shinjuku",
+    "pt": "bairro de Tóquio"
+   },
+   {
+    "jp": "新しい",
+    "romaji": "atarashii",
+    "pt": "novo"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "新しい車を買いました。",
+    "romaji": "atarashii kuruma o kaimashita",
+    "pt": "Comprei um carro novo."
+   }
+  ]
+ },
+ {
+  "n": 63,
+  "kanji": "古",
+  "romaji": [
+   "furu",
+   "ko",
+   "huru"
+  ],
+  "pt": [
+   "velho",
+   "antigo"
+  ],
+  "story": "Dez (十) vezes a mesma história saindo da boca (口) ao longo das gerações. Antigo.",
+  "hp": 40,
+  "atk": 5,
+  "words": [
+   {
+    "jp": "中古",
+    "romaji": "chuuko",
+    "pt": "usado/segunda mão"
+   },
+   {
+    "jp": "古い",
+    "romaji": "furui",
+    "pt": "velho/antigo"
+   },
+   {
+    "jp": "名古屋",
+    "romaji": "nagoya",
+    "pt": "Nagoya"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "これは古いお寺です。",
+    "romaji": "kore wa furui otera desu",
+    "pt": "Este é um templo antigo."
+   }
+  ]
+ },
+ {
+  "n": 64,
+  "kanji": "長",
+  "romaji": [
+   "naga",
+   "chou",
+   "tyou"
+  ],
+  "pt": [
+   "longo",
+   "lider"
+  ],
+  "story": "O cabelo bem longo de um ancião ou líder fluindo com o vento.",
+  "hp": 55,
+  "atk": 7,
+  "words": [
+   {
+    "jp": "社長",
+    "romaji": "shachou",
+    "pt": "presidente da empresa"
+   },
+   {
+    "jp": "長い",
+    "romaji": "nagai",
+    "pt": "longo"
+   },
+   {
+    "jp": "駅長",
+    "romaji": "ekichou",
+    "pt": "chefe da estação"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "長い間、待っていました。",
+    "romaji": "nagai aida, matte imashita",
+    "pt": "Esperei por um longo tempo."
+   }
+  ]
+ },
+ {
+  "n": 65,
+  "kanji": "多",
+  "romaji": [
+   "oo",
+   "ta"
+  ],
+  "pt": [
+   "muitos",
+   "muito"
+  ],
+  "story": "Duas luas (夕) aparecendo de uma vez só na noite... são muitas luas!",
+  "hp": 45,
+  "atk": 6,
+  "words": [
+   {
+    "jp": "多分",
+    "romaji": "tabun",
+    "pt": "talvez/provavelmente"
+   },
+   {
+    "jp": "多い",
+    "romaji": "ooi",
+    "pt": "muitos"
+   },
+   {
+    "jp": "多数",
+    "romaji": "tasuu",
+    "pt": "a maioria"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "東京は人が多いです。",
+    "romaji": "toukyou wa hito ga ooi desu",
+    "pt": "Tóquio tem muitas pessoas."
+   }
+  ]
+ },
+ {
+  "n": 66,
+  "kanji": "少",
+  "romaji": [
+   "suku",
+   "suko",
+   "shou",
+   "syou"
+  ],
+  "pt": [
+   "pouco",
+   "alguns"
+  ],
+  "story": "Algo pequeno (小) dividido com um corte extra na base. Pouco.",
+  "hp": 35,
+  "atk": 5,
+  "words": [
+   {
+    "jp": "少ない",
+    "romaji": "sukunai",
+    "pt": "pouco"
+   },
+   {
+    "jp": "少年",
+    "romaji": "shounen",
+    "pt": "menino/garoto"
+   },
+   {
+    "jp": "少々",
+    "romaji": "shoushou",
+    "pt": "um momento"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "少々お待ちください。",
+    "romaji": "shoushou omachi kudasai",
+    "pt": "Aguarde um momento, por favor."
+   }
+  ]
+ },
+ {
+  "n": 67,
+  "kanji": "白",
+  "romaji": [
+   "shiro",
+   "haku",
+   "byaku",
+   "shira",
+   "siro",
+   "sira"
+  ],
+  "pt": [
+   "branco"
+  ],
+  "story": "O sol (日) com um pequeno raio de luz vazando pelo topo, clareando tudo de branco.",
+  "hp": 35,
+  "atk": 5,
+  "words": [
+   {
+    "jp": "白黒",
+    "romaji": "shirokuro",
+    "pt": "preto e branco"
+   },
+   {
+    "jp": "面白い",
+    "romaji": "omoshiroi",
+    "pt": "interessante/divertido"
+   },
+   {
+    "jp": "白い",
+    "romaji": "shiroi",
+    "pt": "branco"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "白いシャツが好きです。",
+    "romaji": "shiroi shatsu ga suki desu",
+    "pt": "Gosto de camisas brancas."
+   }
+  ]
+ },
+ {
+  "n": 68,
+  "kanji": "学",
+  "romaji": [
+   "mana",
+   "gaku"
+  ],
+  "pt": [
+   "estudo",
+   "aprender"
+  ],
+  "story": "Uma criança (子) debaixo do telhado da escola estudando e aprendendo.",
+  "hp": 65,
+  "atk": 10,
+  "words": [
+   {
+    "jp": "学生",
+    "romaji": "gakusei",
+    "pt": "estudante"
+   },
+   {
+    "jp": "留学",
+    "romaji": "ryuugaku",
+    "pt": "intercâmbio"
+   },
+   {
+    "jp": "大学",
+    "romaji": "daigaku",
+    "pt": "universidade"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "日本語を学んでいます。",
+    "romaji": "nihongo o manande imasu",
+    "pt": "Estou aprendendo japonês."
+   }
+  ]
+ },
+ {
+  "n": 69,
+  "kanji": "校",
+  "romaji": [
+   "kou"
+  ],
+  "pt": [
+   "escola"
+  ],
+  "story": "A árvore (madeira) do lado de um líder ensinando. O prédio da escola.",
+  "hp": 60,
+  "atk": 9,
+  "words": [
+   {
+    "jp": "学校",
+    "romaji": "gakkou",
+    "pt": "escola"
+   },
+   {
+    "jp": "校長",
+    "romaji": "kouchou",
+    "pt": "diretor da escola"
+   },
+   {
+    "jp": "高校",
+    "romaji": "koukou",
+    "pt": "ensino médio"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "明日は学校に行きます。",
+    "romaji": "ashita wa gakkou ni ikimasu",
+    "pt": "Amanhã vou para a escola."
+   }
+  ]
+ },
+ {
+  "n": 70,
+  "kanji": "見",
+  "romaji": [
+   "mi",
+   "ken"
+  ],
+  "pt": [
+   "ver",
+   "olhar"
+  ],
+  "story": "Um grande olho (目) sobre pernas (儿). Caminhar para olhar e ver de perto.",
+  "hp": 55,
+  "atk": 8,
+  "words": [
+   {
+    "jp": "花見",
+    "romaji": "hanami",
+    "pt": "ver as flores"
+   },
+   {
+    "jp": "見学",
+    "romaji": "kengaku",
+    "pt": "visita de estudo"
+   },
+   {
+    "jp": "意見",
+    "romaji": "iken",
+    "pt": "opinião"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "映画を見ます。",
+    "romaji": "eiga o mimasu",
+    "pt": "Vou assistir a um filme."
+   }
+  ]
+ },
+ {
+  "n": 71,
+  "kanji": "食",
+  "romaji": [
+   "ta",
+   "shoku",
+   "ku",
+   "syoku"
+  ],
+  "pt": [
+   "comer",
+   "comida"
+  ],
+  "story": "Uma pessoa de boca aberta debaixo de um teto se preparando para comer.",
+  "hp": 60,
+  "atk": 8,
+  "words": [
+   {
+    "jp": "食べ放題",
+    "romaji": "tabe houdai",
+    "pt": "comer à vontade/rodízio"
+   },
+   {
+    "jp": "定食",
+    "romaji": "teishoku",
+    "pt": "prato feito"
+   },
+   {
+    "jp": "和食",
+    "romaji": "washoku",
+    "pt": "comida japonesa"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "寿司を食べます。",
+    "romaji": "sushi o tabemasu",
+    "pt": "Vou comer sushi."
+   }
+  ]
+ },
+ {
+  "n": 72,
+  "kanji": "飲",
+  "romaji": [
+   "no",
+   "in"
+  ],
+  "pt": [
+   "beber",
+   "bebida"
+  ],
+  "story": "Alguém comendo (食) e bocejando por não ter o que beber.",
+  "hp": 60,
+  "atk": 8,
+  "words": [
+   {
+    "jp": "飲み放題",
+    "romaji": "nomi houdai",
+    "pt": "open bar/beber à vontade"
+   },
+   {
+    "jp": "飲食店",
+    "romaji": "inshokuten",
+    "pt": "restaurante/bar"
+   },
+   {
+    "jp": "飲料",
+    "romaji": "inryou",
+    "pt": "bebida"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "ビールを飲みます。",
+    "romaji": "biiru o nomimasu",
+    "pt": "Vou beber cerveja."
+   }
+  ]
+ },
+ {
+  "n": 73,
+  "kanji": "行",
+  "romaji": [
+   "i",
+   "kou",
+   "gyou",
+   "yu",
+   "oko"
+  ],
+  "pt": [
+   "ir",
+   "viajar"
+  ],
+  "story": "Lembra um cruzamento de ruas ou estradas onde as pessoas estão indo.",
+  "hp": 65,
+  "atk": 9,
+  "words": [
+   {
+    "jp": "旅行",
+    "romaji": "ryokou",
+    "pt": "viagem"
+   },
+   {
+    "jp": "銀行",
+    "romaji": "ginkou",
+    "pt": "banco"
+   },
+   {
+    "jp": "行く",
+    "romaji": "iku",
+    "pt": "ir"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "コンビニへ行きます。",
+    "romaji": "konbini e ikimasu",
+    "pt": "Vou à loja de conveniência."
+   }
+  ]
+ },
+ {
+  "n": 74,
+  "kanji": "来",
+  "romaji": [
+   "ku",
+   "ki",
+   "ko",
+   "rai"
+  ],
+  "pt": [
+   "vir",
+   "proximo"
+  ],
+  "story": "Pessoas abrigadas debaixo de uma árvore pedindo para você vir para a sombra.",
+  "hp": 65,
+  "atk": 9,
+  "words": [
+   {
+    "jp": "来年",
+    "romaji": "rainen",
+    "pt": "próximo ano"
+   },
+   {
+    "jp": "出来る",
+    "romaji": "dekiru",
+    "pt": "conseguir fazer"
+   },
+   {
+    "jp": "来る",
+    "romaji": "kuru",
+    "pt": "vir"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "友達が家へ来ます。",
+    "romaji": "tomodachi ga ie e kuru",
+    "pt": "Meu amigo virá à minha casa."
+   }
+  ]
+ },
+ {
+  "n": 75,
+  "kanji": "語",
+  "romaji": [
+   "go",
+   "kata"
+  ],
+  "pt": [
+   "idioma",
+   "lingua",
+   "palavra"
+  ],
+  "story": "Palavras (言) do eu (吾) saindo da boca. Falar um idioma.",
+  "hp": 80,
+  "atk": 12,
+  "words": [
+   {
+    "jp": "日本語",
+    "romaji": "nihongo",
+    "pt": "língua japonesa"
+   },
+   {
+    "jp": "敬語",
+    "romaji": "keigo",
+    "pt": "linguagem formal"
+   },
+   {
+    "jp": "単語",
+    "romaji": "tango",
+    "pt": "vocabulário"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "日本語を話せます。",
+    "romaji": "nihongo o hanasemasu",
+    "pt": "Consigo falar japonês."
+   }
+  ]
+ },
+ {
+  "n": 76,
+  "kanji": "立",
+  "romaji": [
+   "ta",
+   "ritsu",
+   "ryuu",
+   "da",
+   "ritu"
+  ],
+  "pt": [
+   "ficar de pe",
+   "levantar"
+  ],
+  "story": "Um boneco palito de braços abertos firmemente de pé no chão.",
+  "hp": 50,
+  "atk": 7,
+  "words": [
+   {
+    "jp": "役に立つ",
+    "romaji": "yaku ni tatsu",
+    "pt": "ser útil"
+   },
+   {
+    "jp": "目立つ",
+    "romaji": "medatsu",
+    "pt": "destacar-se"
+   },
+   {
+    "jp": "立つ",
+    "romaji": "tatsu",
+    "pt": "levantar-se"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "立ってください。",
+    "romaji": "tatte kudasai",
+    "pt": "Fique de pé, por favor."
+   }
+  ]
+ },
+ {
+  "n": 77,
+  "kanji": "生",
+  "romaji": [
+   "nama",
+   "i",
+   "u",
+   "ha",
+   "ki",
+   "sei",
+   "shou",
+   "syou"
+  ],
+  "pt": [
+   "vida",
+   "nascer",
+   "viver",
+   "cru"
+  ],
+  "story": "Um broto de planta rasgando a terra e nascendo com vida.",
+  "hp": 75,
+  "atk": 11,
+  "words": [
+   {
+    "jp": "先生",
+    "romaji": "sensei",
+    "pt": "professor"
+   },
+   {
+    "jp": "生ビール",
+    "romaji": "nama biiru",
+    "pt": "cerveja de pressão/chope"
+   },
+   {
+    "jp": "誕生日",
+    "romaji": "tanjoubi",
+    "pt": "aniversário"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "生ビールを一つください。",
+    "romaji": "nama biiru o hitotsu kudasai",
+    "pt": "Um chope, por favor."
+   }
+  ]
+ },
+ {
+  "n": 78,
+  "kanji": "話",
+  "romaji": [
+   "hana",
+   "hanashi",
+   "wa",
+   "hanasi"
+  ],
+  "pt": [
+   "falar",
+   "conversa",
+   "historia"
+  ],
+  "story": "A boca e a língua (舌) ativas produzindo muitas palavras (言). A conversa.",
+  "hp": 65,
+  "atk": 9,
+  "words": [
+   {
+    "jp": "電話",
+    "romaji": "denwa",
+    "pt": "telefone"
+   },
+   {
+    "jp": "世話",
+    "romaji": "sewa",
+    "pt": "tomar conta/ajudar"
+   },
+   {
+    "jp": "話す",
+    "romaji": "hanasu",
+    "pt": "falar"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "先生と話しました。",
+    "romaji": "sensei to hanashimashita",
+    "pt": "Conversei com o professor."
+   }
+  ]
+ },
+ {
+  "n": 79,
+  "kanji": "読",
+  "romaji": [
+   "yo",
+   "doku",
+   "toku",
+   "to"
+  ],
+  "pt": [
+   "ler",
+   "leitura"
+  ],
+  "story": "Vender (売) as próprias palavras (言). Falar as histórias do livro, ler em voz alta.",
+  "hp": 60,
+  "atk": 8,
+  "words": [
+   {
+    "jp": "読書",
+    "romaji": "dokusho",
+    "pt": "leitura"
+   },
+   {
+    "jp": "読み方",
+    "romaji": "yomikata",
+    "pt": "modo de ler"
+   },
+   {
+    "jp": "読む",
+    "romaji": "yomu",
+    "pt": "ler"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "毎晩、本を読みます。",
+    "romaji": "maiban, hon o yomimasu",
+    "pt": "Toda noite, leio um livro."
+   }
+  ]
+ },
+ {
+  "n": 80,
+  "kanji": "書",
+  "romaji": [
+   "ka",
+   "sho",
+   "syo"
+  ],
+  "pt": [
+   "escrever",
+   "livro"
+  ],
+  "story": "Uma mão segurando um pincel escrevendo um livro longo no papel.",
+  "hp": 60,
+  "atk": 8,
+  "words": [
+   {
+    "jp": "辞書",
+    "romaji": "jisho",
+    "pt": "dicionário"
+   },
+   {
+    "jp": "図書館",
+    "romaji": "toshokan",
+    "pt": "biblioteca"
+   },
+   {
+    "jp": "書く",
+    "romaji": "kaku",
+    "pt": "escrever"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "ノートに名前を書きます。",
+    "romaji": "nooto ni namae o kakimasu",
+    "pt": "Escrevo o nome no caderno."
+   }
+  ]
+ },
+ {
+  "n": 81,
+  "kanji": "買",
+  "romaji": [
+   "ka",
+   "bai"
+  ],
+  "pt": [
+   "comprar"
+  ],
+  "story": "Uma rede sobre as moedas de concha... pegando produtos no ato de comprar.",
+  "hp": 55,
+  "atk": 8,
+  "words": [
+   {
+    "jp": "買い物",
+    "romaji": "kaimono",
+    "pt": "compras"
+   },
+   {
+    "jp": "買い手",
+    "romaji": "kaite",
+    "pt": "comprador"
+   },
+   {
+    "jp": "買う",
+    "romaji": "kau",
+    "pt": "comprar"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "スーパーで野菜を買います。",
+    "romaji": "suupaa de yasai o kaimasu",
+    "pt": "Compro vegetais no supermercado."
+   }
+  ]
+ },
+ {
+  "n": 82,
+  "kanji": "入",
+  "romaji": [
+   "hai",
+   "i",
+   "nyuu"
+  ],
+  "pt": [
+   "entrar",
+   "inserir"
+  ],
+  "story": "Lembra uma cunha de madeira ou a ponta de uma flecha entrando num espaço.",
+  "hp": 45,
+  "atk": 6,
+  "words": [
+   {
+    "jp": "入口",
+    "romaji": "iriguchi",
+    "pt": "entrada"
+   },
+   {
+    "jp": "輸入",
+    "romaji": "yunyuu",
+    "pt": "importação"
+   },
+   {
+    "jp": "入れる",
+    "romaji": "ireru",
+    "pt": "colocar dentro"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "かばんにペンを入れました。",
+    "romaji": "kaban ni pen o iremashita",
+    "pt": "Coloquei a caneta na bolsa."
+   }
+  ]
+ },
+ {
+  "n": 83,
+  "kanji": "出",
+  "romaji": [
+   "de",
+   "da",
+   "shutsu",
+   "sui",
+   "syutu"
+  ],
+  "pt": [
+   "sair",
+   "tirar"
+  ],
+  "story": "Duas montanhas, com uma montanha menor saindo de dentro da maior.",
+  "hp": 50,
+  "atk": 7,
+  "words": [
+   {
+    "jp": "出口",
+    "romaji": "deguchi",
+    "pt": "saída"
+   },
+   {
+    "jp": "出張",
+    "romaji": "shucchou",
+    "pt": "viagem de negócios"
+   },
+   {
+    "jp": "出す",
+    "romaji": "dasu",
+    "pt": "tirar/enviar"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "ゴミを出してください。",
+    "romaji": "gomi o dashite kudasai",
+    "pt": "Coloque o lixo para fora, por favor."
+   }
+  ]
+ },
+ {
+  "n": 84,
+  "kanji": "友",
+  "romaji": [
+   "tomo",
+   "yuu"
+  ],
+  "pt": [
+   "amigo"
+  ],
+  "story": "Duas mãos direitas dadas firmemente... a união de amigos.",
+  "hp": 55,
+  "atk": 7,
+  "words": [
+   {
+    "jp": "友達",
+    "romaji": "tomodachi",
+    "pt": "amigo"
+   },
+   {
+    "jp": "友人",
+    "romaji": "yuujin",
+    "pt": "amigo [formal]"
+   },
+   {
+    "jp": "親友",
+    "romaji": "shinyuu",
+    "pt": "melhor amigo"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "友達と遊びます。",
+    "romaji": "tomodachi to asobimasu",
+    "pt": "Vou brincar/sair com meu amigo."
+   }
+  ]
+ },
+ {
+  "n": 85,
+  "kanji": "車",
+  "romaji": [
+   "kuruma",
+   "sha",
+   "sya"
+  ],
+  "pt": [
+   "carro",
+   "veiculo"
+  ],
+  "story": "A vista de cima de uma carruagem: duas rodas na lateral e o eixo cortando o meio.",
+  "hp": 60,
+  "atk": 8,
+  "words": [
+   {
+    "jp": "電車",
+    "romaji": "densha",
+    "pt": "trem"
+   },
+   {
+    "jp": "自転車",
+    "romaji": "jitensha",
+    "pt": "bicicleta"
+   },
+   {
+    "jp": "車椅子",
+    "romaji": "kurumaisu",
+    "pt": "cadeira de rodas"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "車で会社へ行きます。",
+    "romaji": "kuruma de kaisha e ikimasu",
+    "pt": "Vou de carro para a empresa."
+   }
+  ]
+ },
+ {
+  "n": 86,
+  "kanji": "電",
+  "romaji": [
+   "den"
+  ],
+  "pt": [
+   "eletricidade",
+   "energia"
+  ],
+  "story": "Uma nuvem de chuva (雨) jogando raios nos campos. Eletricidade.",
+  "hp": 70,
+  "atk": 12,
+  "words": [
+   {
+    "jp": "電車",
+    "romaji": "densha",
+    "pt": "trem"
+   },
+   {
+    "jp": "電話",
+    "romaji": "denwa",
+    "pt": "telefone"
+   },
+   {
+    "jp": "電気",
+    "romaji": "denki",
+    "pt": "eletricidade/luz"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "電気を消してください。",
+    "romaji": "denki o keshite kudasai",
+    "pt": "Apague a luz, por favor."
+   }
+  ]
+ },
+ {
+  "n": 87,
+  "kanji": "気",
+  "romaji": [
+   "ki",
+   "ke"
+  ],
+  "pt": [
+   "espirito",
+   "mente",
+   "ar",
+   "energia"
+  ],
+  "story": "A fumaça / vapor (ar) subindo e formando cruzes. O espírito e energia das coisas.",
+  "hp": 65,
+  "atk": 10,
+  "words": [
+   {
+    "jp": "天気",
+    "romaji": "tenki",
+    "pt": "estado do tempo"
+   },
+   {
+    "jp": "病気",
+    "romaji": "byouki",
+    "pt": "doença"
+   },
+   {
+    "jp": "元気",
+    "romaji": "genki",
+    "pt": "saudável/energia"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "お元気ですか？",
+    "romaji": "ogenki desu ka?",
+    "pt": "Como você está?"
+   }
+  ]
+ },
+ {
+  "n": 88,
+  "kanji": "本",
+  "romaji": [
+   "hon",
+   "moto",
+   "pon",
+   "bon"
+  ],
+  "pt": [
+   "livro",
+   "origem",
+   "base"
+  ],
+  "story": "Uma árvore (木) com um corte em sua base, marcando a sua raiz, sua origem (e o livro).",
+  "hp": 50,
+  "atk": 7,
+  "words": [
+   {
+    "jp": "日本",
+    "romaji": "nihon",
+    "pt": "Japão"
+   },
+   {
+    "jp": "本当",
+    "romaji": "hontou",
+    "pt": "verdade"
+   },
+   {
+    "jp": "絵本",
+    "romaji": "ehon",
+    "pt": "livro ilustrado"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "これは面白い本です。",
+    "romaji": "kore wa omoshiroi hon desu",
+    "pt": "Este é um livro interessante."
+   }
+  ]
+ },
+ {
+  "n": 89,
+  "kanji": "何",
+  "romaji": [
+   "nani",
+   "nan",
+   "ka"
+  ],
+  "pt": [
+   "o que",
+   "quantos"
+  ],
+  "story": "Uma pessoa carregando algo pesado e perguntando: O que é isso?",
+  "hp": 60,
+  "atk": 9,
+  "words": [
+   {
+    "jp": "何時",
+    "romaji": "nanji",
+    "pt": "que horas?"
+   },
+   {
+    "jp": "何人",
+    "romaji": "nannin",
+    "pt": "quantas pessoas?"
+   },
+   {
+    "jp": "何か",
+    "romaji": "nanika",
+    "pt": "alguma coisa"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "これは何ですか？",
+    "romaji": "kore wa nani desu ka?",
+    "pt": "O que é isto?"
+   }
+  ]
+ },
+ {
+  "n": 90,
+  "kanji": "名",
+  "romaji": [
+   "na",
+   "mei",
+   "myou"
+  ],
+  "pt": [
+   "nome",
+   "fama"
+  ],
+  "story": "Na noite escura (夕), não consigo ver seu rosto, então pergunto usando a boca (口) o seu nome.",
+  "hp": 45,
+  "atk": 6,
+  "words": [
+   {
+    "jp": "名前",
+    "romaji": "namae",
+    "pt": "nome"
+   },
+   {
+    "jp": "有名",
+    "romaji": "yuumei",
+    "pt": "famoso"
+   },
+   {
+    "jp": "名刺",
+    "romaji": "meishi",
+    "pt": "cartão de visitas"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "お名前は何ですか？",
+    "romaji": "onamae wa nan desu ka?",
+    "pt": "Qual é o seu nome?"
+   }
+  ]
+ },
+ {
+  "n": 91,
+  "kanji": "駅",
+  "romaji": [
+   "eki"
+  ],
+  "pt": [
+   "estacao",
+   "estacao de trem"
+  ],
+  "story": "Um cavalo (馬) descansando na plataforma enquanto espera pelo próximo trem (estação).",
+  "hp": 60,
+  "atk": 8,
+  "words": [
+   {
+    "jp": "駅前",
+    "romaji": "ekimae",
+    "pt": "em frente à estação"
+   },
+   {
+    "jp": "東京駅",
+    "romaji": "toukyou eki",
+    "pt": "Estação de Tóquio"
+   },
+   {
+    "jp": "駅員",
+    "romaji": "ekiin",
+    "pt": "funcionário da estação"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "駅まで歩きます。",
+    "romaji": "eki made arukimasu",
+    "pt": "Vou andar até a estação."
+   }
+  ]
+ },
+ {
+  "n": 92,
+  "kanji": "店",
+  "romaji": [
+   "mise",
+   "ten"
+  ],
+  "pt": [
+   "loja",
+   "estabelecimento"
+  ],
+  "story": "Sob um teto comercial, mercadorias arrumadas para venda na loja.",
+  "hp": 50,
+  "atk": 7,
+  "words": [
+   {
+    "jp": "喫茶店",
+    "romaji": "kissaten",
+    "pt": "cafeteria"
+   },
+   {
+    "jp": "店員",
+    "romaji": "ten'in",
+    "pt": "funcionário da loja"
+   },
+   {
+    "jp": "お店",
+    "romaji": "omise",
+    "pt": "loja"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "あの店は美味しいです。",
+    "romaji": "ano mise wa oishii desu",
+    "pt": "Aquele restaurante é gostoso."
+   }
+  ]
+ },
+ {
+  "n": 93,
+  "kanji": "道",
+  "romaji": [
+   "michi",
+   "dou",
+   "miti"
+  ],
+  "pt": [
+   "caminho",
+   "rua"
+  ],
+  "story": "O radical de movimento (caminho) com uma cabeça que lidera a estrada.",
+  "hp": 55,
+  "atk": 8,
+  "words": [
+   {
+    "jp": "道路",
+    "romaji": "douro",
+    "pt": "estrada/via"
+   },
+   {
+    "jp": "北海道",
+    "romaji": "hokkaidou",
+    "pt": "região de Hokkaido"
+   },
+   {
+    "jp": "片道",
+    "romaji": "katamichi",
+    "pt": "viagem só de ida"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "道に迷いました。",
+    "romaji": "michi ni mayoimashita",
+    "pt": "Eu me perdi no caminho."
+   }
+  ]
+ },
+ {
+  "n": 94,
+  "kanji": "国",
+  "romaji": [
+   "kuni",
+   "koku",
+   "goku"
+  ],
+  "pt": [
+   "pais",
+   "nacao"
+  ],
+  "story": "Um rei (王) governando seu território sagrado, totalmente cercado por muralhas gigantes. País.",
+  "hp": 65,
+  "atk": 9,
+  "words": [
+   {
+    "jp": "外国",
+    "romaji": "gaikoku",
+    "pt": "país estrangeiro"
+   },
+   {
+    "jp": "中国",
+    "romaji": "chuugoku",
+    "pt": "China"
+   },
+   {
+    "jp": "国内",
+    "romaji": "kokunai",
+    "pt": "doméstico/interno"
+   }
+  ],
+  "sentences": [
+   {
+    "jp": "あなたの国はどこですか？",
+    "romaji": "anata no kuni wa doko desu ka?",
+    "pt": "De qual país você é?"
+   }
+  ]
+ }
+]
