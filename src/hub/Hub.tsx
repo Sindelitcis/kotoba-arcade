@@ -16,7 +16,7 @@ interface Tile {
 
 const TILES: Tile[] = [
   { id: 'kanjimon', title: 'KanjiMon', jp: '漢字モン', blurb: 'Cace kanji, quebre os selos, complete a coleção.', screen: 'kanjimon' },
-  { id: 'kanabeat', title: 'Kana Beat', jp: 'かなビート', blurb: 'Ritmo e digitação. Chega em seguida.' },
+  { id: 'kanabeat', title: 'Kana Beat', jp: 'かなビート', blurb: 'Digite no ritmo. Kana e palavras no tempo da batida.', screen: 'kanabeat' },
   { id: 'roguelike', title: 'Roguelike de cartas', jp: 'ローグ', blurb: 'Runs curtas, builds e chefes. Na fila.' },
   { id: 'aventura', title: 'Aventura', jp: '冒険', blurb: 'História com japonês de verdade. Na fila.' },
   { id: 'voz', title: 'Conversa por voz', jp: '会話', blurb: 'Personagens com IA rodando no seu PC. Na fila.' },
@@ -48,7 +48,8 @@ export function Hub() {
   const km = kanjimonSave();
   const sentences = readableSentences();
   const sentence = sentences.length > 0 ? sentences[sentences.length - 1] : undefined;
-  const nextGame: Screen = 'kanjimon';
+  const nextGame: Screen = profile.lastGame === 'kanabeat' ? 'kanabeat' : 'kanjimon';
+  const nextLabel = nextGame === 'kanabeat' ? 'Kana Beat · Próxima música' : 'KanjiMon · Caçada';
   const booster = canOpenBooster(profile, km, cards);
 
   useEffect(() => {
@@ -62,10 +63,12 @@ export function Hub() {
         go(nextGame);
       } else if (e.key.toLowerCase() === 'd') go('kanjidex');
       else if (e.key.toLowerCase() === 'b' && booster === 'ok') go('booster');
+      else if (e.key.toLowerCase() === 'k') go('kanabeat');
+      else if (e.key.toLowerCase() === 'c') go('kanjimon');
     };
     addEventListener('keydown', onKey);
     return () => removeEventListener('keydown', onKey);
-  }, [showSettings, booster]);
+  }, [showSettings, booster, nextGame]);
 
   const toggle = (key: 'sound' | 'voice' | 'calm') => {
     settings[key] = !settings[key];
@@ -126,14 +129,18 @@ export function Hub() {
 
       <button class="play-now" onClick={() => go(nextGame)} data-testid="play-now">
         <span class="play-now-main">Jogar agora</span>
-        <span class="play-now-sub">KanjiMon · Caçada <kbd>Enter</kbd></span>
+        <span class="play-now-sub">{nextLabel} <kbd>Enter</kbd></span>
       </button>
 
       <section class="tiles">
         {TILES.map((t) => (
           <button key={t.id} class={t.screen ? 'tile' : 'tile soon'} disabled={!t.screen} onClick={() => t.screen && go(t.screen)}>
             <span class="tile-jp">{t.jp}</span>
-            <span class="tile-title">{t.title}</span>
+            <span class="tile-title">
+              {t.title}
+              {t.id === 'kanjimon' && <kbd>C</kbd>}
+              {t.id === 'kanabeat' && <kbd>K</kbd>}
+            </span>
             <span class="tile-blurb">{t.blurb}</span>
           </button>
         ))}

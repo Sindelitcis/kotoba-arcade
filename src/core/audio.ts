@@ -14,6 +14,11 @@ function audio(): AudioContext | null {
   }
 }
 
+/** Contexto de áudio compartilhado (null com som desligado). */
+export function audioContext(): AudioContext | null {
+  return audio();
+}
+
 interface Tone {
   freq: number;
   dur: number;

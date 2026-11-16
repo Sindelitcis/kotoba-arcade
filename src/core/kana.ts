@@ -209,3 +209,77 @@ export function normalizePt(s: string): string {
     .replace(/\s+/g, ' ')
     .trim();
 }
+
+/* ───────── Digitação letra a letra (jogos de ritmo) ───────── */
+
+const SPELLINGS = new Map<string, string[]>();
+for (const [r, k] of [...ROWS, ...ALIASES]) {
+  if (r === 'o' && k === 'を') continue;
+  const list = SPELLINGS.get(k) ?? [];
+  if (!list.includes(r)) list.push(r);
+  SPELLINGS.set(k, list);
+}
+
+/**
+ * Quebra uma leitura em kana nas unidades que o jogador digita, cada uma com
+ * as grafias aceitas (Hepburn, kunrei, teclado japonês).
+ */
+export function typingUnits(kana: string): string[][] {
+  const s = kataToHira(kana).replace(/[\s。、]/g, '');
+  const raw: string[] = [];
+  for (let i = 0; i < s.length; i++) {
+    const two = s.slice(i, i + 2);
+    if (SPELLINGS.has(two)) {
+      raw.push(two);
+      i++;
+    } else raw.push(s[i] as string);
+  }
+  const base = (u: string | undefined): string[] => (u === undefined ? [] : (SPELLINGS.get(u) ?? [u]));
+  const units: string[][] = [];
+  for (let i = 0; i < raw.length; i++) {
+    const u = raw[i] as string;
+    if (u === 'っ' && raw[i + 1] !== undefined && SPELLINGS.has(raw[i + 1] as string)) {
+      const next = base(raw[i + 1]);
+      const doubled = new Set<string>();
+      for (const sp of next) {
+        doubled.add((sp[0] as string) + sp);
+        if (sp.startsWith('ch')) doubled.add('t' + sp);
+      }
+      units.push([...doubled]);
+      i++;
+    } else if (u === 'ん') {
+      const next = base(raw[i + 1]);
+      const ambiguous = next.some((sp) => VOWELS.includes(sp[0] as string) || sp[0] === 'y' || sp[0] === 'n');
+      units.push(ambiguous ? ['nn', "n'", 'n'] : ['n', 'nn', "n'"]);
+    } else if (u === 'ー') {
+      const prev = units[units.length - 1]?.[0];
+      units.push(prev ? ['-', prev.slice(-1)] : ['-']);
+    } else {
+      units.push(base(u));
+    }
+  }
+  return units;
+}
+
+export type TypingMatch = 'complete' | 'prefix' | 'no';
+
+function matchUnits(buf: string, i: number, units: string[][]): TypingMatch {
+  if (i === units.length) return buf === '' ? 'complete' : 'no';
+  if (buf === '') return 'prefix';
+  let best: TypingMatch = 'no';
+  for (const sp of units[i] as string[]) {
+    if (buf.startsWith(sp)) {
+      const rest = matchUnits(buf.slice(sp.length), i + 1, units);
+      if (rest === 'complete') return 'complete';
+      if (rest === 'prefix') best = 'prefix';
+    } else if (sp.startsWith(buf)) {
+      best = 'prefix';
+    }
+  }
+  return best;
+}
+
+/** O que já foi digitado bate com a leitura? Completo, no caminho, ou errado. */
+export function matchTyping(buffer: string, kana: string): TypingMatch {
+  return matchUnits(toHalfWidth(buffer).toLowerCase(), 0, typingUnits(kana));
+}

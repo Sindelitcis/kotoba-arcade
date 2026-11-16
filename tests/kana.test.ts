@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { compareReading, kanaToRomaji, normalizePt, romajiToHiragana, toReadingKey } from '../src/core/kana';
+import { compareReading, kanaToRomaji, matchTyping, normalizePt, romajiToHiragana, toReadingKey } from '../src/core/kana';
 
 describe('romajiToHiragana', () => {
   it.each([
@@ -79,5 +79,54 @@ describe('texto', () => {
   it('normalizePt ignora acento e caixa', () => {
     expect(normalizePt('  Água ')).toBe('agua');
     expect(normalizePt('MÃE')).toBe('mae');
+  });
+});
+
+describe('matchTyping (digitação letra a letra)', () => {
+  it('acompanha a digitação até completar', () => {
+    expect(matchTyping('', 'さくら')).toBe('prefix');
+    expect(matchTyping('s', 'さくら')).toBe('prefix');
+    expect(matchTyping('saku', 'さくら')).toBe('prefix');
+    expect(matchTyping('sakura', 'さくら')).toBe('complete');
+    expect(matchTyping('sakuro', 'さくら')).toBe('no');
+    expect(matchTyping('sakuraa', 'さくら')).toBe('no');
+  });
+
+  it('aceita Hepburn e kunrei', () => {
+    expect(matchTyping('shi', 'し')).toBe('complete');
+    expect(matchTyping('si', 'し')).toBe('complete');
+    expect(matchTyping('tsu', 'つ')).toBe('complete');
+    expect(matchTyping('tu', 'つ')).toBe('complete');
+    expect(matchTyping('sya', 'しゃ')).toBe('complete');
+    expect(matchTyping('jo', 'じょ')).toBe('complete');
+    expect(matchTyping('zyo', 'じょ')).toBe('complete');
+  });
+
+  it('consoante dobrada', () => {
+    expect(matchTyping('kitte', 'きって')).toBe('complete');
+    expect(matchTyping('gakkou', 'がっこう')).toBe('complete');
+    expect(matchTyping('shucchou', 'しゅっちょう')).toBe('complete');
+    expect(matchTyping('shutchou', 'しゅっちょう')).toBe('complete');
+    expect(matchTyping('kite', 'きって')).toBe('no');
+  });
+
+  it('ん de todo jeito que as pessoas digitam', () => {
+    expect(matchTyping('hon', 'ほん')).toBe('complete');
+    expect(matchTyping('honn', 'ほん')).toBe('complete');
+    expect(matchTyping('sannin', 'さんにん')).toBe('complete');
+    expect(matchTyping("kin'youbi", 'きんようび')).toBe('complete');
+    expect(matchTyping('kinnyoubi', 'きんようび')).toBe('complete');
+    expect(matchTyping('kinyoubi', 'きんようび')).toBe('complete');
+    expect(matchTyping('tenki', 'てんき')).toBe('complete');
+  });
+
+  it('katakana e vogal longa com traço ou vogal repetida', () => {
+    expect(matchTyping('bi-ru', 'ビール')).toBe('complete');
+    expect(matchTyping('biiru', 'ビール')).toBe('complete');
+    expect(matchTyping('a', 'ア')).toBe('complete');
+  });
+
+  it('maiúsculas contam igual', () => {
+    expect(matchTyping('SAKURA', 'さくら')).toBe('complete');
   });
 });

@@ -1,5 +1,6 @@
 import { render } from 'preact';
 import { screen } from './core/app';
+import { KanaBeatGame } from './games/kanabeat/KanaBeatGame';
 import { Booster } from './games/kanjimon/Booster';
 import { Dex } from './games/kanjimon/Dex';
 import { KanjiMonGame } from './games/kanjimon/KanjiMonGame';
@@ -14,6 +15,8 @@ function App() {
       return <Dex />;
     case 'booster':
       return <Booster />;
+    case 'kanabeat':
+      return <KanaBeatGame />;
     default:
       return <Hub />;
   }

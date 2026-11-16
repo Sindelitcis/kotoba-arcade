@@ -2,7 +2,12 @@
 
 Fliperama de jogos para aprender japonês, feito pensando em quem tem TDAH. A regra da casa é simples: primeiro tem que ser um jogo bom. O estudo acontece por dentro dele.
 
-O primeiro jogo é o [KanjiMon](https://github.com/Sindelitcis/KanjiMon), refeito aqui dentro. Os próximos são um jogo de ritmo e digitação, um roguelike de cartas, uma aventura com história e conversa por voz com IA rodando local.
+Jogos que já dá para jogar:
+
+- **KanjiMon**: o [KanjiMon original](https://github.com/Sindelitcis/KanjiMon) refeito aqui dentro. Você caça kanji, quebra os selos respondendo e junta as cartas na KanjiDex.
+- **Kana Beat**: ritmo e digitação. Kana e palavras chegam na linha no tempo da batida e você digita a leitura. A música acelera quando você vai bem e desacelera quando não vai.
+
+Na fila: um roguelike de cartas, uma aventura com história e conversa por voz com IA rodando local.
 
 ## Como rodar
 
@@ -35,7 +40,8 @@ Essas escolhas vêm do que se sabe sobre TDAH e sobre memória, e do que costuma
 - **Primeiro contato não tem como errar.** Kanji novo aparece com o significado, uma historinha e a resposta destacada. A cobrança vem minutos depois, quando lembrar já dá trabalho.
 - **Cada acerto responde na hora.** Som que sobe com o combo, partículas, selo quebrando. Resposta rápida ganha bônus, resposta lenta não perde nada.
 - **A pergunta muda conforme você melhora.** Começa em reconhecer o significado, passa por ler a palavra e chega em digitar a leitura.
-- **Tem ponto de parada.** A cada cinco capturas vem um baú com o resumo da sessão. Dá para parar ali ou seguir por horas.
+- **Tem ponto de parada.** No KanjiMon, a cada cinco capturas vem um baú com o resumo da sessão. No Kana Beat, cada música dura perto de um minuto. Dá para parar ali ou seguir por horas.
+- **Ninguém é expulso do jogo.** No Kana Beat a música sempre vai até o fim. Errou muito, a próxima vem mais lenta.
 - **O progresso é concreto.** O fliperama mostra quantos kanji e palavras você já reconhece e as frases que já consegue ler.
 
 Kanji nunca vem sozinho: toda carta traz palavras de verdade, com leitura em kana e áudio (voz japonesa do navegador).

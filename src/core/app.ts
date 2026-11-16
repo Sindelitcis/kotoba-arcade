@@ -1,5 +1,6 @@
 /** Estado do app no navegador: save carregado, tela atual e gravação. */
 import { signal } from '@preact/signals';
+import { ensureKanaBeatSave, type KanaBeatSave } from '../games/kanabeat/engine';
 import { ensureKanjimonSave, type KanjimonSave } from '../games/kanjimon/engine';
 import { markPlayed } from './progress';
 import { importSave, loadSave, writeSave, type SaveData } from './save';
@@ -33,4 +34,8 @@ export function replaceSave(text: string): void {
 
 export function kanjimonSave(): KanjimonSave {
   return ensureKanjimonSave(app.data.games);
+}
+
+export function kanaBeatSave(): KanaBeatSave {
+  return ensureKanaBeatSave(app.data.games);
 }

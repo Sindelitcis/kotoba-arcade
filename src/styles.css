@@ -250,3 +250,42 @@ kbd {
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }
+
+/* ───────── Kana Beat ───────── */
+.kb { max-width: 1180px; margin: 0 auto; padding: 18px 20px 40px; min-height: 100vh; display: grid; grid-template-rows: auto 1fr; gap: 18px; }
+.kb-score { font: 800 1.6rem/1 ui-monospace, Consolas, monospace; color: var(--gold); min-width: 90px; text-align: right; }
+.kb-progress { width: 160px; }
+.kb-stage { display: grid; gap: 18px; align-content: center; }
+.kb-track {
+  position: relative; height: 320px; border-radius: 22px; overflow: hidden;
+  background: linear-gradient(180deg, #15152e, #0e0e20);
+  border: 1px solid var(--line);
+}
+.kb-line { position: absolute; top: 0; bottom: 0; width: 6px; margin-left: -3px; border-radius: 6px; background: linear-gradient(180deg, var(--accent-2), var(--accent)); box-shadow: 0 0 26px var(--accent-2); }
+.kb-line.line-hit { animation: line-hit 0.25s ease; }
+@keyframes line-hit { 0% { box-shadow: 0 0 60px 12px var(--gold); background: var(--gold); } }
+.kb-note {
+  position: absolute; transform: translate(-50%, -50%);
+  display: grid; justify-items: center; gap: 2px; white-space: nowrap;
+  padding: 10px 18px; border-radius: 16px;
+  background: #22224a; border: 2px solid #3a3a6e;
+  font-family: var(--jp); will-change: left;
+}
+.kb-note.target { border-color: var(--gold); background: #2e2a55; box-shadow: 0 0 26px rgba(255, 209, 102, 0.45); z-index: 2; }
+.kb-text { font-weight: 800; font-size: 2.6rem; line-height: 1.1; }
+.kb-note.is-word .kb-text { font-size: 2.1rem; }
+.kb-furi { font-size: 0.95rem; color: var(--accent-2); }
+.kb-hint { font: 600 0.85rem/1 ui-monospace, Consolas, monospace; color: var(--good); }
+.kb-pt { font: 400 0.8rem/1.1 'Segoe UI', sans-serif; color: var(--muted); }
+.kb-judge { position: absolute; top: 4%; transform: translateX(-20%); font-weight: 800; font-size: 1.3rem; white-space: nowrap; animation: judge 0.9s ease forwards; pointer-events: none; z-index: 3; }
+.kb-judge.perfect { color: var(--gold); } .kb-judge.good { color: var(--accent-2); } .kb-judge.ok { color: var(--r-c); } .kb-judge.miss { color: var(--bad); animation-duration: 1.8s; }
+@keyframes judge { 0% { opacity: 0; transform: translate(-20%, 14px) scale(0.8); } 15% { opacity: 1; transform: translate(-20%, 0) scale(1.1); } 70% { opacity: 1; } 100% { opacity: 0; transform: translate(-20%, -10px); } }
+.kb-typed { min-height: 64px; display: grid; place-items: center; font: 700 2rem/1 ui-monospace, Consolas, monospace; letter-spacing: 0.08em; border-radius: 14px; background: #0f0f22; border: 1px solid var(--line); transition: border-color 0.1s; }
+.kb-typed .muted { font: 400 1rem/1.2 'Segoe UI', sans-serif; letter-spacing: 0; }
+.kb-typed.typo { border-color: var(--bad); animation: shake 0.25s ease; }
+.kb-help { text-align: center; font-size: 0.85rem; }
+.kb-grade { font: 900 7rem/1 'Segoe UI', sans-serif; text-shadow: 0 0 50px currentColor; animation: capture 0.5s cubic-bezier(0.2, 1.4, 0.4, 1); }
+.kb-grade.g-S { color: var(--gold); } .kb-grade.g-A { color: var(--good); } .kb-grade.g-B { color: var(--accent-2); } .kb-grade.g-C { color: var(--muted); }
+.kb-missed { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; align-items: center; max-width: 760px; }
+.kb-missed button { padding: 6px 12px; font-family: var(--jp); font-size: 0.9rem; }
+.tile-title kbd { opacity: 0.7; }
