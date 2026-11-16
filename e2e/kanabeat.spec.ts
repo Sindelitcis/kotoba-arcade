@@ -54,6 +54,27 @@ test('espaço pausa e qualquer tecla volta', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'Pausado' })).toBeHidden();
 });
 
+test('a pausa congela as notas na hora, sem um último quadro andando por baixo do aviso', async ({ page }) => {
+  // O laço ainda rodava um quadro depois da pausa e a nota dava um pulinho com "Pausado" já na tela.
+  await open(page);
+  await page.waitForTimeout(300);
+  const styles = await page.evaluate(async () => {
+    const style = () => document.querySelector('[data-testid="target-note"]')?.getAttribute('style') ?? '';
+    dispatchEvent(new KeyboardEvent('keydown', { key: ' ', code: 'Space', bubbles: true }));
+    await new Promise((r) => setTimeout(r, 0));
+    const seen = [style()];
+    for (let i = 0; i < 6; i++) {
+      await new Promise((r) => requestAnimationFrame(r));
+      await new Promise((r) => setTimeout(r, 0));
+      seen.push(style());
+    }
+    return seen;
+  });
+  await expect(page.getByRole('heading', { name: 'Pausado' })).toBeVisible();
+  expect(styles[0]).not.toBe('');
+  expect(new Set(styles).size).toBe(1);
+});
+
 test('a música sempre termina e mostra o resultado, mesmo sem tocar em nada', async ({ page }) => {
   await page.clock.install();
   await open(page);

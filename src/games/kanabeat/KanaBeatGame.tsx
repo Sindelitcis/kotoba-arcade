@@ -101,6 +101,8 @@ export function KanaBeatGame() {
     if (on) {
       r.pausedAt = performance.now();
       r.music.pause();
+      // Congela a tela no instante da pausa. Sem isto, um último quadro do laço ainda mexia as notas com o aviso de pausa já na tela.
+      setT(now());
     } else {
       r.t0 += performance.now() - (r.pausedAt as number);
       r.pausedAt = null;
