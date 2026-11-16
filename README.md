@@ -28,7 +28,9 @@ npm run e2e       # joga de verdade no Chrome (Playwright)
 npm run check     # tipos + testes + build + e2e, tudo de uma vez
 ```
 
-Todo bug corrigido entra com um teste que reproduz o caso. Rode `npm run check` antes de publicar.
+Todo bug corrigido entra com um teste que reproduz o caso.
+
+Cada commit no `main` passa por essa bateria no GitHub Actions e, se tudo passar, o site em https://sindelitcis.github.io/kotoba-arcade/ é atualizado sozinho. Se algum teste falhar, nada é publicado.
 
 ## Como o jogo ensina
 
