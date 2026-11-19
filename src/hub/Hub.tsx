@@ -5,6 +5,7 @@ import { cenaStyle, type Cena } from '../core/arte';
 import { hasJapaneseVoice, sfx, speak } from '../core/audio';
 import { levelInfo, readingMeter, recentDays } from '../core/progress';
 import { exportSave } from '../core/save';
+import { teclaDe } from '../core/teclas';
 import { BOOSTER_COST, canOpenBooster } from '../games/kanjimon/engine';
 
 interface Tile {
@@ -44,6 +45,7 @@ export function Hub() {
   const [showSettings, setShowSettings] = useState(false);
   const [message, setMessage] = useState('');
   const fileRef = useRef<HTMLInputElement>(null);
+  const settingsRef = useRef<HTMLDivElement>(null);
   const { profile, settings, cards } = app.data;
   const lv = levelInfo(profile.xp);
   const meter = readingMeter(cards);
@@ -60,27 +62,36 @@ export function Hub() {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      const tecla = teclaDe(e);
+      if (tecla === null) return;
       // Na troca de tela este ouvinte ainda vive por um instante: tecla de outro jogo não é do fliperama.
       if (screen.value !== 'hub') return;
       if (showSettings) {
-        if (e.key === 'Escape') setShowSettings(false);
+        if (tecla === 'Escape') setShowSettings(false);
         return;
       }
-      if (e.key === 'Enter' || e.key === ' ') {
+      if (tecla === 'Enter' || tecla === ' ') {
+        // Botão escolhido pelo Tab: o Enter e o espaço são dele.
+        if (e.target instanceof HTMLElement && e.target.closest('button, a, input, select, textarea')) return;
         e.preventDefault();
         go(nextGame);
-      } else if (e.key.toLowerCase() === 'd') go('kanjidex');
-      else if (e.key.toLowerCase() === 'b' && booster === 'ok') go('booster');
-      else if (e.key.toLowerCase() === 'k') go('kanabeat');
-      else if (e.key.toLowerCase() === 'c') go('kanjimon');
-      else if (e.key.toLowerCase() === 'r') go('roguelike');
-      else if (e.key.toLowerCase() === 'a') go('aventura');
-      else if (e.key.toLowerCase() === 'v') go('conversa');
-      else if (e.key.toLowerCase() === 'g') go('gramatica');
+      } else if (tecla.toLowerCase() === 'd') go('kanjidex');
+      else if (tecla.toLowerCase() === 'b' && booster === 'ok') go('booster');
+      else if (tecla.toLowerCase() === 'k') go('kanabeat');
+      else if (tecla.toLowerCase() === 'c') go('kanjimon');
+      else if (tecla.toLowerCase() === 'r') go('roguelike');
+      else if (tecla.toLowerCase() === 'a') go('aventura');
+      else if (tecla.toLowerCase() === 'v') go('conversa');
+      else if (tecla.toLowerCase() === 'g') go('gramatica');
     };
     addEventListener('keydown', onKey);
     return () => removeEventListener('keydown', onKey);
   }, [showSettings, booster, nextGame]);
+
+  // Ajustes é um diálogo: o foco entra nele ao abrir, e quem usa leitor de tela sabe onde está.
+  useEffect(() => {
+    if (showSettings) settingsRef.current?.querySelector<HTMLElement>('input, button')?.focus();
+  }, [showSettings]);
 
   const toggle = (key: 'sound' | 'voice' | 'calm') => {
     settings[key] = !settings[key];
@@ -214,8 +225,8 @@ export function Hub() {
 
       {showSettings && (
         <div class="modal" onClick={() => setShowSettings(false)}>
-          <div class="modal-box" onClick={(e) => e.stopPropagation()}>
-            <h2>Ajustes</h2>
+          <div class="modal-box" ref={settingsRef} role="dialog" aria-modal="true" aria-labelledby="ajustes-titulo" onClick={(e) => e.stopPropagation()}>
+            <h2 id="ajustes-titulo">Ajustes</h2>
             <label class="check">
               <input type="checkbox" checked={settings.sound} onChange={() => toggle('sound')} /> Efeitos sonoros
             </label>
