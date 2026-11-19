@@ -126,3 +126,18 @@ test('a fase toca uma faixa de verdade e a tela de créditos mostra autor e lice
   await expect(page.locator('.kb-credits')).toBeHidden();
   await expect(page.getByTestId('grade')).toBeVisible();
 });
+
+test('a primeira tecla logo que o Kana Beat abre não se perde', async ({ page }) => {
+  // O ouvinte de teclado ligava depois da pintura: um espaço apertado logo ao abrir não pausava.
+  await page.goto('/');
+  await expect(page.getByRole('heading', { name: 'Kotoba Arcade' })).toBeVisible();
+  await page.evaluate(async () => {
+    dispatchEvent(new KeyboardEvent('keydown', { key: 'k', code: 'KeyK', bubbles: true }));
+    // A tela troca e é desenhada, mas ainda não foi pintada.
+    await new Promise<void>((r) => queueMicrotask(r));
+    await new Promise<void>((r) => queueMicrotask(r));
+    if (!document.querySelector('.kb')) throw new Error('Kana Beat ainda não apareceu');
+    dispatchEvent(new KeyboardEvent('keydown', { key: ' ', code: 'Space', bubbles: true }));
+  });
+  await expect(page.getByRole('heading', { name: 'Pausado' })).toBeVisible();
+});

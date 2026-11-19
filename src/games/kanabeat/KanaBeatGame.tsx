@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'preact/hooks';
+import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { app, commit, go, kanaBeatSave } from '../../core/app';
 import { sfx, speak } from '../../core/audio';
 import { cenaStyle } from '../../core/arte';
@@ -158,7 +158,8 @@ export function KanaBeatGame() {
     go('hub');
   };
 
-  useEffect(() => {
+  // Liga o teclado junto com o desenho: com useEffect ele só ligava depois da pintura e a primeira tecla se perdia.
+  useLayoutEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.ctrlKey || e.metaKey || e.altKey) return;
       const key = teclaDe(e);
