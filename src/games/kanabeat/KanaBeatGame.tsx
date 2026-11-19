@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'preact/hooks';
 import { app, commit, go, kanaBeatSave } from '../../core/app';
 import { sfx, speak } from '../../core/audio';
 import { cenaStyle } from '../../core/arte';
+import { useAoAbrirAjuda } from '../../core/help/ajuda';
 import { burst, INK, onomato, pulse } from '../../core/fx';
 import { kanaToRomaji } from '../../core/kana';
 import { MODE_NAMES, modeForPlay, Stage, type BeatEvent, type Judge, type Mode, type StageResult } from './engine';
@@ -114,6 +115,8 @@ export function KanaBeatGame() {
     }
     setPaused(on);
   };
+
+  useAoAbrirAjuda(() => setPause(true));
 
   const restart = (mode?: Mode) => {
     (run.current as Run).music.stop();

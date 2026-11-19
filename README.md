@@ -103,7 +103,7 @@ Kanji nunca vem sozinho: toda carta traz palavras de verdade, com leitura em kan
 ## Organização
 
 ```
-src/core      memória espaçada, seletor de cartas, perguntas, save, kana, som, efeitos, imagens
+src/core      memória espaçada, seletor de cartas, perguntas, save, kana, som, efeitos, imagens, ajuda
 src/assets    fontes recortadas, cenários e personagens
 docs          guia de estilo (estilo.md) e como as imagens foram feitas (imagens.md)
 src/content   kanji, palavras e frases (os 94 kanji do KanjiMon original e o vocabulário do dia a dia)
@@ -117,6 +117,14 @@ e2e           testes jogando no navegador
 As regras de cada jogo ficam em `engine.ts`, sem nada de tela, para dar para testar tudo. Os jogos não conversam entre si. O que eles dividem é a memória do jogador: uma palavra aprendida em um jogo já conta nos outros.
 
 O save fica no navegador. Em Ajustes dá para exportar e importar um arquivo de backup.
+
+## Ajuda dentro do jogo
+
+Toda tela tem um botão de interrogação discreto no canto de baixo. Ele, a tecla `?` ou a F1 abrem a explicação daquela tela: objetivo, como jogar, todas as teclas, o que cada coisa da tela quer dizer, como aquilo ensina e as perguntas mais comuns. Nada abre sozinho. Na Conversa por voz a F1 continua traduzindo a fala; lá a ajuda abre com `?`.
+
+Com a ajuda aberta, o jogo não recebe tecla nenhuma e o Kana Beat pausa. Esc ou um clique fora fecha.
+
+O texto fica em `src/content/ajuda/`, um arquivo por jogo. Um teste confere que toda tela tem ajuda e que toda tecla citada existe de verdade no código da tela, e o contrário também. Mudou uma tecla, o teste avisa que a ajuda ficou velha.
 
 ## Visual
 

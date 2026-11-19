@@ -1,0 +1,105 @@
+/* Ajuda: botão de interrogação e painel. Segue docs/estilo.md: tinta, papel, retícula, cantos retos. */
+
+.ajuda-botao {
+  position: fixed;
+  right: 14px;
+  bottom: 14px;
+  z-index: 40;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  font: 1rem/1 var(--f-titulo);
+  background: var(--papel);
+  border: 2px solid var(--tinta);
+  box-shadow: var(--sombra-p);
+  opacity: 0.6;
+}
+.ajuda-botao:hover:not(:disabled), .ajuda-botao:focus-visible { opacity: 1; }
+
+.ajuda-fundo {
+  position: fixed;
+  inset: 0;
+  /* Acima das onomatopeias (60): a ajuda cobre tudo enquanto está aberta. */
+  z-index: 70;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: var(--tom-medio), rgba(21, 19, 19, 0.6);
+}
+
+.ajuda-painel {
+  width: min(760px, 100%);
+  max-height: min(640px, 92vh);
+  display: grid;
+  grid-template-columns: 190px 1fr;
+  grid-template-rows: auto 1fr;
+  background: var(--branco);
+  border: var(--quadro);
+  box-shadow: 8px 8px 0 var(--tinta);
+  clip-path: polygon(0 0, calc(100% - 22px) 0, 100% 22px, 100% 100%, 0 100%);
+  animation: virar 0.22s ease;
+  font-family: var(--f-texto), var(--jp);
+}
+
+.ajuda-topo {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 34px 12px 16px;
+  border-bottom: var(--quadro);
+  background: var(--tom-leve), var(--papel);
+}
+.ajuda-topo h2 { margin: 0; flex: 1; font: 1.25rem/1.2 var(--f-titulo); }
+.ajuda-jp { font: 1.6rem/1 var(--f-pincel); white-space: nowrap; }
+
+.ajuda-indice {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  padding: 12px;
+  border-right: var(--quadro);
+  background: var(--papel);
+  overflow: auto;
+}
+.ajuda-indice button { justify-content: flex-start; text-align: left; box-shadow: none; padding: 6px 8px; font-size: 0.9rem; }
+.ajuda-indice button.on { background: var(--tinta); color: var(--papel); }
+.ajuda-indice button.on kbd { background: var(--papel); color: var(--tinta); border-color: var(--papel); }
+
+.ajuda-corpo {
+  padding: 14px 20px 20px;
+  overflow: auto;
+  line-height: 1.5;
+  outline: none;
+}
+.ajuda-corpo p { margin: 0 0 10px; }
+.ajuda-secao { margin: 0 0 12px; font: 1rem/1.2 var(--f-titulo); }
+.ajuda-passos, .ajuda-pontos { margin: 0; padding-left: 1.4em; display: grid; gap: 8px; }
+.ajuda-passos li::marker { font-family: var(--f-titulo); }
+
+.ajuda-lista { margin: 0; display: grid; gap: 8px; }
+.ajuda-lista > div { display: grid; grid-template-columns: 130px 1fr; gap: 12px; align-items: baseline; padding-bottom: 8px; border-bottom: 1px dashed var(--cinza); }
+.ajuda-lista.larga > div { grid-template-columns: 170px 1fr; }
+.ajuda-lista dt { font-weight: 700; }
+.ajuda-lista dd { margin: 0; }
+.ajuda-teclas { display: inline-flex; flex-wrap: wrap; gap: 4px; }
+
+.ajuda-perguntas { display: grid; gap: 14px; }
+.ajuda-perguntas h3 { margin: 0 0 4px; font-size: 1rem; }
+.ajuda-perguntas p { margin: 0; }
+
+@media (max-width: 640px) {
+  .ajuda-fundo { padding: 10px; }
+  .ajuda-painel { grid-template-columns: 1fr; grid-template-rows: auto auto 1fr; }
+  .ajuda-topo { gap: 8px; padding: 10px 26px 10px 12px; }
+  .ajuda-topo h2 { font-size: 1.05rem; }
+  .ajuda-jp { font-size: 1.2rem; }
+  .ajuda-topo .ghost kbd { display: none; }
+  .ajuda-indice { border-right: 0; border-bottom: var(--quadro); grid-auto-flow: column; grid-auto-columns: max-content; }
+  .ajuda-lista > div, .ajuda-lista.larga > div { grid-template-columns: 1fr; gap: 2px; }
+}
+
+[data-calma] .ajuda-painel { animation: none; }
+@media (prefers-reduced-motion: reduce) { .ajuda-painel { animation: none; } }

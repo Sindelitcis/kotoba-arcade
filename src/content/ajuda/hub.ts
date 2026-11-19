@@ -1,0 +1,73 @@
+import { MEMORIA_UNICA, SAVE } from './comum';
+import type { Ajuda } from './tipos';
+
+export const HUB: Ajuda = {
+  tela: 'hub',
+  titulo: 'Fliperama',
+  jp: '言葉',
+  objetivo: ['É a entrada de tudo. Daqui você abre qualquer jogo e vê o quanto de japonês já consegue ler.', 'Não tem tarefa do dia. Abra, aperte Enter e jogue.'],
+  passos: [
+    'Aperte Enter (ou clique em Jogar agora) para voltar ao último jogo que você jogou.',
+    'Quer outro? Clique no quadro do jogo ou aperte a letra dele.',
+    'Na parte de baixo você vê o que já lê e a sua coleção do KanjiMon.',
+    'Em Ajustes ficam o som, a voz, o modo calmo e o backup do save.',
+  ],
+  teclas: [
+    { teclas: ['Enter', 'Espaço'], faz: 'Jogar agora: abre o último jogo' },
+    { teclas: ['C'], faz: 'KanjiMon (caçada)' },
+    { teclas: ['K'], faz: 'Kana Beat' },
+    { teclas: ['R'], faz: 'Kotodama' },
+    { teclas: ['A'], faz: 'Aventura' },
+    { teclas: ['G'], faz: 'Kumitate' },
+    { teclas: ['V'], faz: 'Conversa por voz' },
+    { teclas: ['D'], faz: 'KanjiDex, a coleção de cartas' },
+    { teclas: ['B'], faz: 'Abrir um booster, quando dá' },
+  ],
+  elementos: [
+    { nome: 'Nível', texto: 'Sobe com o XP que você ganha em qualquer jogo. A barra mostra quanto falta para o próximo.' },
+    { nome: 'Moedas (●)', texto: 'Ganhas jogando. Servem para abrir booster de cartas do KanjiMon.' },
+    { nome: 'Sete quadradinhos', texto: 'Os últimos sete dias. Preenchido é dia em que você jogou. Faltar um dia não apaga nada.' },
+    { nome: 'Jogar agora', texto: 'Leva direto ao último jogo, já no ponto de começar.' },
+    { nome: 'O que você já lê', texto: 'Kanji e palavras que você já encontrou (barra clara) e os que já estão firmes na memória (barra escura). Firme é o que você lembraria mesmo depois de uma semana sem ver.' },
+    { nome: 'Frase da vez', texto: 'Uma frase que você já consegue ler com os kanji que encontrou. Clique para ouvir. Ex.: 山に行きます (やまに いきます, vou à montanha).' },
+    { nome: 'Quadro do KanjiMon', texto: 'Capturas, cartas da coleção e melhor combo. O booster abre depois que você encontrar 3 kanji.' },
+  ],
+  ensina: [
+    'Começar custa uma tecla. Sem login, sem menu, sem lista de tarefas.',
+    'Não existe pilha de revisão atrasada. Quem some por uns dias volta e recebe primeiro o que mais vale rever.',
+    'O progresso é concreto: kanji, palavras e frases que você já lê.',
+  ],
+  perguntas: [
+    { p: 'Qual jogo eu jogo primeiro?', r: 'Qualquer um. Se não souber, comece pelo KanjiMon: ele apresenta os kanji que os outros jogos usam.' },
+    { p: 'Faltei uns dias. Perdi alguma coisa?', r: 'Nada. Não tem sequência que quebra. Na volta, o jogo traz primeiro o que mais precisa de revisão.' },
+    MEMORIA_UNICA,
+    SAVE,
+  ],
+};
+
+export const AJUSTES: Ajuda = {
+  tela: 'ajustes',
+  titulo: 'Ajustes',
+  jp: 'せってい',
+  objetivo: ['Deixar o jogo do seu jeito e guardar uma cópia do seu progresso.'],
+  passos: [
+    'Marque ou desmarque cada opção. Vale na hora.',
+    'Para guardar um backup, clique em Exportar backup. O arquivo vai para a pasta de downloads.',
+    'Para trazer um backup de volta, clique em Importar backup e escolha o arquivo.',
+    'Esc ou um clique fora fecha os Ajustes.',
+  ],
+  teclas: [{ teclas: ['Esc'], faz: 'Fechar os Ajustes' }],
+  elementos: [
+    { nome: 'Efeitos sonoros', texto: 'Os sons de acerto, erro, combo e baú.' },
+    { nome: 'Voz em japonês', texto: 'A voz que lê palavras e frases. Usa a voz japonesa do navegador. Se o navegador não tiver uma, aparece um aviso do lado.' },
+    { nome: 'Modo calmo', texto: 'Tira o tremor das linhas, diminui os efeitos e as onomatopeias. Bom para dias de cabeça cheia. Toda a informação continua na tela.' },
+    { nome: 'Exportar backup', texto: 'Baixa um arquivo .json com todo o seu progresso.' },
+    { nome: 'Importar backup', texto: 'Troca o progresso deste navegador pelo do arquivo. O progresso atual é substituído.' },
+  ],
+  ensina: ['O modo calmo existe porque estímulo demais cansa. Menos efeito não tira nada do aprendizado.'],
+  perguntas: [
+    SAVE,
+    { p: 'Como levo meu progresso para outro computador?', r: 'Exporte o backup aqui, leve o arquivo e importe no outro navegador.' },
+    { p: 'Importar apaga o que eu tenho?', r: 'Substitui. O que estava neste navegador dá lugar ao que está no arquivo. Se quiser guardar os dois, exporte antes.' },
+  ],
+};

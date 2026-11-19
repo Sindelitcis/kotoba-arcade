@@ -3,6 +3,7 @@ import { KANJI, type Sentence } from '../content';
 import { app, commit, go, kanjimonSave, replaceSave, saved, screen, tick, type Screen } from '../core/app';
 import { cenaStyle, type Cena } from '../core/arte';
 import { hasJapaneseVoice, sfx, speak } from '../core/audio';
+import { useSubtelaAjuda } from '../core/help/ajuda';
 import { levelInfo, readingMeter, recentDays } from '../core/progress';
 import { exportSave } from '../core/save';
 import { teclaDe } from '../core/teclas';
@@ -43,6 +44,7 @@ function readableSentences(): Sentence[] {
 export function Hub() {
   void tick.value;
   const [showSettings, setShowSettings] = useState(false);
+  useSubtelaAjuda(showSettings ? 'ajustes' : null);
   const [message, setMessage] = useState('');
   const fileRef = useRef<HTMLInputElement>(null);
   const settingsRef = useRef<HTMLDivElement>(null);

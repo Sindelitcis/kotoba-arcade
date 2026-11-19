@@ -1,0 +1,51 @@
+import { MEMORIA_UNICA, PARAR, SAVE, semNovidade, VOLTOU } from './comum';
+import type { Ajuda } from './tipos';
+
+export const KANABEAT: Ajuda = {
+  tela: 'kanabeat',
+  titulo: 'Kana Beat',
+  jp: 'かなビート',
+  objetivo: ['Digitar a leitura de kana e palavras no tempo da música.', 'Cada música dura perto de um minuto. Não tem game over: a música sempre vai até o fim.'],
+  passos: [
+    'As notas vêm da direita para a esquerda, até a linha.',
+    'Digite a leitura em romaji. Ex.: か → ka, ねこ → neko.',
+    'Digitar quando a nota está em cima da linha vale mais. Mas basta digitar antes de ela passar.',
+    'Errou uma tecla? A nota recomeça. Backspace apaga o que você digitou.',
+    'No fim vem a nota da música (S, A, B ou C) e a velocidade da próxima.',
+  ],
+  teclas: [
+    { teclas: ['A–Z'], faz: 'Digitar a leitura em romaji' },
+    { teclas: ['Backspace'], faz: 'Apagar o que foi digitado' },
+    { teclas: ['Espaço'], faz: 'Pausar. Na pausa, qualquer tecla volta' },
+    { teclas: ['Esc'], faz: 'Sair para o fliperama' },
+    { teclas: ['Enter'], faz: 'No fim: próxima música' },
+    { teclas: ['1', '2', '3'], faz: 'No fim: próxima em Hiragana, Katakana ou Palavras' },
+  ],
+  elementos: [
+    { nome: 'Modo', texto: 'Hiragana, Katakana ou Palavras. O jogo alterna sozinho; no fim de cada música dá para escolher.' },
+    { nome: 'BPM', texto: 'A velocidade da música. Começa em 70 e vai de 50 a 150. Foi bem (85% ou mais), a próxima sobe 6. Foi mal (menos de 55%), desce 6.' },
+    { nome: 'Combo', texto: 'Notas seguidas sem deixar passar. Aumenta os pontos de cada nota, até o dobro.' },
+    { nome: 'Barra de cima', texto: 'Quanto da música já foi.' },
+    { nome: 'Linha', texto: 'O ponto certo de digitar. Ela pisca na batida.' },
+    { nome: 'Nota destacada', texto: 'A da vez. Você sempre digita a mais antiga que ainda não passou.' },
+    { nome: 'Leitura em cima', texto: 'Em palavra com kanji, a leitura vai por cima (ex.: 山 com やま). Some quando a leitura já está firme.' },
+    { nome: 'Romaji embaixo', texto: 'Só no primeiro contato com o kana. Depois some.' },
+    { nome: 'Perfeito, Bom, Valeu, Passou', texto: 'Quão perto da linha você terminou de digitar. Passou é nota que foi embora sem resposta.' },
+    { nome: 'S, A, B, C', texto: 'A nota da música. S pede 93% de precisão e nenhuma nota perdida.' },
+  ],
+  ensina: [
+    'Digitar a leitura obriga a lembrar, não só reconhecer.',
+    'A ajuda some conforme você aprende: primeiro o romaji, depois a leitura em cima do kanji.',
+    'A velocidade se ajusta a você. Ninguém é expulso: errou muito, a próxima vem mais lenta.',
+    'As notas que passaram aparecem no fim, para olhar e ouvir de novo.',
+  ],
+  perguntas: [
+    { p: 'Abrir a ajuda pausa a música?', r: 'Pausa. Quando fechar, a tela de pausa fica esperando. Aperte qualquer tecla para voltar.' },
+    { p: 'Posso digitar em kana?', r: 'Aqui não. O Kana Beat é para treinar o romaji no teclado. Para digitar em kana, use o KanjiMon ou a Conversa.' },
+    VOLTOU,
+    semNovidade('muitas cartas ainda aprendendo ao mesmo tempo'),
+    MEMORIA_UNICA,
+    PARAR,
+    SAVE,
+  ],
+};

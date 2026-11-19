@@ -2,6 +2,7 @@ import { effect } from '@preact/signals';
 import { render } from 'preact';
 import { screen } from './core/app';
 import { sfx } from './core/audio';
+import { HelpButton } from './core/help/HelpButton';
 import { AventuraGame } from './games/aventura/AventuraGame';
 import { ConversaGame } from './games/conversa/ConversaGame';
 import { GramaticaGame } from './games/gramatica/GramaticaGame';
@@ -44,4 +45,14 @@ effect(() => {
   else sfx.page();
 });
 
-render(<App />, document.getElementById('app') as HTMLElement);
+/** A tela e, num canto, o botão de ajuda dela. */
+function Raiz() {
+  return (
+    <>
+      <App />
+      <HelpButton tela={screen.value} />
+    </>
+  );
+}
+
+render(<Raiz />, document.getElementById('app') as HTMLElement);
