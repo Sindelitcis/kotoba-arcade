@@ -36,19 +36,22 @@ function neighbors<T>(list: readonly T[], index: number, radius: number): T[] {
   return out;
 }
 
-/** Três alternativas erradas, plausíveis, sem repetir e sem coincidir com a certa. */
-function distractors(rng: Rng, answer: string, near: string[], far: readonly string[]): string[] {
+/**
+ * Três alternativas erradas, plausíveis, sem repetir e sem coincidir com a certa.
+ * `alsoRight` marca opções que também estariam certas (outro kanji com o mesmo significado).
+ */
+function distractors(rng: Rng, answer: string, near: string[], far: readonly string[], alsoRight: (v: string) => boolean): string[] {
   const out: string[] = [];
   const add = (v: string) => {
-    if (v !== answer && !out.includes(v) && out.length < 3) out.push(v);
+    if (v !== answer && !alsoRight(v) && !out.includes(v) && out.length < 3) out.push(v);
   };
   for (const v of shuffle(rng, near)) add(v);
   for (const v of shuffle(rng, far)) add(v);
   return out;
 }
 
-function choicesFor(rng: Rng, answer: string, near: string[], far: readonly string[]): string[] {
-  return shuffle(rng, [answer, ...distractors(rng, answer, near, far)]);
+function choicesFor(rng: Rng, answer: string, near: string[], far: readonly string[], alsoRight: (v: string) => boolean = () => false): string[] {
+  return shuffle(rng, [answer, ...distractors(rng, answer, near, far, alsoRight)]);
 }
 
 export function kanjiMeaningQuestion(k: Kanji, rng: Rng, isNew: boolean): Question {
@@ -61,7 +64,7 @@ export function kanjiMeaningQuestion(k: Kanji, rng: Rng, isNew: boolean): Questi
     card: cardKey(k.id, 'meaning'),
     prompt: k.kanji,
     ask: 'O que significa?',
-    choices: choicesFor(rng, answer, near, KANJI.map((o) => o.pt[0] as string)),
+    choices: choicesFor(rng, answer, near, KANJI.map((o) => o.pt[0] as string), (v) => k.pt.includes(v)),
     answer,
     typing: false,
     teach: isNew
@@ -74,12 +77,15 @@ export function kanjiMeaningQuestion(k: Kanji, rng: Rng, isNew: boolean): Questi
 
 export function kanjiRecallQuestion(k: Kanji, rng: Rng): Question {
   const idx = KANJI.indexOf(k);
+  const meaning = k.pt[0] as string;
+  // 天 e 空 querem dizer "céu": um não pode ser a alternativa errada do outro.
+  const sameMeaning = new Set(KANJI.filter((o) => o !== k && o.pt.includes(meaning)).map((o) => o.kanji));
   return {
     kind: 'kanji-recall',
     card: cardKey(k.id, 'recall'),
     prompt: k.pt[0] as string,
     ask: 'Qual é o kanji?',
-    choices: choicesFor(rng, k.kanji, neighbors(KANJI, idx, 6).map((o) => o.kanji), KANJI.map((o) => o.kanji)),
+    choices: choicesFor(rng, k.kanji, neighbors(KANJI, idx, 6).map((o) => o.kanji), KANJI.map((o) => o.kanji), (v) => sameMeaning.has(v)),
     answer: k.kanji,
     typing: false,
     speak: (k.words[0] as Word).kana,
