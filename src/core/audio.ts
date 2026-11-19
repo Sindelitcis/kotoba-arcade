@@ -7,7 +7,7 @@
  * pela metade no Kumitate) cai na voz do navegador.
  */
 import { app } from './app';
-import { VOZ_PADRAO, type VozId } from './vozes';
+import { VOZ_PADRAO, VOZ_PALAVRA, type VozId } from './vozes';
 
 let ctx: AudioContext | null = null;
 let noise: AudioBuffer | null = null;
@@ -245,6 +245,11 @@ function silence(): void {
  * Fala um texto em japonês: a gravação, quando existe; senão a voz do navegador.
  * Uma fala nova corta a anterior. `voz` escolhe o personagem (Aventura).
  */
+/** Palavra solta ou kana: o áudio é achado pelo kana, na voz de palavra (mais clara em palavra curta). */
+export function speakWord(kana: string): Promise<void> {
+  return speak(kana, VOZ_PALAVRA);
+}
+
 export function speak(text: string, voz: VozId = VOZ_PADRAO): Promise<void> {
   if (!app.data.settings.voice) return Promise.resolve();
   const n = ++request;

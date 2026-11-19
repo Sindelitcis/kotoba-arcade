@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { app, commit, go, roguelikeSave } from '../../core/app';
-import { sfx, speak } from '../../core/audio';
+import { sfx, speakWord } from '../../core/audio';
 import { cenaStyle } from '../../core/arte';
 import { acertou, cor, corStyle, errou, zerar } from '../../core/cor';
 import { Pintura } from '../../core/Pintura';
@@ -118,7 +118,7 @@ export function RoguelikeGame() {
     const q = asking.question;
     const events = run.answer(input, performance.now() - shownAt.current);
     commit();
-    speak(q.speak);
+    speakWord(q.speak);
     const played = events.find((e): e is Extract<RunEvent, { t: 'play' }> => e.t === 'play');
     if (!played) return;
     const effect = asking.card.effect;

@@ -1,11 +1,13 @@
 /**
  * Tudo o que os jogos falam em voz alta e que é fixo: palavras, frases, falas da
- * Aventura, frases montadas do Kumitate, abertura e respostas prontas da Conversa.
+ * Aventura, frases do Kumitate, abertura, respostas prontas e palavras novas da Conversa.
  *
  * `scripts/gravar-vozes.mjs` usa esta lista para gravar os áudios, e
  * `tests/vozes.test.ts` confere que cada item tem arquivo no manifesto.
- * O que é dito na hora (resposta do modelo na Conversa, frase do Kumitate ainda
- * pela metade) não entra: cai na voz do navegador.
+ * A frase do Kumitate pela metade (tecla R no meio da montagem) também é finita:
+ * entram todas, com uma pausa no lugar do buraco vazio.
+ * Só a resposta do modelo na Conversa é dita na hora, pelo servidor local; sem ele,
+ * pela voz do navegador.
  */
 import { KANA, KANJI, WORDS, type Word } from '../src/content';
 import { DAILY_WORDS } from '../src/content/vida';
@@ -13,7 +15,7 @@ import { hasKanji, kataToHira } from '../src/core/kana';
 import { parseLine, plainText, type Scene } from '../src/games/aventura/engine';
 import { SCENES } from '../src/games/aventura/cenas';
 import { CENAS, marcado } from '../src/games/conversa/engine';
-import { ANSWERS, conjugateWritten, parseSentence, type Block, type Ending, type Piece } from '../src/games/gramatica/engine';
+import { ANSWERS, MAX_OPEN, conjugateWritten, parseSentence, type Block, type Ending, type Piece } from '../src/games/gramatica/engine';
 import { COURSE } from '../src/games/gramatica/pontos';
 import { VOZ_CONVERSA, VOZ_PADRAO, VOZ_PALAVRA, VOZES, vozDaAventura, type VozId } from '../src/core/vozes';
 
@@ -51,7 +53,7 @@ export const TTS_CORRIGIDO: Readonly<Record<string, string>> = {
   '五分待ってください。': 'ごふん待ってください。', // OpenJTalk diz ごぶ
 };
 
-function palavra(w: Word, origem: string): Fala {
+function palavra(w: Pick<Word, 'jp' | 'kana'>, origem: string): Fala {
   return {
     texto: w.kana,
     voz: VOZ_PALAVRA,
@@ -93,23 +95,74 @@ function aventura(scenes: readonly Scene[]): Fala[] {
   return out;
 }
 
-/** Todas as formas prontas de uma frase do Kumitate (に e へ valem no mesmo buraco). */
-function montagens(markup: string): Parte[][] {
+/** Pausa no lugar de uma partícula que o jogador ainda não pôs. Só vai ao motor, não ao texto. */
+const BURACO = '、';
+
+/**
+ * Formas de uma frase do Kumitate. `estado(i)` diz o que o buraco `i` tem: todas as
+ * respostas certas (に e へ valem no mesmo buraco), só a primeira (buraco fechado, que o
+ * jogo já mostra preenchido) ou nada (aberto e ainda vazio).
+ */
+function formas(pieces: readonly Piece[], estado: (i: number) => 'todas' | 'primeira' | 'vazio'): Parte[][] {
   let frases: Parte[][] = [[]];
-  for (const p of parseSentence(markup) as Piece[]) {
+  pieces.forEach((p, i) => {
     let opcoes: Parte[];
     if (p.k === 'text') opcoes = [p.reading ? { t: p.text, r: p.reading } : { t: p.text }];
-    else if (p.verb) {
-      const verb = COURSE.verbs[p.verb];
-      if (!verb) throw new Error(`verbo desconhecido: ${p.verb}`);
-      opcoes = ANSWERS[p.role].map((b: Block) => {
-        const w = conjugateWritten(verb, b as Ending);
-        return w.reading ? { t: w.text + w.tail, r: w.reading + w.tail } : { t: w.text + w.tail };
-      });
-    } else opcoes = ANSWERS[p.role].map((b: Block) => ({ t: b }));
+    else {
+      const e = estado(i);
+      const blocos: (Block | null)[] = e === 'vazio' ? [null] : e === 'primeira' ? [ANSWERS[p.role][0] as Block] : [...ANSWERS[p.role]];
+      if (p.verb) {
+        const verb = COURSE.verbs[p.verb];
+        if (!verb) throw new Error(`verbo desconhecido: ${p.verb}`);
+        // Sem ponta ainda, o verbo aparece na forma de dicionário.
+        opcoes = blocos.map((b) => {
+          const w = conjugateWritten(verb, b as Ending | null);
+          return w.reading ? { t: w.text + w.tail, r: w.reading + w.tail } : { t: w.text + w.tail };
+        });
+      } else opcoes = blocos.map((b) => ({ t: b ?? BURACO }));
+    }
     frases = frases.flatMap((a) => opcoes.map((o) => [...a, o]));
-  }
+  });
   return frases;
+}
+
+/** Todas as formas prontas de uma frase do Kumitate. */
+const montagens = (markup: string): Parte[][] => formas(parseSentence(markup), () => 'todas');
+
+/**
+ * Tudo que a tecla R pode falar no meio da montagem: os buracos abertos se enchem na
+ * ordem da frase, e os fechados já vêm com a primeira resposta. Quais abrem depende dos
+ * pontos que o jogador já viu, então entram todas as combinações (o motor do Kumitate
+ * abre os do ponto da frase e depois os de pontos vistos, até MAX_OPEN).
+ */
+export function metades(markup: string, roles: readonly string[]): Parte[][] {
+  const pieces = parseSentence(markup);
+  const gaps = pieces.flatMap((p, i) => (p.k === 'gap' ? [i] : []));
+  const alvo = gaps.filter((i) => roles.includes((pieces[i] as { role: string }).role));
+  const outros = gaps.filter((i) => !alvo.includes(i));
+  const out: Parte[][] = [];
+  for (let mask = 0; mask < 1 << outros.length; mask++) {
+    const vistos = outros.filter((_, j) => mask & (1 << j));
+    const abertos = [...alvo, ...vistos].slice(0, Math.max(MAX_OPEN, alvo.length)).sort((a, b) => a - b);
+    for (let cheios = 0; cheios < abertos.length; cheios++) {
+      out.push(...formas(pieces, (i) => {
+        const pos = abertos.indexOf(i);
+        return pos < 0 ? 'primeira' : pos < cheios ? 'todas' : 'vazio';
+      }));
+    }
+  }
+  return out;
+}
+
+/** O texto que o jogo passa para `speak()`: sem a pausa do buraco. */
+const semBuraco = (partes: readonly Parte[]) => partes.filter((p) => p.t !== BURACO).map((p) => p.t).join('');
+
+/** A pausa não começa nem termina a frase, e não repete. */
+function tirarPausasSobrando(partes: Parte[]): Parte[] {
+  const out = partes.filter((p, i) => p.t !== BURACO || (i > 0 && partes[i - 1]?.t !== BURACO));
+  while (out[0]?.t === BURACO) out.shift();
+  while (out.at(-1)?.t === BURACO) out.pop();
+  return out;
 }
 
 function kumitate(): Fala[] {
@@ -118,8 +171,13 @@ function kumitate(): Fala[] {
     const frases = [point.example.jp, ...point.sentences.map((s) => s.jp)];
     frases.forEach((markup, i) => {
       // O exemplo da lição usa só a primeira resposta de cada buraco.
-      const formas = i === 0 ? montagens(markup).slice(0, 1) : montagens(markup);
-      for (const partes of formas) out.push({ texto: juntar(partes), voz: VOZ_PADRAO, tts: juntar(partes), partes, origem: `kumitate/${point.id}/${i}` });
+      const prontas = i === 0 ? montagens(markup).slice(0, 1) : montagens(markup);
+      for (const partes of prontas) out.push({ texto: juntar(partes), voz: VOZ_PADRAO, tts: juntar(partes), partes, origem: `kumitate/${point.id}/${i}` });
+      if (i === 0) return;
+      for (const cheia of metades(markup, point.roles)) {
+        const partes = tirarPausasSobrando(cheia);
+        out.push({ texto: semBuraco(partes), voz: VOZ_PADRAO, tts: juntar(partes), partes, origem: `kumitate/${point.id}/${i}/metade` });
+      }
     });
   }
   return out;
@@ -134,6 +192,8 @@ function conversa(): Fala[] {
     out.push({ texto: a.jp, voz: VOZ_CONVERSA[cena.personagem.voz] ?? VOZ_PADRAO, tts: a.jp, partes: rubyPartes(a.ruby), origem: `conversa/${cena.id}/abertura` });
     // A sugestão guarda só o texto e a leitura juntos; vai inteira, e o Whisper confere.
     for (const s of cena.primeiras) out.push({ texto: s.jp, voz: VOZ_PADRAO, tts: s.jp, partes: [{ t: s.jp }], origem: `conversa/${cena.id}/pronta` });
+    // Palavras novas do resumo: o botão de ouvir fala o kana.
+    for (const t of cena.vocabulario) out.push(palavra(t, `conversa/${cena.id}/palavra`));
   }
   return out;
 }

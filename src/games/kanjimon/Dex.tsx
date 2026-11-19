@@ -1,7 +1,7 @@
 import { useLayoutEffect, useState } from 'preact/hooks';
 import { cardKey, KANJI, type Kanji } from '../../content';
 import { app, go, kanjimonSave, tick } from '../../core/app';
-import { speak } from '../../core/audio';
+import { speak, speakWord } from '../../core/audio';
 import { masteryLevel } from '../../core/srs';
 import { teclaDe } from '../../core/teclas';
 import { artUrl } from './art';
@@ -105,7 +105,7 @@ export function Dex() {
                 <p>{open.story}</p>
                 <h3>Palavras</h3>
                 {open.words.map((w) => (
-                  <button key={w.id} class="word" onClick={() => speak(w.kana)} title="Ouvir">
+                  <button key={w.id} class="word" onClick={() => speakWord(w.kana)} title="Ouvir">
                     <b>{w.jp}</b>
                     <span>{w.kana}</span>
                     <span class="muted">{w.pt}</span>

@@ -52,6 +52,7 @@ const r = spawnSync(
     '--voicevox', voicevox,
     '--kanjium', join(vozDir, 'dados/kanjium-accents.txt'),
     '--relatorio', join(trabalho, 'relatorio.json'),
+    '--duvidas', join(trabalho, 'duvidas.json'),
     ...process.argv.slice(2),
   ],
   // HF_HOME: onde o Whisper large-v3-turbo já está baixado (o mesmo da Conversa por voz).

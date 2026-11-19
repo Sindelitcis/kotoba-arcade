@@ -1,13 +1,16 @@
 # Vozes
 
-Tudo que os jogos falam e que é sempre igual vem de arquivos gravados em `public/vozes/`: palavras, frases dos kanji, kana, falas da Aventura, frases do Kumitate, abertura e respostas prontas da Conversa. A voz do navegador só aparece no que muda a cada vez (a resposta do modelo na Conversa quando o servidor local está desligado, a frase do Kumitate ainda pela metade).
+Tudo que os jogos falam vem de arquivos gravados em `public/vozes/`: palavras, frases dos kanji, kana, falas da Aventura, frases do Kumitate (prontas e pela metade, na tecla R), abertura, respostas prontas e palavras novas da Conversa. A única fala montada na hora é a resposta do modelo na Conversa, e quem fala é o servidor local, com o AivisSpeech. A voz do navegador só aparece se um arquivo não tocar ou se o servidor perder a voz no meio.
 
 ## Como funciona
 
 - `scripts/falas.ts` lista cada texto que vai para `speak()`, com a voz e a leitura esperada.
 - `npm run vozes` grava o que falta e atualiza `public/vozes/manifesto.json` (texto → voz → arquivo). O nome do arquivo é um hash do texto, da voz e do que foi mandado ao motor. Mudou a frase, muda o arquivo; o que sobrar é apagado.
-- `speak(texto, voz)` em `src/core/audio.ts` procura o texto no manifesto e toca o mp3. Sem gravação, usa a voz do navegador.
-- `tests/vozes.test.ts` falha se algum texto fixo ficar sem áudio. Escreveu uma cena nova, rode `npm run vozes`.
+- `speak(texto, voz)` em `src/core/audio.ts` procura o texto no manifesto e toca o mp3. Palavra solta e kana usam `speakWord(kana)`, que pede a voz de palavra. Sem gravação, usa a voz do navegador.
+- `tests/vozes.test.ts` falha se algum texto da lista ficar sem áudio. Escreveu uma cena nova, rode `npm run vozes`.
+- `tests/vozes-cobertura.test.ts` parte dos jogos: lista toda chamada de `speak()` do código (chamada nova falha até alguém dizer de onde vem o texto) e joga 80 rodadas do Kumitate conferindo cada frase que a rodada fala, inteira ou pela metade.
+
+A frase pela metade do Kumitate tem 200 formas possíveis, então todas foram gravadas. No buraco ainda vazio, o motor recebe uma vírgula, para soar como uma pausa, e não como uma palavra que sumiu.
 
 ## Gravar de novo
 
@@ -36,7 +39,7 @@ Variáveis: `VOZ_DIR`, `VOZ_PYTHON`, `AIVIS_URL`, `VOICEVOX_URL`. `npm run vozes
 
 1. **Leitura.** O motor recebe o texto com kanji, que acerta mais leitura e acento do que o kana solto. Antes, o gravador pergunta como ele lê cada palavra com kanji. A palavra que ele lê errado (日本人 vira ニッポンジン, この間 vira このかん) vai em kana, só ela. A frase inteira em kana erra mais: em せんせいとはなします, o は vira partícula e sai "と わなします".
 2. **Acento.** Palavra solta tem o acento conferido na Kanjium. Se o motor errar, o acento é trocado antes de gravar. É assim que はし (ponte) e はし (palitos) saem diferentes.
-3. **Ouvido.** O Whisper ouve cada gravação. Se ele não entender a mesma coisa, o gravador tenta de novo com mais silêncio em volta e fica com a melhor. O que continua diferente vai para `trabalho/relatorio.json`. Kana solto não dá para conferir assim: o Whisper não reconhece uma mora sozinha.
+3. **Ouvido.** O Whisper ouve cada gravação. Palavra curta também é ouvida depois de uma frase-moldura (次の言葉は、…), que dá contexto sem entregar a resposta. Se ele não entender a mesma coisa, o gravador tenta de novo: mais silêncio em volta, mais devagar, a palavra inteira em kana e, nas falas sem personagem, outra voz do AivisSpeech (まい, コハク, にせ, nessa ordem). Fica a primeira versão que bater. O que continua diferente vai para `trabalho/duvidas.json`, que guarda as dúvidas entre uma gravação e outra. `npm run vozes -- --refazer-textos lista.json` grava de novo só os textos da lista. Kana solto não dá para conferir assim: o Whisper não reconhece uma mora sozinha.
 4. **Volume e silêncio.** Corta o silêncio das pontas, deixa tudo em -18 LUFS e grava mp3 mono de 48 kbps.
 
 Quando o OpenJTalk lê uma frase errado pelo kanji (五分 vira ごぶ), a correção vai em `TTS_CORRIGIDO`, em `scripts/falas.ts`.
@@ -88,7 +91,22 @@ Palavra solta mudou a escolha. Na primeira gravação completa, o Whisper não e
 | まお mais devagar (0,85) | 18 de 55 | 30 de 40 |
 | VOICEVOX 四国めたん | 42 de 55 | 35 de 40 |
 
-Uma palavra que não se entende ensina errado, então palavra e kana ficaram com a 四国めたん. O VOICEVOX também aceita o acento marcado e recalcula a altura de cada mora, o que deixa a correção de acento da Kanjium valer de verdade.
+Uma palavra que não se entende ensina errado, então palavra e kana ficaram com a 四国めたん.
+
+A まお também embola algumas palavras dentro da frase. 切符 sai きっと em toda versão que tentamos (devagar, em kana, com mais silêncio); a にせ acertou 3 de 3. Por isso nove frases sem personagem estão em outra voz: sete com a にせ (as de 切符 e 友達が家へ来ます) e duas com a まい. Vale mais uma palavra clara numa voz diferente do que a voz de sempre ensinando a palavra errada.
+
+## Dúvidas que ficaram
+
+Seis gravações o Whisper não confirmou, em nenhuma versão:
+
+| Texto | Voz | O Whisper ouviu | Por quê |
+| --- | --- | --- | --- |
+| さんびゃく | 四国めたん | 3略 | escreve o número; o "略" é o juiz |
+| まちなか | 四国めたん | 街中 | o OpenJTalk lê 街中 como まちじゅう; a gravação está certa |
+| つぎのかた、どうぞ。 | 阿井田 茂 | 次の方、どうぞ。 | o OpenJTalk lê 方 como ほう; a gravação está certa |
+| はい、あいています。 | まお | はい、会えています | nas outras tentativas ele ouviu 開いて, que o OpenJTalk lê ひらいて; pode ser o juiz ou o い curto |
+| いいえ、まだまだです。 | まお | いえ、まだまだです | o いいえ sai curto |
+| ごご | 四国めたん | 子語 (com moldura) | palavra de duas moras; sem moldura ele ouve ここ | O VOICEVOX também aceita o acento marcado e recalcula a altura de cada mora, o que deixa a correção de acento da Kanjium valer de verdade.
 
 Não entraram nas amostras:
 

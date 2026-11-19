@@ -4,7 +4,7 @@ import { app, aventuraSave, commit, go, screen } from '../../core/app';
 import { CENA_AVENTURA, cenaStyle, pessoaCorUrl, pessoaUrl } from '../../core/arte';
 import { corStyle } from '../../core/cor';
 import { Pintura } from '../../core/Pintura';
-import { sfx, speak } from '../../core/audio';
+import { sfx, speak, speakWord } from '../../core/audio';
 import { vozDaAventura } from '../../core/vozes';
 import { onomato } from '../../core/fx';
 import { hasKanji } from '../../core/kana';
@@ -332,7 +332,7 @@ export function AventuraGame() {
               <ul class="av-words">
                 {summary.newWords.map((w) => (
                   <li key={w.id}>
-                    <button onClick={() => speak(w.kana)} title="Ouvir">
+                    <button onClick={() => speakWord(w.kana)} title="Ouvir">
                       <b lang="ja">{w.jp}</b>
                       {hasKanji(w.jp) && <i>{w.kana}</i>}
                       <span>{w.pt}</span>

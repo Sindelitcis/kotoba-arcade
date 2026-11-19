@@ -5,13 +5,19 @@ Para cada fala:
    acento; a palavra que o motor lê errado pelo kanji (日本人 = ニッポンジン) vai em kana.
 2. Palavra solta: confere o acento na Kanjium (CC BY-SA 4.0) e corrige se o motor errou.
 3. Sintetiza, corta silêncio, normaliza o volume e grava mp3 mono.
-4. Confere com o Whisper: se o que ele ouve não bate com a leitura, tenta de novo
-   com mais silêncio em volta e fica com a melhor versão.
+4. Confere com o Whisper. Palavra curta também é ouvida depois de uma frase-moldura
+   (次の言葉は、…), que dá contexto sem dizer a resposta. Se não bater, tenta de novo:
+   mais silêncio em volta, mais devagar e, na palavra solta com kanji, tudo em kana.
+   Fala sem personagem (voz padrão) que ainda assim não bate vai para outra voz do
+   AivisSpeech (`RESERVA`): a まお embola algumas palavras (切符 sai きっと).
+   Fica a primeira que bater ou, se nenhuma, a melhor; essa vai para `duvidas.json`.
 
 Arquivos já gravados (mesmo texto, mesma voz, mesma entrada) não são refeitos.
+`--refazer-textos arquivo.json` (lista de textos) refaz só esses.
 """
 import argparse
 import hashlib
+import io
 import json
 import os
 import subprocess
@@ -19,6 +25,7 @@ import sys
 import tempfile
 import urllib.parse
 import urllib.request
+import wave
 from pathlib import Path
 
 VERSAO = 2
@@ -138,6 +145,63 @@ def cer(ref: str, hyp: str) -> float:
     return ant[-1] / len(ref)
 
 
+def juntar_wav(a: bytes, b: bytes) -> bytes:
+    """Dois wav do mesmo motor e voz, um depois do outro."""
+    with wave.open(io.BytesIO(a)) as wa, wave.open(io.BytesIO(b)) as wb:
+        params = wa.getparams()
+        quadros = wa.readframes(wa.getnframes()) + wb.readframes(wb.getnframes())
+    out = io.BytesIO()
+    with wave.open(out, "wb") as w:
+        w.setparams(params)
+        w.writeframes(quadros)
+    return out.getvalue()
+
+
+MOLDURA = "次の言葉は、"
+
+
+def aceita(erro: float, esperado: str) -> bool:
+    """Frase longa aceita um deslize do Whisper; palavra curta precisa bater."""
+    return erro == 0 or (len(esperado) >= 8 and erro <= 0.1)
+
+
+class Ouvido:
+    """O Whisper ouvindo uma gravação, com e sem a frase-moldura antes."""
+
+    def __init__(self, whisper):
+        self.whisper = whisper
+        self._molduras = {}
+
+    def transcrever(self, wav: bytes) -> str:
+        with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as t:
+            t.write(wav)
+            tmp = t.name
+        try:
+            segs, _ = self.whisper.transcribe(tmp, language="ja", beam_size=5)
+            return "".join(s.text for s in segs).strip()
+        finally:
+            os.unlink(tmp)
+
+    def moldura(self, motor, estilo: int):
+        if estilo not in self._molduras:
+            q = motor.consulta(MOLDURA, estilo)
+            self._molduras[estilo] = (motor.sintese(q, estilo), moras(q))
+        return self._molduras[estilo]
+
+    def conferir(self, wav: bytes, esperado: str, motor, estilo: int):
+        """(erro, o que ouviu)."""
+        ouviu = self.transcrever(wav)
+        erro = cer(esperado, pronuncia(ouviu)) if ouviu else 1.0
+        if aceita(erro, esperado) or len(esperado) >= 8:
+            return erro, ouviu
+        # Palavra curta solta engana o Whisper (ごご vira ここ). Com contexto antes, ele acerta mais.
+        fala, ref_moldura = self.moldura(motor, estilo)
+        ouviu2 = self.transcrever(juntar_wav(fala, wav))
+        ref = ref_moldura + esperado
+        erro2 = cer(ref, pronuncia(ouviu2)) * len(ref) / len(esperado) if ouviu2 else 1.0
+        return (erro2, f"{ouviu2} (com moldura)") if erro2 < erro else (erro, ouviu)
+
+
 def carregar_kanjium(caminho: str) -> dict:
     acentos = {}
     if not Path(caminho).exists():
@@ -185,6 +249,27 @@ def corrigir_acento(f: dict, consulta: dict, motor: Motor, estilo: int, kanjium:
         motor.recalcular_tom(consulta, estilo)
 
 
+# Vozes que substituem a padrão, na ordem, quando o Whisper não entende nenhuma versão dela.
+RESERVA = ["mai", "kohaku", "nise"]
+
+
+def variantes(f: dict, consulta: dict, motor: Motor, estilo: int, kanjium: dict, reservas: list):
+    """As versões que o gravador tenta, na ordem, até o Whisper confirmar uma:
+    (nome, consulta, motor, estilo)."""
+    yield "normal", consulta, motor, estilo
+    q = dict(consulta, prePhonemeLength=0.25, postPhonemeLength=0.35)
+    yield "silencio", q, motor, estilo
+    yield "devagar", dict(q, speedScale=0.9), motor, estilo
+    p = f.get("palavra")
+    if p and p["jp"] != p["kana"]:
+        k = motor.consulta(p["kana"], estilo)
+        corrigir_acento(f, k, motor, estilo, kanjium, {"acento_corrigido": []})
+        yield "kana", dict(k, prePhonemeLength=0.25, postPhonemeLength=0.35), motor, estilo
+    for nome, outro, est in reservas:
+        c = outro.consulta(outro.texto_do_motor(f["partes"], est, []), est)
+        yield f"voz {nome}", dict(c, prePhonemeLength=0.25, postPhonemeLength=0.35), outro, est
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--falas", required=True)
@@ -195,15 +280,21 @@ def main():
     ap.add_argument("--relatorio", required=True)
     ap.add_argument("--whisper", default="mobiuslabsgmbh/faster-whisper-large-v3-turbo")
     ap.add_argument("--refazer", action="store_true", help="grava tudo de novo")
+    ap.add_argument("--refazer-textos", help="json com a lista de textos para gravar de novo")
+    ap.add_argument("--duvidas", help="json com as gravações que o Whisper não confirmou (vai sendo atualizado)")
     args = ap.parse_args()
 
     dados = json.loads(Path(args.falas).read_text(encoding="utf-8"))
-    vozes, falas = dados["vozes"], dados["falas"]
+    vozes, falas, padrao = dados["vozes"], dados["falas"], dados["padrao"]
     saida = Path(args.saida)
     saida.mkdir(parents=True, exist_ok=True)
     motores = {"aivis": Motor(args.aivis), "voicevox": Motor(args.voicevox, voicevox=True)}
     kanjium = carregar_kanjium(args.kanjium)
-    whisper = WhisperModel(args.whisper, device="cuda", compute_type="float16")
+    ouvido = Ouvido(WhisperModel(args.whisper, device="cuda", compute_type="float16"))
+    refazer = set(json.loads(Path(args.refazer_textos).read_text(encoding="utf-8"))) if args.refazer_textos else set()
+    duvidas = {}
+    if args.duvidas and Path(args.duvidas).exists():
+        duvidas = json.loads(Path(args.duvidas).read_text(encoding="utf-8"))
 
     manifesto = {}
     usados = set()
@@ -219,7 +310,7 @@ def main():
         manifesto.setdefault(f["texto"], {})[f["voz"]] = arquivo
         usados.add(arquivo)
         destino = saida / arquivo
-        if destino.exists() and not args.refazer:
+        if destino.exists() and not args.refazer and f["texto"] not in refazer:
             rel["ja_existiam"] += 1
             continue
 
@@ -238,28 +329,27 @@ def main():
             continue
 
         esperado = moras(consulta)
+        reservas = []
+        if f["voz"] == padrao and not f.get("palavra"):
+            reservas = [(v, motores[vozes[v]["motor"]], vozes[v]["estilo"]) for v in RESERVA if v in vozes]
         melhor = None
-        for tentativa in range(2):
-            q = dict(consulta)
-            if tentativa == 1:
-                q["prePhonemeLength"], q["postPhonemeLength"] = 0.25, 0.35
-                rel["whisper_refeitas"] += 1
-            wav = motor.sintese(q, estilo)
-            with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as t:
-                t.write(wav)
-                tmp = t.name
-            segs, _ = whisper.transcribe(tmp, language="ja", beam_size=5)
-            os.unlink(tmp)
-            ouviu = "".join(s.text for s in segs).strip()
-            erro = cer(esperado, pronuncia(ouviu)) if ouviu else 1.0
+        for nome, q, m, est in variantes(f, consulta, motor, estilo, kanjium, reservas):
+            wav = m.sintese(q, est)
+            erro, ouviu = ouvido.conferir(wav, esperado, m, est)
             if melhor is None or erro < melhor[0]:
-                melhor = (erro, wav, ouviu)
-            # Frase longa aceita um deslize do Whisper; palavra curta precisa bater.
-            if erro == 0 or (len(esperado) >= 8 and erro <= 0.1):
+                melhor = (erro, wav, ouviu, nome)
+            if aceita(erro, esperado):
                 break
-        erro, wav, ouviu = melhor
-        if erro > 0 and not (len(esperado) >= 8 and erro <= 0.1):
-            rel["whisper_divergente"].append({"texto": f["texto"], "voz": f["voz"], "esperado": esperado, "ouviu": ouviu, "cer": round(erro, 3)})
+            rel["whisper_refeitas"] += 1
+        erro, wav, ouviu, nome = melhor
+        duvidas.pop(arquivo, None)
+        if nome.startswith("voz "):
+            rel.setdefault("outra_voz", []).append({"texto": f["texto"], "voz": nome[4:], "aceita": aceita(erro, esperado)})
+        if not aceita(erro, esperado):
+            item = {"texto": f["texto"], "voz": f["voz"], "esperado": esperado, "ouviu": ouviu,
+                    "cer": round(erro, 3), "versao": nome}
+            rel["whisper_divergente"].append(item)
+            duvidas[arquivo] = item
         processar(wav, destino)
         rel["gravadas"] += 1
 
@@ -269,10 +359,15 @@ def main():
     rel["removidas"] = len(sobras)
     corpo = {"versao": VERSAO, "falas": {k: dict(sorted(v.items())) for k, v in sorted(manifesto.items())}}
     (saida / "manifesto.json").write_text(json.dumps(corpo, ensure_ascii=False, indent=0) + "\n", encoding="utf-8")
+    duvidas = {a: d for a, d in duvidas.items() if a in usados}
+    rel["duvidas"] = list(duvidas.values())
+    if args.duvidas:
+        Path(args.duvidas).write_text(json.dumps(duvidas, ensure_ascii=False, indent=1, sort_keys=True), encoding="utf-8")
     Path(args.relatorio).write_text(json.dumps(rel, ensure_ascii=False, indent=1), encoding="utf-8")
     print(f"gravadas {rel['gravadas']}, já existiam {rel['ja_existiam']}, removidas {len(sobras)}, "
           f"palavra em kana {len(rel['palavra_em_kana'])}, acento corrigido {len(rel['acento_corrigido'])}, "
-          f"whisper divergente {len(rel['whisper_divergente'])}, sem conferir {rel['sem_conferir']}")
+          f"whisper divergente {len(rel['whisper_divergente'])}, sem conferir {rel['sem_conferir']}, "
+          f"dúvidas guardadas {len(duvidas)}")
 
 
 if __name__ == "__main__":

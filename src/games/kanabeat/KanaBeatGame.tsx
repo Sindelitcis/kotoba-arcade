@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { app, commit, go, kanaBeatSave } from '../../core/app';
-import { sfx, speak } from '../../core/audio';
+import { sfx, speakWord } from '../../core/audio';
 import { cenaStyle } from '../../core/arte';
 import { acertou, cor, corStyle, errou, zerar } from '../../core/cor';
 import { Pintura } from '../../core/Pintura';
@@ -75,7 +75,7 @@ export function KanaBeatGame() {
         pulse(lineEl.current, 'line-hit');
         if (e.judge === 'perfect') onomato('captura', lineEl.current, 'shu', 0.8);
         setJudge((j) => ({ text: JUDGE_TEXT[e.judge], cls: e.judge, n: j.n + 1 }));
-        if (e.note.pt) speak(e.note.kana);
+        if (e.note.pt) speakWord(e.note.kana);
       } else if (e.t === 'miss') {
         errou();
         sfx.miss();
@@ -335,7 +335,7 @@ export function KanaBeatGame() {
             <div class="kb-missed">
               <span class="muted">Para olhar de novo:</span>
               {result.missed.slice(0, 8).map((n) => (
-                <button key={n.id} onClick={() => speak(n.kana)} title="Ouvir">
+                <button key={n.id} onClick={() => speakWord(n.kana)} title="Ouvir">
                   <b>{n.text}</b> {n.furigana && n.furigana !== n.text ? `${n.furigana} · ` : ''}
                   {kanaToRomaji(n.kana).replace(/'/g, '')}
                   {n.pt ? ` · ${n.pt}` : ''}

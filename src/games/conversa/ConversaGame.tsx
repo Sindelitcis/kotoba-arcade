@@ -3,7 +3,7 @@ import { app, commit, conversaSave, go, screen } from '../../core/app';
 import { CENA_CONVERSA, cenaStyle, pessoaCorUrl, pessoaUrl } from '../../core/arte';
 import { corStyle } from '../../core/cor';
 import { Pintura } from '../../core/Pintura';
-import { sfx, speak } from '../../core/audio';
+import { sfx, speak, speakWord } from '../../core/audio';
 import { VOZ_CONVERSA } from '../../core/vozes';
 import { onomato } from '../../core/fx';
 import { teclaDe } from '../../core/teclas';
@@ -430,7 +430,7 @@ export function ConversaGame() {
               <ul class="av-words">
                 {resumo.novas.map((t) => (
                   <li key={t.id}>
-                    <button onClick={() => speak(t.jp)}>
+                    <button onClick={() => speakWord(t.kana)}>
                       <b lang="ja">{t.jp}</b>
                       {t.kana !== t.jp && <i lang="ja">{t.kana}</i>}
                       <span>{t.pt}</span>
