@@ -249,6 +249,16 @@ describe('save do KanjiMon', () => {
     expect(s).toEqual({ dex: { '1_c': 2 }, captures: 0, bestCombo: 0, boosters: 0, sinceRare: 0 });
   });
 
+  it('número inválido e coleção em lista também são consertados', () => {
+    // sinceRare NaN desligava para sempre a garantia de carta rara; dex em lista sumia no JSON.
+    const games: Record<string, unknown> = { kanjimon: { dex: [], captures: Number.NaN, sinceRare: Infinity, bestCombo: 3 } };
+    const s = ensureKanjimonSave(games);
+    expect(s).toEqual({ dex: {}, captures: 0, bestCombo: 3, boosters: 0, sinceRare: 0 });
+    const comLixo = ensureKanjimonSave({ kanjimon: { dex: { '1_c': 2, '2_r': 'duas', '3_sr': -1 } } });
+    expect(comLixo.dex).toEqual({ '1_c': 2 });
+    expect(ensureKanjimonSave({ kanjimon: comLixo }).dex).toBe(comLixo.dex);
+  });
+
   it('troca lixo por um save limpo', () => {
     expect(ensureKanjimonSave({ kanjimon: 'oi' })).toEqual(emptyKanjimonSave());
     expect(ensureKanjimonSave({ kanjimon: [1] })).toEqual(emptyKanjimonSave());

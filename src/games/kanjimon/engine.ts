@@ -57,9 +57,14 @@ export function ensureKanjimonSave(games: Record<string, unknown>): KanjimonSave
     return base;
   }
   const save = current as Record<string, unknown>;
-  for (const [k, v] of Object.entries(base)) {
-    if (typeof save[k] !== typeof v || save[k] === null) save[k] = v;
+  const count = (x: unknown): x is number => typeof x === 'number' && Number.isFinite(x) && x >= 0;
+  for (const k of ['captures', 'bestCombo', 'boosters', 'sinceRare'] as const) {
+    if (!count(save[k])) save[k] = base[k];
   }
+  // A coleção é consertada no lugar: quem já tem a referência continua escrevendo nela.
+  if (typeof save.dex !== 'object' || save.dex === null || Array.isArray(save.dex)) save.dex = {};
+  const dex = save.dex as Record<string, unknown>;
+  for (const [k, v] of Object.entries(dex)) if (!count(v) || v === 0) delete dex[k];
   return save as unknown as KanjimonSave;
 }
 

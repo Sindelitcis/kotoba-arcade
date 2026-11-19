@@ -50,6 +50,8 @@ export function ensureConversaSave(games: Record<string, unknown>): ConversaSave
     if (typeof save[k] !== 'number' || !Number.isFinite(save[k])) save[k] = 0;
   }
   if (typeof save.cenas !== 'object' || save.cenas === null || Array.isArray(save.cenas)) save.cenas = {};
+  const cenas = save.cenas as Record<string, unknown>;
+  for (const [k, v] of Object.entries(cenas)) if (typeof v !== 'number' || !Number.isFinite(v) || v < 0) delete cenas[k];
   return save as unknown as ConversaSave;
 }
 

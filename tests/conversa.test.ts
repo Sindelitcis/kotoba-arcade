@@ -637,3 +637,11 @@ describe('save da conversa', () => {
     expect(proximaCena(save).id).toBe('apresentacao');
   });
 });
+
+describe('save da Conversa estragado', () => {
+  it('contagem de cena que não é número volta a zero', () => {
+    // "2" + 1 virava "21" e a cena seguinte sugerida ficava errada.
+    const games: Record<string, unknown> = { conversa: { cenas: { pedido: '2', caminho: 3, entrevista: NaN } } };
+    expect(ensureConversaSave(games).cenas).toEqual({ caminho: 3 });
+  });
+});
