@@ -3,10 +3,10 @@ import { app, commit, go, kanaBeatSave } from '../../core/app';
 import { sfx, speak } from '../../core/audio';
 import { cenaStyle } from '../../core/arte';
 import { useAoAbrirAjuda } from '../../core/help/ajuda';
+import { teclaDe } from '../../core/teclas';
 import { burst, INK, onomato, pulse } from '../../core/fx';
 import { kanaToRomaji } from '../../core/kana';
 import { MODE_NAMES, modeForPlay, Stage, type BeatEvent, type Judge, type Mode, type StageResult } from './engine';
-import { isTypingKey, normalKey } from './keys';
 import { startMusic, type Music } from './music';
 import { LICENCA_URL, TRACKS } from './tracks';
 
@@ -161,7 +161,8 @@ export function KanaBeatGame() {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.ctrlKey || e.metaKey || e.altKey) return;
-      const key = normalKey(e);
+      const key = teclaDe(e);
+      if (key === null) return;
       if (credits) {
         if (key === 'Escape' || key === 'Enter' || key === ' ' || key.toLowerCase() === 'c') {
           e.preventDefault();
@@ -200,7 +201,7 @@ export function KanaBeatGame() {
         setPause(true);
         return;
       }
-      if (isTypingKey(key)) {
+      if (/^[a-zA-Z'-]$/.test(key)) {
         e.preventDefault();
         handle((run.current as Run).stage.key(key, now()));
       }

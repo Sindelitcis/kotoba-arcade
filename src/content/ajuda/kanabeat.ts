@@ -20,6 +20,7 @@ export const KANABEAT: Ajuda = {
     { teclas: ['Esc'], faz: 'Sair para o fliperama' },
     { teclas: ['Enter'], faz: 'No fim: próxima música' },
     { teclas: ['1', '2', '3'], faz: 'No fim: próxima em Hiragana, Katakana ou Palavras' },
+    { teclas: ['C'], faz: 'No fim: ver quem fez as músicas' },
   ],
   elementos: [
     { nome: 'Modo', texto: 'Hiragana, Katakana ou Palavras. O jogo alterna sozinho; no fim de cada música dá para escolher.' },
@@ -27,6 +28,7 @@ export const KANABEAT: Ajuda = {
     { nome: 'Combo', texto: 'Notas seguidas sem deixar passar. Aumenta os pontos de cada nota, até o dobro.' },
     { nome: 'Barra de cima', texto: 'Quanto da música já foi.' },
     { nome: 'Linha', texto: 'O ponto certo de digitar. Ela pisca na batida.' },
+    { nome: 'Música', texto: 'Uma faixa de verdade, com o nome em cima. O jogo escolhe a que tem o andamento mais perto do BPM e ajusta a velocidade. As notas caem na batida dela.' },
     { nome: 'Nota destacada', texto: 'A da vez. Você sempre digita a mais antiga que ainda não passou.' },
     { nome: 'Leitura em cima', texto: 'Em palavra com kanji, a leitura vai por cima (ex.: 山 com やま). Some quando a leitura já está firme.' },
     { nome: 'Romaji embaixo', texto: 'Só no primeiro contato com o kana. Depois some.' },

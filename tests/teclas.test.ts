@@ -33,6 +33,14 @@ describe('tecla de jogo com o IME japonês do Windows', () => {
     expect(teclaDe(evento({ key: 'Process', code: 'Digit1', keyCode: 229 }, campo))).toBeNull();
   });
 
+  it('no Kana Beat, letras, traço, espaço e apagar chegam com o IME ligado', () => {
+    // Bug de 19/11/2026: com o IME em hiragana não dava para digitar nada no Kana Beat.
+    expect(teclaDe(evento({ key: 'Process', code: 'KeyT', keyCode: 229 }))).toBe('t');
+    expect(teclaDe(evento({ key: 'Process', code: 'Minus', keyCode: 229 }))).toBe('-');
+    expect(teclaDe(evento({ key: 'Process', code: 'Space', keyCode: 229 }))).toBe(' ');
+    expect(teclaDe(evento({ key: 'Process', code: 'Backspace', keyCode: 229 }))).toBe('Backspace');
+  });
+
   it('número de largura dupla vira o comum', () => {
     expect(teclaDe(evento({ key: '１' }))).toBe('1');
   });

@@ -15,6 +15,8 @@ const CODES: Record<string, string> = {
   Escape: 'Escape',
   Tab: 'Tab',
   Backspace: 'Backspace',
+  // O traço do ー no Kana Beat.
+  Minus: '-',
   ArrowUp: 'ArrowUp',
   ArrowDown: 'ArrowDown',
   ArrowLeft: 'ArrowLeft',
