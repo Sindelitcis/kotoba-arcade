@@ -6,6 +6,7 @@ import { useAoAbrirAjuda } from '../../core/help/ajuda';
 import { burst, INK, onomato, pulse } from '../../core/fx';
 import { kanaToRomaji } from '../../core/kana';
 import { MODE_NAMES, modeForPlay, Stage, type BeatEvent, type Judge, type Mode, type StageResult } from './engine';
+import { isTypingKey, normalKey } from './keys';
 import { startMusic, type Music } from './music';
 
 const HIT_X = 16; // posição da linha, em % da largura da pista
@@ -136,18 +137,19 @@ export function KanaBeatGame() {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.ctrlKey || e.metaKey || e.altKey) return;
-      if (e.key === 'Escape') {
+      const key = normalKey(e);
+      if (key === 'Escape') {
         e.preventDefault();
         leave();
         return;
       }
       if (result) {
-        if (e.key === 'Enter' || e.key === ' ') {
+        if (key === 'Enter' || key === ' ') {
           e.preventDefault();
           restart();
-        } else if (e.key === '1') restart('hiragana');
-        else if (e.key === '2') restart('katakana');
-        else if (e.key === '3') restart('palavras');
+        } else if (key === '1') restart('hiragana');
+        else if (key === '2') restart('katakana');
+        else if (key === '3') restart('palavras');
         return;
       }
       if (paused) {
@@ -155,20 +157,20 @@ export function KanaBeatGame() {
         setPause(false);
         return;
       }
-      if (e.key === 'Backspace') {
+      if (key === 'Backspace') {
         e.preventDefault();
         (run.current as Run).stage.clearBuffer();
         setTypoAt(0);
         return;
       }
-      if (e.key === ' ') {
+      if (key === ' ') {
         e.preventDefault();
         setPause(true);
         return;
       }
-      if (/^[a-zA-Z'-]$/.test(e.key)) {
+      if (isTypingKey(key)) {
         e.preventDefault();
-        handle((run.current as Run).stage.key(e.key, now()));
+        handle((run.current as Run).stage.key(key, now()));
       }
     };
     const onHide = () => {

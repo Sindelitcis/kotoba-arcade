@@ -92,3 +92,19 @@ test('Esc volta ao fliperama e o botão principal passa a continuar no Kana Beat
   await page.keyboard.press('Escape');
   await expect(page.getByTestId('play-now')).toContainText('Kana Beat');
 });
+
+test('com o teclado japonês do Windows ligado (tecla chega como Process/229) a digitação ainda conta', async ({ page }) => {
+  // Bug de 19/11/2026: com o IME japonês ativo o Chrome manda key "Process" e keyCode 229 em vez da letra.
+  // O jogo só olhava e.key e jogava tudo fora. page.keyboard.type sempre manda a letra limpa, por isso o teste antigo passava.
+  await open(page);
+  const cdp = await page.context().newCDPSession(page);
+  const note = page.getByTestId('target-note');
+  await expect.poll(async () => parseFloat((await note.getAttribute('style'))?.match(/left: ([\d.-]+)%/)?.[1] ?? '99'), { timeout: 15_000, intervals: [40] }).toBeLessThan(20);
+  const romaji = (await note.getAttribute('data-romaji')) ?? '';
+  for (const ch of romaji) {
+    const code = `Key${ch.toUpperCase()}`;
+    await cdp.send('Input.dispatchKeyEvent', { type: 'rawKeyDown', key: 'Process', code, windowsVirtualKeyCode: 229, nativeVirtualKeyCode: 229 });
+    await cdp.send('Input.dispatchKeyEvent', { type: 'keyUp', key: ch, code, windowsVirtualKeyCode: ch.toUpperCase().charCodeAt(0) });
+  }
+  await expect(page.getByTestId('score')).not.toHaveText('0');
+});
