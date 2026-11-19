@@ -3,12 +3,13 @@
 Junta em http://127.0.0.1:8791 as três peças que o jogo usa:
   /ouvir     fala em japonês -> texto (Whisper, pelo faster-whisper)
   /conversa  o modelo que faz o personagem (Ollama)
-  /voz       texto -> fala em japonês (VOICEVOX ou Fish Speech)
+  /voz       texto -> fala em japonês (VOICEVOX)
 e mais /leitura (separa a frase em palavras com a leitura, para o furigana)
 e /saude (o que está ligado).
 
 Só atende a própria máquina. Quem sobe tudo é `npm run local` (local/iniciar.mjs).
 """
+import asyncio
 import io
 import os
 import re
@@ -18,7 +19,7 @@ import time
 from pathlib import Path
 
 import httpx
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import Body, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
 
@@ -90,12 +91,17 @@ async def ouvir(req: Request, dica: str = ""):
     if len(audio) < 1000:
         return {"texto": "", "ms": 0}
     t = time.time()
-    with _whisper_trava:
-        segs, _ = _whisper["modelo"].transcribe(
-            io.BytesIO(audio), language="ja", beam_size=5, vad_filter=True,
-            condition_on_previous_text=False, initial_prompt=dica[:200] or None,
-        )
-        texto = "".join(s.text for s in segs if s.no_speech_prob < 0.8).strip()
+
+    def transcrever():
+        with _whisper_trava:
+            segs, _ = _whisper["modelo"].transcribe(
+                io.BytesIO(audio), language="ja", beam_size=5, vad_filter=True,
+                condition_on_previous_text=False, initial_prompt=dica[:200] or None,
+            )
+            return "".join(s.text for s in segs if s.no_speech_prob < 0.8).strip()
+
+    # Fora do laço de eventos: enquanto transcreve, as outras rotas continuam respondendo.
+    texto = await asyncio.to_thread(transcrever)
     if ALUCINACOES.search(texto):
         texto = ""
     return {"texto": texto, "ms": round((time.time() - t) * 1000)}
@@ -103,9 +109,10 @@ async def ouvir(req: Request, dica: str = ""):
 
 # ---------------------------------------------------------------- conversa
 
+# As rotas que esperam outro programa são `def` comuns: o FastAPI roda cada uma numa thread e o servidor
+# não trava enquanto o modelo pensa.
 @app.post("/conversa")
-async def conversa(req: Request):
-    dados = await req.json()
+def conversa(dados: dict = Body(...)):
     c = CFG["conversa"]
     corpo = {
         "model": c["modelo"],
@@ -125,13 +132,28 @@ async def conversa(req: Request):
     return {"texto": r.json()["message"]["content"], "ms": round((time.time() - t) * 1000)}
 
 
-def _modelo_no_ollama():
+_modelo = {"pronto": False, "erro": ""}
+
+
+def _aquecer_modelo():
+    # Carrega o modelo na placa ao subir: sem isso a primeira fala do jogador esperava o Ollama abrir o modelo.
     c = CFG["conversa"]
-    try:
-        nomes = [m["name"] for m in http.get(c["ollama"] + "/api/tags", timeout=3).json()["models"]]
-        return c["modelo"] in nomes or c["modelo"] + ":latest" in nomes
-    except Exception:  # noqa: BLE001
-        return False
+    for _ in range(60):
+        try:
+            r = http.post(c["ollama"] + "/api/generate", json={"model": c["modelo"], "prompt": "", "keep_alive": "30m"}, timeout=300)
+            if r.status_code == 404:
+                _modelo["erro"] = f"o modelo {c['modelo']} não está no Ollama (ollama pull {c['modelo']})"
+                print(f"[conversa] {_modelo['erro']}", flush=True)
+                return
+            r.raise_for_status()
+            _modelo["pronto"] = True
+            print(f"[conversa] {c['modelo']} pronto", flush=True)
+            return
+        except httpx.HTTPError:
+            time.sleep(2)  # o Ollama ainda está abrindo
+
+
+threading.Thread(target=_aquecer_modelo, daemon=True).start()
 
 
 # ---------------------------------------------------------------- leitura (furigana)
@@ -140,15 +162,17 @@ _tagger = None
 
 
 @app.post("/leitura")
-async def leitura(req: Request):
+def leitura(dados: dict = Body(...)):
     global _tagger
     if _tagger is None:
         import fugashi
         _tagger = fugashi.Tagger()
-    texto = (await req.json())["texto"][:400]
+    texto = dados["texto"][:400]
     tokens = []
     for w in _tagger(texto):
         kana = getattr(w.feature, "kana", None)
+        if w.surface == "私" and kana == "ワタクシ":
+            kana = "ワタシ"  # o dicionário dá a leitura formal; numa conversa comum é わたし
         tokens.append({"t": (w.white_space or "") + w.surface, **({"r": kana} if kana and kana != "*" else {})})
     resto = texto[len("".join(t["t"] for t in tokens)):]
     if resto:
@@ -171,13 +195,7 @@ def _voz_voicevox(texto, voz):
     return r.content
 
 
-def _voz_fish(texto, voz):
-    r = http.post(CFG["voz"]["fish"]["url"] + "/voz", json={"texto": texto, "voz": voz})
-    r.raise_for_status()
-    return r.content
-
-
-MOTORES = {"voicevox": _voz_voicevox, "fish": _voz_fish}
+MOTORES = {"voicevox": _voz_voicevox}
 
 
 def _motor_vivo():
@@ -185,16 +203,13 @@ def _motor_vivo():
     try:
         if motor == "voicevox":
             return http.get(CFG["voz"]["voicevox"]["url"] + "/version", timeout=2).status_code == 200
-        if motor == "fish":
-            return http.get(CFG["voz"]["fish"]["url"] + "/saude", timeout=2).json().get("ok") is True
     except Exception:  # noqa: BLE001
         pass
     return False
 
 
 @app.post("/voz")
-async def voz(req: Request):
-    dados = await req.json()
+def voz(dados: dict = Body(...)):
     texto = dados["texto"].strip()[:200]
     if not texto:
         raise HTTPException(400, "Sem texto.")
@@ -215,7 +230,7 @@ async def voz(req: Request):
 def saude():
     return {
         "ok": True,
-        "conversa": {"ok": _modelo_no_ollama(), "modelo": CFG["conversa"]["modelo"]},
+        "conversa": {"ok": _modelo["pronto"], "modelo": CFG["conversa"]["modelo"], "erro": _modelo["erro"]},
         "fala": {"ok": _whisper["estado"] == "ok", "estado": _whisper["estado"], "modelo": CFG["fala"]["modelo"], "onde": _whisper["onde"]},
         "voz": {"ok": _motor_vivo(), "motor": CFG["voz"]["motor"]},
     }
