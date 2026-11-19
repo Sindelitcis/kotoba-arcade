@@ -522,6 +522,11 @@ input { accent-color: var(--tinta); }
 .kb-judge.perfect { color: var(--shu); font-size: 1.9rem; } .kb-judge.good { color: var(--tinta); } .kb-judge.ok { color: var(--tinta-2); } .kb-judge.miss { color: var(--cinza); text-decoration: line-through; animation-duration: 1.8s; }
 @keyframes judge { 0% { opacity: 0; transform: translate(-20%, 14px) scale(1.6) rotate(-6deg); } 15% { opacity: 1; transform: translate(-20%, 0) scale(1) rotate(-4deg); } 70% { opacity: 1; } 100% { opacity: 0; transform: translate(-20%, -10px) rotate(-4deg); } }
 .kb-typed { min-height: 64px; display: grid; place-items: center; font: 700 2rem/1 ui-monospace, Consolas, monospace; letter-spacing: 0.08em; background: var(--branco); border: 2.5px solid var(--tinta); box-shadow: var(--sombra-p); }
+.kb-typed { position: relative; cursor: text; }
+.kb-typed:focus-within { outline: 3px solid var(--tinta); outline-offset: 3px; }
+/* Campo real por cima da caixa: recebe o foco e as teclas, mas quem aparece é o texto do jogo. */
+.kb-entrada { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; border: 0; padding: 0; caret-color: transparent; cursor: text; }
+.kb-wrong { color: var(--shu); margin-left: 0.15em; }
 .kb-typed .muted { font: 400 1rem/1.2 var(--f-texto); letter-spacing: 0; }
 .kb-typed.typo { background: var(--tom-medio), var(--branco); animation: shake 0.25s ease; }
 .kb-help { text-align: center; font-size: 0.85rem; }
@@ -750,8 +755,12 @@ button.small { padding: 3px 10px; font-size: 0.8rem; }
 
 /* ───────── Cor anime como recompensa (docs/estilo.md) ───────── */
 [style*='--cor'] { transition: --cor 0.9s cubic-bezier(0.3, 0, 0.2, 1); }
+/* A pintura fica sempre atrás de todo o conteúdo do quadro. Com z-index 0 ela cobria
+   o que não tinha posição própria (as alternativas do KanjiMon). O -1 com isolation no
+   quadro mantém a pintura por cima do fundo de mangá e por baixo de tudo o resto. */
+:has(> .pinta) { isolation: isolate; }
 .pinta {
-  position: absolute !important; inset: 0; z-index: 0 !important; pointer-events: none;
+  position: absolute !important; inset: 0; z-index: -1 !important; pointer-events: none;
   background: var(--veu, linear-gradient(transparent, transparent)), var(--cena-cor) center / cover;
   -webkit-mask: var(--borrao) center / calc(var(--cor) * 340%) calc(var(--cor) * 340%) no-repeat;
   mask: var(--borrao) center / calc(var(--cor) * 340%) calc(var(--cor) * 340%) no-repeat;
