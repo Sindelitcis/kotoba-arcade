@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { KANJI, type Sentence } from '../content';
-import { app, commit, go, kanjimonSave, replaceSave, screen, tick, type Screen } from '../core/app';
+import { app, commit, go, kanjimonSave, replaceSave, saved, screen, tick, type Screen } from '../core/app';
 import { cenaStyle, type Cena } from '../core/arte';
 import { hasJapaneseVoice, sfx, speak } from '../core/audio';
 import { levelInfo, readingMeter, recentDays } from '../core/progress';
@@ -149,6 +149,12 @@ export function Hub() {
           </button>
         </div>
       </header>
+
+      {!saved.value && (
+        <p class="notice" role="alert" data-testid="save-failed">
+          O navegador não deixou gravar o progresso. Ele continua valendo enquanto esta aba estiver aberta: em Ajustes, exporte um backup.
+        </p>
+      )}
 
       <button class="play-now" style={cenaStyle('hub-shibuya')} onClick={() => go(nextGame)} data-testid="play-now">
         <span class="play-now-main">Jogar agora</span>

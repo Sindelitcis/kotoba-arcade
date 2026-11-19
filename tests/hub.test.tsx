@@ -1,7 +1,7 @@
 import { render } from 'preact';
 import { act } from 'preact/test-utils';
 import { afterEach, describe, expect, it } from 'vitest';
-import { screen } from '../src/core/app';
+import { saved, screen } from '../src/core/app';
 import { Hub } from '../src/hub/Hub';
 
 function press(key: string) {
@@ -69,5 +69,18 @@ describe('fliperama com o IME e com o Tab', () => {
     const dialogo = document.querySelector('[role="dialog"]');
     expect(dialogo?.getAttribute('aria-modal')).toBe('true');
     expect(dialogo?.contains(document.activeElement)).toBe(true);
+  });
+});
+
+describe('aviso de gravação', () => {
+  afterEach(() => {
+    render(null, document.body);
+    saved.value = true;
+  });
+
+  it('quando o navegador recusa gravar, o fliperama avisa e aponta o backup', async () => {
+    saved.value = false;
+    await act(() => render(<Hub />, document.body));
+    expect(document.querySelector('[data-testid="save-failed"]')?.textContent).toContain('backup');
   });
 });

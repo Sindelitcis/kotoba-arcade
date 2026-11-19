@@ -17,8 +17,11 @@ export const app: { data: SaveData } = { data: loadSave(localStorage, Date.now()
 export const tick = signal(0);
 export const screen = signal<Screen>('hub');
 
+/** false quando a última gravação foi recusada pelo navegador. O fliperama avisa e sugere o backup. */
+export const saved = signal(true);
+
 export function commit(): void {
-  writeSave(localStorage, app.data, Date.now());
+  saved.value = writeSave(localStorage, app.data, Date.now());
   tick.value++;
 }
 

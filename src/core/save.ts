@@ -54,6 +54,24 @@ function isObject(x: unknown): x is Record<string, unknown> {
   return typeof x === 'object' && x !== null && !Array.isArray(x);
 }
 
+const CARD_NUMBERS = ['due', 'stability', 'difficulty', 'elapsed_days', 'scheduled_days', 'learning_steps', 'reps', 'lapses'] as const;
+
+/** Uma carta só entra se o FSRS consegue usá-la. Carta estragada some; ela volta a ser "nova". */
+function isCard(x: unknown): x is CardState {
+  if (!isObject(x)) return false;
+  const finite = (v: unknown) => typeof v === 'number' && Number.isFinite(v);
+  if (!CARD_NUMBERS.every((k) => finite(x[k]))) return false;
+  if (!(typeof x.state === 'number' && Number.isInteger(x.state) && x.state >= 0 && x.state <= 3)) return false;
+  return x.last_review === undefined || finite(x.last_review);
+}
+
+function cleanCards(input: unknown): Record<string, CardState> {
+  const out: Record<string, CardState> = {};
+  if (!isObject(input)) return out;
+  for (const [k, v] of Object.entries(input)) if (isCard(v)) out[k] = v;
+  return out;
+}
+
 /** Valida e completa um save vindo de fora (arquivo importado, versão antiga). */
 export function normalizeSave(input: unknown, now: number): SaveData {
   if (!isObject(input)) throw new Error('Arquivo de save inválido.');
@@ -80,7 +98,7 @@ export function normalizeSave(input: unknown, now: number): SaveData {
       voice: typeof settings.voice === 'boolean' ? settings.voice : base.settings.voice,
       calm: typeof settings.calm === 'boolean' ? settings.calm : base.settings.calm,
     },
-    cards: isObject(input.cards) ? (input.cards as Record<string, CardState>) : {},
+    cards: cleanCards(input.cards),
     games: isObject(input.games) ? input.games : {},
   };
 }
@@ -92,14 +110,24 @@ export function loadSave(store: KeyValueStore, now: number): SaveData {
     return normalizeSave(JSON.parse(text), now);
   } catch {
     // Save corrompido: guarda uma cópia para não perder nada e começa limpo.
-    store.setItem(`${SAVE_KEY}:corrompido:${now}`, text);
+    try {
+      store.setItem(`${SAVE_KEY}:corrompido:${now}`, text);
+    } catch {
+      // Sem espaço nem para a cópia: o jogo abre mesmo assim.
+    }
     return emptySave(now);
   }
 }
 
-export function writeSave(store: KeyValueStore, data: SaveData, now: number): void {
+/** Grava o save. Devolve false se o navegador recusou (espaço cheio, modo privado): o jogo segue na memória. */
+export function writeSave(store: KeyValueStore, data: SaveData, now: number): boolean {
   data.updatedAt = now;
-  store.setItem(SAVE_KEY, JSON.stringify(data));
+  try {
+    store.setItem(SAVE_KEY, JSON.stringify(data));
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 export function exportSave(data: SaveData): string {

@@ -126,3 +126,37 @@ describe('conteúdo', () => {
     expect(getWord('w:花火').kanji).toEqual(['花', '火']);
   });
 });
+
+describe('cartas estragadas no save', () => {
+  it('carta com campo inválido é descartada e as boas ficam', () => {
+    // Um backup editado à mão (ou de versão antiga) com "due" em texto quebrava o FSRS na hora da revisão.
+    const boa = review(undefined, { correct: true }, T0);
+    const texto = JSON.stringify({
+      v: 1,
+      cards: {
+        'k:一#meaning': boa,
+        'k:二#meaning': { ...boa, due: 'amanhã' },
+        'k:三#meaning': { ...boa, state: 9 },
+        'k:四#meaning': { ...boa, stability: null },
+        'k:五#meaning': 'oi',
+      },
+    });
+    const s = importSave(texto, T0);
+    expect(Object.keys(s.cards)).toEqual(['k:一#meaning']);
+    expect(() => review(s.cards['k:一#meaning'], { correct: true }, T0 + DAY)).not.toThrow();
+  });
+});
+
+describe('navegador que não deixa gravar', () => {
+  it('gravação recusada (espaço cheio, modo privado) não derruba o jogo', () => {
+    // O erro do localStorage subia de dentro do commit() e a tela parava no meio da jogada.
+    const cheio = { getItem: () => null, setItem: () => { throw new DOMException('cheio', 'QuotaExceededError'); } };
+    expect(writeSave(cheio, emptySave(T0), T0)).toBe(false);
+    expect(writeSave(memoryStore(), emptySave(T0), T0)).toBe(true);
+  });
+
+  it('save corrompido que nem dá para copiar ainda abre limpo', () => {
+    const store = { getItem: () => '{quebrado', setItem: () => { throw new Error('cheio'); } };
+    expect(loadSave(store, T0).cards).toEqual({});
+  });
+});
