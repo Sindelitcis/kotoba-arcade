@@ -11,7 +11,20 @@
     "dispositivo": "auto"
   },
   "voz": {
-    "motor": "voicevox",
+    "motor": "aivis",
+    "aivis": {
+      "url": "http://127.0.0.1:10101",
+      "exe": "",
+      "gpu": true,
+      "velocidade": 1.0,
+      "vozes": {
+        "padrao": 888753760,
+        "sakura": 1878365376,
+        "yui": 1431611904,
+        "takeshi": 1937616896,
+        "tanaka": 1310138976
+      }
+    },
     "voicevox": {
       "url": "http://127.0.0.1:50021",
       "exe": "",

@@ -3,6 +3,7 @@ import { findWord } from '../../content/vida';
 import { app, aventuraSave, commit, go, screen } from '../../core/app';
 import { CENA_AVENTURA, cenaStyle, pessoaUrl } from '../../core/arte';
 import { sfx, speak } from '../../core/audio';
+import { vozDaAventura } from '../../core/vozes';
 import { onomato } from '../../core/fx';
 import { hasKanji } from '../../core/kana';
 import { teclaDe } from '../../core/teclas';
@@ -144,7 +145,7 @@ export function AventuraGame() {
   // A voz acompanha o que entra na tela.
   const seq = mode === 'play' && play ? play.seq : -1;
   useEffect(() => {
-    if (mode === 'play' && play && play.shown.plain) speak(play.shown.plain);
+    if (mode === 'play' && play && play.shown.plain) speak(play.shown.plain, vozDaAventura(play.shown.who));
   }, [mode, play, seq]);
 
   useEffect(() => {
@@ -182,7 +183,7 @@ export function AventuraGame() {
           p.askMeaning();
           redraw();
         } else if (key === 'r') {
-          if (p.shown.plain) speak(p.shown.plain);
+          if (p.shown.plain) speak(p.shown.plain, vozDaAventura(p.shown.who));
         } else if (p.awaitingChoice) {
           if (digit) choose(digit - 1);
         } else if (confirm) advance();
@@ -201,7 +202,7 @@ export function AventuraGame() {
         else if (key === 's') setDiaryMeaning((v) => !v);
         else if (confirm || key === 'r') {
           const entry = diaryEntries(SCENES, save, app.data.cards, findWord)[diaryIndex];
-          if (entry) speak(entry.plain);
+          if (entry) speak(entry.plain, vozDaAventura(entry.who));
         }
       }
     };
@@ -366,7 +367,7 @@ export function AventuraGame() {
                 class={i === diaryIndex ? 'av-entry on' : 'av-entry'}
                 onClick={() => {
                   setDiaryIndex(i);
-                  speak(entry.plain);
+                  speak(entry.plain, vozDaAventura(entry.who));
                 }}
               >
                 <span class="av-who">{whoName(entry.who)}</span>

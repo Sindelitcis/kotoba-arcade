@@ -1,6 +1,6 @@
 // `npm run local`: sobe tudo que a Conversa por voz precisa neste PC e abre o jogo.
 //   - o servidor local (fala, conversa e furigana) em Python
-//   - o VOICEVOX (voz dos personagens), se o config apontar o run.exe
+//   - o AivisSpeech ou o VOICEVOX (voz dos personagens), se o config apontar o run.exe
 //   - o Ollama, se ainda não estiver rodando
 //   - o fliperama em http://localhost:5173
 // Ctrl+C fecha tudo que foi aberto aqui.
@@ -69,16 +69,16 @@ if (!(await responde(`${cfg.conversa.ollama}/api/version`))) {
   subir('ollama', 'ollama', ['serve'], { filtro: () => false });
 }
 subir('servidor', python, [join(AQUI, 'servidor.py')], { filtro: semAviso });
-const vv = cfg.voz.voicevox;
-if (cfg.voz.motor === 'voicevox' && !(await responde(`${vv.url}/version`))) {
-  if (vv.exe && existsSync(vv.exe)) {
-    const portaVoz = new URL(vv.url).port || '50021';
-    subir('voz', vv.exe, ['--host', '127.0.0.1', '--port', portaVoz], {
-      cwd: dirname(vv.exe),
+const motorVoz = cfg.voz[cfg.voz.motor];
+if (motorVoz?.url && !(await responde(`${motorVoz.url}/version`))) {
+  if (motorVoz.exe && existsSync(motorVoz.exe)) {
+    const portaVoz = new URL(motorVoz.url).port;
+    subir('voz', motorVoz.exe, ['--host', '127.0.0.1', '--port', portaVoz, ...(motorVoz.gpu ? ['--use_gpu'] : [])], {
+      cwd: dirname(motorVoz.exe),
       filtro: (l) => /error/i.test(l),
     });
   } else {
-    console.log('[voz] O VOICEVOX não está aberto e o config não aponta o run.exe: as falas usam a voz do navegador.');
+    console.log(`[voz] O motor de voz (${cfg.voz.motor}) não está aberto e o config não aponta o run.exe: as falas usam a voz do navegador.`);
   }
 }
 subir('jogo', process.platform === 'win32' ? 'npx.cmd' : 'npx', ['vite', '--strictPort'], {

@@ -12,7 +12,8 @@
     "test:watch": "vitest",
     "e2e": "playwright test",
     "check": "npm run typecheck && npm run test && npm run build && npm run e2e",
-    "local": "node local/iniciar.mjs"
+    "local": "node local/iniciar.mjs",
+    "vozes": "node scripts/gravar-vozes.mjs"
   },
   "dependencies": {
     "@preact/signals": "^2.11.4",

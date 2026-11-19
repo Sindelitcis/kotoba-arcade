@@ -1,8 +1,13 @@
 /**
  * Sons do jogo, todos sintetizados na hora (sem arquivo de áudio): pincel, papel, impacto de taiko,
- * página virando e notas de koto na escala japonesa. Voz em japonês pelo navegador.
+ * página virando e notas de koto na escala japonesa.
+ *
+ * Voz em japonês: gravações em `public/vozes/` (ver `scripts/gravar-vozes.mjs`), achadas pelo
+ * manifesto `texto → voz → arquivo`. O que não foi gravado (fala do modelo na Conversa, frase
+ * pela metade no Kumitate) cai na voz do navegador.
  */
 import { app } from './app';
+import { VOZ_PADRAO, type VozId } from './vozes';
 
 let ctx: AudioContext | null = null;
 let noise: AudioBuffer | null = null;
@@ -187,12 +192,10 @@ function findVoice(): SpeechSynthesisVoice | null {
   return jaVoice;
 }
 
-/** Fala um texto em japonês. Sem voz japonesa instalada, fica em silêncio. */
-export function speak(text: string): void {
-  if (!app.data.settings.voice || typeof speechSynthesis === 'undefined') return;
+function speakInBrowser(text: string): void {
+  if (typeof speechSynthesis === 'undefined') return;
   const voice = findVoice();
   if (!voice) return;
-  speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text);
   u.voice = voice;
   u.lang = 'ja-JP';
@@ -200,6 +203,67 @@ export function speak(text: string): void {
   speechSynthesis.speak(u);
 }
 
-export function hasJapaneseVoice(): boolean {
-  return typeof speechSynthesis !== 'undefined' && !!findVoice();
+export interface Manifesto {
+  versao: number;
+  /** texto → voz → arquivo em `vozes/`. */
+  falas: Record<string, Partial<Record<VozId, string>>>;
 }
+
+const VOZES_URL = `${import.meta.env.BASE_URL}vozes/`;
+let manifesto: Promise<Manifesto | null> | null = null;
+let gravadas = false;
+
+/** Baixa o manifesto uma vez. Sem rede ou sem arquivo, fica null e tudo vai para o navegador. */
+export function loadVoices(): Promise<Manifesto | null> {
+  manifesto ??= fetch(`${VOZES_URL}manifesto.json`)
+    .then((r) => (r.ok ? (r.json() as Promise<Manifesto>) : null))
+    .catch(() => null)
+    .then((m) => {
+      gravadas = !!m && Object.keys(m.falas).length > 0;
+      return m;
+    });
+  return manifesto;
+}
+
+/** Arquivo gravado para o texto, na voz pedida ou, se não houver, na padrão. */
+export function recordedFile(m: Manifesto, text: string, voz: VozId = VOZ_PADRAO): string | undefined {
+  const f = m.falas[text];
+  if (!f) return undefined;
+  return f[voz] ?? f[VOZ_PADRAO] ?? Object.values(f)[0];
+}
+
+let playing: HTMLAudioElement | null = null;
+let request = 0;
+
+function silence(): void {
+  playing?.pause();
+  playing = null;
+  if (typeof speechSynthesis !== 'undefined') speechSynthesis.cancel();
+}
+
+/**
+ * Fala um texto em japonês: a gravação, quando existe; senão a voz do navegador.
+ * Uma fala nova corta a anterior. `voz` escolhe o personagem (Aventura).
+ */
+export function speak(text: string, voz: VozId = VOZ_PADRAO): Promise<void> {
+  if (!app.data.settings.voice) return Promise.resolve();
+  const n = ++request;
+  silence();
+  return loadVoices().then((m) => {
+    if (n !== request) return; // outra fala veio antes de o manifesto chegar
+    const file = m ? recordedFile(m, text, voz) : undefined;
+    if (!file || typeof Audio === 'undefined') return speakInBrowser(text);
+    const a = new Audio(VOZES_URL + file);
+    playing = a;
+    a.play().catch(() => {
+      if (n === request) speakInBrowser(text);
+    });
+  });
+}
+
+/** Há voz japonesa: as gravações carregaram ou o navegador tem uma voz instalada. */
+export function hasJapaneseVoice(): boolean {
+  return gravadas || (typeof speechSynthesis !== 'undefined' && !!findVoice());
+}
+
+if (typeof window !== 'undefined' && typeof fetch !== 'undefined') void loadVoices();

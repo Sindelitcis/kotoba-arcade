@@ -30,19 +30,19 @@ Esse jogo precisa de três programas rodando na sua máquina, e um comando liga 
 npm run local
 ```
 
-Ele sobe o servidor da pasta `local/` em `127.0.0.1:8791`, abre o Ollama e o VOICEVOX se ainda não estiverem abertos e roda o jogo em http://localhost:5173. Quando aparecer "tudo pronto", é só jogar. Ctrl+C fecha tudo.
+Ele sobe o servidor da pasta `local/` em `127.0.0.1:8791`, abre o Ollama e o AivisSpeech se ainda não estiverem abertos e roda o jogo em http://localhost:5173. Quando aparecer "tudo pronto", é só jogar. Ctrl+C fecha tudo.
 
 | Parte      | O que usa                                                                                 | Onde roda                                   |
 | ---------- | ----------------------------------------------------------------------------------------- | ------------------------------------------- |
 | Ouvir você | [faster-whisper](https://github.com/SYSTRAN/faster-whisper) com o modelo `large-v3-turbo` | placa de vídeo (ou processador, mais lento) |
 | Conversar  | [Ollama](https://ollama.com) com `gemma4:12b`                                             | placa de vídeo                              |
-| Falar      | [VOICEVOX](https://voicevox.hiroshiba.jp)                                                 | processador                                 |
+| Falar      | [AivisSpeech Engine](https://github.com/Aivis-Project/AivisSpeech-Engine)                 | placa de vídeo                              |
 
 Requisitos:
 
-- Windows com placa NVIDIA de 12 GB ou mais (testado numa RTX 5060 Ti de 16 GB: o modelo de conversa ocupa uns 8 GB e o Whisper uns 2 GB).
+- Windows com placa NVIDIA de 16 GB (testado numa RTX 5060 Ti: com o modelo de conversa, o Whisper e o AivisSpeech abertos, a placa fica em 15,7 GB). Com placa de 12 GB, use o VOICEVOX, que roda no processador.
 - Uns 15 GB livres em disco para os modelos.
-- Python 3.11, Ollama 0.40 ou mais novo e o VOICEVOX Engine (testado na 0.26).
+- Python 3.11, Ollama 0.40 ou mais novo e o AivisSpeech Engine (testado na 1.2.0).
 
 Preparação, uma vez só:
 
@@ -52,13 +52,15 @@ C:/caminho/do/venv/Scripts/pip install -r local/requirements.txt
 ollama pull gemma4:12b
 ```
 
-Baixe o VOICEVOX Engine para Windows (versão CPU) no [GitHub do projeto](https://github.com/VOICEVOX/voicevox_engine/releases) e extraia numa pasta. Depois copie `local/config.exemplo.json` para `local/config.local.json` (esse arquivo não vai para o git) e preencha:
+Baixe o AivisSpeech Engine para Windows no [GitHub do projeto](https://github.com/Aivis-Project/AivisSpeech-Engine/releases) e extraia numa pasta. Na primeira vez ele baixa as vozes まお e コハク; as outras três (まい, にせ, 阿井田 茂) se instalam pelo AivisHub, com os ids que estão em `src/core/vozes.ts`. Depois copie `local/config.exemplo.json` para `local/config.local.json` (esse arquivo não vai para o git) e preencha:
 
 - `python`: o `python.exe` do venv;
 - `cache_modelos`: a pasta onde o Whisper vai guardar o modelo (uns 1,6 GB no primeiro uso);
-- `voz.voicevox.exe`: o `run.exe` do VOICEVOX.
+- `voz.aivis.exe`: o `run.exe` do AivisSpeech Engine.
 
-Sem o VOICEVOX o jogo usa a voz japonesa do navegador. O primeiro `npm run local` demora alguns minutos porque baixa o Whisper e carrega os modelos; depois sobe em uns 10 segundos.
+Quem preferir o VOICEVOX, que roda no processador, troca `voz.motor` para `voicevox` e preenche `voz.voicevox.exe`.
+
+Sem motor de voz a Conversa usa a voz japonesa do navegador. O primeiro `npm run local` demora alguns minutos porque baixa o Whisper e carrega os modelos; depois sobe em uns 10 segundos.
 
 O servidor só aceita conexões do próprio PC. Nada do que você fala sai da máquina.
 
@@ -98,18 +100,20 @@ São 15 pontos, do N5 ao começo do N4, nesta ordem: は, の, を, ます/ま�
 
 As frases usam só o vocabulário que já está nos outros jogos, mais umas poucas palavras de apoio em kana (わたし, これ, コーヒー). Cada ponto é uma carta na memória espaçada (`g:<ponto>#uso`).
 
-Kanji nunca vem sozinho: toda carta traz palavras de verdade, com leitura em kana e áudio (voz japonesa do navegador).
+Kanji nunca vem sozinho: toda carta traz palavras de verdade, com leitura em kana e áudio gravado. Como as vozes foram escolhidas e gravadas: [docs/vozes.md](docs/vozes.md).
 
 ## Organização
 
 ```
 src/core      memória espaçada, seletor de cartas, perguntas, save, kana, som, efeitos, imagens, ajuda
 src/assets    fontes recortadas, cenários, personagens e músicas do Kana Beat
-docs          guia de estilo (estilo.md) e como as imagens foram feitas (imagens.md)
+docs          guia de estilo (estilo.md), como as imagens (imagens.md) e as vozes (vozes.md) foram feitas
+public/vozes  falas gravadas em mp3 e o manifesto texto → arquivo
 src/content   kanji, palavras e frases (os 94 kanji do KanjiMon original e o vocabulário do dia a dia)
 src/hub       o fliperama
 src/games     um jogo por pasta; as regras ficam separadas da tela
-local         servidor da Conversa por voz (Whisper, Ollama e VOICEVOX) e o `npm run local`
+local         servidor da Conversa por voz (Whisper, Ollama e AivisSpeech) e o `npm run local`
+scripts       importação do conteúdo, recorte das fontes e gravação das vozes (`npm run vozes`)
 tests         testes das regras
 e2e           testes jogando no navegador
 ```
@@ -141,7 +145,7 @@ Fontes, as duas pela SIL Open Font License 1.1 (o texto da licença está em `sr
 
 Cenários e personagens: gerados no PC com o [Animagine XL 4.0](https://huggingface.co/cagliostrolab/animagine-xl-4.0) (Cagliostro Research Lab, licença CreativeML Open RAIL++-M, que permite usar as imagens geradas). Detalhes em [docs/imagens.md](docs/imagens.md).
 
-Efeitos sonoros: todos sintetizados no próprio jogo (`src/core/audio.ts`).
+Efeitos sonoros: todos sintetizados no próprio jogo (`src/core/audio.ts`). As falas em japonês são gravações, com as vozes no fim desta seção.
 
 Músicas do Kana Beat: trechos de cerca de 1 minuto, cortados em loop, de faixas livres do [OpenGameArt](https://opengameart.org). Como foram escolhidas e cortadas está em [docs/musica.md](docs/musica.md). Dentro do jogo, a tela de resultado tem o botão Músicas com esta mesma lista.
 
@@ -158,4 +162,4 @@ Músicas do Kana Beat: trechos de cerca de 1 minuto, cortados em loop, de faixas
 
 Os trechos foram cortados, tiveram o volume igualado e foram convertidos para ogg; fora isso, a música é a original.
 
-Vozes da Conversa por voz: VOICEVOX:四国めたん, VOICEVOX:春日部つむぎ, VOICEVOX:青山龍星 e VOICEVOX:玄野武宏.
+Vozes: AivisSpeech, modelos do AivisHub pela licença ACML 1.0. AivisSpeech: まお e AivisSpeech: コハク (©Oz Chat/Trippy, CV: ねゆたろ), AivisSpeech: まい, AivisSpeech: にせ e AivisSpeech: 阿井田 茂 (CV: 古山キリヲ). Palavras soltas e kana: VOICEVOX:四国めたん. O acento das palavras foi conferido na base da [Kanjium](https://github.com/mifunetoshiro/kanjium), de Uros O. (CC BY-SA 4.0).

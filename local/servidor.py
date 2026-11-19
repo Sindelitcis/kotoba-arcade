@@ -3,7 +3,7 @@
 Junta em http://127.0.0.1:8791 as três peças que o jogo usa:
   /ouvir     fala em japonês -> texto (Whisper, pelo faster-whisper)
   /conversa  o modelo que faz o personagem (Ollama)
-  /voz       texto -> fala em japonês (VOICEVOX)
+  /voz       texto -> fala em japonês (AivisSpeech ou VOICEVOX)
 e mais /leitura (separa a frase em palavras com a leitura, para o furigana)
 e /saude (o que está ligado).
 
@@ -182,27 +182,32 @@ def leitura(dados: dict = Body(...)):
 
 # ---------------------------------------------------------------- texto -> fala
 
-def _voz_voicevox(texto, voz):
-    v = CFG["voz"]["voicevox"]
-    falante = v["vozes"].get(voz, v["vozes"]["padrao"])
-    q = http.post(v["url"] + "/audio_query", params={"text": texto, "speaker": falante})
-    q.raise_for_status()
-    consulta = q.json()
-    consulta["speedScale"] = v.get("velocidade", 0.9)
-    consulta["prePhonemeLength"] = 0.05
-    r = http.post(v["url"] + "/synthesis", params={"speaker": falante}, json=consulta)
-    r.raise_for_status()
-    return r.content
+def _voz_api(motor):
+    """VOICEVOX e AivisSpeech têm a mesma API (/audio_query e /synthesis)."""
+
+    def falar(texto, voz):
+        v = CFG["voz"][motor]
+        falante = v["vozes"].get(voz, v["vozes"]["padrao"])
+        q = http.post(v["url"] + "/audio_query", params={"text": texto, "speaker": falante})
+        q.raise_for_status()
+        consulta = q.json()
+        consulta["speedScale"] = v.get("velocidade", 1.0)
+        consulta["prePhonemeLength"] = 0.05
+        r = http.post(v["url"] + "/synthesis", params={"speaker": falante}, json=consulta)
+        r.raise_for_status()
+        return r.content
+
+    return falar
 
 
-MOTORES = {"voicevox": _voz_voicevox}
+MOTORES = {"aivis": _voz_api("aivis"), "voicevox": _voz_api("voicevox")}
 
 
 def _motor_vivo():
     motor = CFG["voz"]["motor"]
     try:
-        if motor == "voicevox":
-            return http.get(CFG["voz"]["voicevox"]["url"] + "/version", timeout=2).status_code == 200
+        if motor in MOTORES:
+            return http.get(CFG["voz"][motor]["url"] + "/version", timeout=2).status_code == 200
     except Exception:  # noqa: BLE001
         pass
     return False

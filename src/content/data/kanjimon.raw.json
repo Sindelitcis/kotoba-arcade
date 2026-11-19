@@ -430,7 +430,7 @@
    },
    {
     "jp": "百貨店",
-    "romaji": "hyakukaten",
+    "romaji": "hyakkaten",
     "pt": "loja de departamento"
    }
   ],
@@ -557,7 +557,7 @@
   "sentences": [
    {
     "jp": "千円を払いました。",
-    "romaji": "senen o haraimashita",
+    "romaji": "sen'en o haraimashita",
     "pt": "Paguei mil ienes."
    }
   ]
@@ -2972,7 +2972,7 @@
   "sentences": [
    {
     "jp": "友達が家へ来ます。",
-    "romaji": "tomodachi ga ie e kuru",
+    "romaji": "tomodachi ga ie e kimasu",
     "pt": "Meu amigo virá à minha casa."
    }
   ]
@@ -3583,7 +3583,7 @@
   "sentences": [
    {
     "jp": "これは何ですか？",
-    "romaji": "kore wa nani desu ka?",
+    "romaji": "kore wa nan desu ka?",
     "pt": "O que é isto?"
    }
   ]

@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { app, commit, conversaSave, go, screen } from '../../core/app';
 import { CENA_CONVERSA, cenaStyle, pessoaUrl } from '../../core/arte';
 import { sfx, speak } from '../../core/audio';
+import { VOZ_CONVERSA } from '../../core/vozes';
 import { onomato } from '../../core/fx';
 import { teclaDe } from '../../core/teclas';
 import { criarCliente, procurarServidor, type Cliente, type Saude } from './cliente';
@@ -70,7 +71,7 @@ export function ConversaGame() {
     };
   }, []);
 
-  /** Fala do personagem: voz do servidor local; se ela falhar, a do navegador. */
+  /** Fala do personagem: voz do servidor local; se ela falhar, a gravada (abertura) ou a do navegador. */
   const tocar = async (linha: Linha, cena: Cena) => {
     if (!app.data.settings.voice) return;
     audioEl.current?.pause();
@@ -89,7 +90,7 @@ export function ConversaGame() {
         // cai para a voz do navegador
       }
     }
-    speak(linha.jp);
+    speak(linha.jp, VOZ_CONVERSA[cena.personagem.voz]);
   };
 
   const reagir = (events: Evento[]) => {
@@ -347,6 +348,11 @@ export function ConversaGame() {
           {saude?.voz.ok && saude.voz.motor === 'voicevox' && (
             <p class="muted cv-credit" data-testid="cv-credit">
               Vozes: VOICEVOX:四国めたん, VOICEVOX:春日部つむぎ, VOICEVOX:青山龍星, VOICEVOX:玄野武宏
+            </p>
+          )}
+          {saude?.voz.ok && saude.voz.motor === 'aivis' && (
+            <p class="muted cv-credit" data-testid="cv-credit">
+              Vozes: AivisSpeech (créditos no README)
             </p>
           )}
         </section>
