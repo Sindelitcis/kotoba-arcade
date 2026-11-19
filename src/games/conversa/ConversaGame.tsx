@@ -1,25 +1,10 @@
-import { useEffect, useRef, useState } from "preact/hooks";
-import { app, commit, conversaSave, go, screen } from "../../core/app";
-import { sfx, speak } from "../../core/audio";
-import {
-  criarCliente,
-  procurarServidor,
-  type Cliente,
-  type Saude,
-} from "./cliente";
-import {
-  CENAS,
-  Conversa,
-  proximaCena,
-  type Cena,
-  type Dica,
-  type Evento,
-  type Linha,
-  type Resumo,
-  type Ruby,
-} from "./engine";
+import { useEffect, useRef, useState } from 'preact/hooks';
+import { app, commit, conversaSave, go, screen } from '../../core/app';
+import { sfx, speak } from '../../core/audio';
+import { criarCliente, procurarServidor, type Cliente, type Saude } from './cliente';
+import { CENAS, Conversa, proximaCena, type Cena, type Dica, type Evento, type Linha, type Resumo, type Ruby } from './engine';
 
-type Fase = "procurando" | "desligado" | "menu" | "conversa" | "resumo";
+type Fase = 'procurando' | 'desligado' | 'menu' | 'conversa' | 'resumo';
 
 function RubyText({ ruby }: { ruby: readonly Ruby[] }) {
   return (
@@ -56,7 +41,7 @@ async function gravar(): Promise<Gravacao> {
       new Promise((resolve) => {
         rec.onstop = () => {
           stream.getTracks().forEach((t) => t.stop());
-          resolve(new Blob(partes, { type: rec.mimeType || "audio/webm" }));
+          resolve(new Blob(partes, { type: rec.mimeType || 'audio/webm' }));
         };
         rec.stop();
       }),
@@ -64,44 +49,34 @@ async function gravar(): Promise<Gravacao> {
 }
 
 export function ConversaGame() {
-  const [fase, setFase] = useState<Fase>("procurando");
+  const [fase, setFase] = useState<Fase>('procurando');
   const [saude, setSaude] = useState<Saude | null>(null);
   const [, setFrame] = useState(0);
   const redraw = () => setFrame((n) => n + 1);
   const conversa = useRef<Conversa | null>(null);
   const cliente = useRef<Cliente>(criarCliente());
-  const [texto, setTexto] = useState("");
+  const [texto, setTexto] = useState('');
   const [dica, setDica] = useState<Dica | null>(null);
-  const [aviso, setAviso] = useState("");
+  const [aviso, setAviso] = useState('');
   const [traduzidas, setTraduzidas] = useState<Set<number>>(new Set());
   const [resumo, setResumo] = useState<Resumo | null>(null);
-  const [ouvindo, setOuvindo] = useState<"nao" | "gravando" | "transcrevendo">(
-    "nao",
-  );
+  const [ouvindo, setOuvindo] = useState<'nao' | 'gravando' | 'transcrevendo'>('nao');
   const gravacao = useRef<Gravacao | null>(null);
   const inputEl = useRef<HTMLInputElement>(null);
   const listaEl = useRef<HTMLOListElement>(null);
   const audioEl = useRef<HTMLAudioElement | null>(null);
 
   const procurar = async () => {
-    setFase("procurando");
+    setFase('procurando');
     let s = await procurarServidor(location.hostname);
     // Servidor ligado mas o modelo ainda abrindo na placa: espera até 3 minutos em vez de dizer que está desligado.
-    for (
-      let i = 0;
-      i < 90 &&
-      s &&
-      !s.conversa.ok &&
-      !s.conversa.erro &&
-      screen.value === "conversa";
-      i++
-    ) {
+    for (let i = 0; i < 90 && s && !s.conversa.ok && !s.conversa.erro && screen.value === 'conversa'; i++) {
       setSaude(s);
       await new Promise((r) => setTimeout(r, 2000));
       s = await procurarServidor(location.hostname);
     }
     setSaude(s);
-    setFase(s && s.conversa.ok ? "menu" : "desligado");
+    setFase(s && s.conversa.ok ? 'menu' : 'desligado');
   };
 
   useEffect(() => {
@@ -131,31 +106,25 @@ export function ConversaGame() {
     const c = conversa.current;
     if (!c) return;
     for (const e of events) {
-      if (e.t === "linha" && e.linha.quem === "personagem")
-        void tocar(e.linha, c.cena);
-      else if (e.t === "passo") {
+      if (e.t === 'linha' && e.linha.quem === 'personagem') void tocar(e.linha, c.cena);
+      else if (e.t === 'passo') {
         sfx.capture(1);
         setAviso(`Objetivo: ${e.passo.pt}`);
-      } else if (e.t === "nova") sfx.click();
-      else if (e.t === "dica") setDica(e.dica);
-      else if (e.t === "levelup") {
+      } else if (e.t === 'nova') sfx.click();
+      else if (e.t === 'dica') setDica(e.dica);
+      else if (e.t === 'levelup') {
         sfx.levelup();
         setAviso(`Nível ${e.level}!`);
-      } else if (e.t === "falha")
-        setAviso(
-          "O servidor local não respondeu. Sua fala não se perdeu: mande de novo.",
-        );
-      else if (e.t === "fim") {
+      } else if (e.t === 'falha') setAviso('O servidor local não respondeu. Sua fala não se perdeu: mande de novo.');
+      else if (e.t === 'fim') {
         if (e.resumo.concluida) sfx.chest();
         setResumo(e.resumo);
-        setTimeout(() => setFase("resumo"), 1800);
+        setTimeout(() => setFase('resumo'), 1800);
       }
     }
     commit();
     redraw();
-    requestAnimationFrame(() =>
-      listaEl.current?.lastElementChild?.scrollIntoView({ block: "nearest" }),
-    );
+    requestAnimationFrame(() => listaEl.current?.lastElementChild?.scrollIntoView({ block: 'nearest' }));
   };
 
   const comecar = (cena: Cena) => {
@@ -168,22 +137,22 @@ export function ConversaGame() {
       ai: cliente.current,
     });
     conversa.current = c;
-    setTexto("");
+    setTexto('');
     setDica(null);
-    setAviso("");
+    setAviso('');
     setTraduzidas(new Set());
     setResumo(null);
-    setFase("conversa");
+    setFase('conversa');
     reagir(c.iniciar());
     requestAnimationFrame(() => inputEl.current?.focus());
   };
 
   const enviar = async (fala: string) => {
     const c = conversa.current;
-    if (!c || c.fase !== "vez" || !fala.trim()) return;
-    setTexto("");
+    if (!c || c.fase !== 'vez' || !fala.trim()) return;
+    setTexto('');
     setDica(null);
-    setAviso("");
+    setAviso('');
     const pending = c.dizer(fala);
     redraw();
     reagir(await pending);
@@ -192,44 +161,38 @@ export function ConversaGame() {
 
   const pedirDica = async () => {
     const c = conversa.current;
-    if (!c || c.fase !== "vez") return;
+    if (!c || c.fase !== 'vez') return;
     setDica(await c.pedirDica());
   };
 
   const microfone = async () => {
     const c = conversa.current;
-    if (!c || c.fase !== "vez" || !saude?.fala.ok) return;
-    if (ouvindo === "nao") {
+    if (!c || c.fase !== 'vez' || !saude?.fala.ok) return;
+    if (ouvindo === 'nao') {
       try {
         gravacao.current = await gravar();
         audioEl.current?.pause();
-        setOuvindo("gravando");
+        setOuvindo('gravando');
       } catch {
-        setAviso(
-          "Não consegui abrir o microfone. Dá para digitar em romaji ou kana.",
-        );
+        setAviso('Não consegui abrir o microfone. Dá para digitar em romaji ou kana.');
       }
       return;
     }
-    if (ouvindo !== "gravando" || !gravacao.current) return;
-    setOuvindo("transcrevendo");
+    if (ouvindo !== 'gravando' || !gravacao.current) return;
+    setOuvindo('transcrevendo');
     try {
       const audio = await gravacao.current.parar();
-      const ultima = [...c.linhas]
-        .reverse()
-        .find((l) => l.quem === "personagem");
-      const dito = await cliente.current.ouvir(audio, ultima?.jp ?? "");
-      setOuvindo("nao");
+      const ultima = [...c.linhas].reverse().find((l) => l.quem === 'personagem');
+      const dito = await cliente.current.ouvir(audio, ultima?.jp ?? '');
+      setOuvindo('nao');
       if (!dito) {
-        setAviso(
-          "Não ouvi nada. Tente de novo, mais perto do microfone, ou digite.",
-        );
+        setAviso('Não ouvi nada. Tente de novo, mais perto do microfone, ou digite.');
         return;
       }
       await enviar(dito);
     } catch {
-      setOuvindo("nao");
-      setAviso("O reconhecimento de fala não respondeu. Dá para digitar.");
+      setOuvindo('nao');
+      setAviso('O reconhecimento de fala não respondeu. Dá para digitar.');
     }
   };
 
@@ -239,7 +202,7 @@ export function ConversaGame() {
     audioEl.current?.pause();
     setResumo(c.encerrar());
     commit();
-    setFase("resumo");
+    setFase('resumo');
   };
 
   const traduzir = (i: number) => {
@@ -251,8 +214,7 @@ export function ConversaGame() {
 
   const ultimaDoPersonagem = (): number => {
     const linhas = conversa.current?.linhas ?? [];
-    for (let i = linhas.length - 1; i >= 0; i--)
-      if (linhas[i]?.quem === "personagem") return i;
+    for (let i = linhas.length - 1; i >= 0; i--) if (linhas[i]?.quem === 'personagem') return i;
     return -1;
   };
 
@@ -260,26 +222,23 @@ export function ConversaGame() {
   // Enter apertado logo que o menu aparecia caía no tratador velho e se perdia.
   const teclaRef = useRef<(e: KeyboardEvent) => void>(() => {});
   teclaRef.current = (e: KeyboardEvent) => {
-    if (screen.value !== "conversa") return;
+    if (screen.value !== 'conversa') return;
     const noCampo = e.target === inputEl.current;
-    if (fase === "conversa") {
-      if (e.key === "Escape") {
+    if (fase === 'conversa') {
+      if (e.key === 'Escape') {
         e.preventDefault();
         encerrar();
-      } else if (e.key === "Tab") {
+      } else if (e.key === 'Tab') {
         e.preventDefault();
         void pedirDica();
-      } else if (
-        e.key === "F2" ||
-        (e.key === " " && (!noCampo || texto === ""))
-      ) {
+      } else if (e.key === 'F2' || (e.key === ' ' && (!noCampo || texto === ''))) {
         e.preventDefault();
         void microfone();
-      } else if (e.key === "F1") {
+      } else if (e.key === 'F1') {
         e.preventDefault();
         const i = ultimaDoPersonagem();
         if (i >= 0) traduzir(i);
-      } else if (e.key === "F3") {
+      } else if (e.key === 'F3') {
         e.preventDefault();
         const c = conversa.current;
         const i = ultimaDoPersonagem();
@@ -287,46 +246,43 @@ export function ConversaGame() {
       }
       return;
     }
-    if (e.key === "Escape") {
+    if (e.key === 'Escape') {
       e.preventDefault();
-      if (fase === "resumo") setFase("menu");
-      else go("hub");
-    } else if (fase === "menu" && /^[1-9]$/.test(e.key)) {
+      if (fase === 'resumo') setFase('menu');
+      else go('hub');
+    } else if (fase === 'menu' && /^[1-9]$/.test(e.key)) {
       const cena = CENAS[Number(e.key) - 1];
       if (cena) comecar(cena);
-    } else if (e.key === "Enter") {
+    } else if (e.key === 'Enter') {
       e.preventDefault();
-      if (fase === "menu" || fase === "resumo")
-        comecar(proximaCena(conversaSave()));
-      else if (fase === "desligado") void procurar();
+      if (fase === 'menu' || fase === 'resumo') comecar(proximaCena(conversaSave()));
+      else if (fase === 'desligado') void procurar();
     }
   };
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => teclaRef.current(e);
-    addEventListener("keydown", onKey);
-    return () => removeEventListener("keydown", onKey);
+    addEventListener('keydown', onKey);
+    return () => removeEventListener('keydown', onKey);
   }, []);
 
   const voltar = (
-    <button class="ghost" onClick={() => go("hub")}>
+    <button class="ghost" onClick={() => go('hub')}>
       ← Fliperama <kbd>Esc</kbd>
     </button>
   );
 
-  if (fase === "procurando") {
+  if (fase === 'procurando') {
     return (
       <main class="cv" data-testid="cv" data-phase="procurando">
         <header class="km-top">{voltar}</header>
         <p class="muted cv-center" data-testid="cv-wait">
-          {saude
-            ? `Abrindo o modelo de conversa (${saude.conversa.modelo})...`
-            : "Procurando a IA no seu PC..."}
+          {saude ? `Abrindo o modelo de conversa (${saude.conversa.modelo})...` : 'Procurando a IA no seu PC...'}
         </p>
       </main>
     );
   }
 
-  if (fase === "desligado") {
+  if (fase === 'desligado') {
     return (
       <main class="cv" data-testid="cv" data-phase="desligado">
         <header class="km-top">{voltar}</header>
@@ -336,22 +292,16 @@ export function ConversaGame() {
           </span>
           <h2 class="big">Conversa por voz</h2>
           <p class="cv-off-text">
-            Este jogo roda só no seu PC: abra a pasta do Kotoba Arcade, rode{" "}
-            <code>npm run local</code> e jogue em{" "}
-            <code>http://localhost:5173</code>.
+            Este jogo roda só no seu PC: abra a pasta do Kotoba Arcade, rode <code>npm run local</code> e jogue em <code>http://localhost:5173</code>.
           </p>
           {saude && !saude.conversa.ok && (
             <p class="muted" data-testid="cv-model-off">
               O servidor local respondeu, mas o modelo de conversa não abriu
-              {saude.conversa.erro ? `: ${saude.conversa.erro}` : "."}
+              {saude.conversa.erro ? `: ${saude.conversa.erro}` : '.'}
             </p>
           )}
           <div class="actions center">
-            <button
-              class="primary"
-              onClick={() => void procurar()}
-              data-testid="cv-retry"
-            >
+            <button class="primary" onClick={() => void procurar()} data-testid="cv-retry">
               Procurar de novo <kbd>Enter</kbd>
             </button>
           </div>
@@ -360,7 +310,7 @@ export function ConversaGame() {
     );
   }
 
-  if (fase === "menu") {
+  if (fase === 'menu') {
     const save = conversaSave();
     const sugerida = proximaCena(save);
     return (
@@ -368,22 +318,12 @@ export function ConversaGame() {
         <header class="km-top">
           {voltar}
           <span class="muted">
-            {save.concluidas}{" "}
-            {save.concluidas === 1
-              ? "conversa concluída"
-              : "conversas concluídas"}
+            {save.concluidas} {save.concluidas === 1 ? 'conversa concluída' : 'conversas concluídas'}
           </span>
         </header>
         <section class="av-panel">
-          <p class="muted">
-            Escolha uma situação. Fale no microfone ou digite em romaji ou kana.
-            Cada conversa leva de 2 a 4 minutos.
-          </p>
-          <button
-            class="play-now"
-            onClick={() => comecar(sugerida)}
-            data-testid="cv-start"
-          >
+          <p class="muted">Escolha uma situação. Fale no microfone ou digite em romaji ou kana. Cada conversa leva de 2 a 4 minutos.</p>
+          <button class="play-now" onClick={() => comecar(sugerida)} data-testid="cv-start">
             <span class="play-now-main">{sugerida.titulo}</span>
             <span class="play-now-sub">
               {sugerida.resumo} <kbd>Enter</kbd>
@@ -391,36 +331,21 @@ export function ConversaGame() {
           </button>
           <div class="av-scenes">
             {CENAS.map((c, i) => (
-              <button
-                key={c.id}
-                class={save.cenas[c.id] ? "tile done" : "tile"}
-                onClick={() => comecar(c)}
-                data-scene={c.id}
-              >
+              <button key={c.id} class={save.cenas[c.id] ? 'tile done' : 'tile'} onClick={() => comecar(c)} data-scene={c.id}>
                 <span class="tile-jp" lang="ja">
                   {c.jp}
                 </span>
                 <span class="tile-title">
                   {c.titulo} <kbd>{i + 1}</kbd>
                 </span>
-                <span class="tile-blurb">
-                  {save.cenas[c.id]
-                    ? `${c.resumo} · feita ${save.cenas[c.id]}x`
-                    : c.resumo}
-                </span>
+                <span class="tile-blurb">{save.cenas[c.id] ? `${c.resumo} · feita ${save.cenas[c.id]}x` : c.resumo}</span>
               </button>
             ))}
           </div>
-          {!saude?.fala.ok && (
-            <p class="muted">
-              O reconhecimento de fala ainda não está pronto: por enquanto,
-              digite.
-            </p>
-          )}
-          {saude?.voz.ok && saude.voz.motor === "voicevox" && (
+          {!saude?.fala.ok && <p class="muted">O reconhecimento de fala ainda não está pronto: por enquanto, digite.</p>}
+          {saude?.voz.ok && saude.voz.motor === 'voicevox' && (
             <p class="muted cv-credit" data-testid="cv-credit">
-              Vozes: VOICEVOX:四国めたん, VOICEVOX:春日部つむぎ,
-              VOICEVOX:青山龍星, VOICEVOX:玄野武宏
+              Vozes: VOICEVOX:四国めたん, VOICEVOX:春日部つむぎ, VOICEVOX:青山龍星, VOICEVOX:玄野武宏
             </p>
           )}
         </section>
@@ -428,18 +353,16 @@ export function ConversaGame() {
     );
   }
 
-  if (fase === "resumo" && resumo) {
+  if (fase === 'resumo' && resumo) {
     return (
       <main class="cv" data-testid="cv" data-phase="resumo">
         <section class="av-panel" data-testid="cv-summary">
           <span class="muted">{resumo.cena.titulo}</span>
-          <h2 class="big">
-            {resumo.concluida ? "Objetivo cumprido!" : "Conversa encerrada"}
-          </h2>
+          <h2 class="big">{resumo.concluida ? 'Objetivo cumprido!' : 'Conversa encerrada'}</h2>
           <ul class="cv-goals">
             {resumo.passos.map((p) => (
-              <li key={p.pt} class={p.feito ? "done" : undefined}>
-                {p.feito ? "✓" : "·"} {p.pt}
+              <li key={p.pt} class={p.feito ? 'done' : undefined}>
+                {p.feito ? '✓' : '·'} {p.pt}
               </li>
             ))}
           </ul>
@@ -502,14 +425,10 @@ export function ConversaGame() {
             </div>
           )}
           <div class="actions center">
-            <button
-              class="primary"
-              onClick={() => comecar(proximaCena(conversaSave()))}
-              data-testid="cv-again"
-            >
+            <button class="primary" onClick={() => comecar(proximaCena(conversaSave()))} data-testid="cv-again">
               Outra conversa <kbd>Enter</kbd>
             </button>
-            <button class="ghost" onClick={() => setFase("menu")}>
+            <button class="ghost" onClick={() => setFase('menu')}>
               Escolher situação <kbd>Esc</kbd>
             </button>
           </div>
@@ -520,7 +439,7 @@ export function ConversaGame() {
 
   const c = conversa.current;
   if (!c) return null;
-  const pensando = c.fase === "pensando" || ouvindo === "transcrevendo";
+  const pensando = c.fase === 'pensando' || ouvindo === 'transcrevendo';
   return (
     <main class="cv" data-testid="cv" data-phase="conversa" data-turn={c.fase}>
       <header class="km-top">
@@ -532,8 +451,8 @@ export function ConversaGame() {
         </div>
         <ul class="cv-goals" data-testid="cv-goals">
           {c.cena.passos.map((p) => (
-            <li key={p.id} class={c.feitos.has(p.id) ? "done" : undefined}>
-              {c.feitos.has(p.id) ? "✓" : "·"} {p.pt}
+            <li key={p.id} class={c.feitos.has(p.id) ? 'done' : undefined}>
+              {c.feitos.has(p.id) ? '✓' : '·'} {p.pt}
             </li>
           ))}
         </ul>
@@ -543,33 +462,20 @@ export function ConversaGame() {
         <p class="av-narra">{c.cena.lugar}</p>
         <ol class="cv-lines" ref={listaEl} data-testid="cv-lines">
           {c.linhas.map((l, i) => (
-            <li
-              key={i}
-              class={`cv-line ${l.quem}`}
-              data-testid={l.quem === "personagem" ? "cv-npc" : "cv-me"}
-            >
-              <span class="av-who">
-                {l.quem === "personagem" ? c.cena.personagem.nome : "Você"}
-              </span>
+            <li key={i} class={`cv-line ${l.quem}`} data-testid={l.quem === 'personagem' ? 'cv-npc' : 'cv-me'}>
+              <span class="av-who">{l.quem === 'personagem' ? c.cena.personagem.nome : 'Você'}</span>
               <p class="cv-jp" lang="ja">
                 <RubyText ruby={l.ruby} />
               </p>
               {l.digitado && <small class="muted">{l.digitado}</small>}
-              {l.quem === "personagem" && (
+              {l.quem === 'personagem' && (
                 <div class="cv-tools">
-                  <button
-                    class="ghost small"
-                    onClick={() => void tocar(l, c.cena)}
-                  >
+                  <button class="ghost small" onClick={() => void tocar(l, c.cena)}>
                     Ouvir
                   </button>
                   {l.pt && (
-                    <button
-                      class="ghost small"
-                      onClick={() => traduzir(i)}
-                      data-testid="cv-translate"
-                    >
-                      {traduzidas.has(i) ? "Esconder tradução" : "Tradução"}
+                    <button class="ghost small" onClick={() => traduzir(i)} data-testid="cv-translate">
+                      {traduzidas.has(i) ? 'Esconder tradução' : 'Tradução'}
                     </button>
                   )}
                 </div>
@@ -581,7 +487,7 @@ export function ConversaGame() {
               )}
             </li>
           ))}
-          {c.fase === "pensando" && (
+          {c.fase === 'pensando' && (
             <li class="cv-line personagem thinking" data-testid="cv-thinking">
               <span class="av-who">{c.cena.personagem.nome}</span>
               <p class="cv-jp">…</p>
@@ -625,22 +531,13 @@ export function ConversaGame() {
         >
           <button
             type="button"
-            class={ouvindo === "gravando" ? "cv-mic on" : "cv-mic"}
+            class={ouvindo === 'gravando' ? 'cv-mic on' : 'cv-mic'}
             disabled={!saude?.fala.ok || pensando}
             onClick={() => void microfone()}
             data-testid="cv-mic"
-            title={
-              saude?.fala.ok
-                ? "Falar (Espaço com o campo vazio)"
-                : "O reconhecimento de fala não está ligado"
-            }
+            title={saude?.fala.ok ? 'Falar (Espaço com o campo vazio)' : 'O reconhecimento de fala não está ligado'}
           >
-            {ouvindo === "gravando"
-              ? "Parar e enviar"
-              : ouvindo === "transcrevendo"
-                ? "Ouvindo..."
-                : "Falar"}{" "}
-            <kbd>Espaço</kbd>
+            {ouvindo === 'gravando' ? 'Parar e enviar' : ouvindo === 'transcrevendo' ? 'Ouvindo...' : 'Falar'} <kbd>Espaço</kbd>
           </button>
           <input
             ref={inputEl}
@@ -652,12 +549,7 @@ export function ConversaGame() {
             autocomplete="off"
             spellcheck={false}
           />
-          <button
-            type="submit"
-            class="primary"
-            disabled={pensando || !texto.trim()}
-            data-testid="cv-send"
-          >
+          <button type="submit" class="primary" disabled={pensando || !texto.trim()} data-testid="cv-send">
             Enviar <kbd>Enter</kbd>
           </button>
         </form>
