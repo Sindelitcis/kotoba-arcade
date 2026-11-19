@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { app, commit, conversaSave, go, screen } from '../../core/app';
+import { CENA_CONVERSA, cenaStyle, pessoaUrl } from '../../core/arte';
 import { sfx, speak } from '../../core/audio';
+import { onomato } from '../../core/fx';
 import { criarCliente, procurarServidor, type Cliente, type Saude } from './cliente';
 import { CENAS, Conversa, proximaCena, type Cena, type Dica, type Evento, type Linha, type Resumo, type Ruby } from './engine';
 
@@ -109,6 +111,7 @@ export function ConversaGame() {
       if (e.t === 'linha' && e.linha.quem === 'personagem') void tocar(e.linha, c.cena);
       else if (e.t === 'passo') {
         sfx.capture(1);
+        onomato('captura', document.querySelector('[data-testid="cv-goals"]'), 'shu', 0.9);
         setAviso(`Objetivo: ${e.passo.pt}`);
       } else if (e.t === 'nova') sfx.click();
       else if (e.t === 'dica') setDica(e.dica);
@@ -358,7 +361,7 @@ export function ConversaGame() {
       <main class="cv" data-testid="cv" data-phase="resumo">
         <section class="av-panel" data-testid="cv-summary">
           <span class="muted">{resumo.cena.titulo}</span>
-          <h2 class="big">{resumo.concluida ? 'Objetivo cumprido!' : 'Conversa encerrada'}</h2>
+          <h2 class={resumo.concluida ? 'big win' : 'big'}>{resumo.concluida ? 'Objetivo cumprido!' : 'Conversa encerrada'}</h2>
           <ul class="cv-goals">
             {resumo.passos.map((p) => (
               <li key={p.pt} class={p.feito ? 'done' : undefined}>
@@ -459,7 +462,10 @@ export function ConversaGame() {
       </header>
 
       <section class="cv-chat">
-        <p class="av-narra">{c.cena.lugar}</p>
+        <div class="cv-cena" style={cenaStyle(CENA_CONVERSA[c.cena.id]?.cena)}>
+          {pessoaUrl(CENA_CONVERSA[c.cena.id]?.pessoa) && <img src={pessoaUrl(CENA_CONVERSA[c.cena.id]?.pessoa)} alt={c.cena.personagem.nome} />}
+          <p class="av-narra">{c.cena.lugar}</p>
+        </div>
         <ol class="cv-lines" ref={listaEl} data-testid="cv-lines">
           {c.linhas.map((l, i) => (
             <li key={i} class={`cv-line ${l.quem}`} data-testid={l.quem === 'personagem' ? 'cv-npc' : 'cv-me'}>

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { KANJI, type Sentence } from '../content';
 import { app, commit, go, kanjimonSave, replaceSave, screen, tick, type Screen } from '../core/app';
+import { cenaStyle, type Cena } from '../core/arte';
 import { hasJapaneseVoice, sfx, speak } from '../core/audio';
 import { levelInfo, readingMeter, recentDays } from '../core/progress';
 import { exportSave } from '../core/save';
@@ -12,15 +13,16 @@ interface Tile {
   jp: string;
   blurb: string;
   screen?: Screen;
+  cena: Cena;
 }
 
 const TILES: Tile[] = [
-  { id: 'kanjimon', title: 'KanjiMon', jp: '漢字モン', blurb: 'Cace kanji, quebre os selos, complete a coleção.', screen: 'kanjimon' },
-  { id: 'kanabeat', title: 'Kana Beat', jp: 'かなビート', blurb: 'Digite no ritmo. Kana e palavras no tempo da batida.', screen: 'kanabeat' },
-  { id: 'roguelike', title: 'Kotodama', jp: '言霊', blurb: 'Roguelike de cartas. Runs curtas, relíquias e um chefe no topo.', screen: 'roguelike' },
-  { id: 'aventura', title: 'Aventura', jp: '冒険', blurb: 'Você chegou ao Japão. Cenas curtas com japonês de verdade.', screen: 'aventura' },
-  { id: 'gramatica', title: 'Kumitate', jp: '組み立て', blurb: 'Monte frases encaixando partículas e pontas de verbo.', screen: 'gramatica' },
-  { id: 'conversa', title: 'Conversa por voz', jp: '会話', blurb: 'Fale japonês com personagens. A IA roda no seu PC.', screen: 'conversa' },
+  { id: 'kanjimon', title: 'KanjiMon', jp: '漢字モン', blurb: 'Cace kanji, quebre os selos, complete a coleção.', screen: 'kanjimon', cena: 'kanjimon-takao' },
+  { id: 'kanabeat', title: 'Kana Beat', jp: 'かなビート', blurb: 'Digite no ritmo. Kana e palavras no tempo da batida.', screen: 'kanabeat', cena: 'kanabeat-dotonbori' },
+  { id: 'roguelike', title: 'Kotodama', jp: '言霊', blurb: 'Roguelike de cartas. Runs curtas, relíquias e um chefe no topo.', screen: 'roguelike', cena: 'kotodama-inari' },
+  { id: 'aventura', title: 'Aventura', jp: '冒険', blurb: 'Você chegou ao Japão. Cenas curtas com japonês de verdade.', screen: 'aventura', cena: 'aventura-narita' },
+  { id: 'gramatica', title: 'Kumitate', jp: '組み立て', blurb: 'Monte frases encaixando partículas e pontas de verbo.', screen: 'gramatica', cena: 'kumitate-gion' },
+  { id: 'conversa', title: 'Conversa por voz', jp: '会話', blurb: 'Fale japonês com personagens. A IA roda no seu PC.', screen: 'conversa', cena: 'conversa-cafe' },
 ];
 
 /** Frases cujo kanji o jogador já encontrou: prova concreta de que dá para ler mais que ontem. */
@@ -137,14 +139,14 @@ export function Hub() {
         </div>
       </header>
 
-      <button class="play-now" onClick={() => go(nextGame)} data-testid="play-now">
+      <button class="play-now" style={cenaStyle('hub-shibuya')} onClick={() => go(nextGame)} data-testid="play-now">
         <span class="play-now-main">Jogar agora</span>
         <span class="play-now-sub">{nextLabel} <kbd>Enter</kbd></span>
       </button>
 
       <section class="tiles">
         {TILES.map((t) => (
-          <button key={t.id} class={t.screen ? 'tile' : 'tile soon'} disabled={!t.screen} onClick={() => t.screen && go(t.screen)}>
+          <button key={t.id} class={t.screen ? 'tile' : 'tile soon'} style={cenaStyle(t.cena)} disabled={!t.screen} onClick={() => t.screen && go(t.screen)}>
             <span class="tile-jp">{t.jp}</span>
             <span class="tile-title">
               {t.title}

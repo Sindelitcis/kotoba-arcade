@@ -48,6 +48,14 @@ test('acertar quebra os selos, captura a carta e paga moedas', async ({ page }) 
   await expect(page.getByTestId('kanji-seen')).toHaveText('1');
 });
 
+test('acertar com o mouse em cima da resposta ainda mostra o vermelho do acerto e carimba ドン', async ({ page }) => {
+  // O hover dos botões ganhava do estilo de acerto e a resposta certa ficava sem cor nenhuma.
+  await startHunt(page);
+  await page.locator('[data-answer="yes"]').click();
+  await expect(page.locator('.choice.right')).toHaveCSS('background-color', 'rgb(215, 38, 30)');
+  await expect(page.locator('.onomato')).toHaveText(/ドン|ズバッ/);
+});
+
 test('errar tira um coração e mostra a resposta certa', async ({ page }) => {
   await startHunt(page);
   await page.locator('.choice:not([data-answer])').first().click();

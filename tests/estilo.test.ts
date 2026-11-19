@@ -1,0 +1,113 @@
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { app, commit } from '../src/core/app';
+import { CENA_AVENTURA, CENA_CONVERSA, NOMES_CENAS, NOMES_PESSOAS, cenaStyle, pessoaUrl } from '../src/core/arte';
+import { yo } from '../src/core/audio';
+import { onomato, SFX_WORDS } from '../src/core/fx';
+import { SCENES, SPEAKERS } from '../src/games/aventura/cenas';
+import { CENAS } from '../src/games/conversa/engine';
+
+const SRC = join(__dirname, '..', 'src');
+
+function arquivos(dir: string): string[] {
+  return readdirSync(dir, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? arquivos(join(dir, e.name)) : [join(dir, e.name)]));
+}
+
+describe('fontes recortadas', () => {
+  it('todo caractere japonês do código e do conteúdo está no recorte das fontes', () => {
+    // Kanji novo no conteúdo sem rodar scripts/recortar-fontes.py sairia na fonte do sistema, fora do estilo.
+    const recorte = new Set(readFileSync(join(SRC, 'assets/fontes/caracteres.txt'), 'utf-8'));
+    const faltando = new Set<string>();
+    for (const f of arquivos(SRC).filter((f) => /\.(tsx?|json)$/.test(f))) {
+      for (const c of readFileSync(f, 'utf-8')) if (c.codePointAt(0)! >= 0x3000 && !recorte.has(c)) faltando.add(c);
+    }
+    expect([...faltando].join('')).toBe('');
+  });
+
+  it('as onomatopeias usam só katakana que está no recorte', () => {
+    const recorte = new Set(readFileSync(join(SRC, 'assets/fontes/caracteres.txt'), 'utf-8'));
+    for (const w of Object.values(SFX_WORDS)) for (const c of w) expect(recorte.has(c), `${w}: ${c}`).toBe(true);
+  });
+});
+
+describe('cenários e personagens', () => {
+  it('toda imagem nomeada existe em src/assets', () => {
+    for (const n of NOMES_CENAS) expect(existsSync(join(SRC, 'assets/cenas', `${n}.webp`)), n).toBe(true);
+    for (const n of NOMES_PESSOAS) expect(existsSync(join(SRC, 'assets/pessoas', `${n}.webp`)), n).toBe(true);
+  });
+
+  it('nenhuma imagem passa de 160 KB', () => {
+    for (const dir of ['cenas', 'pessoas']) {
+      for (const f of arquivos(join(SRC, 'assets', dir))) expect(readFileSync(f).length, f).toBeLessThan(160 * 1024);
+    }
+  });
+
+  it('cada cena da Aventura tem cenário e cada personagem que fala tem retrato', () => {
+    for (const s of SCENES) expect(CENA_AVENTURA[s.id], s.id).toBeDefined();
+    // O aviso da estação é só voz no alto-falante: não tem rosto.
+    for (const id of Object.keys(SPEAKERS).filter((id) => id !== 'aviso')) expect(pessoaUrl(id), id).toBeDefined();
+  });
+
+  it('cada situação da Conversa tem cenário e personagem', () => {
+    for (const c of CENAS) {
+      const arte = CENA_CONVERSA[c.id];
+      expect(arte, c.id).toBeDefined();
+      expect(cenaStyle(arte!.cena)['--cena']).toMatch(/^url\(/);
+      expect(pessoaUrl(arte!.pessoa)).toBeDefined();
+    }
+  });
+
+  it('sem cenário, o quadro fica sem fundo em vez de quebrar', () => {
+    expect(cenaStyle(undefined)).toEqual({});
+  });
+});
+
+describe('sons', () => {
+  it('a escala yo não tem semitom e sobe uma oitava a cada cinco notas', () => {
+    for (let i = 0; i < 14; i++) {
+      const semis = 12 * Math.log2(yo(i + 1) / yo(i));
+      expect(semis).toBeGreaterThanOrEqual(1.99);
+    }
+    expect(yo(5) / yo(0)).toBeCloseTo(2);
+  });
+});
+
+describe('onomatopeia e modo calmo', () => {
+  afterEach(() => {
+    vi.useRealTimers();
+    app.data.settings.calm = false;
+    commit();
+    document.body.innerHTML = '';
+  });
+
+  it('carimba a palavra perto do elemento e some sozinha', () => {
+    vi.useFakeTimers();
+    const alvo = document.createElement('div');
+    document.body.appendChild(alvo);
+    const el = onomato('acerto', alvo, 'shu');
+    expect(el?.textContent).toBe('ドン');
+    expect(el?.classList.contains('c-shu')).toBe(true);
+    expect(document.querySelectorAll('.onomato')).toHaveLength(1);
+    vi.advanceTimersByTime(1000);
+    expect(document.querySelectorAll('.onomato')).toHaveLength(0);
+  });
+
+  it('sem elemento não faz nada', () => {
+    expect(onomato('erro', null)).toBeNull();
+  });
+
+  it('no modo calmo a onomatopeia sai menor e sem giro, e a página ganha o atributo que corta o tremor', () => {
+    app.data.settings.calm = true;
+    commit();
+    expect(document.documentElement.hasAttribute('data-calma')).toBe(true);
+    const alvo = document.createElement('div');
+    document.body.appendChild(alvo);
+    const el = onomato('erro', alvo)!;
+    expect(el.classList.contains('quiet')).toBe(true);
+    expect(el.style.getPropertyValue('--rot')).toBe('0deg');
+    app.data.settings.calm = false;
+    commit();
+    expect(document.documentElement.hasAttribute('data-calma')).toBe(false);
+  });
+});

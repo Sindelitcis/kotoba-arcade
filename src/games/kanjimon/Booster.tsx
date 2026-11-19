@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { app, commit, go, kanjimonSave } from '../../core/app';
 import { sfx, speak } from '../../core/audio';
-import { burstFrom } from '../../core/fx';
+import { burstFrom, onomato } from '../../core/fx';
 import { artUrl, RARITY_COLORS } from './art';
 import { BOOSTER_COST, canOpenBooster, openBooster, RARITY, type BoosterCard } from './engine';
 
@@ -29,10 +29,15 @@ export function Booster() {
     const card = cards[revealed] as BoosterCard;
     const tier = ['c', 'r', 'sr', 'ur'].indexOf(card.rarity);
     sfx.capture(tier);
+    sfx.page();
     if (tier >= 2) sfx.rare();
     speak((card.kanji.words[0] ?? { kana: '' }).kana);
     setRevealed(revealed + 1);
-    requestAnimationFrame(() => burstFrom(row.current?.children[revealed] ?? null, RARITY_COLORS[card.rarity], 24 + tier * 18, 480));
+    requestAnimationFrame(() => {
+      const el = row.current?.children[revealed] ?? null;
+      onomato(tier >= 2 ? 'raro' : 'revela', el, tier >= 2 ? 'kin' : 'tinta');
+      burstFrom(el, RARITY_COLORS[card.rarity], 24 + tier * 18, 480);
+    });
   };
 
   const done = cards.length > 0 && revealed >= cards.length;

@@ -44,6 +44,9 @@ test('do fliperama à primeira peça só no teclado: lição primeiro, depois a 
   await page.keyboard.press(String(ok + 1));
   await expect(page.getByTestId('gr-done')).toBeVisible();
   await expect(page.locator('.gr-slot.filled')).toHaveText(/は/);
+  // A peça que fecha a frase carimba só o ピカッ: as duas onomatopeias juntas tapavam a frase.
+  await expect(page.locator('.onomato')).toHaveCount(1);
+  await expect(page.locator('.onomato')).toHaveText('ピカッ');
 });
 
 test('peça que não serve volta com o porquê, sem tela de erro', async ({ page }) => {

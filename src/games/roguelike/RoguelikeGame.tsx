@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { app, commit, go, roguelikeSave } from '../../core/app';
 import { sfx, speak } from '../../core/audio';
-import { burstFrom, pulse } from '../../core/fx';
+import { cenaStyle } from '../../core/arte';
+import { burstFrom, INK, onomato, pulse } from '../../core/fx';
 import type { Question } from '../../core/questions';
 import { EFFECTS, effectText, faceOf, NODES, RELICS, REST_HEAL, Run, SHARPEN, type Intent, type RunCard, type RunEvent } from './engine';
 
@@ -14,10 +15,10 @@ interface Asking {
 const HIT_DELAY = 520;
 const MISS_DELAY = 1800;
 const COLORS: Record<string, string[]> = {
-  attack: ['#ff5d73', '#ffd166', '#ffffff'],
-  block: ['#4cc9f0', '#7c5cff', '#ffffff'],
-  heal: ['#3ddc97', '#ffffff'],
-  draw: ['#ffd166', '#7c5cff'],
+  attack: [INK.shu, INK.tinta],
+  block: [INK.tinta],
+  heal: [INK.shu, INK.tinta],
+  draw: [INK.tinta],
 };
 
 function newRun(): Run {
@@ -62,10 +63,12 @@ export function RoguelikeGame() {
         const who = run.enemy?.name ?? 'O inimigo';
         if (e.damage > 0) {
           sfx.miss();
+          onomato('golpe', playerEl.current);
           pulse(playerEl.current, 'shake');
           setNote(`${who} atacou: ${e.damage} de dano${e.blocked > 0 ? `, ${e.blocked} no escudo` : ''}.`);
         } else if (e.intent.attack) {
           sfx.click();
+          onomato('defesa', playerEl.current);
           setNote(`${who} atacou e o escudo segurou tudo.`);
         } else {
           sfx.click();
@@ -76,6 +79,7 @@ export function RoguelikeGame() {
       } else if (e.t === 'win') {
         sfx.capture(e.kind === 'combat' ? 0 : e.kind === 'elite' ? 2 : 3);
         burstFrom(enemyEl.current, COLORS.attack as string[], 50, 520);
+        onomato('acerto', enemyEl.current, 'shu', 1.5);
       } else if (e.t === 'levelup') {
         sfx.levelup();
         setNote(`Nível ${e.level}!`);
@@ -119,11 +123,13 @@ export function RoguelikeGame() {
     if (played.correct) {
       sfx.hit(played.combo);
       if (played.fast) sfx.fast();
+      onomato(played.fast ? 'rapido' : 'acerto', document.querySelector('.rg-ask .prompt'), 'shu');
       const target = effect === 'attack' ? enemyEl.current : playerEl.current;
       burstFrom(target, COLORS[effect] as string[], played.fast ? 34 : 20);
       pulse(target, effect === 'attack' ? 'hurt' : 'pop');
     } else {
       sfx.miss();
+      onomato('erro', document.querySelector('.rg-ask .prompt'));
       pulse(fieldEl.current, 'flash-bad');
     }
     const note = played.close
@@ -261,7 +267,7 @@ export function RoguelikeGame() {
                 energia
               </span>
             </div>
-            <div class={`rg-side rg-enemy k-${enemy.kind}`} ref={enemyEl}>
+            <div class={`rg-side rg-enemy k-${enemy.kind}`} ref={enemyEl} style={cenaStyle('kotodama-inari')}>
               <span class="rg-glyph">{enemy.jp}</span>
               <b>{enemy.name}</b>
               <div class="bar">
@@ -425,7 +431,7 @@ export function RoguelikeGame() {
                 ))}
               </div>
             )}
-            <div class={`prompt ${q.kind}`} data-testid="prompt">
+            <div key={q.prompt} class={`prompt ${q.kind}`} data-testid="prompt">
               {q.prompt}
             </div>
             {q.sub && <div class="sub">{q.sub}</div>}
@@ -487,8 +493,8 @@ export function RoguelikeGame() {
       )}
 
       {run.phase === 'over' && !asking && (
-        <div class="overlay" data-testid="rg-over">
-          <h2 class="big">{run.won ? 'Chefe derrotado!' : 'Fim da run'}</h2>
+        <div class={run.won ? 'overlay win' : 'overlay'} data-testid="rg-over">
+          <h2 class={run.won ? 'big win' : 'big'}>{run.won ? 'Chefe derrotado!' : 'Fim da run'}</h2>
           <p class="muted">
             {run.won ? 'Você chegou ao topo.' : 'A vida acabou.'} Tudo que você estudou continua na memória.
           </p>

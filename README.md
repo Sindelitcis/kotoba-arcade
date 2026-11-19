@@ -103,7 +103,9 @@ Kanji nunca vem sozinho: toda carta traz palavras de verdade, com leitura em kan
 ## Organização
 
 ```
-src/core      memória espaçada, seletor de cartas, perguntas, save, kana, som, efeitos
+src/core      memória espaçada, seletor de cartas, perguntas, save, kana, som, efeitos, imagens
+src/assets    fontes recortadas, cenários e personagens
+docs          guia de estilo (estilo.md) e como as imagens foram feitas (imagens.md)
 src/content   kanji, palavras e frases (os 94 kanji do KanjiMon original e o vocabulário do dia a dia)
 src/hub       o fliperama
 src/games     um jogo por pasta; as regras ficam separadas da tela
@@ -116,8 +118,21 @@ As regras de cada jogo ficam em `engine.ts`, sem nada de tela, para dar para tes
 
 O save fica no navegador. Em Ajustes dá para exportar e importar um arquivo de backup.
 
+## Visual
+
+O jogo tem cara de mangá em preto e branco: tinta, retícula, quadros e onomatopeia desenhada. Vermelho só aparece quando você acerta ou ganha alguma coisa. As regras estão em [docs/estilo.md](docs/estilo.md). O modo calmo, em Ajustes, tira o tremor das linhas e diminui os efeitos.
+
 ## Créditos
 
 As artes das cartas e o conteúdo dos 94 kanji vêm do KanjiMon original, feito com Leonardo Carvalho.
+
+Fontes, as duas pela SIL Open Font License 1.1 (o texto da licença está em `src/assets/fontes/`):
+
+- [Dela Gothic One](https://github.com/syakuzen/DelaGothic), de The Dela Gothic Project Authors: títulos e onomatopeias.
+- [Yuji Syuku](https://github.com/Kinutafontfactory/Yuji), de The Yuji Project Authors (Kinuta Font Factory): kanji em pincel.
+
+Cenários e personagens: gerados no PC com o [Animagine XL 4.0](https://huggingface.co/cagliostrolab/animagine-xl-4.0) (Cagliostro Research Lab, licença CreativeML Open RAIL++-M, que permite usar as imagens geradas). Detalhes em [docs/imagens.md](docs/imagens.md).
+
+Sons: todos sintetizados no próprio jogo (`src/core/audio.ts`), sem arquivo de áudio de terceiros.
 
 Vozes da Conversa por voz: VOICEVOX:四国めたん, VOICEVOX:春日部つむぎ, VOICEVOX:青山龍星 e VOICEVOX:玄野武宏.

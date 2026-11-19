@@ -1,7 +1,9 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { findWord } from '../../content/vida';
 import { app, aventuraSave, commit, go, screen } from '../../core/app';
+import { CENA_AVENTURA, cenaStyle, pessoaUrl } from '../../core/arte';
 import { sfx, speak } from '../../core/audio';
+import { onomato } from '../../core/fx';
 import { hasKanji } from '../../core/kana';
 import { SCENES, SPEAKERS } from './cenas';
 import { diaryEntries, isUnlocked, PLAYER, ScenePlay, suggestScene, type PlayEvent, type Scene, type SceneSummary, type TokenView } from './engine';
@@ -110,6 +112,7 @@ export function AventuraGame() {
         setNote(`Nível ${e.level}!`);
       } else if (e.t === 'end') {
         sfx.chest();
+        requestAnimationFrame(() => onomato('captura', document.querySelector('.av-panel h2'), 'shu', 1.2));
         setSummary(e.summary);
         setMode('summary');
       }
@@ -218,7 +221,8 @@ export function AventuraGame() {
           <span class="av-note">{note}</span>
         </header>
 
-        <section class={`av-stage ${s.kind}${mine ? ' mine' : ''}`} data-testid="av-stage" data-kind={s.kind}>
+        <section class={`av-stage ${s.kind}${mine ? ' mine' : ''}`} data-testid="av-stage" data-kind={s.kind} style={cenaStyle(CENA_AVENTURA[play.scene.id])}>
+          {!mine && pessoaUrl(s.who) && <img key={s.who} class="av-portrait" src={pessoaUrl(s.who)} alt={whoName(s.who)} />}
           {s.kind === 'narra' || s.tokens.length === 0 ? (
             <p class="av-narra" data-testid="av-narra">{s.pt}</p>
           ) : (
@@ -281,7 +285,7 @@ export function AventuraGame() {
       <main class="av">
         <section class="av-panel" data-testid="av-summary">
           <span class="muted">Cena concluída</span>
-          <h2 class="big">{summary.scene.title}</h2>
+          <h2 class="big win">{summary.scene.title}</h2>
           <div class="summary">
             <div>
               <b>{summary.lines}</b>
@@ -413,7 +417,7 @@ export function AventuraGame() {
             const open = isUnlocked(SCENES, save, i);
             const done = save.done.includes(scene.id);
             return (
-              <button key={scene.id} class={done ? 'tile done' : open ? 'tile' : 'tile soon'} disabled={!open} onClick={() => start(scene)} data-scene={scene.id}>
+              <button key={scene.id} class={done ? 'tile done' : open ? 'tile' : 'tile soon'} style={cenaStyle(CENA_AVENTURA[scene.id])} disabled={!open} onClick={() => start(scene)} data-scene={scene.id}>
                 <span class="tile-jp" lang="ja">{scene.jp}</span>
                 <span class="tile-title">
                   {scene.title}

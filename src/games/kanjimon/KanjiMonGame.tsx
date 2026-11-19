@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { app, commit, go, kanjimonSave } from '../../core/app';
 import { sfx, speak } from '../../core/audio';
-import { burstFrom, pulse } from '../../core/fx';
+import { cenaStyle } from '../../core/arte';
+import { burstFrom, onomato, pulse } from '../../core/fx';
 import { artUrl, RARITY_COLORS } from './art';
 import { CHEST_EVERY, Hunt, MAX_HEARTS, RARITY, type Enemy, type HuntEvent, type Question } from './engine';
 
@@ -75,6 +76,7 @@ export function KanjiMonGame() {
       pulse(cardEl.current, 'pop');
       if (next.enemy.rarity === 'sr' || next.enemy.rarity === 'ur') {
         sfx.rare();
+        onomato('raro', cardEl.current, 'kin');
         burstFrom(cardEl.current, RARITY_COLORS[next.enemy.rarity], 40);
       }
     }
@@ -98,6 +100,7 @@ export function KanjiMonGame() {
     if (hit) {
       sfx.hit(hit.combo);
       if (hit.fast) sfx.fast();
+      onomato(hit.fast ? 'rapido' : 'acerto', cardEl.current, 'shu');
       burstFrom(cardEl.current, RARITY_COLORS[view.enemy.rarity], hit.fast ? 34 : 20);
       pulse(cardEl.current, 'hurt');
       setFeedback({
@@ -114,6 +117,7 @@ export function KanjiMonGame() {
       }));
     } else {
       sfx.miss();
+      onomato('erro', cardEl.current);
       pulse(arenaEl.current, 'flash-bad');
       pulse(arenaEl.current, 'shake');
       setFeedback({ ok: false, chosen: input });
@@ -162,12 +166,19 @@ export function KanjiMonGame() {
     if (overlay.t === 'capture') {
       const tier = ['c', 'r', 'sr', 'ur'].indexOf(overlay.enemy.rarity);
       sfx.capture(tier);
+      onomato('captura', document.querySelector('.capture-card'), 'shu', 1.3);
       burstFrom(document.querySelector('.capture-card'), RARITY_COLORS[overlay.enemy.rarity], 30 + tier * 20, 520);
       const auto = window.setTimeout(dismiss, 1500);
       return () => clearTimeout(auto);
     }
-    if (overlay.t === 'levelup') sfx.levelup();
-    if (overlay.t === 'chest') sfx.chest();
+    if (overlay.t === 'levelup') {
+      sfx.levelup();
+      onomato('nivel', document.querySelector('.overlay h2'), 'shu', 1.4);
+    }
+    if (overlay.t === 'chest') {
+      sfx.chest();
+      onomato('bau', document.querySelector('.overlay h2'), 'kin', 1.2);
+    }
     if (overlay.t === 'over') sfx.over();
     return undefined;
   }, [overlay]);
@@ -229,7 +240,7 @@ export function KanjiMonGame() {
         </button>
       </header>
 
-      <section class="arena" ref={arenaEl}>
+      <section class="arena" ref={arenaEl} style={cenaStyle('kanjimon-takao')}>
         <div class={`enemy-card r-${view.enemy.rarity}${hideCard ? ' hidden-face' : ''}`} ref={cardEl}>
           <img src={artUrl(view.enemy.kanji, view.enemy.rarity)} alt="" onError={(e) => ((e.target as HTMLImageElement).style.visibility = 'hidden')} />
           <div class="enemy-kanji" data-testid="enemy-kanji">
@@ -253,7 +264,7 @@ export function KanjiMonGame() {
               ))}
             </div>
           )}
-          <div class={`prompt ${q.kind}`} data-testid="prompt">
+          <div key={q.prompt} class={`prompt ${q.kind}`} data-testid="prompt">
             {q.prompt}
           </div>
           {q.sub && <div class="sub">{q.sub}</div>}
@@ -315,7 +326,7 @@ export function KanjiMonGame() {
       </section>
 
       {overlay?.t === 'capture' && (
-        <div class="overlay" onClick={dismiss}>
+        <div class="overlay win" onClick={dismiss}>
           <div class={`capture-card r-${overlay.enemy.rarity}`}>
             <img src={artUrl(overlay.enemy.kanji, overlay.enemy.rarity)} alt="" onError={(e) => ((e.target as HTMLImageElement).style.visibility = 'hidden')} />
             <div class="enemy-kanji">{overlay.enemy.kanji.kanji}</div>
@@ -332,8 +343,8 @@ export function KanjiMonGame() {
       )}
 
       {overlay?.t === 'levelup' && (
-        <div class="overlay" onClick={dismiss}>
-          <h2 class="big">Nível {overlay.level}!</h2>
+        <div class="overlay win" onClick={dismiss}>
+          <h2 class="big win">Nível {overlay.level}!</h2>
           <p class="muted">
             <kbd>Enter</kbd> para seguir
           </p>
@@ -341,8 +352,8 @@ export function KanjiMonGame() {
       )}
 
       {overlay?.t === 'chest' && (
-        <div class="overlay">
-          <h2 class="big">Baú!</h2>
+        <div class="overlay win">
+          <h2 class="big win">Baú!</h2>
           <p class="gain">
             +{overlay.coins} moedas{overlay.booster ? ' · +1 booster grátis' : ''} · +1 coração
           </p>

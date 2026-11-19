@@ -1,7 +1,9 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { findWord } from '../../content/vida';
 import { app, commit, go, gramaticaSave, screen } from '../../core/app';
+import { cenaStyle } from '../../core/arte';
 import { sfx, speak } from '../../core/audio';
+import { onomato } from '../../core/fx';
 import { masteryLevel } from '../../core/srs';
 import { cardOf, exampleView, fits, GramaticaRound, openPoints, plainSentence, ROUND_SIZE, slotWritten, WINS_TO_UNLOCK, type RoundEvent, type RoundSummary, type Written } from './engine';
 import { COURSE, POINTS } from './pontos';
@@ -61,9 +63,14 @@ export function GramaticaGame() {
       if (e.t === 'fit') {
         sfx.hit(e.combo);
         if (e.fast) sfx.fast();
-      } else if (e.t === 'bounce') sfx.click();
-      else if (e.t === 'solved') {
+        // A última peça fecha a frase: aí quem fala é o ピカッ, uma onomatopeia por vez.
+        if (!events.some((x) => x.t === 'solved')) onomato('encaixe', document.querySelector('.gr-slot.active'), 'shu', 0.9);
+      } else if (e.t === 'bounce') {
+        sfx.click();
+        onomato('erro', document.querySelector('.gr-tray'), 'tinta', 0.8);
+      } else if (e.t === 'solved') {
         sfx.capture(1);
+        onomato('captura', document.querySelector('.gr-sentence'), 'shu');
         speak(e.plain);
       } else if (e.t === 'unlock') setNote(`Peça nova a caminho: ${e.point.blocks.join(' ')}`);
       else if (e.t === 'levelup') {
@@ -148,7 +155,7 @@ export function GramaticaGame() {
         </header>
 
         {round.phase === 'lesson' ? (
-          <section class="gr-lesson" data-testid="gr-lesson">
+          <section class="gr-lesson" data-testid="gr-lesson" style={cenaStyle('kumitate-gion')}>
             <span class="gr-tag">Peça nova</span>
             <h2>{pz.point.title}</h2>
             <p>{pz.point.lesson}</p>
@@ -165,7 +172,7 @@ export function GramaticaGame() {
             </button>
           </section>
         ) : (
-          <section class="gr-board" data-testid="gr-board">
+          <section class="gr-board" data-testid="gr-board" style={cenaStyle('kumitate-gion')}>
             <p class="gr-goal" data-testid="gr-goal">{pz.pt}</p>
             <div class="gr-sentence" lang="ja" data-testid="gr-sentence">
               {pz.pieces.map((p, i) => {
@@ -265,7 +272,7 @@ export function GramaticaGame() {
       <main class="gr">
         <section class="av-panel" data-testid="gr-summary">
           <span class="muted">Rodada concluída</span>
-          <h2 class="big">{summary.score} pontos{summary.record ? ' · recorde!' : ''}</h2>
+          <h2 class={summary.record ? 'big win' : 'big'}>{summary.score} pontos{summary.record ? ' · recorde!' : ''}</h2>
           <div class="summary">
             <div>
               <b>{summary.sentences}</b>

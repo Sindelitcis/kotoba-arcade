@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { app, commit, go, kanaBeatSave } from '../../core/app';
 import { sfx, speak } from '../../core/audio';
-import { burst, pulse } from '../../core/fx';
+import { cenaStyle } from '../../core/arte';
+import { burst, INK, onomato, pulse } from '../../core/fx';
 import { kanaToRomaji } from '../../core/kana';
 import { MODE_NAMES, modeForPlay, Stage, type BeatEvent, type Judge, type Mode, type StageResult } from './engine';
 import { startMusic, type Music } from './music';
@@ -10,9 +11,9 @@ const HIT_X = 16; // posição da linha, em % da largura da pista
 const START_DELAY = 150;
 const JUDGE_TEXT: Record<Judge | 'miss', string> = { perfect: 'Perfeito!', good: 'Bom!', ok: 'Valeu', miss: 'Passou' };
 const JUDGE_COLORS: Record<Judge, string[]> = {
-  perfect: ['#ffd166', '#fff3b0', '#ff6b9d'],
-  good: ['#4cc9f0', '#a0e7ff'],
-  ok: ['#9aa5b1', '#cbd2d9'],
+  perfect: [INK.shu, INK.shu, INK.tinta],
+  good: [INK.tinta],
+  ok: [INK.tinta],
 };
 
 interface Run {
@@ -63,6 +64,7 @@ export function KanaBeatGame() {
         const r = lineEl.current?.getBoundingClientRect();
         if (r) burst(r.left + r.width / 2, r.top + r.height / 2, JUDGE_COLORS[e.judge], e.judge === 'perfect' ? 30 : 16, 380);
         pulse(lineEl.current, 'line-hit');
+        if (e.judge === 'perfect') onomato('captura', lineEl.current, 'shu', 0.8);
         setJudge((j) => ({ text: JUDGE_TEXT[e.judge], cls: e.judge, n: j.n + 1 }));
         if (e.note.pt) speak(e.note.kana);
       } else if (e.t === 'miss') {
@@ -75,8 +77,10 @@ export function KanaBeatGame() {
         (run.current as Run).music.stop();
         commit();
         setResult(e.result);
-        if (e.result.grade === 'S' || e.result.record) sfx.levelup();
-        else sfx.chest();
+        if (e.result.grade === 'S' || e.result.record) {
+          sfx.levelup();
+          requestAnimationFrame(() => onomato('nivel', document.querySelector('.kb-grade'), 'shu', 1.3));
+        } else sfx.chest();
       }
     }
   };
@@ -202,7 +206,7 @@ export function KanaBeatGame() {
       </header>
 
       <section class="kb-stage">
-        <div class="kb-track" ref={trackEl}>
+        <div class="kb-track" ref={trackEl} style={cenaStyle('kanabeat-dotonbori')}>
           <div class="kb-line" ref={lineEl} style={{ left: `${HIT_X}%`, opacity: 0.55 + 0.45 * (1 - beatPhase) }} />
           {visible.map((n) => {
             const x = HIT_X + ((n.time - t) / stage.leadMs) * (100 - HIT_X);
@@ -242,7 +246,7 @@ export function KanaBeatGame() {
       )}
 
       {result && (
-        <div class="overlay">
+        <div class={result.grade === 'S' || result.record ? 'overlay win' : 'overlay'}>
           <div class={`kb-grade g-${result.grade}`} data-testid="grade">
             {result.grade}
           </div>
