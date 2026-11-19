@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'preact/hooks';
+import { useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { app, commit, go, kanjimonSave } from '../../core/app';
 import { sfx, speak } from '../../core/audio';
 import { burstFrom, onomato } from '../../core/fx';
@@ -44,7 +44,8 @@ export function Booster() {
   const done = cards.length > 0 && revealed >= cards.length;
   const again = canOpenBooster(app.data.profile, kanjimonSave(), app.data.cards) === 'ok';
 
-  useEffect(() => {
+  // Ligado junto com o desenho da tela: tecla apertada logo que a tela aparece não se perde.
+  useLayoutEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const tecla = teclaDe(e);
       if (tecla === null) return;

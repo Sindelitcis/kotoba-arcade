@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'preact/hooks';
+import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { KANJI, type Sentence } from '../content';
 import { app, commit, go, kanjimonSave, replaceSave, saved, screen, tick, type Screen } from '../core/app';
 import { cenaStyle, type Cena } from '../core/arte';
@@ -60,7 +60,8 @@ export function Hub() {
   const nextLabel = { kanabeat: 'Kana Beat · Próxima música', roguelike: 'Kotodama · Nova run', aventura: 'Aventura · Próxima cena', gramatica: 'Kumitate · Nova rodada', kanjimon: 'KanjiMon · Caçada' }[nextGame];
   const booster = canOpenBooster(profile, km, cards);
 
-  useEffect(() => {
+  // Ligado junto com o desenho da tela: tecla apertada logo que a tela aparece não se perde.
+  useLayoutEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const tecla = teclaDe(e);
       if (tecla === null) return;

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'preact/hooks';
+import { useLayoutEffect, useState } from 'preact/hooks';
 import { cardKey, KANJI, type Kanji } from '../../content';
 import { app, go, kanjimonSave, tick } from '../../core/app';
 import { speak } from '../../core/audio';
@@ -25,7 +25,8 @@ export function Dex() {
   const dex = kanjimonSave().dex;
   const owned = (k: Kanji) => RARITIES.filter((r) => dex[dexKey(k, r)]);
 
-  useEffect(() => {
+  // Ligado junto com o desenho da tela: tecla apertada logo que a tela aparece não se perde.
+  useLayoutEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const tecla = teclaDe(e);
       if (tecla === null) return;

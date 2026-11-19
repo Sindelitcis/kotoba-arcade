@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'preact/hooks';
+import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { app, commit, conversaSave, go, screen } from '../../core/app';
 import { CENA_CONVERSA, cenaStyle, pessoaUrl } from '../../core/arte';
 import { sfx, speak } from '../../core/audio';
@@ -259,7 +259,8 @@ export function ConversaGame() {
       else if (fase === 'desligado') void procurar();
     }
   };
-  useEffect(() => {
+  // Ligado junto com o desenho da tela: tecla apertada logo que a tela aparece não se perde.
+  useLayoutEffect(() => {
     const onKey = (e: KeyboardEvent) => teclaRef.current(e);
     addEventListener('keydown', onKey);
     return () => removeEventListener('keydown', onKey);
