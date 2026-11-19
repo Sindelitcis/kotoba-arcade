@@ -141,3 +141,31 @@ test('sair no meio da cena volta para a lista de cenas sem perder o que foi vist
   await expect(page.getByTestId('av-menu')).toBeVisible();
   await expect(page.getByRole('button', { name: /Diário \(1\)/ })).toBeEnabled();
 });
+
+test('a cena é em cor de anime e a narração volta ao traço de mangá; cena feita fica pintada no menu', async ({ page }) => {
+  await openGame(page);
+  await expect(page.locator('.av-scenes .tile.pintado')).toHaveCount(0);
+  await startScene(page);
+  const vistos = new Set<string>();
+  for (let i = 0; i < 300 && !(await page.getByTestId('av-summary').isVisible()); i++) {
+    const palco = page.getByTestId('av-stage');
+    if (await palco.isVisible()) {
+      const { kind, cor, retrato } = await palco.evaluate((el) => ({
+        kind: el.getAttribute('data-kind') ?? '',
+        cor: (el as HTMLElement).style.getPropertyValue('--cor'),
+        retrato: el.querySelector('.av-portrait')?.className ?? '',
+      }));
+      expect(cor, kind).toBe(kind === 'narra' ? '0' : '1');
+      if (retrato) expect(retrato.includes('cor'), kind).toBe(kind !== 'narra');
+      vistos.add(kind === 'narra' ? 'narra' : 'cena');
+    }
+    const ok = page.locator('.av-option[data-result="ok"]:not(.tried)').first();
+    if (await ok.isVisible()) await ok.click();
+    else await page.keyboard.press('Enter');
+    await page.waitForTimeout(40);
+  }
+  expect([...vistos].sort()).toEqual(['cena', 'narra']);
+  await page.keyboard.press('Escape');
+  await expect(page.getByTestId('av-menu')).toBeVisible();
+  await expect(page.locator('.av-scenes .tile.pintado')).toHaveCount(1);
+});

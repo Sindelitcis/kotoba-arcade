@@ -2,6 +2,8 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { app, commit, go, roguelikeSave } from '../../core/app';
 import { sfx, speak } from '../../core/audio';
 import { cenaStyle } from '../../core/arte';
+import { acertou, cor, corStyle, errou, zerar } from '../../core/cor';
+import { Pintura } from '../../core/Pintura';
 import { burstFrom, INK, onomato, pulse } from '../../core/fx';
 import type { Question } from '../../core/questions';
 import { teclaDe } from '../../core/teclas';
@@ -122,6 +124,7 @@ export function RoguelikeGame() {
     const effect = asking.card.effect;
     const what = `${EFFECTS[effect].name}: ${effectText(effect, played.amount)}`;
     if (played.correct) {
+      acertou(played.combo);
       sfx.hit(played.combo);
       if (played.fast) sfx.fast();
       onomato(played.fast ? 'rapido' : 'acerto', document.querySelector('.rg-ask .prompt'), 'shu');
@@ -129,6 +132,7 @@ export function RoguelikeGame() {
       burstFrom(target, COLORS[effect] as string[], played.fast ? 34 : 20);
       pulse(target, effect === 'attack' ? 'hurt' : 'pop');
     } else {
+      errou();
       sfx.miss();
       onomato('erro', document.querySelector('.rg-ask .prompt'));
       pulse(fieldEl.current, 'flash-bad');
@@ -166,6 +170,7 @@ export function RoguelikeGame() {
   const restart = () => {
     clearTimeout(timer.current);
     runRef.current = newRun();
+    zerar();
     setAsking(null);
     setNote('');
     redraw();
@@ -271,7 +276,14 @@ export function RoguelikeGame() {
                 energia
               </span>
             </div>
-            <div class={`rg-side rg-enemy k-${enemy.kind}`} ref={enemyEl} style={cenaStyle('kotodama-inari')}>
+            <div
+              class={`rg-side rg-enemy k-${enemy.kind}`}
+              ref={enemyEl}
+              // Chefe e elite já entram em cor cheia; no combate comum o santuário ganha cor com os acertos.
+              style={{ ...cenaStyle('kotodama-inari'), ...corStyle(enemy.kind === 'combat' ? cor.value : 1) }}
+              data-testid="rg-enemy"
+            >
+              <Pintura cena="kotodama-inari" />
               <span class="rg-glyph">{enemy.jp}</span>
               <b>{enemy.name}</b>
               <div class="bar">

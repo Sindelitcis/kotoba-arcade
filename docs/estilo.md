@@ -1,8 +1,8 @@
 # Guia de estilo
 
-O Kotoba Arcade tem cara de mangá em preto e branco: tinta sobre papel, retícula, quadros de HQ e onomatopeia desenhada. A cor quase não aparece. Quando aparece, é porque você acertou ou ganhou alguma coisa.
+O Kotoba Arcade mistura duas coisas: mangá em preto e branco (tinta sobre papel, retícula, quadros de HQ, onomatopeia desenhada) e anime colorido atual. A tela começa no traço. A cor de anime chega quando você vai bem e vai embora devagar quando você erra ou para. Veja "Mangá e anime" mais abaixo.
 
-Fica de fora qualquer coisa com cara de anos 80 ou 90: city pop, neon, VHS, tela de tubo, pixel art, degradê roxo. A referência é mangá atual impresso.
+Fica de fora qualquer coisa com cara de anos 80 ou 90: city pop, neon, VHS, tela de tubo, pixel art, degradê roxo. A referência é mangá atual impresso e anime atual: cor limpa, luz clara, céu azul.
 
 ## Cores
 
@@ -21,6 +21,15 @@ Todas ficam em `:root` no `src/styles.css`. Não use cor solta no CSS: use o tok
 Erro nunca é vermelho. Erro é tinta: risco, tremor, retícula escura. Vermelho é sempre coisa boa.
 
 `--shu` e `--kin` são cores de destaque. Se uma tela tiver mais de dois ou três pontos vermelhos ao mesmo tempo, algum está sobrando.
+
+A paleta de anime só entra junto com a cor de recompensa (o `--cor` subindo), nunca no traço de mangá parado:
+
+| Token | Valor | Para quê |
+| --- | --- | --- |
+| `--sora` | `#2f9be8` | azul de céu: linha do Kana Beat, raios de vitória |
+| `--sakura` | `#ff6f9f` | rosa: combo cheio, chefe do Kotodama, captura |
+| `--midori` | `#2fbf71` | verde: relíquias |
+| `--yuuhi` | `#ff9f2e` | laranja de fim de tarde: relíquias, brilho do chefe |
 
 ## Fontes
 
@@ -99,9 +108,53 @@ Regras:
 
 O modo calmo (`Ajustes`) e o `prefers-reduced-motion` do sistema desligam o tremor de quadro, encurtam os trancos, deixam a onomatopeia menor e sem giro e cortam a maior parte dos respingos. A informação continua toda na tela.
 
+## Mangá e anime
+
+### A cor é recompensa
+
+Cada quadro com cenário tem duas camadas: o desenho de mangá e, por cima, a mesma imagem pintada em anime (`<Pintura>` em `src/core/Pintura.tsx`). A camada colorida aparece por um borrão de tinta que cresce do meio do quadro, controlado pela variável CSS `--cor`, de 0 (só tinta) a 1 (cor cheia). O valor sai de `src/core/cor.ts`:
+
+- Acerto: a cor sobe até o nível do combo. Seis acertos seguidos enchem (no Kana Beat, dez notas). Um acerto nunca tira cor.
+- Erro: sobra 35% da cor. Ela cai devagar (a transição leva 0,9 s), não some de uma vez.
+- Pausa, recomeço e troca de tela: volta para o traço.
+- Progresso que só cresce (frases da rodada do Kumitate): usa `progresso()`.
+
+### Onde é mangá
+
+A leitura pede foco, então nessas telas o traço manda e a cor é só acento:
+
+- Kumitate: o tabuleiro ganha no máximo metade da cor, aos poucos, a cada frase montada. A lição fica toda em mangá.
+- Perguntas do KanjiMon: a arena pinta com o combo, mas a carta e as respostas continuam no traço.
+- KanjiDex e painel de ajuda: só mangá, com o vermelho e o dourado de sempre.
+- Quadros de passagem e onomatopeia: a narração da Aventura é um quadro de mangá, mesmo no meio de uma cena colorida.
+
+### Onde é anime
+
+Onde a graça é viver ou comemorar, a cor entra cheia:
+
+- Aventura e Conversa: lugar e personagem em cor de anime durante a cena. A narração volta ao mangá. Os retratos coloridos são as mesmas pessoas do mangá.
+- Captura e booster do KanjiMon: a arte da carta sai do cinza para a cor e estoura para fora do quadro com aros rosa e azul. A arte continua a original de `kanjimon.online`; só o efeito muda.
+- Chefe e elite do Kotodama entram em cor cheia; relíquias têm fundo colorido. No combate comum o santuário pinta com os acertos.
+- Kana Beat: a rua de Dotonbori acende com o combo, e a linha de acerto passa de tinta para azul.
+- Vitória (nível, baú, fim de rodada): raios azuis e rosa atrás do quadro.
+
+### O fliperama mistura os dois
+
+A capa é mangá. Cada jogo que você já jogou de verdade (capturou, terminou uma música, uma run, uma cena, uma rodada, uma conversa) aparece pintado, como um mapa que vai ganhando cor. A capa "Jogar agora" pinta na mesma proporção: com os seis jogos jogados, Shibuya fica toda colorida. Nos menus da Aventura e da Conversa, cena concluída também fica pintada.
+
+### Como uma passa para a outra
+
+Sem corte seco nem esmaecido genérico. A passagem é sempre de tinta:
+
+- Borrão de tinta que vira cor: a máscara cresce do centro, com respingos em volta.
+- Pincelada: ao abrir uma cena da Aventura ou uma conversa, o borrão cresce do zero até cheio (animação `pintar`).
+- Corte de quadro: a narração volta ao mangá dentro do mesmo quadro.
+
+No modo calmo a cor ainda chega, mas mais devagar (1,6 s), um pouco menos saturada e sem as animações de pintar e de colorir carta.
+
 ## Cenários e personagens
 
-Lugares reais do Japão, desenhados em preto e branco (cruzamento de Shibuya, Fushimi Inari, Dotonbori, aeroporto de Narita, estação de Shinjuku). Ficam em `src/assets/cenas/` e `src/assets/pessoas/`, em WebP cinza, com no máximo 960px de largura.
+Lugares reais do Japão (cruzamento de Shibuya, Fushimi Inari, Dotonbori, aeroporto de Narita, estação de Shinjuku), cada um em duas versões com a mesma composição: mangá em `src/assets/cenas/` e `src/assets/pessoas/` (WebP cinza) e anime em `src/assets/cenas-cor/` e `src/assets/pessoas-cor/` (WebP colorido). Todas com no máximo 960px de largura e menos de 160 KB. Um teste falha se uma imagem de mangá ficar sem a versão colorida.
 
 Foram gerados no PC com um modelo aberto (veja os créditos no README). Para gerar de novo, siga `docs/imagens.md`.
 

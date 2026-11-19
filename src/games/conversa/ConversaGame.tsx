@@ -1,6 +1,8 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { app, commit, conversaSave, go, screen } from '../../core/app';
-import { CENA_CONVERSA, cenaStyle, pessoaUrl } from '../../core/arte';
+import { CENA_CONVERSA, cenaStyle, pessoaCorUrl, pessoaUrl } from '../../core/arte';
+import { corStyle } from '../../core/cor';
+import { Pintura } from '../../core/Pintura';
 import { sfx, speak } from '../../core/audio';
 import { VOZ_CONVERSA } from '../../core/vozes';
 import { onomato } from '../../core/fx';
@@ -333,7 +335,14 @@ export function ConversaGame() {
           </button>
           <div class="av-scenes">
             {CENAS.map((c, i) => (
-              <button key={c.id} class={save.cenas[c.id] ? 'tile done' : 'tile'} onClick={() => comecar(c)} data-scene={c.id}>
+              <button
+                key={c.id}
+                class={save.cenas[c.id] ? 'tile done pintado' : 'tile'}
+                style={{ ...cenaStyle(CENA_CONVERSA[c.id]?.cena), ...corStyle(save.cenas[c.id] ? 1 : 0) }}
+                onClick={() => comecar(c)}
+                data-scene={c.id}
+              >
+                <Pintura cena={CENA_CONVERSA[c.id]?.cena} />
                 <span class="tile-jp" lang="ja">
                   {c.jp}
                 </span>
@@ -466,8 +475,16 @@ export function ConversaGame() {
       </header>
 
       <section class="cv-chat">
-        <div class="cv-cena" style={cenaStyle(CENA_CONVERSA[c.cena.id]?.cena)}>
-          {pessoaUrl(CENA_CONVERSA[c.cena.id]?.pessoa) && <img src={pessoaUrl(CENA_CONVERSA[c.cena.id]?.pessoa)} alt={c.cena.personagem.nome} />}
+        {/* Conversar é viver a cena: lugar e personagem em cor de anime. */}
+        <div class="cv-cena" style={{ ...cenaStyle(CENA_CONVERSA[c.cena.id]?.cena), ...corStyle(1) }} data-testid="cv-cena">
+          <Pintura cena={CENA_CONVERSA[c.cena.id]?.cena} />
+          {pessoaUrl(CENA_CONVERSA[c.cena.id]?.pessoa) && (
+            <img
+              class={pessoaCorUrl(CENA_CONVERSA[c.cena.id]?.pessoa) ? 'cor' : undefined}
+              src={pessoaCorUrl(CENA_CONVERSA[c.cena.id]?.pessoa) ?? pessoaUrl(CENA_CONVERSA[c.cena.id]?.pessoa)}
+              alt={c.cena.personagem.nome}
+            />
+          )}
           <p class="av-narra">{c.cena.lugar}</p>
         </div>
         <ol class="cv-lines" ref={listaEl} data-testid="cv-lines">

@@ -2,7 +2,7 @@ import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { app, commit } from '../src/core/app';
-import { CENA_AVENTURA, CENA_CONVERSA, NOMES_CENAS, NOMES_PESSOAS, cenaStyle, pessoaUrl } from '../src/core/arte';
+import { CENA_AVENTURA, CENA_CONVERSA, NOMES_CENAS, NOMES_PESSOAS, cenaCorUrl, cenaStyle, pessoaCorUrl, pessoaUrl } from '../src/core/arte';
 import { yo } from '../src/core/audio';
 import { onomato, SFX_WORDS } from '../src/core/fx';
 import { SCENES, SPEAKERS } from '../src/games/aventura/cenas';
@@ -37,8 +37,18 @@ describe('cenários e personagens', () => {
     for (const n of NOMES_PESSOAS) expect(existsSync(join(SRC, 'assets/pessoas', `${n}.webp`)), n).toBe(true);
   });
 
+  it('toda imagem de mangá tem a versão anime colorida com o mesmo nome', () => {
+    // Sem a versão colorida, a recompensa de cor não aparece naquele cenário ou personagem.
+    for (const n of NOMES_CENAS) expect(cenaCorUrl(n), n).toBeDefined();
+    for (const n of NOMES_PESSOAS) expect(pessoaCorUrl(n), n).toBeDefined();
+    const cenasCor = readdirSync(join(SRC, 'assets/cenas-cor')).map((f) => f.replace('.webp', ''));
+    const pessoasCor = readdirSync(join(SRC, 'assets/pessoas-cor')).map((f) => f.replace('.webp', ''));
+    expect(cenasCor.sort()).toEqual([...NOMES_CENAS].sort());
+    expect(pessoasCor.sort()).toEqual([...NOMES_PESSOAS].sort());
+  });
+
   it('nenhuma imagem passa de 160 KB', () => {
-    for (const dir of ['cenas', 'pessoas']) {
+    for (const dir of ['cenas', 'pessoas', 'cenas-cor', 'pessoas-cor']) {
       for (const f of arquivos(join(SRC, 'assets', dir))) expect(readFileSync(f).length, f).toBeLessThan(160 * 1024);
     }
   });

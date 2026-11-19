@@ -1,7 +1,9 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { findWord } from '../../content/vida';
 import { app, aventuraSave, commit, go, screen } from '../../core/app';
-import { CENA_AVENTURA, cenaStyle, pessoaUrl } from '../../core/arte';
+import { CENA_AVENTURA, cenaStyle, pessoaCorUrl, pessoaUrl } from '../../core/arte';
+import { corStyle } from '../../core/cor';
+import { Pintura } from '../../core/Pintura';
 import { sfx, speak } from '../../core/audio';
 import { vozDaAventura } from '../../core/vozes';
 import { onomato } from '../../core/fx';
@@ -225,8 +227,22 @@ export function AventuraGame() {
           <span class="av-note">{note}</span>
         </header>
 
-        <section class={`av-stage ${s.kind}${mine ? ' mine' : ''}`} data-testid="av-stage" data-kind={s.kind} style={cenaStyle(CENA_AVENTURA[play.scene.id])}>
-          {!mine && pessoaUrl(s.who) && <img key={s.who} class="av-portrait" src={pessoaUrl(s.who)} alt={whoName(s.who)} />}
+        <section
+          class={`av-stage ${s.kind}${mine ? ' mine' : ''}`}
+          data-testid="av-stage"
+          data-kind={s.kind}
+          // Viver a cena é em cor de anime; a narração é o quadro de mangá que faz a passagem.
+          style={{ ...cenaStyle(CENA_AVENTURA[play.scene.id]), ...corStyle(s.kind === 'narra' ? 0 : 1) }}
+        >
+          <Pintura cena={CENA_AVENTURA[play.scene.id]} />
+          {!mine && pessoaUrl(s.who) && (
+            <img
+              key={`${s.who}-${s.kind === 'narra' ? 'tinta' : 'cor'}`}
+              class={s.kind === 'narra' ? 'av-portrait' : 'av-portrait cor'}
+              src={(s.kind !== 'narra' && pessoaCorUrl(s.who)) || pessoaUrl(s.who)}
+              alt={whoName(s.who)}
+            />
+          )}
           {s.kind === 'narra' || s.tokens.length === 0 ? (
             <p class="av-narra" data-testid="av-narra">{s.pt}</p>
           ) : (
@@ -421,7 +437,15 @@ export function AventuraGame() {
             const open = isUnlocked(SCENES, save, i);
             const done = save.done.includes(scene.id);
             return (
-              <button key={scene.id} class={done ? 'tile done' : open ? 'tile' : 'tile soon'} style={cenaStyle(CENA_AVENTURA[scene.id])} disabled={!open} onClick={() => start(scene)} data-scene={scene.id}>
+              <button
+                key={scene.id}
+                class={done ? 'tile done pintado' : open ? 'tile' : 'tile soon'}
+                style={{ ...cenaStyle(CENA_AVENTURA[scene.id]), ...corStyle(done ? 1 : 0) }}
+                disabled={!open}
+                onClick={() => start(scene)}
+                data-scene={scene.id}
+              >
+                <Pintura cena={CENA_AVENTURA[scene.id]} />
                 <span class="tile-jp" lang="ja">{scene.jp}</span>
                 <span class="tile-title">
                   {scene.title}

@@ -2,6 +2,8 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { app, commit, go, kanjimonSave } from '../../core/app';
 import { sfx, speak } from '../../core/audio';
 import { cenaStyle } from '../../core/arte';
+import { acertou, cor, corStyle, errou, zerar } from '../../core/cor';
+import { Pintura } from '../../core/Pintura';
 import { burstFrom, onomato, pulse } from '../../core/fx';
 import { teclaDe } from '../../core/teclas';
 import { artUrl, RARITY_COLORS } from './art';
@@ -99,6 +101,7 @@ export function KanjiMonGame() {
     }
 
     if (hit) {
+      acertou(hit.combo);
       sfx.hit(hit.combo);
       if (hit.fast) sfx.fast();
       onomato(hit.fast ? 'rapido' : 'acerto', cardEl.current, 'shu');
@@ -117,6 +120,7 @@ export function KanjiMonGame() {
         enemy: { ...v.enemy, seals: hit.sealsLeft },
       }));
     } else {
+      errou();
       sfx.miss();
       onomato('erro', cardEl.current);
       pulse(arenaEl.current, 'flash-bad');
@@ -138,6 +142,7 @@ export function KanjiMonGame() {
   const dismiss = () => {
     if (!overlay) return;
     if (overlay.t === 'over') {
+      zerar();
       hunt.current = newHunt();
       hunt.current.start();
       setOverlays([]);
@@ -244,7 +249,8 @@ export function KanjiMonGame() {
         </button>
       </header>
 
-      <section class="arena" ref={arenaEl} style={cenaStyle('kanjimon-takao')}>
+      <section class="arena" ref={arenaEl} style={{ ...cenaStyle('kanjimon-takao'), ...corStyle(cor.value) }} data-testid="arena">
+        <Pintura cena="kanjimon-takao" />
         <div class={`enemy-card r-${view.enemy.rarity}${hideCard ? ' hidden-face' : ''}`} ref={cardEl}>
           <img src={artUrl(view.enemy.kanji, view.enemy.rarity)} alt="" onError={(e) => ((e.target as HTMLImageElement).style.visibility = 'hidden')} />
           <div class="enemy-kanji" data-testid="enemy-kanji">

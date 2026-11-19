@@ -2,6 +2,8 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { findWord } from '../../content/vida';
 import { app, commit, go, gramaticaSave, screen } from '../../core/app';
 import { cenaStyle } from '../../core/arte';
+import { corStyle, progresso } from '../../core/cor';
+import { Pintura } from '../../core/Pintura';
 import { sfx, speak } from '../../core/audio';
 import { onomato } from '../../core/fx';
 import { masteryLevel } from '../../core/srs';
@@ -175,7 +177,13 @@ export function GramaticaGame() {
             </button>
           </section>
         ) : (
-          <section class="gr-board" data-testid="gr-board" style={cenaStyle('kumitate-gion')}>
+          <section
+            class="gr-board"
+            data-testid="gr-board"
+            // Kumitate é leitura: segue mangá, e só o fundo de Gion ganha um acento de cor a cada frase montada (no máximo metade).
+            style={{ ...cenaStyle('kumitate-gion'), ...corStyle(0.5 * progresso(round.index + (round.phase === 'solved' ? 1 : 0), ROUND_SIZE)) }}
+          >
+            <Pintura cena="kumitate-gion" />
             <p class="gr-goal" data-testid="gr-goal">{pz.pt}</p>
             <div class="gr-sentence" lang="ja" data-testid="gr-sentence">
               {pz.pieces.map((p, i) => {

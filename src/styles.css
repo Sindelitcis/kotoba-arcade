@@ -13,6 +13,13 @@
   font-display: swap;
 }
 
+/* Quanto de cor anime a tela tem (0 = só tinta, 1 = cor cheia). Registrada para poder animar. */
+@property --cor {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0;
+}
+
 :root {
   --papel: #f4f0e6;
   --papel-2: #e8e2d4;
@@ -22,6 +29,13 @@
   --cinza: #8b857b;
   --shu: #d7261e;
   --kin: #e0a526;
+  /* Paleta anime: só aparece quando a tela ganha cor (acerto, combo, cena viva, celebração). */
+  --sora: #2f9be8;
+  --sakura: #ff6f9f;
+  --midori: #2fbf71;
+  --yuuhi: #ff9f2e;
+  /* Borrão de tinta que revela a cor: cresce de dentro para fora com --cor. */
+  --borrao: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cg fill='%23000'%3E%3Ccircle cx='50' cy='50' r='31'/%3E%3Ccircle cx='77' cy='39' r='10'/%3E%3Ccircle cx='25' cy='66' r='12'/%3E%3Ccircle cx='62' cy='80' r='9'/%3E%3Ccircle cx='31' cy='27' r='9'/%3E%3Ccircle cx='88' cy='71' r='4'/%3E%3Ccircle cx='11' cy='41' r='4.5'/%3E%3Ccircle cx='70' cy='15' r='5'/%3E%3Ccircle cx='43' cy='92' r='3.5'/%3E%3C/g%3E%3C/svg%3E");
 
   --jp: 'Yu Gothic UI', 'Yu Gothic', 'Hiragino Sans', 'Noto Sans JP', 'Meiryo', sans-serif;
   --f-texto: 'Segoe UI', system-ui, -apple-system, sans-serif;
@@ -734,13 +748,69 @@ button.small { padding: 3px 10px; font-size: 0.8rem; }
 .gr-stars { color: var(--shu); letter-spacing: 0.1em; }
 .gr-learned { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
 
+/* ───────── Cor anime como recompensa (docs/estilo.md) ───────── */
+[style*='--cor'] { transition: --cor 0.9s cubic-bezier(0.3, 0, 0.2, 1); }
+.pinta {
+  position: absolute !important; inset: 0; z-index: 0 !important; pointer-events: none;
+  background: var(--veu, linear-gradient(transparent, transparent)), var(--cena-cor) center / cover;
+  -webkit-mask: var(--borrao) center / calc(var(--cor) * 340%) calc(var(--cor) * 340%) no-repeat;
+  mask: var(--borrao) center / calc(var(--cor) * 340%) calc(var(--cor) * 340%) no-repeat;
+}
+.tile { --veu: linear-gradient(0deg, rgba(255, 253, 248, 0.96) 26%, rgba(255, 253, 248, 0.55) 52%, rgba(255, 253, 248, 0) 80%); }
+.play-now { --veu: linear-gradient(90deg, rgba(21, 19, 19, 0.85) 0%, rgba(21, 19, 19, 0.35) 45%, rgba(21, 19, 19, 0) 75%); }
+.arena { --veu: linear-gradient(rgba(255, 253, 248, 0.74), rgba(255, 253, 248, 0.74)); }
+.kb-track { --veu: linear-gradient(rgba(255, 253, 248, 0.5), rgba(255, 253, 248, 0.5)); }
+.rg-side { --veu: linear-gradient(0deg, var(--branco) 30%, rgba(255, 253, 248, 0.35)); }
+.av-stage { --veu: linear-gradient(90deg, rgba(255, 253, 248, 0.94) 36%, rgba(255, 253, 248, 0.55) 62%, rgba(255, 253, 248, 0) 88%); }
+.gr-board { --veu: linear-gradient(0deg, var(--branco) 52%, rgba(255, 253, 248, 0.55)); }
+.cv-cena { --veu: linear-gradient(90deg, rgba(255, 253, 248, 0.94) 32%, rgba(255, 253, 248, 0) 80%); }
+.tile.pintado .tile-jp { color: var(--tinta); text-shadow: 0 0 8px var(--branco), 0 0 3px var(--branco); }
+.tile.pintado::after { border-color: var(--tinta); }
+
+/* Retrato colorido por cima do de mangá: a cor entra junto com a fala. */
+.av-portrait.cor { filter: none; }
+.cv-cena img.cor { filter: none; }
+.av-stage:not(.narra) { animation: pintar 0.8s ease both; }
+.cv-cena { animation: pintar 1.1s ease both 0.15s; }
+@keyframes pintar { from { --cor: 0; } }
+
+/* Acentos que esquentam com a cor: o combo, a linha do Kana Beat, a luz do palco. */
+.combo.on { color: color-mix(in oklab, var(--shu), var(--sakura) calc(var(--cor) * 60%)); }
+.kb-line { background: color-mix(in oklab, var(--tinta), var(--sora) calc(var(--cor) * 100%)); }
+.kb-track[style*='--cor'] { box-shadow: var(--sombra), inset 0 0 calc(var(--cor) * 70px) rgb(255 159 46 / calc(var(--cor) * 0.55)); }
+.kb-note.target { background: color-mix(in oklab, var(--tinta), #1d4f8f calc(var(--cor) * 100%)); }
+
+/* Chefe, elite e relíquias do Kotodama: anime colorido. */
+.rg-enemy.k-boss .rg-glyph, .rg-enemy.k-elite .rg-glyph { text-shadow: 0 0 10px var(--branco), 0 0 3px var(--branco); }
+.rg-enemy.k-boss::before { background: repeating-conic-gradient(from 0deg at 50% 50%, var(--sakura) 0 0.5deg, transparent 0.5deg 3.2deg); opacity: 0.6; z-index: 1; }
+.rg-relic { background: linear-gradient(135deg, #ffe4ee, #dff0ff); border-color: var(--tinta); }
+.rg-relic:nth-child(3n + 2) { background: linear-gradient(135deg, #fff1d6, #ffe0ec); }
+.rg-relic:nth-child(3n) { background: linear-gradient(135deg, #dcf6e8, #e1efff); }
+
+/* Captura e booster: a arte colorida da carta estoura do quadro de tinta. */
+.overlay.win::before { background: repeating-conic-gradient(from 0deg at 50% 50%, var(--sora) 0 0.6deg, transparent 0.6deg 3deg), repeating-conic-gradient(from 1.4deg at 50% 50%, var(--sakura) 0 0.4deg, transparent 0.4deg 4.1deg); opacity: 0.45; }
+.capture-card { animation: estourar 0.75s cubic-bezier(0.2, 1.3, 0.4, 1) both; }
+.booster .enemy-card.flip-in img { animation: colorir 0.7s ease both; }
+@keyframes estourar {
+  0% { transform: scale(0.82); filter: grayscale(1) contrast(1.3); box-shadow: 0 0 0 0 var(--tinta); }
+  35% { transform: scale(0.86) rotate(-2deg); filter: grayscale(1) contrast(1.3); }
+  60% { transform: scale(1.14) rotate(2deg); filter: grayscale(0) saturate(1.4); box-shadow: 0 0 0 14px var(--sakura), 0 0 0 26px var(--sora); }
+  100% { transform: scale(1); filter: none; }
+}
+@keyframes colorir { 0%, 30% { filter: grayscale(1) contrast(1.3); } 100% { filter: none; } }
+
 /* ───────── Modo calmo e movimento reduzido ───────── */
+[data-calma] [style*='--cor'] { transition-duration: 1.6s; }
+[data-calma] .pinta { filter: saturate(0.75); }
+[data-calma] .av-stage:not(.narra), [data-calma] .cv-cena { animation: none; }
+[data-calma] .booster .enemy-card.flip-in img { animation: none; }
 [data-calma] *::after, [data-calma] *::before { animation: none !important; }
 [data-calma] .kb-track::before { animation: none; }
 /* Dicas, "pensando" e microfone ficam parados: o contorno e a cor já dizem o que é. */
 [data-calma] .choice.hint, [data-calma] .gr-block.hint, [data-calma] .gr-slot.active .gr-jp, [data-calma] .cv-line.thinking .cv-jp, [data-calma] .cv-mic.on { animation: none; }
 [data-calma] .hurt { animation-duration: 0.15s; }
 [data-calma] .capture-card, [data-calma] .kb-grade { animation: fade 0.2s ease; }
+[data-calma] .overlay.win::before { opacity: 0.25; }
 [data-calma] .combo.on { transform: none; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }

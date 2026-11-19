@@ -132,7 +132,7 @@ O texto fica em `src/content/ajuda/`, um arquivo por jogo. Um teste confere que 
 
 ## Visual
 
-O jogo tem cara de mangá em preto e branco: tinta, retícula, quadros e onomatopeia desenhada. Vermelho só aparece quando você acerta ou ganha alguma coisa. As regras estão em [docs/estilo.md](docs/estilo.md). O modo calmo, em Ajustes, tira o tremor das linhas e diminui os efeitos.
+O jogo mistura mangá em preto e branco (tinta, retícula, quadros, onomatopeia desenhada) com anime colorido. Toda tela começa no traço e ganha cor conforme você acerta: combo, sequência, cena terminada. Errou ou pausou, a cor volta para a tinta devagar. No fliperama, cada jogo que você já jogou fica pintado. As regras estão em [docs/estilo.md](docs/estilo.md). O modo calmo, em Ajustes, tira o tremor das linhas, deixa a cor chegar mais devagar e diminui os efeitos.
 
 ## Créditos
 
@@ -143,7 +143,7 @@ Fontes, as duas pela SIL Open Font License 1.1 (o texto da licença está em `sr
 - [Dela Gothic One](https://github.com/syakuzen/DelaGothic), de The Dela Gothic Project Authors: títulos e onomatopeias.
 - [Yuji Syuku](https://github.com/Kinutafontfactory/Yuji), de The Yuji Project Authors (Kinuta Font Factory): kanji em pincel.
 
-Cenários e personagens: gerados no PC com o [Animagine XL 4.0](https://huggingface.co/cagliostrolab/animagine-xl-4.0) (Cagliostro Research Lab, licença CreativeML Open RAIL++-M, que permite usar as imagens geradas). Detalhes em [docs/imagens.md](docs/imagens.md).
+Cenários e personagens, nas versões mangá e anime: gerados no PC com o [Animagine XL 4.0](https://huggingface.co/cagliostrolab/animagine-xl-4.0) (Cagliostro Research Lab, licença CreativeML Open RAIL++-M, que permite usar as imagens geradas). Detalhes em [docs/imagens.md](docs/imagens.md).
 
 Efeitos sonoros: todos sintetizados no próprio jogo (`src/core/audio.ts`). As falas em japonês são gravações, com as vozes no fim desta seção.
 

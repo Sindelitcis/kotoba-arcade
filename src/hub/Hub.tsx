@@ -1,8 +1,10 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { KANJI, type Sentence } from '../content';
-import { app, commit, go, kanjimonSave, replaceSave, saved, screen, tick, type Screen } from '../core/app';
+import { app, aventuraSave, commit, conversaSave, go, gramaticaSave, kanaBeatSave, kanjimonSave, replaceSave, roguelikeSave, saved, screen, tick, type Screen } from '../core/app';
 import { cenaStyle, type Cena } from '../core/arte';
 import { hasJapaneseVoice, sfx, speak } from '../core/audio';
+import { corStyle, visitados, type Saves } from '../core/cor';
+import { Pintura } from '../core/Pintura';
 import { useSubtelaAjuda } from '../core/help/ajuda';
 import { levelInfo, readingMeter, recentDays } from '../core/progress';
 import { exportSave } from '../core/save';
@@ -61,6 +63,9 @@ export function Hub() {
       : 'kanjimon';
   const nextLabel = { kanabeat: 'Kana Beat · Próxima música', roguelike: 'Kotodama · Nova run', aventura: 'Aventura · Próxima cena', gramatica: 'Kumitate · Nova rodada', kanjimon: 'KanjiMon · Caçada' }[nextGame];
   const booster = canOpenBooster(profile, km, cards);
+  // Mapa sendo pintado: cada jogo já jogado ganha cor no fliperama, e a capa pinta junto.
+  const pintados = visitados({ kanjimon: km, kanabeat: kanaBeatSave(), roguelike: roguelikeSave(), aventura: aventuraSave(), gramatica: gramaticaSave(), conversa: conversaSave() });
+  const quantos = Object.values(pintados).filter(Boolean).length;
 
   // Ligado junto com o desenho da tela: tecla apertada logo que a tela aparece não se perde.
   useLayoutEffect(() => {
@@ -159,14 +164,23 @@ export function Hub() {
         </p>
       )}
 
-      <button class="play-now" style={cenaStyle('hub-shibuya')} onClick={() => go(nextGame)} data-testid="play-now">
+      <button class="play-now" style={{ ...cenaStyle('hub-shibuya'), ...corStyle(quantos / TILES.length) }} onClick={() => go(nextGame)} data-testid="play-now">
+        <Pintura cena="hub-shibuya" />
         <span class="play-now-main">Jogar agora</span>
         <span class="play-now-sub">{nextLabel} <kbd>Enter</kbd></span>
       </button>
 
       <section class="tiles">
         {TILES.map((t) => (
-          <button key={t.id} class={t.screen ? 'tile' : 'tile soon'} style={cenaStyle(t.cena)} disabled={!t.screen} onClick={() => t.screen && go(t.screen)}>
+          <button
+            key={t.id}
+            class={`${t.screen ? 'tile' : 'tile soon'}${pintados[t.id as keyof Saves] ? ' pintado' : ''}`}
+            style={{ ...cenaStyle(t.cena), ...corStyle(pintados[t.id as keyof Saves] ? 1 : 0) }}
+            data-testid={`tile-${t.id}`}
+            disabled={!t.screen}
+            onClick={() => t.screen && go(t.screen)}
+          >
+            <Pintura cena={t.cena} />
             <span class="tile-jp">{t.jp}</span>
             <span class="tile-title">
               {t.title}

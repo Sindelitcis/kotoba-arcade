@@ -2,6 +2,7 @@ import { effect } from '@preact/signals';
 import { render } from 'preact';
 import { screen } from './core/app';
 import { loadVoices, sfx } from './core/audio';
+import { zerar } from './core/cor';
 import { HelpButton } from './core/help/HelpButton';
 import { AventuraGame } from './games/aventura/AventuraGame';
 import { ConversaGame } from './games/conversa/ConversaGame';
@@ -40,10 +41,11 @@ function App() {
   }
 }
 
-// Trocar de tela é virar a página.
+// Trocar de tela é virar a página, e a página nova começa no traço (sem cor).
 let firstScreen = true;
 effect(() => {
   void screen.value;
+  zerar();
   if (firstScreen) firstScreen = false;
   else sfx.page();
 });

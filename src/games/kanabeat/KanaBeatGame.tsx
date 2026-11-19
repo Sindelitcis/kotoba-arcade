@@ -2,6 +2,8 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { app, commit, go, kanaBeatSave } from '../../core/app';
 import { sfx, speak } from '../../core/audio';
 import { cenaStyle } from '../../core/arte';
+import { acertou, cor, corStyle, errou, zerar } from '../../core/cor';
+import { Pintura } from '../../core/Pintura';
 import { useAoAbrirAjuda } from '../../core/help/ajuda';
 import { teclaDe } from '../../core/teclas';
 import { burst, INK, onomato, pulse } from '../../core/fx';
@@ -65,6 +67,8 @@ export function KanaBeatGame() {
   const handle = (events: BeatEvent[]) => {
     for (const e of events) {
       if (e.t === 'hit') {
+        // O palco acende com o combo: 10 notas seguidas e a rua de Dotonbori fica toda colorida.
+        acertou(e.combo, 10);
         sfx.hit(e.combo);
         const r = lineEl.current?.getBoundingClientRect();
         if (r) burst(r.left + r.width / 2, r.top + r.height / 2, JUDGE_COLORS[e.judge], e.judge === 'perfect' ? 30 : 16, 380);
@@ -73,6 +77,7 @@ export function KanaBeatGame() {
         setJudge((j) => ({ text: JUDGE_TEXT[e.judge], cls: e.judge, n: j.n + 1 }));
         if (e.note.pt) speak(e.note.kana);
       } else if (e.t === 'miss') {
+        errou();
         sfx.miss();
         pulse(trackEl.current, 'flash-bad');
         setJudge((j) => ({ text: `${JUDGE_TEXT.miss}: ${e.note.text} = ${kanaToRomaji(e.note.kana).replace(/'/g, '')}`, cls: 'miss', n: j.n + 1 }));
@@ -124,6 +129,7 @@ export function KanaBeatGame() {
     const r = run.current as Run;
     if (result || on === (r.pausedAt !== null)) return;
     if (on) {
+      zerar();
       r.pausedAt = performance.now();
       r.music.halt();
       // Congela a tela no instante da pausa. Sem isto, um último quadro do laço ainda mexia as notas com o aviso de pausa já na tela.
@@ -144,6 +150,7 @@ export function KanaBeatGame() {
   const restart = (mode?: Mode) => {
     (run.current as Run).music.stop();
     run.current = newRun(mode);
+    zerar();
     setResult(null);
     setPaused(false);
     setT(0);
@@ -248,7 +255,8 @@ export function KanaBeatGame() {
       </header>
 
       <section class="kb-stage">
-        <div class="kb-track" ref={trackEl} style={cenaStyle('kanabeat-dotonbori')}>
+        <div class="kb-track" ref={trackEl} style={{ ...cenaStyle('kanabeat-dotonbori'), ...corStyle(cor.value) }} data-testid="kb-track">
+          <Pintura cena="kanabeat-dotonbori" />
           <div class="kb-line" ref={lineEl} style={{ left: `${HIT_X}%`, opacity: 0.55 + 0.45 * (1 - beatPhase) }} />
           {visible.map((n) => {
             const x = HIT_X + ((n.time - t) / stage.leadMs) * (100 - HIT_X);
