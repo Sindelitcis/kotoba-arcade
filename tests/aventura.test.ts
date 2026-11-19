@@ -406,6 +406,14 @@ describe('progresso entre cenas', () => {
     expect(suggestScene(SCENES, save, data.cards, T0)?.id).toBe('estacao');
   });
 
+  it('número de cena que não existe nunca conta como aberta', () => {
+    // Com a última cena concluída, "a cena depois da última" passava por aberta (a tela só não quebrava por sorte).
+    const { save } = setup();
+    for (const s of SCENES) save.done.push(s.id);
+    expect(isUnlocked(SCENES, save, SCENES.length)).toBe(false);
+    expect(isUnlocked(SCENES, save, -1)).toBe(false);
+  });
+
   it('com tudo concluído, sugere reviver a cena mais perto de ser esquecida', () => {
     const { data, save, deps } = setup();
     let t = T0;

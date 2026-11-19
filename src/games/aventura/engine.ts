@@ -166,6 +166,7 @@ export function sceneWords(scene: Scene): string[] {
 
 /** A cena abre quando a anterior foi concluída. */
 export function isUnlocked(scenes: readonly Scene[], save: AventuraSave, index: number): boolean {
+  if (index < 0 || index >= scenes.length) return false;
   if (index === 0) return true;
   const prev = scenes[index - 1];
   return !!prev && save.done.includes(prev.id);
