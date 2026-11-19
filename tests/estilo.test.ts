@@ -111,3 +111,21 @@ describe('onomatopeia e modo calmo', () => {
     expect(document.documentElement.hasAttribute('data-calma')).toBe(false);
   });
 });
+
+describe('modo calmo', () => {
+  it('toda animação sem fim tem uma regra do modo calmo que a para', () => {
+    // As dicas tracejadas, o "pensando" e o microfone da Conversa continuavam piscando com o modo calmo ligado.
+    const css = readFileSync(join(SRC, 'styles.css'), 'utf-8').replace(/\/\*[\s\S]*?\*\//g, '');
+    const calmas = [...css.matchAll(/([^{}]*\[data-calma\][^{}]*)\{[^}]*animation:\s*none/g)].map((m) => m[1] as string).join(',');
+    const soltas: string[] = [];
+    for (const m of css.matchAll(/([^{}]+)\{([^}]*)\}/g)) {
+      const seletor = (m[1] as string).trim();
+      if (!/animation:[^;]*infinite/.test(m[2] as string) || seletor.startsWith('@') || seletor.includes('[data-calma]')) continue;
+      for (const s of seletor.split(',').map((x) => x.trim())) {
+        if (/::?(before|after)\b/.test(s)) continue; // [data-calma] *::before, *::after
+        if (!calmas.includes(`[data-calma] ${s}`)) soltas.push(s);
+      }
+    }
+    expect(soltas).toEqual([]);
+  });
+});

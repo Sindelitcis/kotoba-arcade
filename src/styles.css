@@ -734,6 +734,8 @@ button.small { padding: 3px 10px; font-size: 0.8rem; }
 /* ───────── Modo calmo e movimento reduzido ───────── */
 [data-calma] *::after, [data-calma] *::before { animation: none !important; }
 [data-calma] .kb-track::before { animation: none; }
+/* Dicas, "pensando" e microfone ficam parados: o contorno e a cor já dizem o que é. */
+[data-calma] .choice.hint, [data-calma] .gr-block.hint, [data-calma] .gr-slot.active .gr-jp, [data-calma] .cv-line.thinking .cv-jp, [data-calma] .cv-mic.on { animation: none; }
 [data-calma] .hurt { animation-duration: 0.15s; }
 [data-calma] .capture-card, [data-calma] .kb-grade { animation: fade 0.2s ease; }
 [data-calma] .combo.on { transform: none; }
