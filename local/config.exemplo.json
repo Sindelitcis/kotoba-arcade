@@ -1,0 +1,38 @@
+{
+  "porta": 8791,
+  "python": "",
+  "cache_modelos": "",
+  "conversa": {
+    "ollama": "http://127.0.0.1:11434",
+    "modelo": "gemma4:e4b"
+  },
+  "fala": {
+    "modelo": "large-v3-turbo",
+    "dispositivo": "auto"
+  },
+  "voz": {
+    "motor": "nenhum",
+    "voicevox": {
+      "url": "http://127.0.0.1:50021",
+      "velocidade": 0.9,
+      "vozes": {
+        "padrao": 13
+      }
+    },
+    "fish": {
+      "url": "http://127.0.0.1:8793",
+      "python": "C:/caminho/do/fish-speech/.venv/Scripts/python.exe",
+      "pasta": "C:/caminho/do/fish-speech",
+      "motor": "C:/caminho/do/motor-de-narracao",
+      "modelo": "C:/caminho/do/modelo-s2-pro",
+      "compilar": true,
+      "max_len": 2048,
+      "vozes": {
+        "padrao": {
+          "wav": "C:/caminho/da/voz.wav",
+          "txt": "C:/caminho/da/voz.txt"
+        }
+      }
+    }
+  }
+}

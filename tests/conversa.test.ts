@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 import { cardKey } from '../src/content';
 import { seededRng } from '../src/core/rng';
 import { emptySave } from '../src/core/save';
-import { kataToHira } from '../src/core/kana';
 import { review } from '../src/core/srs';
 import {
   acharTermos,
@@ -111,13 +110,7 @@ describe('texto com furigana', () => {
   });
 
   it('a leitura fica só em cima dos kanji', () => {
-    const ruby = montarRuby([
-      { t: 'お水', r: 'オミズ' },
-      { t: 'を', r: 'ヲ' },
-      { t: '食べ', r: 'タベ' },
-      { t: 'ます', r: 'マス' },
-      { t: '。' },
-    ]);
+    const ruby = montarRuby([{ t: 'お水', r: 'オミズ' }, { t: 'を', r: 'ヲ' }, { t: '食べ', r: 'タベ' }, { t: 'ます', r: 'マス' }, { t: '。' }]);
     expect(ruby).toEqual([{ t: 'お' }, { t: '水', r: 'みず' }, { t: 'を' }, { t: '食', r: 'た' }, { t: 'べます。' }]);
   });
 
@@ -243,7 +236,7 @@ describe('o que vai para o modelo', () => {
     const foco = palavrasEmFoco(cafe, data.cards, T0, seededRng(1));
     expect(foco).toHaveLength(3);
     const prompt = montarPrompt(cafe, conhecidas, foco);
-    expect(prompt).toContain('Sakura');
+    expect(prompt).toContain('Kenta');
     expect(prompt).toContain('- pedir: Pedir algo para comer ou beber');
     expect(prompt).toContain('palavras que ele já conhece: 駅');
     expect(prompt).toContain(foco[0]!.jp);
@@ -460,7 +453,12 @@ describe('conversa', () => {
   it('as sugestões do modelo ganham leitura para o jogador conseguir digitar', async () => {
     const tokens = (t: string): Token[] =>
       t === 'お会計をお願いします'
-        ? [{ t: 'お会計', r: 'オカイケイ' }, { t: 'を', r: 'ヲ' }, { t: 'お願い', r: 'オネガイ' }, { t: 'します', r: 'シマス' }]
+        ? [
+            { t: 'お会計', r: 'オカイケイ' },
+            { t: 'を', r: 'ヲ' },
+            { t: 'お願い', r: 'オネガイ' },
+            { t: 'します', r: 'シマス' },
+          ]
         : [{ t, r: t }];
     const s = setup([json({})], { tokens });
     await s.conversa.dizer('koohii wo kudasai');

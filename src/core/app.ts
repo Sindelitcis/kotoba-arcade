@@ -1,13 +1,14 @@
 /** Estado do app no navegador: save carregado, tela atual e gravação. */
 import { signal } from '@preact/signals';
 import { ensureAventuraSave, type AventuraSave } from '../games/aventura/engine';
+import { ensureConversaSave, type ConversaSave } from '../games/conversa/engine';
 import { ensureKanaBeatSave, type KanaBeatSave } from '../games/kanabeat/engine';
 import { ensureKanjimonSave, type KanjimonSave } from '../games/kanjimon/engine';
 import { ensureRoguelikeSave, type RoguelikeSave } from '../games/roguelike/engine';
 import { markPlayed } from './progress';
 import { importSave, loadSave, writeSave, type SaveData } from './save';
 
-export type Screen = 'hub' | 'kanjimon' | 'kanjidex' | 'booster' | 'kanabeat' | 'roguelike' | 'aventura';
+export type Screen = 'hub' | 'kanjimon' | 'kanjidex' | 'booster' | 'kanabeat' | 'roguelike' | 'aventura' | 'conversa';
 
 export const app: { data: SaveData } = { data: loadSave(localStorage, Date.now()) };
 
@@ -44,6 +45,10 @@ export function kanaBeatSave(): KanaBeatSave {
 
 export function aventuraSave(): AventuraSave {
   return ensureAventuraSave(app.data.games);
+}
+
+export function conversaSave(): ConversaSave {
+  return ensureConversaSave(app.data.games);
 }
 
 export function roguelikeSave(): RoguelikeSave {

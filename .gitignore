@@ -4,3 +4,7 @@ test-results
 playwright-report
 *.local
 .DS_Store
+
+# Servidor local da Conversa: caminhos do PC (voz, modelos) ficam fora do Git
+local/config.local.json
+local/__pycache__

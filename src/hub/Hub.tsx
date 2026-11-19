@@ -19,7 +19,7 @@ const TILES: Tile[] = [
   { id: 'kanabeat', title: 'Kana Beat', jp: 'かなビート', blurb: 'Digite no ritmo. Kana e palavras no tempo da batida.', screen: 'kanabeat' },
   { id: 'roguelike', title: 'Kotodama', jp: '言霊', blurb: 'Roguelike de cartas. Runs curtas, relíquias e um chefe no topo.', screen: 'roguelike' },
   { id: 'aventura', title: 'Aventura', jp: '冒険', blurb: 'Você chegou ao Japão. Cenas curtas com japonês de verdade.', screen: 'aventura' },
-  { id: 'voz', title: 'Conversa por voz', jp: '会話', blurb: 'Personagens com IA rodando no seu PC. Na fila.' },
+  { id: 'conversa', title: 'Conversa por voz', jp: '会話', blurb: 'Fale japonês com personagens. A IA roda no seu PC.', screen: 'conversa' },
 ];
 
 /** Frases cujo kanji o jogador já encontrou: prova concreta de que dá para ler mais que ontem. */
@@ -70,6 +70,7 @@ export function Hub() {
       else if (e.key.toLowerCase() === 'c') go('kanjimon');
       else if (e.key.toLowerCase() === 'r') go('roguelike');
       else if (e.key.toLowerCase() === 'a') go('aventura');
+      else if (e.key.toLowerCase() === 'v') go('conversa');
     };
     addEventListener('keydown', onKey);
     return () => removeEventListener('keydown', onKey);
@@ -147,6 +148,7 @@ export function Hub() {
               {t.id === 'kanabeat' && <kbd>K</kbd>}
               {t.id === 'roguelike' && <kbd>R</kbd>}
               {t.id === 'aventura' && <kbd>A</kbd>}
+              {t.id === 'conversa' && <kbd>V</kbd>}
             </span>
             <span class="tile-blurb">{t.blurb}</span>
           </button>

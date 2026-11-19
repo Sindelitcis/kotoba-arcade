@@ -11,7 +11,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "e2e": "playwright test",
-    "check": "npm run typecheck && npm run test && npm run build && npm run e2e"
+    "check": "npm run typecheck && npm run test && npm run build && npm run e2e",
+    "local": "node local/iniciar.mjs"
   },
   "dependencies": {
     "@preact/signals": "^2.11.4",

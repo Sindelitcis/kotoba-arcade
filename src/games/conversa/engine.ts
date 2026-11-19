@@ -153,7 +153,16 @@ export interface Sugestao {
   pt: string;
 }
 
-const FORA: [string, string][] = [['ふぁ', 'fa'], ['ふぃ', 'fi'], ['ふぇ', 'fe'], ['ふぉ', 'fo'], ['てぃ', 'ti'], ['でぃ', 'di'], ['うぃ', 'wi'], ['うぇ', 'we']];
+const FORA: [string, string][] = [
+  ['ふぁ', 'fa'],
+  ['ふぃ', 'fi'],
+  ['ふぇ', 'fe'],
+  ['ふぉ', 'fo'],
+  ['てぃ', 'ti'],
+  ['でぃ', 'di'],
+  ['うぃ', 'wi'],
+  ['うぇ', 'we'],
+];
 /** Partícula sozinha se fala diferente de como se escreve. */
 const PARTICULA: Record<string, string> = { は: 'wa', を: 'o', へ: 'e' };
 
@@ -202,10 +211,10 @@ export const CENAS: readonly Cena[] = [
     titulo: 'Pedir no café',
     jp: '注文',
     resumo: 'Peça algo, veja quanto custa e pague.',
-    lugar: 'Você entrou num café pequeno em Tóquio. A atendente veio até a sua mesa.',
-    personagem: { nome: 'Sakura', papel: 'atendente do café', voz: 'sakura' },
+    lugar: 'Você entrou num café pequeno em Tóquio. O atendente veio até a sua mesa.',
+    personagem: { nome: 'Kenta', papel: 'atendente do café', voz: 'kenta' },
     papel:
-      'Você é Sakura (さくら), atendente de um café pequeno em Tóquio. O cliente acabou de sentar. O café tem コーヒー (400円), お茶 (300円), お水 (de graça), ケーキ (500円) e サンドイッチ (600円). Anote o pedido, diga o preço quando ele perguntar ou pedir a conta, e receba o pagamento (現金 ou カード).',
+      'Você é Kenta (けんた), atendente de um café pequeno em Tóquio. O cliente acabou de sentar. O café tem コーヒー (400円), お茶 (300円), お水 (de graça), ケーキ (500円) e サンドイッチ (600円). Anote o pedido, diga o preço quando ele perguntar ou pedir a conta, e receba o pagamento (現金 ou カード).',
     passos: [
       { id: 'pedir', pt: 'Pedir algo para comer ou beber' },
       { id: 'conta', pt: 'Perguntar quanto custa ou pedir a conta' },
@@ -213,7 +222,10 @@ export const CENAS: readonly Cena[] = [
     ],
     abertura: { texto: 'いらっしゃいませ。ご注文[ちゅうもん]は？', pt: 'Bem-vindo! O que vai pedir?' },
     primeiraDica: 'Peça uma bebida. "... o kudasai" quer dizer "me dá ..., por favor".',
-    primeiras: [sugestao('コーヒーをください', 'koohii o kudasai', 'Um café, por favor.'), sugestao('お水[みず]をお願[ねが]いします', 'omizu o onegaishimasu', 'Uma água, por favor.')],
+    primeiras: [
+      sugestao('コーヒーをください', 'koohii o kudasai', 'Um café, por favor.'),
+      sugestao('お水[みず]をお願[ねが]いします', 'omizu o onegaishimasu', 'Uma água, por favor.'),
+    ],
     vocabulario: [
       termo('ください', 'me dá, por favor'),
       termo('お願[ねが]いします', 'por favor (pedindo algo)'),
@@ -246,7 +258,10 @@ export const CENAS: readonly Cena[] = [
     ],
     abertura: { texto: 'はい、どうしましたか？', pt: 'Pois não, o que houve?' },
     primeiraDica: 'Pergunte onde fica a estação. "... wa doko desu ka" quer dizer "onde fica ...?".',
-    primeiras: [sugestao('すみません、駅[えき]はどこですか', 'sumimasen, eki wa doko desu ka', 'Com licença, onde fica a estação?'), sugestao('駅[えき]に行[い]きたいです', 'eki ni ikitai desu', 'Quero ir à estação.')],
+    primeiras: [
+      sugestao('すみません、駅[えき]はどこですか', 'sumimasen, eki wa doko desu ka', 'Com licença, onde fica a estação?'),
+      sugestao('駅[えき]に行[い]きたいです', 'eki ni ikitai desu', 'Quero ir à estação.'),
+    ],
     vocabulario: [
       termo('すみません', 'com licença / desculpe'),
       termo('駅[えき]', 'estação'),
@@ -266,19 +281,22 @@ export const CENAS: readonly Cena[] = [
     id: 'apresentacao',
     titulo: 'Se apresentar',
     jp: '自己紹介',
-    resumo: 'Conheça uma colega nova e fale de você.',
-    lugar: 'Primeiro dia na casa compartilhada. Uma moradora veio falar com você na cozinha.',
-    personagem: { nome: 'Yui', papel: 'colega de casa', voz: 'yui' },
+    resumo: 'Conheça um colega de casa e fale de você.',
+    lugar: 'Primeiro dia na casa compartilhada. Um morador veio falar com você na cozinha.',
+    personagem: { nome: 'Yuuto', papel: 'colega de casa', voz: 'yuuto' },
     papel:
-      'Você é Yui (ゆい), 24 anos, mora numa casa compartilhada em Tóquio e trabalha numa livraria. Um morador novo, estrangeiro, acabou de chegar. Você é curiosa e gentil: pergunta o nome, de onde ele é e do que ele gosta, e conta um pouco de você quando ele perguntar.',
+      'Você é Yuuto (ゆうと), 24 anos, mora numa casa compartilhada em Tóquio e trabalha numa livraria. Um morador novo, estrangeiro, acabou de chegar. Você é curioso e gentil: pergunta o nome, de onde ele é e do que ele gosta, e conta um pouco de você quando ele perguntar.',
     passos: [
       { id: 'nome', pt: 'Dizer o seu nome' },
       { id: 'origem', pt: 'Dizer de onde você é' },
-      { id: 'gosto', pt: 'Contar algo de que você gosta ou perguntar algo a ela' },
+      { id: 'gosto', pt: 'Contar algo de que você gosta ou perguntar algo a ele' },
     ],
-    abertura: { texto: 'はじめまして。ゆいです。お名前[なまえ]は？', pt: 'Prazer. Sou a Yui. Qual é o seu nome?' },
+    abertura: { texto: 'はじめまして。ゆうとです。お名前[なまえ]は？', pt: 'Prazer. Sou o Yuuto. Qual é o seu nome?' },
     primeiraDica: 'Diga o seu nome e termine com "desu". Ex.: "Rafa desu".',
-    primeiras: [sugestao('はじめまして。ラファです', 'hajimemashite. rafa desu', 'Prazer. Sou o Rafa. (troque pelo seu nome)'), sugestao('よろしくお願[ねが]いします', 'yoroshiku onegaishimasu', 'Prazer em conhecer, conto com você.')],
+    primeiras: [
+      sugestao('はじめまして。ラファです', 'hajimemashite. rafa desu', 'Prazer. Sou o Rafa. (troque pelo seu nome)'),
+      sugestao('よろしくお願[ねが]いします', 'yoroshiku onegaishimasu', 'Prazer em conhecer, conto com você.'),
+    ],
     vocabulario: [
       termo('はじめまして', 'prazer em conhecer'),
       termo('名前[なまえ]', 'nome'),
@@ -309,7 +327,10 @@ export const CENAS: readonly Cena[] = [
     ],
     abertura: { texto: 'こんにちは。田中[たなか]です。お名前[なまえ]をお願[ねが]いします。', pt: 'Boa tarde. Sou o Tanaka. Seu nome, por favor.' },
     primeiraDica: 'Diga o seu nome com "desu" e depois "yoroshiku onegaishimasu".',
-    primeiras: [sugestao('ラファです。ブラジルから来[き]ました', 'rafa desu. burajiru kara kimashita', 'Sou o Rafa. Vim do Brasil. (troque pelo seu nome)'), sugestao('よろしくお願[ねが]いします', 'yoroshiku onegaishimasu', 'Conto com o senhor.')],
+    primeiras: [
+      sugestao('ラファです。ブラジルから来[き]ました', 'rafa desu. burajiru kara kimashita', 'Sou o Rafa. Vim do Brasil. (troque pelo seu nome)'),
+      sugestao('よろしくお願[ねが]いします', 'yoroshiku onegaishimasu', 'Conto com o senhor.'),
+    ],
     vocabulario: [
       termo('アルバイト', 'trabalho de meio período'),
       termo('仕事[しごと]', 'trabalho'),
@@ -383,10 +404,7 @@ export const ESQUEMA = {
   properties: {
     entendi: { type: 'boolean' },
     correcao: {
-      anyOf: [
-        { type: 'null' },
-        { type: 'object', properties: { melhor: { type: 'string' }, nota: { type: 'string' } }, required: ['melhor', 'nota'] },
-      ],
+      anyOf: [{ type: 'null' }, { type: 'object', properties: { melhor: { type: 'string' }, nota: { type: 'string' } }, required: ['melhor', 'nota'] }],
     },
     passos: { type: 'array', items: { type: 'string' } },
     fala: { type: 'string' },
