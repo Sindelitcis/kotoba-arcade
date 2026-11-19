@@ -18,11 +18,6 @@
   "atk": 3,
   "words": [
    {
-    "jp": "一日",
-    "romaji": "tsuitachi",
-    "pt": "1º dia do mês"
-   },
-   {
     "jp": "一人",
     "romaji": "hitori",
     "pt": "1 pessoa"
@@ -31,6 +26,11 @@
     "jp": "一緒に",
     "romaji": "issho ni",
     "pt": "juntos"
+   },
+   {
+    "jp": "一日",
+    "romaji": "tsuitachi",
+    "pt": "dia 1º do mês (um dia inteiro é いちにち)"
    }
   ],
   "sentences": [
@@ -544,9 +544,9 @@
     "pt": "100 ienes"
    },
    {
-    "jp": "円い",
-    "romaji": "marui",
-    "pt": "redondo"
+    "jp": "五千円",
+    "romaji": "gosen'en",
+    "pt": "5 mil ienes"
    },
    {
     "jp": "円安",
@@ -995,7 +995,7 @@
    {
     "jp": "空いている",
     "romaji": "aiteiru",
-    "pt": "estar vazio/livre"
+    "pt": "estar livre (lugar, horário)"
    }
   ],
   "sentences": [

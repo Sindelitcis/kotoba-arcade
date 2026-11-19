@@ -241,27 +241,37 @@ function silence(): void {
   if (typeof speechSynthesis !== 'undefined') speechSynthesis.cancel();
 }
 
-/**
- * Fala um texto em japonês: a gravação, quando existe; senão a voz do navegador.
- * Uma fala nova corta a anterior. `voz` escolhe o personagem (Aventura).
- */
 /** Palavra solta ou kana: o áudio é achado pelo kana, na voz de palavra (mais clara em palavra curta). */
 export function speakWord(kana: string): Promise<void> {
   return speak(kana, VOZ_PALAVRA);
 }
 
-export function speak(text: string, voz: VozId = VOZ_PADRAO): Promise<void> {
+/**
+ * Kanji sozinho: a gravação fica no próprio kanji, porque o kana se repete (日 e 火 são
+ * ひ, com acento diferente). Sem gravação, o navegador fala o kana, nunca o kanji, que
+ * ele leria de qualquer jeito.
+ */
+export function speakKanji(kanji: string, kana: string): Promise<void> {
+  return speak(kanji, VOZ_PALAVRA, kana);
+}
+
+/**
+ * Fala um texto em japonês: a gravação, quando existe; senão a voz do navegador.
+ * Uma fala nova corta a anterior. `voz` escolhe o personagem (Aventura).
+ * `fallback` é o que o navegador fala quando não há gravação (o kana de um kanji solto).
+ */
+export function speak(text: string, voz: VozId = VOZ_PADRAO, fallback: string = text): Promise<void> {
   if (!app.data.settings.voice) return Promise.resolve();
   const n = ++request;
   silence();
   return loadVoices().then((m) => {
     if (n !== request) return; // outra fala veio antes de o manifesto chegar
     const file = m ? recordedFile(m, text, voz) : undefined;
-    if (!file || typeof Audio === 'undefined') return speakInBrowser(text);
+    if (!file || typeof Audio === 'undefined') return speakInBrowser(fallback);
     const a = new Audio(VOZES_URL + file);
     playing = a;
     a.play().catch(() => {
-      if (n === request) speakInBrowser(text);
+      if (n === request) speakInBrowser(fallback);
     });
   });
 }

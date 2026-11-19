@@ -3,7 +3,7 @@
  * leitura e o caminho inverso (do significado para o kanji).
  */
 import { cardKey, KANJI, WORDS, type Kanji, type Word } from '../content';
-import { compareReading, type ReadingMatch } from './kana';
+import { compareReading, kanaToRomaji, type ReadingMatch } from './kana';
 import { shuffle, type Rng } from './rng';
 
 export type QuestionKind = 'kanji-meaning' | 'kanji-recall' | 'word-reading' | 'word-meaning';
@@ -22,8 +22,13 @@ export interface Question {
   typing: boolean;
   /** Primeiro contato: a tela ensina antes de perguntar. */
   teach?: { title: string; lines: string[] };
-  /** O que falar em voz alta depois da resposta. */
+  /**
+   * O que falar em voz alta depois da resposta: a chave da gravação. Na carta de kanji é o
+   * próprio kanji (a gravação diz a leitura dele sozinho); na palavra, o kana.
+   */
   speak: string;
+  /** A mesma fala em kana, para a voz do navegador quando faltar a gravação. */
+  speakKana: string;
   /** Texto que acompanha a voz, mostrado depois da resposta. */
   echo: string;
 }
@@ -68,10 +73,9 @@ export function kanjiMeaningQuestion(k: Kanji, rng: Rng, isNew: boolean): Questi
     answer,
     typing: false,
     teach: isNew
-      ? { title: `${k.kanji} = ${k.pt.join(', ')}`, lines: [k.story, `${example.jp} (${example.kana}) · ${example.pt}`] }
+      ? { title: `${k.kanji} = ${k.pt.join(', ')}`, lines: [k.story, ...readingLines(k), `Exemplo: ${example.jp} (${example.kana}) · ${example.pt}`] }
       : undefined,
-    speak: example.kana,
-    echo: echoOf(example),
+    ...kanjiVoice(k),
   };
 }
 
@@ -88,9 +92,22 @@ export function kanjiRecallQuestion(k: Kanji, rng: Rng): Question {
     choices: choicesFor(rng, k.kanji, neighbors(KANJI, idx, 6).map((o) => o.kanji), KANJI.map((o) => o.kanji), (v) => sameMeaning.has(v)),
     answer: k.kanji,
     typing: false,
-    speak: (k.words[0] as Word).kana,
-    echo: echoOf(k.words[0] as Word),
+    ...kanjiVoice(k),
   };
+}
+
+const romaji = (kana: string) => kanaToRomaji(kana).replace(/'/g, '');
+
+/** A carta mostra só o kanji: a voz e o texto que a acompanha são a leitura dele sozinho. */
+function kanjiVoice(k: Kanji): Pick<Question, 'speak' | 'speakKana' | 'echo'> {
+  return { speak: k.kanji, speakKana: k.reading, echo: `${k.kanji} · ${k.reading} (${romaji(k.reading)}) · ${k.pt[0]}` };
+}
+
+/** Leitura do kanji sozinho e as outras que aparecem dentro das palavras. */
+export function readingLines(k: Kanji): string[] {
+  const lines = [`Sozinho, lê-se ${k.reading} (${romaji(k.reading)}).`];
+  if (k.otherReadings.length > 0) lines.push(`Dentro de palavras também: ${k.otherReadings.join(', ')}.`);
+  return lines;
 }
 
 function echoOf(w: Word): string {
@@ -113,6 +130,7 @@ export function wordMeaningQuestion(w: Word, rng: Rng, isNew: boolean): Question
     typing: false,
     teach: isNew ? { title: `${w.jp} = ${w.pt}`, lines: [`Lê-se ${w.kana} (${w.romaji})`] } : undefined,
     speak: w.kana,
+    speakKana: w.kana,
     echo: echoOf(w),
   };
 }
@@ -133,6 +151,7 @@ export function wordReadingQuestion(w: Word, rng: Rng, typing: boolean): Questio
     answer: w.kana,
     typing,
     speak: w.kana,
+    speakKana: w.kana,
     echo: echoOf(w),
   };
 }

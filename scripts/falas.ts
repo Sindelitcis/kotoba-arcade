@@ -202,6 +202,15 @@ function conversa(): Fala[] {
 export function listarFalas(): Fala[] {
   const todas: Fala[] = [
     ...WORDS.map((w) => palavra(w, 'conteudo/palavra')),
+    // Kanji sozinho na carta: a chave é o kanji (日 e 火 são os dois ひ, com acento diferente).
+    ...KANJI.map((k): Fala => ({
+      texto: k.kanji,
+      voz: VOZ_PALAVRA,
+      tts: k.kanji,
+      partes: [{ t: k.kanji, r: k.reading }],
+      palavra: { jp: k.kanji, kana: k.reading },
+      origem: 'conteudo/kanji',
+    })),
     ...DAILY_WORDS.map((w) => palavra(w, 'conteudo/vida')),
     ...KANJI.flatMap((k) =>
       k.sentences.map((s) => {

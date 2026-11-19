@@ -4,6 +4,7 @@
  */
 import raw from './data/kanjimon.raw.json';
 import { hasKanji, kanaToRomaji, kataToHira, KANA_TABLE, romajiToHiragana } from '../core/kana';
+import { LEITURAS, type LeituraKanji } from './leituras';
 
 export interface Word {
   id: string;
@@ -31,6 +32,10 @@ export interface Kanji {
   pt: string[];
   /** Leituras em romaji (Hepburn). */
   readings: string[];
+  /** Leitura falada quando o kanji aparece sozinho na carta, em kana (九 = きゅう). */
+  reading: string;
+  /** Outras leituras comuns, em kana, para mostrar junto. */
+  otherReadings: string[];
   story: string;
   words: Word[];
   sentences: Sentence[];
@@ -63,6 +68,12 @@ function buildKana(jp: string, romaji: string): string {
   return romajiToHiragana(romaji);
 }
 
+function leituraDe(kanji: string): LeituraKanji {
+  const l = LEITURAS[kanji];
+  if (!l) throw new Error(`kanji sem leitura conferida em leituras.ts: ${kanji}`);
+  return l;
+}
+
 function build(): { kanji: Kanji[]; words: Word[] } {
   const wordsByJp = new Map<string, Word>();
   const known = new Set(raw.map((k) => k.kanji));
@@ -88,6 +99,8 @@ function build(): { kanji: Kanji[]; words: Word[] } {
       kanji: k.kanji,
       pt: k.pt.filter((s) => !/^\d+$/.test(s)).map((s) => ACCENTS[s] ?? s),
       readings: k.romaji.filter(isHepburn),
+      reading: leituraDe(k.kanji).sozinho,
+      otherReadings: leituraDe(k.kanji).outras,
       story: k.story,
       words,
       sentences: k.sentences,

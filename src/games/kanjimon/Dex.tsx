@@ -1,7 +1,8 @@
 import { useLayoutEffect, useState } from 'preact/hooks';
 import { cardKey, KANJI, type Kanji } from '../../content';
 import { app, go, kanjimonSave, tick } from '../../core/app';
-import { speak, speakWord } from '../../core/audio';
+import { speak, speakKanji, speakWord } from '../../core/audio';
+import { kanaToRomaji } from '../../core/kana';
 import { masteryLevel } from '../../core/srs';
 import { teclaDe } from '../../core/teclas';
 import { artUrl } from './art';
@@ -101,7 +102,12 @@ export function Dex() {
                 <h2>
                   {open.kanji} <small>{open.pt.join(', ')}</small>
                 </h2>
-                <p class="muted">Leituras: {open.readings.join(', ')}</p>
+                <button class="word dex-reading" onClick={() => speakKanji(open.kanji, open.reading)} title="Ouvir" data-testid="dex-reading">
+                  <b>{open.kanji}</b>
+                  <span>{open.reading}</span>
+                  <span class="muted">sozinho · {kanaToRomaji(open.reading).replace(/'/g, '')}</span>
+                </button>
+                {open.otherReadings.length > 0 && <p class="muted">Dentro de palavras também: {open.otherReadings.join(', ')}</p>}
                 <p>{open.story}</p>
                 <h3>Palavras</h3>
                 {open.words.map((w) => (

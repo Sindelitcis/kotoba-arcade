@@ -1,6 +1,6 @@
 import { useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { app, commit, go, kanjimonSave } from '../../core/app';
-import { sfx, speakWord } from '../../core/audio';
+import { sfx, speakKanji } from '../../core/audio';
 import { burstFrom, onomato } from '../../core/fx';
 import { teclaDe } from '../../core/teclas';
 import { artUrl, RARITY_COLORS } from './art';
@@ -32,7 +32,7 @@ export function Booster() {
     sfx.capture(tier);
     sfx.page();
     if (tier >= 2) sfx.rare();
-    speakWord((card.kanji.words[0] ?? { kana: '' }).kana);
+    speakKanji(card.kanji.kanji, card.kanji.reading);
     setRevealed(revealed + 1);
     requestAnimationFrame(() => {
       const el = row.current?.children[revealed] ?? null;

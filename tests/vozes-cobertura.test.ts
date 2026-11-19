@@ -49,17 +49,17 @@ const CHAMADAS: Record<string, string[]> = {
     "speak(r.phase === 'lesson' ? exampleView(COURSE, r.puzzle.point).map((w) => w.text + w.tail).join('') : plainSentence(r.puzzle))", // tecla R, inclusive pela metade
   ],
   'src/games/kanabeat/KanaBeatGame.tsx': ['speakWord(e.note.kana)', 'speakWord(n.kana)'],
-  'src/games/kanjimon/Booster.tsx': ["speakWord((card.kanji.words[0] ?? { kana: '' }).kana)"],
-  'src/games/kanjimon/Dex.tsx': ['speakWord(w.kana)', 'speak(s.jp)'],
-  'src/games/kanjimon/KanjiMonGame.tsx': ['speakWord(asked.speak)'],
-  'src/games/roguelike/RoguelikeGame.tsx': ['speakWord(q.speak)'],
+  'src/games/kanjimon/Booster.tsx': ['speakKanji(card.kanji.kanji, card.kanji.reading)'], // kanji sozinho
+  'src/games/kanjimon/Dex.tsx': ['speakKanji(open.kanji, open.reading)', 'speakWord(w.kana)', 'speak(s.jp)'],
+  'src/games/kanjimon/KanjiMonGame.tsx': ['speak(asked.speak, VOZ_PALAVRA, asked.speakKana)'], // kanji sozinho ou palavra
+  'src/games/roguelike/RoguelikeGame.tsx': ['speak(q.speak, VOZ_PALAVRA, q.speakKana)'],
   'src/hub/Hub.tsx': ['speak(sentence.jp)'],
 };
 
-/** Pega `speak(...)`/`speakWord(...)` com os parênteses balanceados. */
+/** Pega `speak(...)`, `speakWord(...)` e `speakKanji(...)` com os parênteses balanceados. */
 function chamadas(fonte: string): string[] {
   const out: string[] = [];
-  for (const m of fonte.matchAll(/\bspeak(Word)?\(/g)) {
+  for (const m of fonte.matchAll(/\bspeak(Word|Kanji)?\(/g)) {
     let fundo = 0;
     let i = m.index;
     for (; i < fonte.length; i++) {
@@ -90,6 +90,10 @@ describe('cobertura das vozes a partir dos jogos', () => {
     ];
     expect([...new Set(textos)].filter((t) => !gravada(t, VOZ_PALAVRA))).toEqual([]);
     expect(findWord(WORDS[0]!.id)).toBeDefined();
+  });
+
+  it('cada kanji sozinho (carta do KanjiMon, Kotodama, booster, Dex) tem a leitura gravada na voz de palavra', () => {
+    expect(KANJI.map((k) => k.kanji).filter((t) => !gravada(t, VOZ_PALAVRA))).toEqual([]);
   });
 
   it('palavras novas da Conversa estão na voz de palavra', () => {

@@ -97,7 +97,7 @@ A まお também embola algumas palavras dentro da frase. 切符 sai きっと e
 
 ## Dúvidas que ficaram
 
-Seis gravações o Whisper não confirmou, em nenhuma versão:
+Estas gravações o Whisper não confirmou, em nenhuma versão:
 
 | Texto | Voz | O Whisper ouviu | Por quê |
 | --- | --- | --- | --- |
@@ -106,7 +106,9 @@ Seis gravações o Whisper não confirmou, em nenhuma versão:
 | つぎのかた、どうぞ。 | 阿井田 茂 | 次の方、どうぞ。 | o OpenJTalk lê 方 como ほう; a gravação está certa |
 | はい、あいています。 | まお | はい、会えています | nas outras tentativas ele ouviu 開いて, que o OpenJTalk lê ひらいて; pode ser o juiz ou o い curto |
 | いいえ、まだまだです。 | まお | いえ、まだまだです | o いいえ sai curto |
-| ごご | 四国めたん | 子語 (com moldura) | palavra de duas moras; sem moldura ele ouve ここ | O VOICEVOX também aceita o acento marcado e recalcula a altura de cada mora, o que deixa a correção de acento da Kanjium valer de verdade.
+| ごご | 四国めたん | 子語 (com moldura) | palavra de duas moras; sem moldura ele ouve ここ |
+| 新, 長, 立, 入, 出 | 四国めたん | チン, ちょっ, いつ, にゅ, 術 | kanji sozinho na leitura on'yomi, uma ou duas moras sem contexto. O motor recebeu o kana certo (しん, ちょう, りつ, にゅう, しゅつ), e a duração bate com きゅう e こう, que o Whisper confirmou |
+| 十 | 四国めたん | 10. | escreve o número; a gravação está certa | O VOICEVOX também aceita o acento marcado e recalcula a altura de cada mora, o que deixa a correção de acento da Kanjium valer de verdade.
 
 Não entraram nas amostras:
 

@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { app, commit, go, kanjimonSave } from '../../core/app';
-import { sfx, speakWord } from '../../core/audio';
+import { sfx, speak } from '../../core/audio';
+import { VOZ_PALAVRA } from '../../core/vozes';
 import { cenaStyle } from '../../core/arte';
 import { acertou, cor, corStyle, errou, zerar } from '../../core/cor';
 import { Pintura } from '../../core/Pintura';
@@ -92,7 +93,7 @@ export function KanjiMonGame() {
     const asked = current.question;
     const events = current.answer(input, performance.now() - shownAt.current);
     commit();
-    speakWord(asked.speak);
+    speak(asked.speak, VOZ_PALAVRA, asked.speakKana);
 
     const hit = events.find((e): e is Extract<HuntEvent, { t: 'hit' }> => e.t === 'hit');
     const queue: Overlay[] = [];
