@@ -2,13 +2,14 @@
 import { signal } from '@preact/signals';
 import { ensureAventuraSave, type AventuraSave } from '../games/aventura/engine';
 import { ensureConversaSave, type ConversaSave } from '../games/conversa/engine';
+import { ensureGramaticaSave, type GramaticaSave } from '../games/gramatica/engine';
 import { ensureKanaBeatSave, type KanaBeatSave } from '../games/kanabeat/engine';
 import { ensureKanjimonSave, type KanjimonSave } from '../games/kanjimon/engine';
 import { ensureRoguelikeSave, type RoguelikeSave } from '../games/roguelike/engine';
 import { markPlayed } from './progress';
 import { importSave, loadSave, writeSave, type SaveData } from './save';
 
-export type Screen = 'hub' | 'kanjimon' | 'kanjidex' | 'booster' | 'kanabeat' | 'roguelike' | 'aventura' | 'conversa';
+export type Screen = 'hub' | 'kanjimon' | 'kanjidex' | 'booster' | 'kanabeat' | 'roguelike' | 'aventura' | 'conversa' | 'gramatica';
 
 export const app: { data: SaveData } = { data: loadSave(localStorage, Date.now()) };
 
@@ -53,4 +54,8 @@ export function conversaSave(): ConversaSave {
 
 export function roguelikeSave(): RoguelikeSave {
   return ensureRoguelikeSave(app.data.games);
+}
+
+export function gramaticaSave(): GramaticaSave {
+  return ensureGramaticaSave(app.data.games);
 }

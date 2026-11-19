@@ -30,4 +30,10 @@ describe('teclado do fliperama', () => {
     press('k');
     expect(screen.value).toBe('roguelike');
   });
+
+  it('G no fliperama abre o Kumitate', async () => {
+    await act(() => render(<Hub />, document.body));
+    press('g');
+    expect(screen.value).toBe('gramatica');
+  });
 });

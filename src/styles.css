@@ -425,3 +425,43 @@ button.small { padding: 3px 10px; font-size: 0.8rem; }
 .cv-fix { display: grid; gap: 2px; background: var(--bg-2); border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; }
 .cv-fix p { font: 500 1.2rem/1.6 var(--jp); }
 .cv-fix b { color: var(--good); }
+
+/* ───────── Kumitate (montar frases) ───────── */
+.gr { max-width: 920px; margin: 0 auto; padding: 18px 20px 40px; display: grid; gap: 18px; min-height: 100vh; grid-template-rows: auto 1fr auto; }
+.gr-progress { color: var(--muted); }
+.gr-progress b { color: var(--text); }
+.gr-note { min-width: 80px; text-align: right; color: var(--gold); font-weight: 700; }
+.gr-board, .gr-lesson { display: grid; gap: 18px; align-content: center; justify-items: center; text-align: center; background: rgba(26, 26, 51, 0.8); border: 1px solid var(--line); border-radius: 18px; padding: 28px; }
+.gr-lesson { border-left: 5px solid var(--good); }
+.gr-lesson > p { max-width: 60ch; }
+.gr-tag { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--good); }
+.gr-goal { color: var(--gold); font-size: 1.15rem; }
+.gr-example { font: 700 2rem/2.1 var(--jp); display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; }
+.gr-sentence { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; align-items: flex-end; }
+.gr-piece, .gr-slot { display: grid; justify-items: center; gap: 2px; }
+.gr-jp { font: 700 2rem/2.1 var(--jp); }
+.gr-jp rt, .gr-example rt { font: 500 0.42em/1 var(--jp); color: var(--accent-2); }
+.gr-gloss { color: var(--muted); font-size: 0.75rem; max-width: 12ch; }
+.gr-slot .gr-jp { min-width: 2.4em; padding: 0 8px; border-radius: 10px; border: 2px dashed var(--line); }
+.gr-slot.active .gr-jp { border-color: var(--gold); box-shadow: 0 0 18px rgba(255, 209, 102, 0.3); }
+.gr-slot.filled .gr-jp { border-style: solid; border-color: var(--good); animation: pop 0.2s ease; }
+.gr-slot.fixed .gr-jp { border-color: transparent; }
+.gr-piece.mark { color: var(--good); }
+.gr-dict { opacity: 0.55; }
+.gr-hole { color: var(--gold); }
+.gr-why { max-width: 60ch; background: var(--bg-2); border: 1px solid var(--line); border-left: 4px solid var(--accent-2); border-radius: 12px; padding: 10px 14px; text-align: left; animation: fade 0.15s ease; }
+.gr-why b { font-family: var(--jp); color: var(--accent-2); }
+.gr-tray { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
+.gr-block { display: grid; justify-items: center; gap: 6px; min-width: 84px; padding: 12px 16px; }
+.gr-block span { font: 700 1.8rem/1.2 var(--jp); }
+.gr-block kbd { margin: 0; }
+.gr-block.tried { opacity: 0.35; }
+.gr-block.hint { border-color: var(--good); animation: hint 1.2s ease infinite; }
+.gr-done { display: grid; gap: 10px; justify-items: center; color: var(--good); font-weight: 700; }
+.gr-points { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; width: 100%; text-align: left; }
+.gr-point { display: grid; grid-template-columns: 8em 1fr auto; align-items: center; gap: 12px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 8px 14px; }
+.gr-point.locked { opacity: 0.45; }
+.gr-point.next { border-color: rgba(61, 220, 151, 0.5); }
+.gr-point-blocks { font: 700 1.2rem/1.3 var(--jp); }
+.gr-stars { color: var(--gold); letter-spacing: 0.1em; }
+.gr-learned { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
