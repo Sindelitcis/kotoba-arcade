@@ -101,3 +101,19 @@ test('ajustes: exportar gera um arquivo de backup', async ({ page }) => {
   await page.getByRole('button', { name: 'Exportar backup' }).click();
   expect((await download).suggestedFilename()).toMatch(/^kotoba-arcade-save-\d{4}-\d{2}-\d{2}\.json$/);
 });
+
+test('com o IME japonês ligado, o número ainda escolhe a alternativa e o Esc da conversão não tira da caçada', async ({ page }) => {
+  // Com o IME em hiragana o Chrome manda key "Process" (229) e os números não respondiam.
+  await startHunt(page);
+  await page.evaluate(() => {
+    const e = new KeyboardEvent('keydown', { key: 'Escape', isComposing: true, bubbles: true });
+    dispatchEvent(e);
+  });
+  await expect(page.getByTestId('enemy-kanji')).toBeVisible();
+  await page.evaluate(() => {
+    const e = new KeyboardEvent('keydown', { key: 'Process', code: 'Digit1', bubbles: true });
+    Object.defineProperty(e, 'keyCode', { value: 229 });
+    dispatchEvent(e);
+  });
+  await expect(page.locator('.choice.right, .choice.wrong').first()).toBeVisible();
+});

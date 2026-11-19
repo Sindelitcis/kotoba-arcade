@@ -3,6 +3,7 @@ import { cardKey, KANJI, type Kanji } from '../../content';
 import { app, go, kanjimonSave, tick } from '../../core/app';
 import { speak } from '../../core/audio';
 import { masteryLevel } from '../../core/srs';
+import { teclaDe } from '../../core/teclas';
 import { artUrl } from './art';
 import { dexKey, RARITIES, RARITY, type Rarity } from './engine';
 
@@ -26,7 +27,9 @@ export function Dex() {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key !== 'Escape') return;
+      const tecla = teclaDe(e);
+      if (tecla === null) return;
+      if (tecla !== 'Escape') return;
       if (open) setOpen(null);
       else go('hub');
     };

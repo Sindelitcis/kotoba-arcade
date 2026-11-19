@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'preact/hooks';
 import { app, commit, go, kanjimonSave } from '../../core/app';
 import { sfx, speak } from '../../core/audio';
 import { burstFrom, onomato } from '../../core/fx';
+import { teclaDe } from '../../core/teclas';
 import { artUrl, RARITY_COLORS } from './art';
 import { BOOSTER_COST, canOpenBooster, openBooster, RARITY, type BoosterCard } from './engine';
 
@@ -45,8 +46,10 @@ export function Booster() {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') go('hub');
-      else if (e.key === 'Enter' || e.key === ' ') {
+      const tecla = teclaDe(e);
+      if (tecla === null) return;
+      if (tecla === 'Escape') go('hub');
+      else if (tecla === 'Enter' || tecla === ' ') {
         e.preventDefault();
         if (!done) reveal();
         else if (again) open();

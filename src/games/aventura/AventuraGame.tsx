@@ -5,6 +5,7 @@ import { CENA_AVENTURA, cenaStyle, pessoaUrl } from '../../core/arte';
 import { sfx, speak } from '../../core/audio';
 import { onomato } from '../../core/fx';
 import { hasKanji } from '../../core/kana';
+import { teclaDe } from '../../core/teclas';
 import { SCENES, SPEAKERS } from './cenas';
 import { diaryEntries, isUnlocked, PLAYER, ScenePlay, suggestScene, type PlayEvent, type Scene, type SceneSummary, type TokenView } from './engine';
 
@@ -154,24 +155,26 @@ export function AventuraGame() {
   // Ouvinte ligado junto com o desenho da tela: tecla apertada logo que a tela aparece não se perde.
   useLayoutEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      const tecla = teclaDe(e);
+      if (tecla === null) return;
       // Na troca de tela este ouvinte ainda vive por um instante.
       if (screen.value !== 'aventura') return;
-      const key = e.key.toLowerCase();
-      const confirm = e.key === 'Enter' || e.key === ' ';
-      const digit = /^[1-9]$/.test(e.key) ? Number(e.key) : 0;
-      if (confirm || e.key === 'ArrowUp' || e.key === 'ArrowDown') e.preventDefault();
+      const key = tecla.toLowerCase();
+      const confirm = tecla === 'Enter' || tecla === ' ';
+      const digit = /^[1-9]$/.test(tecla) ? Number(tecla) : 0;
+      if (confirm || tecla === 'ArrowUp' || tecla === 'ArrowDown') e.preventDefault();
 
       const mode = modeRef.current;
       const summary = playRef.current?.summary ?? null;
       if (mode === 'menu') {
-        if (e.key === 'Escape') go('hub');
+        if (tecla === 'Escape') go('hub');
         else if (confirm) start(suggestScene(SCENES, save, app.data.cards, Date.now()));
         else if (key === 'd' && save.diary.length > 0) openDiary();
         else if (digit && isUnlocked(SCENES, save, digit - 1)) start(SCENES[digit - 1]);
       } else if (mode === 'play') {
         const p = playRef.current;
         if (!p) return;
-        if (e.key === 'Escape') setMode('menu');
+        if (tecla === 'Escape') setMode('menu');
         else if (key === 'f') {
           p.askReading();
           redraw();
@@ -184,7 +187,7 @@ export function AventuraGame() {
           if (digit) choose(digit - 1);
         } else if (confirm) advance();
       } else if (mode === 'summary') {
-        if (e.key === 'Escape') setMode('menu');
+        if (tecla === 'Escape') setMode('menu');
         else if (confirm) {
           const index = summary ? SCENES.indexOf(summary.scene) : -1;
           const next = SCENES[index + 1];
@@ -192,9 +195,9 @@ export function AventuraGame() {
           else setMode('menu');
         } else if (key === 'd') openDiary();
       } else if (mode === 'diary') {
-        if (e.key === 'Escape') setMode('menu');
-        else if (e.key === 'ArrowDown') setDiaryIndex((i) => Math.min(save.diary.length - 1, i + 1));
-        else if (e.key === 'ArrowUp') setDiaryIndex((i) => Math.max(0, i - 1));
+        if (tecla === 'Escape') setMode('menu');
+        else if (tecla === 'ArrowDown') setDiaryIndex((i) => Math.min(save.diary.length - 1, i + 1));
+        else if (tecla === 'ArrowUp') setDiaryIndex((i) => Math.max(0, i - 1));
         else if (key === 's') setDiaryMeaning((v) => !v);
         else if (confirm || key === 'r') {
           const entry = diaryEntries(SCENES, save, app.data.cards, findWord)[diaryIndex];

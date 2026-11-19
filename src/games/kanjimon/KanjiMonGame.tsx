@@ -3,6 +3,7 @@ import { app, commit, go, kanjimonSave } from '../../core/app';
 import { sfx, speak } from '../../core/audio';
 import { cenaStyle } from '../../core/arte';
 import { burstFrom, onomato, pulse } from '../../core/fx';
+import { teclaDe } from '../../core/teclas';
 import { artUrl, RARITY_COLORS } from './art';
 import { CHEST_EVERY, Hunt, MAX_HEARTS, RARITY, type Enemy, type HuntEvent, type Question } from './engine';
 
@@ -185,20 +186,22 @@ export function KanjiMonGame() {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
+      const tecla = teclaDe(e);
+      if (tecla === null) return;
+      if (tecla === 'Escape') {
         e.preventDefault();
         leave();
         return;
       }
       if (overlay) {
-        if (e.key === 'Enter' || e.key === ' ') {
+        if (tecla === 'Enter' || tecla === ' ') {
           e.preventDefault();
           dismiss();
         }
         return;
       }
-      if (!q.typing && /^[1-4]$/.test(e.key)) {
-        const choice = q.choices[Number(e.key) - 1];
+      if (!q.typing && /^[1-4]$/.test(tecla)) {
+        const choice = q.choices[Number(tecla) - 1];
         if (choice) submit(choice);
       }
     };

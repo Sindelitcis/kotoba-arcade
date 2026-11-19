@@ -4,6 +4,7 @@ import { sfx, speak } from '../../core/audio';
 import { cenaStyle } from '../../core/arte';
 import { burstFrom, INK, onomato, pulse } from '../../core/fx';
 import type { Question } from '../../core/questions';
+import { teclaDe } from '../../core/teclas';
 import { EFFECTS, effectText, faceOf, NODES, RELICS, REST_HEAL, Run, SHARPEN, type Intent, type RunCard, type RunEvent } from './engine';
 
 interface Asking {
@@ -177,13 +178,15 @@ export function RoguelikeGame() {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
+      const tecla = teclaDe(e);
+      if (tecla === null) return;
+      if (tecla === 'Escape') {
         e.preventDefault();
         leave();
         return;
       }
-      const digit = /^[0-9]$/.test(e.key) ? Number(e.key) : -1;
-      const confirm = e.key === 'Enter' || e.key === ' ';
+      const digit = /^[0-9]$/.test(tecla) ? Number(tecla) : -1;
+      const confirm = tecla === 'Enter' || tecla === ' ';
       if (asking) {
         if (!asking.feedback && !asking.question.typing && digit >= 1 && digit <= 4) {
           const choice = asking.question.choices[digit - 1];
@@ -194,13 +197,13 @@ export function RoguelikeGame() {
       if (confirm) e.preventDefault();
       if (run.phase === 'combat') {
         if (digit >= 1) play(digit - 1);
-        else if (confirm || e.key.toLowerCase() === 'e') endTurn();
+        else if (confirm || tecla.toLowerCase() === 'e') endTurn();
       } else if (run.phase === 'map') {
         if (digit >= 1 && digit <= run.options.length) act(run.choose(digit - 1));
         else if (confirm) act(run.choose(0));
       } else if (run.phase === 'reward') {
         if (digit >= 1 && run.reward?.offers[digit - 1]) act(run.takeReward(digit - 1));
-        else if (digit === 0 || e.key.toLowerCase() === 'p') act(run.takeReward(null));
+        else if (digit === 0 || tecla.toLowerCase() === 'p') act(run.takeReward(null));
       } else if (run.phase === 'rest') {
         if (digit === 1) act(run.rest('heal'));
         else if (digit === 2) act(run.rest('sharpen'));

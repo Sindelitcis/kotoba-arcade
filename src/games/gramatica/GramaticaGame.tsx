@@ -5,6 +5,7 @@ import { cenaStyle } from '../../core/arte';
 import { sfx, speak } from '../../core/audio';
 import { onomato } from '../../core/fx';
 import { masteryLevel } from '../../core/srs';
+import { teclaDe } from '../../core/teclas';
 import { cardOf, exampleView, fits, GramaticaRound, openPoints, plainSentence, ROUND_SIZE, slotWritten, WINS_TO_UNLOCK, type RoundEvent, type RoundSummary, type Written } from './engine';
 import { COURSE, POINTS } from './pontos';
 
@@ -112,25 +113,27 @@ export function GramaticaGame() {
   // Ouvinte ligado junto com o desenho da tela: tecla apertada logo que a tela aparece não se perde.
   useLayoutEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      const tecla = teclaDe(e);
+      if (tecla === null) return;
       // Na troca de tela este ouvinte ainda vive por um instante.
       if (screen.value !== 'gramatica') return;
-      const confirm = e.key === 'Enter' || e.key === ' ';
-      const digit = /^[1-9]$/.test(e.key) ? Number(e.key) : 0;
+      const confirm = tecla === 'Enter' || tecla === ' ';
+      const digit = /^[1-9]$/.test(tecla) ? Number(tecla) : 0;
       if (confirm) e.preventDefault();
       const mode = modeRef.current;
       if (mode === 'menu') {
-        if (e.key === 'Escape') go('hub');
+        if (tecla === 'Escape') go('hub');
         else if (confirm) start();
       } else if (mode === 'round') {
         const r = roundRef.current;
         if (!r) return;
-        if (e.key === 'Escape') setMode('menu');
-        else if (e.key.toLowerCase() === 'r') speak(r.phase === 'lesson' ? exampleView(COURSE, r.puzzle.point).map((w) => w.text + w.tail).join('') : plainSentence(r.puzzle));
+        if (tecla === 'Escape') setMode('menu');
+        else if (tecla.toLowerCase() === 'r') speak(r.phase === 'lesson' ? exampleView(COURSE, r.puzzle.point).map((w) => w.text + w.tail).join('') : plainSentence(r.puzzle));
         else if (r.phase === 'build') {
           if (digit) place(digit - 1);
         } else if (confirm) proceed();
       } else if (mode === 'summary') {
-        if (e.key === 'Escape') setMode('menu');
+        if (tecla === 'Escape') setMode('menu');
         else if (confirm) start();
       }
     };

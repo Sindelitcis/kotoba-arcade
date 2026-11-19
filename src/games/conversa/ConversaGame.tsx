@@ -3,6 +3,7 @@ import { app, commit, conversaSave, go, screen } from '../../core/app';
 import { CENA_CONVERSA, cenaStyle, pessoaUrl } from '../../core/arte';
 import { sfx, speak } from '../../core/audio';
 import { onomato } from '../../core/fx';
+import { teclaDe } from '../../core/teclas';
 import { criarCliente, procurarServidor, type Cliente, type Saude } from './cliente';
 import { CENAS, Conversa, proximaCena, type Cena, type Dica, type Evento, type Linha, type Resumo, type Ruby } from './engine';
 
@@ -225,23 +226,25 @@ export function ConversaGame() {
   // Enter apertado logo que o menu aparecia caía no tratador velho e se perdia.
   const teclaRef = useRef<(e: KeyboardEvent) => void>(() => {});
   teclaRef.current = (e: KeyboardEvent) => {
+    const tecla = teclaDe(e);
+    if (tecla === null) return;
     if (screen.value !== 'conversa') return;
     const noCampo = e.target === inputEl.current;
     if (fase === 'conversa') {
-      if (e.key === 'Escape') {
+      if (tecla === 'Escape') {
         e.preventDefault();
         encerrar();
-      } else if (e.key === 'Tab') {
+      } else if (tecla === 'Tab') {
         e.preventDefault();
         void pedirDica();
-      } else if (e.key === 'F2' || (e.key === ' ' && (!noCampo || texto === ''))) {
+      } else if (tecla === 'F2' || (tecla === ' ' && (!noCampo || texto === ''))) {
         e.preventDefault();
         void microfone();
-      } else if (e.key === 'F1') {
+      } else if (tecla === 'F1') {
         e.preventDefault();
         const i = ultimaDoPersonagem();
         if (i >= 0) traduzir(i);
-      } else if (e.key === 'F3') {
+      } else if (tecla === 'F3') {
         e.preventDefault();
         const c = conversa.current;
         const i = ultimaDoPersonagem();
@@ -249,14 +252,14 @@ export function ConversaGame() {
       }
       return;
     }
-    if (e.key === 'Escape') {
+    if (tecla === 'Escape') {
       e.preventDefault();
       if (fase === 'resumo') setFase('menu');
       else go('hub');
-    } else if (fase === 'menu' && /^[1-9]$/.test(e.key)) {
-      const cena = CENAS[Number(e.key) - 1];
+    } else if (fase === 'menu' && /^[1-9]$/.test(tecla)) {
+      const cena = CENAS[Number(tecla) - 1];
       if (cena) comecar(cena);
-    } else if (e.key === 'Enter') {
+    } else if (tecla === 'Enter') {
       e.preventDefault();
       if (fase === 'menu' || fase === 'resumo') comecar(proximaCena(conversaSave()));
       else if (fase === 'desligado') void procurar();
