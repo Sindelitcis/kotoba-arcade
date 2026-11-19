@@ -41,9 +41,9 @@ function existe(tecla: string, fonte: string): boolean {
   return fonte.includes(`'${NOMES[tecla] ?? tecla}'`);
 }
 
-/** Teclas que o código compara por nome (`e.key === 'Enter'`, `key === 'd'`...). */
+/** Teclas que o código compara por nome (`e.key === 'Enter'`, `tecla === 'Escape'`, `key === 'd'`...). */
 function teclasNoCodigo(fonte: string): string[] {
-  return [...fonte.matchAll(/(?:e\.key(?:\.toLowerCase\(\))?|\bkey) [!=]== '([^']+)'/g)].map((m) => m[1] as string);
+  return [...fonte.matchAll(/(?:\be\.key|\btecla|\bkey)(?:\.toLowerCase\(\))? [!=]== '([^']+)'/g)].map((m) => m[1] as string);
 }
 
 function comoNaAjuda(tecla: string): string {
@@ -191,6 +191,16 @@ describe('painel de ajuda', () => {
     } finally {
       removeEventListener('keydown', jogo);
     }
+  });
+
+  it('com o IME japonês ligado: ？ de largura dupla abre, e o Esc que chega como Process fecha', async () => {
+    await montar('kanjimon');
+    await act(() => press('？'));
+    expect(ajudaAberta.value).toBe(true);
+    await act(() => {
+      document.body.dispatchEvent(new KeyboardEvent('keydown', { key: 'Process', code: 'Escape', keyCode: 229, bubbles: true, cancelable: true }));
+    });
+    expect(ajudaAberta.value).toBe(false);
   });
 
   it('números trocam a seção enquanto o painel está aberto', async () => {

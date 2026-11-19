@@ -84,6 +84,17 @@ for (const c of CASOS) {
   });
 }
 
+test('depois de abrir pelo botão e fechar, o Enter do fliperama volta a ser jogar agora', async ({ page }) => {
+  // O foco ficava no botão de ajuda e o Enter reabria a ajuda em vez de abrir o jogo.
+  await page.getByTestId('ajuda-botao').click();
+  await expect(painel(page)).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(painel(page)).toBeHidden();
+  await page.keyboard.press('Enter');
+  await expect(page.getByTestId('enemy-kanji')).toBeVisible();
+  await expect(painel(page)).toBeHidden();
+});
+
 test('o índice troca de seção pelo clique e pelo número', async ({ page }) => {
   await page.getByTestId('ajuda-botao').click();
   const corpo = page.getByTestId('ajuda-corpo');

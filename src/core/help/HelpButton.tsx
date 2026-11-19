@@ -7,6 +7,7 @@
 import { useEffect, useLayoutEffect } from 'preact/hooks';
 import { SECOES, telaUsaF1 } from '../../content/ajuda';
 import { abrirAjuda, ajudaAberta, fecharAjuda, secaoAjuda, teclaDeAjuda, telaAjuda, telaAtual, type TelaAjuda } from './ajuda';
+import { teclaDe } from '../teclas';
 import { HelpPanel } from './HelpPanel';
 import './ajuda.css';
 
@@ -16,25 +17,28 @@ import './ajuda.css';
  */
 function aoTeclar(e: KeyboardEvent): void {
   const tela = telaAtual.value;
+  // Mesmo filtro dos jogos: com o IME japonês ligado, a tecla vem pela posição; ？ vira ?.
+  const tecla = teclaDe(e);
   if (ajudaAberta.value) {
     e.stopImmediatePropagation();
-    if (e.key === 'Escape' || e.key === '?' || e.key === 'F1') {
+    if (tecla === null) return;
+    if (tecla === 'Escape' || tecla === '?' || tecla === 'F1') {
       e.preventDefault();
-      if (e.key !== 'F1' || !telaUsaF1(tela)) fecharAjuda();
+      if (tecla !== 'F1' || !telaUsaF1(tela)) fecharAjuda();
       return;
     }
-    const n = /^[1-9]$/.test(e.key) ? Number(e.key) : 0;
+    const n = /^[1-9]$/.test(tecla) ? Number(tecla) : 0;
     if (n >= 1 && n <= SECOES.length) {
       e.preventDefault();
       secaoAjuda.value = n - 1;
-    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+    } else if (tecla === 'ArrowLeft' || tecla === 'ArrowRight') {
       e.preventDefault();
-      const passo = e.key === 'ArrowLeft' ? -1 : 1;
+      const passo = tecla === 'ArrowLeft' ? -1 : 1;
       secaoAjuda.value = (secaoAjuda.value + passo + SECOES.length) % SECOES.length;
     }
     return;
   }
-  if (teclaDeAjuda(e, telaUsaF1(tela))) {
+  if (tecla !== null && teclaDeAjuda({ key: tecla, ctrlKey: e.ctrlKey, altKey: e.altKey, metaKey: e.metaKey, target: e.target }, telaUsaF1(tela))) {
     e.preventDefault();
     e.stopImmediatePropagation();
     abrirAjuda();
@@ -59,7 +63,8 @@ export function HelpButton({ tela }: { tela: TelaAjuda }) {
 
   return (
     <>
-      <button class="ajuda-botao" onClick={() => abrirAjuda()} aria-label="Ajuda: como funciona esta tela" title="Ajuda (?)" data-testid="ajuda-botao">
+      {/* O clique do mouse não leva o foco para o botão: ao fechar, o Enter volta a ser "jogar agora", não "abrir a ajuda de novo". */}
+      <button class="ajuda-botao" onMouseDown={(e) => e.preventDefault()} onClick={() => abrirAjuda()} aria-label="Ajuda: como funciona esta tela" title="Ajuda (?)" data-testid="ajuda-botao">
         ?
       </button>
       {ajudaAberta.value && <HelpPanel />}
