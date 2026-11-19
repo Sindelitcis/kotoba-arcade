@@ -6,6 +6,7 @@ import { onomato } from '../../core/fx';
 import { teclaDe } from '../../core/teclas';
 import { criarCliente, procurarServidor, type Cliente, type Saude } from './cliente';
 import { CENAS, Conversa, proximaCena, type Cena, type Dica, type Evento, type Linha, type Resumo, type Ruby } from './engine';
+import { gravar, type Gravacao } from './microfone';
 
 type Fase = 'procurando' | 'desligado' | 'menu' | 'conversa' | 'resumo';
 
@@ -24,31 +25,6 @@ function RubyText({ ruby }: { ruby: readonly Ruby[] }) {
       )}
     </>
   );
-}
-
-/** Grava o microfone até `parar()`. */
-interface Gravacao {
-  parar(): Promise<Blob>;
-}
-
-async function gravar(): Promise<Gravacao> {
-  const stream = await navigator.mediaDevices.getUserMedia({
-    audio: { channelCount: 1, echoCancellation: true, noiseSuppression: true },
-  });
-  const rec = new MediaRecorder(stream);
-  const partes: Blob[] = [];
-  rec.ondataavailable = (e) => e.data.size > 0 && partes.push(e.data);
-  rec.start();
-  return {
-    parar: () =>
-      new Promise((resolve) => {
-        rec.onstop = () => {
-          stream.getTracks().forEach((t) => t.stop());
-          resolve(new Blob(partes, { type: rec.mimeType || 'audio/webm' }));
-        };
-        rec.stop();
-      }),
-  };
 }
 
 export function ConversaGame() {
@@ -82,9 +58,16 @@ export function ConversaGame() {
     setFase(s && s.conversa.ok ? 'menu' : 'desligado');
   };
 
+  // Saiu da tela: para a voz e desliga o microfone, mesmo no meio de uma gravação.
+  const montado = useRef(true);
   useEffect(() => {
     void procurar();
-    return () => audioEl.current?.pause();
+    return () => {
+      montado.current = false;
+      audioEl.current?.pause();
+      gravacao.current?.cancelar();
+      gravacao.current = null;
+    };
   }, []);
 
   /** Fala do personagem: voz do servidor local; se ela falhar, a do navegador. */
@@ -94,7 +77,11 @@ export function ConversaGame() {
     if (saude?.voz.ok) {
       try {
         const blob = await cliente.current.voz(linha.jp, cena.personagem.voz);
-        const a = new Audio(URL.createObjectURL(blob));
+        if (!montado.current) return;
+        const url = URL.createObjectURL(blob);
+        const a = new Audio(url);
+        // Cada fala é um arquivo na memória: solta quando acaba de tocar.
+        a.onended = a.onerror = () => URL.revokeObjectURL(url);
         audioEl.current = a;
         await a.play();
         return;
@@ -174,7 +161,13 @@ export function ConversaGame() {
     if (!c || c.fase !== 'vez' || !saude?.fala.ok) return;
     if (ouvindo === 'nao') {
       try {
-        gravacao.current = await gravar();
+        const g = await gravar();
+        // A pessoa saiu da tela enquanto o navegador pedia permissão: desliga já.
+        if (!montado.current) {
+          g.cancelar();
+          return;
+        }
+        gravacao.current = g;
         audioEl.current?.pause();
         setOuvindo('gravando');
       } catch {
@@ -186,6 +179,7 @@ export function ConversaGame() {
     setOuvindo('transcrevendo');
     try {
       const audio = await gravacao.current.parar();
+      gravacao.current = null;
       const ultima = [...c.linhas].reverse().find((l) => l.quem === 'personagem');
       const dito = await cliente.current.ouvir(audio, ultima?.jp ?? '');
       setOuvindo('nao');
