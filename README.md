@@ -5,7 +5,7 @@ Fliperama de jogos para aprender japonês, feito pensando em quem tem TDAH. A re
 Jogos que já dá para jogar:
 
 - **KanjiMon**: o [KanjiMon original](https://github.com/Sindelitcis/KanjiMon) refeito aqui dentro. Você caça kanji, quebra os selos respondendo e junta as cartas na KanjiDex.
-- **Kana Beat**: ritmo e digitação. Kana e palavras chegam na linha no tempo da batida e você digita a leitura. A música acelera quando você vai bem e desacelera quando não vai.
+- **Kana Beat**: ritmo e digitação. Kana e palavras chegam na linha no tempo da batida e você digita a leitura. A música é de verdade (lofi, eletrônica e batida com koto) e acelera quando você vai bem e desacelera quando não vai.
 - **Kotodama**: roguelike de cartas. Cada carta é um kanji ou uma palavra. Jogar a carta abre uma pergunta: acertou, o golpe sai forte; errou, sai fraco. Você sobe sete andares até o chefe, pega relíquias que mudam as regras e escolhe cartas novas depois de cada luta. Uma run leva de 5 a 10 minutos.
 - **Aventura**: você acabou de chegar ao Japão e vive cenas curtas do dia a dia (imigração, guichê do trem, konbini). As pessoas falam japonês de verdade, com áudio, e você responde escolhendo o que dizer. Não tem tela de erro: se a pessoa não entende, ela estranha, repete, e a conversa continua. Palavra nova aparece com leitura e significado; conforme firma na memória, a ajuda some. Cada cena leva de 3 a 5 minutos e as falas vividas ficam num diário para reler e ouvir.
 - **Kumitate**: puzzle de montar frases. Cada frase tem buracos e você encaixa partículas (は, を, に, で...) e pontas de verbo (ます, ません, た, ない...) até ela dizer o que foi pedido em português. A ponta encaixada transforma o verbo na hora: 飲む vira 飲みました. Peça que não serve volta para a bandeja com o motivo, sem tela de erro. Cada ponto de gramática é uma peça nova que destrava depois de você acertar a anterior de primeira algumas vezes, e chega com uma lição curta e um exemplo antes de ser cobrado. Uma rodada são seis frases.
@@ -104,7 +104,7 @@ Kanji nunca vem sozinho: toda carta traz palavras de verdade, com leitura em kan
 
 ```
 src/core      memória espaçada, seletor de cartas, perguntas, save, kana, som, efeitos, imagens, ajuda
-src/assets    fontes recortadas, cenários e personagens
+src/assets    fontes recortadas, cenários, personagens e músicas do Kana Beat
 docs          guia de estilo (estilo.md) e como as imagens foram feitas (imagens.md)
 src/content   kanji, palavras e frases (os 94 kanji do KanjiMon original e o vocabulário do dia a dia)
 src/hub       o fliperama
@@ -141,6 +141,21 @@ Fontes, as duas pela SIL Open Font License 1.1 (o texto da licença está em `sr
 
 Cenários e personagens: gerados no PC com o [Animagine XL 4.0](https://huggingface.co/cagliostrolab/animagine-xl-4.0) (Cagliostro Research Lab, licença CreativeML Open RAIL++-M, que permite usar as imagens geradas). Detalhes em [docs/imagens.md](docs/imagens.md).
 
-Sons: todos sintetizados no próprio jogo (`src/core/audio.ts`), sem arquivo de áudio de terceiros.
+Efeitos sonoros: todos sintetizados no próprio jogo (`src/core/audio.ts`).
+
+Músicas do Kana Beat: trechos de cerca de 1 minuto, cortados em loop, de faixas livres do [OpenGameArt](https://opengameart.org). Como foram escolhidas e cortadas está em [docs/musica.md](docs/musica.md). Dentro do jogo, a tela de resultado tem o botão Músicas com esta mesma lista.
+
+| Faixa | Autor | Licença | BPM |
+| --- | --- | --- | --- |
+| [Letting Go Of The Past](https://opengameart.org/content/happy-lo-fi-lofi-collection) | Holizna | [CC0](https://creativecommons.org/publicdomain/zero/1.0/) | 75 |
+| [Blue Skies](https://opengameart.org/content/happy-lo-fi-lofi-collection) | Holizna | [CC0](https://creativecommons.org/publicdomain/zero/1.0/) | 82 |
+| [Bartender](https://opengameart.org/content/lofi-compilation) | TAD | [CC0](https://creativecommons.org/publicdomain/zero/1.0/) | 90 |
+| [happy lofi day](https://opengameart.org/content/happy-lofi-day) | Tarush Singhal | [CC0](https://creativecommons.org/publicdomain/zero/1.0/) | 99 |
+| [Ninja Anthem EDM Beat](https://opengameart.org/content/ninja-anthem-edm-beat) | ISAo (airyluvs) | [OGA-BY 3.0](https://static.opengameart.org/OGA-BY-3.0.txt) | 120 |
+| [Only 115 (Dance Loop)](https://opengameart.org/content/only-115-dance-loop) | Snabisch | [CC-BY 3.0](https://creativecommons.org/licenses/by/3.0/) | 125 |
+| [Arukas Bloom](https://opengameart.org/content/arukas-bloom) | TAD | [CC-BY 4.0](https://creativecommons.org/licenses/by/4.0/) | 130 |
+| [Japanese Modern loop](https://opengameart.org/content/japanese-modern-loop) | F_kaiba | [CC-BY 4.0](https://creativecommons.org/licenses/by/4.0/) | 160 |
+
+Os trechos foram cortados, tiveram o volume igualado e foram convertidos para ogg; fora isso, a música é a original.
 
 Vozes da Conversa por voz: VOICEVOX:四国めたん, VOICEVOX:春日部つむぎ, VOICEVOX:青山龍星 e VOICEVOX:玄野武宏.

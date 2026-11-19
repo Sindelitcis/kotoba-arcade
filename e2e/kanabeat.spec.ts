@@ -108,3 +108,21 @@ test('com o teclado japonês do Windows ligado (tecla chega como Process/229) a 
   }
   await expect(page.getByTestId('score')).not.toHaveText('0');
 });
+
+test('a fase toca uma faixa de verdade e a tela de créditos mostra autor e licença', async ({ page }) => {
+  const ogg = page.waitForResponse((r) => /\/assets\/.*\.ogg$/.test(r.url()) && r.ok());
+  await page.clock.install();
+  await open(page);
+  await ogg;
+  await expect(page.getByTestId('song')).toContainText('·');
+  await page.clock.runFor(180_000);
+  await expect(page.getByTestId('grade')).toBeVisible();
+  await page.keyboard.press('c');
+  const credits = page.locator('.kb-credits li');
+  await expect(credits).toHaveCount(8);
+  await expect(credits.first()).toContainText('Holizna');
+  await expect(page.locator('.kb-credits')).toContainText('CC-BY 4.0');
+  await page.keyboard.press('Escape');
+  await expect(page.locator('.kb-credits')).toBeHidden();
+  await expect(page.getByTestId('grade')).toBeVisible();
+});

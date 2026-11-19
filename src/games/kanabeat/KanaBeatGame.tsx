@@ -8,9 +8,12 @@ import { kanaToRomaji } from '../../core/kana';
 import { MODE_NAMES, modeForPlay, Stage, type BeatEvent, type Judge, type Mode, type StageResult } from './engine';
 import { isTypingKey, normalKey } from './keys';
 import { startMusic, type Music } from './music';
+import { LICENCA_URL, TRACKS } from './tracks';
 
 const HIT_X = 16; // posição da linha, em % da largura da pista
 const START_DELAY = 150;
+/** Atraso ao voltar da pausa: o tempo de agendar o som de novo. */
+const RESUME_DELAY = 60;
 const JUDGE_TEXT: Record<Judge | 'miss', string> = { perfect: 'Perfeito!', good: 'Bom!', ok: 'Valeu', miss: 'Passou' };
 const JUDGE_COLORS: Record<Judge, string[]> = {
   perfect: [INK.shu, INK.shu, INK.tinta],
@@ -21,9 +24,11 @@ const JUDGE_COLORS: Record<Judge, string[]> = {
 interface Run {
   stage: Stage;
   music: Music;
-  /** performance.now() em que o tempo da fase vale 0. */
-  t0: number;
+  /** performance.now() em que o tempo da fase vale 0; null enquanto a música carrega. */
+  t0: number | null;
   pausedAt: number | null;
+  /** O tempo da fase nunca volta para trás deste ponto (ao sair da pausa o som leva uns ms para voltar). */
+  floor: number;
 }
 
 function newRun(mode?: Mode): Run {
@@ -34,12 +39,7 @@ function newRun(mode?: Mode): Run {
     chosen,
     save.bpm[chosen],
   );
-  return {
-    stage,
-    music: startMusic(stage.bpm, stage.endTime, START_DELAY),
-    t0: performance.now() + START_DELAY,
-    pausedAt: null,
-  };
+  return { stage, music: startMusic(stage.bpm), t0: null, pausedAt: null, floor: 0 };
 }
 
 export function KanaBeatGame() {
@@ -50,13 +50,16 @@ export function KanaBeatGame() {
   const [paused, setPaused] = useState(false);
   const [judge, setJudge] = useState<{ text: string; cls: string; n: number }>({ text: '', cls: '', n: 0 });
   const [typoAt, setTypoAt] = useState(0);
+  const [started, setStarted] = useState(false);
+  const [credits, setCredits] = useState(false);
   const trackEl = useRef<HTMLDivElement>(null);
   const lineEl = useRef<HTMLDivElement>(null);
   const stage = run.current.stage;
 
   const now = () => {
     const r = run.current as Run;
-    return (r.pausedAt ?? performance.now()) - r.t0;
+    if (r.t0 === null) return 0;
+    return Math.max(r.floor, (r.pausedAt ?? performance.now()) - r.t0);
   };
 
   const handle = (events: BeatEvent[]) => {
@@ -87,9 +90,25 @@ export function KanaBeatGame() {
     }
   };
 
+  // A fase começa quando a música carregou: o tempo 0 cai no primeiro tempo forte da faixa.
+  const current = run.current;
+  useEffect(() => {
+    const r = current;
+    let alive = true;
+    void r.music.ready.then(() => {
+      if (!alive || run.current !== r || r.t0 !== null) return;
+      // Pausou antes de carregar: o tempo fica em 0 e a música entra quando voltar.
+      r.t0 = r.pausedAt ?? r.music.play(0, START_DELAY);
+      setStarted(true);
+    });
+    return () => {
+      alive = false;
+    };
+  }, [current]);
+
   // Laço do jogo
   useEffect(() => {
-    if (result || paused) return;
+    if (result || paused || !started) return;
     let frame = 0;
     const loop = () => {
       const time = now();
@@ -99,20 +118,23 @@ export function KanaBeatGame() {
     };
     frame = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(frame);
-  }, [result, paused]);
+  }, [result, paused, started]);
 
   const setPause = (on: boolean) => {
     const r = run.current as Run;
     if (result || on === (r.pausedAt !== null)) return;
     if (on) {
       r.pausedAt = performance.now();
-      r.music.pause();
+      r.music.halt();
       // Congela a tela no instante da pausa. Sem isto, um último quadro do laço ainda mexia as notas com o aviso de pausa já na tela.
       setT(now());
     } else {
-      r.t0 += performance.now() - (r.pausedAt as number);
+      const g = now();
       r.pausedAt = null;
-      r.music.resume();
+      if (r.t0 !== null) {
+        r.t0 = r.music.play(g, RESUME_DELAY) - g;
+        r.floor = g;
+      }
     }
     setPaused(on);
   };
@@ -125,6 +147,8 @@ export function KanaBeatGame() {
     setResult(null);
     setPaused(false);
     setT(0);
+    setStarted(false);
+    setCredits(false);
     setJudge({ text: '', cls: '', n: 0 });
   };
 
@@ -138,6 +162,13 @@ export function KanaBeatGame() {
     const onKey = (e: KeyboardEvent) => {
       if (e.ctrlKey || e.metaKey || e.altKey) return;
       const key = normalKey(e);
+      if (credits) {
+        if (key === 'Escape' || key === 'Enter' || key === ' ' || key.toLowerCase() === 'c') {
+          e.preventDefault();
+          setCredits(false);
+        }
+        return;
+      }
       if (key === 'Escape') {
         e.preventDefault();
         leave();
@@ -150,6 +181,7 @@ export function KanaBeatGame() {
         } else if (key === '1') restart('hiragana');
         else if (key === '2') restart('katakana');
         else if (key === '3') restart('palavras');
+        else if (key.toLowerCase() === 'c') setCredits(true);
         return;
       }
       if (paused) {
@@ -197,6 +229,9 @@ export function KanaBeatGame() {
       <header class="km-top">
         <div class="kb-mode">
           <b>{MODE_NAMES[stage.mode]}</b> <span class="muted">{stage.bpm} BPM</span>
+          <small class="muted kb-song" data-testid="song">
+            ♪ {run.current.music.choice.track.titulo} · {run.current.music.choice.track.autor}
+          </small>
         </div>
         <div class={stage.combo > 1 ? 'combo on' : 'combo'}>Combo x{stage.combo}</div>
         <div class="kb-score" data-testid="score">
@@ -236,7 +271,7 @@ export function KanaBeatGame() {
         </div>
 
         <div class={`kb-typed${typoFresh ? ' typo' : ''}`} data-testid="typed">
-          {stage.buffer || <span class="muted">{t < stage.leadMs ? 'Digite a leitura quando a nota chegar na linha' : ' '}</span>}
+          {stage.buffer || <span class="muted">{!started ? 'Carregando a música…' : t < stage.leadMs ? 'Digite a leitura quando a nota chegar na linha' : ' '}</span>}
         </div>
         <p class="muted kb-help">
           Digite em romaji · <kbd>Espaço</kbd> pausa · <kbd>Backspace</kbd> apaga
@@ -314,7 +349,33 @@ export function KanaBeatGame() {
             <button onClick={leave}>
               Fliperama <kbd>Esc</kbd>
             </button>
+            <button class="ghost" onClick={() => setCredits(true)} data-testid="credits">
+              Músicas <kbd>C</kbd>
+            </button>
           </div>
+        </div>
+      )}
+
+      {credits && (
+        <div class="overlay kb-credits" onClick={() => setCredits(false)}>
+          <h2>Músicas do Kana Beat</h2>
+          <p class="muted">Trechos de faixas livres, cortados em loop. Obrigado a quem fez e liberou.</p>
+          <ul>
+            {TRACKS.map((tr) => (
+              <li key={tr.id}>
+                <a href={tr.link} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}>
+                  {tr.titulo}
+                </a>{' '}
+                de {tr.autor} ·{' '}
+                <a href={LICENCA_URL[tr.licenca]} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}>
+                  {tr.licenca}
+                </a>
+              </li>
+            ))}
+          </ul>
+          <p class="muted">
+            Voltar <kbd>Esc</kbd>
+          </p>
         </div>
       )}
     </main>

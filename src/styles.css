@@ -471,6 +471,7 @@ input { accent-color: var(--tinta); }
 /* ───────── Kana Beat ───────── */
 .kb { max-width: 1180px; margin: 0 auto; padding: 18px 20px 40px; min-height: 100vh; display: grid; grid-template-rows: auto 1fr; gap: 18px; }
 .kb-mode b { font: 400 1.05rem/1 var(--f-titulo); }
+.kb-song { display: block; margin-top: 4px; font-size: 0.75rem; max-width: 260px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .kb-score { font: 400 1.7rem/1 var(--f-titulo); color: var(--tinta); min-width: 90px; text-align: right; }
 .kb-progress { width: 160px; }
 .kb-stage { display: grid; gap: 18px; align-content: center; }
@@ -510,6 +511,8 @@ input { accent-color: var(--tinta); }
 .kb-typed .muted { font: 400 1rem/1.2 var(--f-texto); letter-spacing: 0; }
 .kb-typed.typo { background: var(--tom-medio), var(--branco); animation: shake 0.25s ease; }
 .kb-help { text-align: center; font-size: 0.85rem; }
+.kb-credits ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 6px; }
+.kb-credits a { color: var(--tinta); text-decoration: underline; }
 .kb-grade { font: 400 8rem/1 var(--f-pincel); color: var(--tinta); animation: capture 0.5s cubic-bezier(0.2, 1.4, 0.4, 1); }
 .kb-grade.g-S { color: var(--shu); } .kb-grade.g-C { color: var(--tinta-2); }
 .kb-missed { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; align-items: center; max-width: 760px; }
