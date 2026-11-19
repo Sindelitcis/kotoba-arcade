@@ -265,5 +265,3 @@ export function speak(text: string, voz: VozId = VOZ_PADRAO): Promise<void> {
 export function hasJapaneseVoice(): boolean {
   return gravadas || (typeof speechSynthesis !== 'undefined' && !!findVoice());
 }
-
-if (typeof window !== 'undefined' && typeof fetch !== 'undefined') void loadVoices();

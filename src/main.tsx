@@ -1,7 +1,7 @@
 import { effect } from '@preact/signals';
 import { render } from 'preact';
 import { screen } from './core/app';
-import { sfx } from './core/audio';
+import { loadVoices, sfx } from './core/audio';
 import { HelpButton } from './core/help/HelpButton';
 import { AventuraGame } from './games/aventura/AventuraGame';
 import { ConversaGame } from './games/conversa/ConversaGame';
@@ -13,6 +13,9 @@ import { KanjiMonGame } from './games/kanjimon/KanjiMonGame';
 import { RoguelikeGame } from './games/roguelike/RoguelikeGame';
 import { Hub } from './hub/Hub';
 import './styles.css';
+
+// O manifesto das vozes gravadas já vem antes da primeira fala.
+void loadVoices();
 
 function App() {
   switch (screen.value) {
