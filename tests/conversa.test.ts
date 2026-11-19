@@ -645,3 +645,20 @@ describe('save da Conversa estragado', () => {
     expect(ensureConversaSave(games).cenas).toEqual({ caminho: 3 });
   });
 });
+
+describe('encerrar enquanto o personagem pensa', () => {
+  it('a resposta que chega depois não reabre a conversa nem dá pontos', async () => {
+    // Esc com o modelo ainda pensando mostrava o resumo, e a resposta atrasada voltava a conversa para "vez",
+    // somava XP depois do resumo e tocava a voz do personagem por cima do menu.
+    const { conversa, data } = setup([json({ passos: ['pedir'] })]);
+    const pendente = conversa.dizer('koohii wo kudasai');
+    const resumo = conversa.encerrar();
+    const xp = data.profile.xp;
+    const events = await pendente;
+    expect(events).toEqual([]);
+    expect(conversa.fase).toBe('fim');
+    expect(data.profile.xp).toBe(xp);
+    expect(conversa.linhas.filter((l) => l.quem === 'jogador')).toHaveLength(0);
+    expect(resumo.turnos).toBe(0);
+  });
+});

@@ -878,9 +878,19 @@ export class Conversa {
     try {
       r = await this.perguntar(conteudo, jp);
     } catch {
+      if (this.fechada) return [];
       this.fase = 'vez';
       return [{ t: 'falha' }];
     }
+    // Tudo que precisa esperar o servidor vem antes de mexer no estado: se o jogador encerrar
+    // a conversa no meio, a resposta atrasada é jogada fora inteira.
+    const reserva = r === RESERVA;
+    const correcaoLida = r.correcao ? await this.ruby(r.correcao.melhor) : null;
+    const pendentes = cena.passos.filter((p) => !this.feitos.has(p.id));
+    const leitura = pendentes.some((p) => p.sinais) ? (await this.ruby(jp)).kana : '';
+    const lido = await this.ruby(r.fala);
+    if (this.fechada) return [];
+
     this.historico.push({ role: 'user', content: conteudo });
     this.historico.push({
       role: 'assistant',
@@ -895,14 +905,12 @@ export class Conversa {
 
     const events: Evento[] = [];
     const before = levelInfo(deps.profile.xp).level;
-    const reserva = r === RESERVA;
     const minha: Linha = { quem: 'jogador', jp, ruby: [{ t: jp }], comAjuda };
     if (jp !== digitado) minha.digitado = digitado;
     if (!reserva) minha.entendida = r.entendi;
-    if (r.correcao) {
+    if (r.correcao && correcaoLida) {
       // O modelo às vezes "corrige" só a escrita (こおひい → コーヒー): soa igual, então não é correção.
-      const lido = await this.ruby(r.correcao.melhor);
-      if (!lido.kana || !mesmoSom(lido.kana, jp)) minha.correcao = { dito: jp, ...r.correcao };
+      if (!correcaoLida.kana || !mesmoSom(correcaoLida.kana, jp)) minha.correcao = { dito: jp, ...r.correcao };
     }
     this.linhas.push(minha);
     events.push({ t: 'linha', linha: minha });
@@ -912,8 +920,6 @@ export class Conversa {
       events.push(...this.falar(jp, comAjuda));
     }
     // O modelo às vezes não marca a despedida: "arigatou gozaimashita" encerra a entrevista de qualquer jeito.
-    const pendentes = cena.passos.filter((p) => !this.feitos.has(p.id));
-    const leitura = pendentes.some((p) => p.sinais) ? (await this.ruby(jp)).kana : '';
     for (const p of pendentes) {
       if (!r.passos.includes(p.id) && !cumpreSozinho(p, jp, leitura)) continue;
       this.feitos.add(p.id);
@@ -921,7 +927,6 @@ export class Conversa {
       events.push({ t: 'passo', passo: p });
     }
 
-    const lido = await this.ruby(r.fala);
     const dela: Linha = {
       quem: 'personagem',
       jp: r.fala,
@@ -943,7 +948,8 @@ export class Conversa {
       // Duas falas seguidas sem o personagem entender: as respostas prontas aparecem sozinhas.
       if (this.semEntender >= 2) {
         this.nivelDica = 1;
-        events.push({ t: 'dica', dica: await this.pedirDica() });
+        const dica = await this.pedirDica();
+        if (!this.fechada) events.push({ t: 'dica', dica });
       }
     }
     const after = levelInfo(deps.profile.xp).level;
