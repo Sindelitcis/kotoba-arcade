@@ -4,7 +4,7 @@ import { sfx, speakWord } from '../../core/audio';
 import { cenaStyle } from '../../core/arte';
 import { acertou, cor, corStyle, errou, zerar } from '../../core/cor';
 import { Pintura } from '../../core/Pintura';
-import { useAoAbrirAjuda } from '../../core/help/ajuda';
+import { ajudaAberta, useAoAbrirAjuda } from '../../core/help/ajuda';
 import { teclaDe } from '../../core/teclas';
 import { burst, INK, onomato, pulse } from '../../core/fx';
 import { kanaToRomaji } from '../../core/kana';
@@ -54,6 +54,8 @@ export function KanaBeatGame() {
   const [typoAt, setTypoAt] = useState(0);
   const [started, setStarted] = useState(false);
   const [credits, setCredits] = useState(false);
+  const [wrong, setWrong] = useState('');
+  const inputEl = useRef<HTMLInputElement>(null);
   const trackEl = useRef<HTMLDivElement>(null);
   const lineEl = useRef<HTMLDivElement>(null);
   const stage = run.current.stage;
@@ -211,7 +213,10 @@ export function KanaBeatGame() {
       }
       if (/^[a-zA-Z'-]$/.test(key)) {
         e.preventDefault();
-        handle((run.current as Run).stage.key(key, now()));
+        const events = (run.current as Run).stage.key(key, now());
+        // Letra errada aparece riscada na caixa: sem isso parecia que o teclado não respondia.
+        setWrong(events.some((ev) => ev.t === 'type' && !ev.ok) ? key.toLowerCase() : '');
+        handle(events);
       }
     };
     const onHide = () => {
@@ -226,6 +231,31 @@ export function KanaBeatGame() {
   });
 
   useEffect(() => () => run.current?.music.stop(), []);
+
+  // A caixa de digitar fica sempre com o foco enquanto a música toca. O teclado japonês do
+  // Windows (IME) e algumas extensões só entregam as teclas a um campo de texto; com o foco
+  // num campo marcado como do jogo, toda tecla chega, e clicar em qualquer lugar não atrapalha.
+  const playing = !result && !paused && !credits;
+  useLayoutEffect(() => {
+    if (playing && !ajudaAberta.value && document.activeElement !== inputEl.current) inputEl.current?.focus({ preventScroll: true });
+  });
+  const keepFocus = () => {
+    requestAnimationFrame(() => {
+      if (playing && !ajudaAberta.value && inputEl.current?.isConnected) inputEl.current.focus({ preventScroll: true });
+    });
+  };
+  // O que o IME chegar a escrever no campo é descartado: a tecla já foi tratada no keydown.
+  const discard = () => {
+    const el = inputEl.current;
+    if (el && el.value) el.value = '';
+  };
+  const cancelIme = () => {
+    const el = inputEl.current;
+    if (!el) return;
+    el.blur();
+    el.value = '';
+    el.focus({ preventScroll: true });
+  };
 
   const visible = stage.visible(t);
   const target = stage.target;
@@ -280,9 +310,28 @@ export function KanaBeatGame() {
           </div>
         </div>
 
-        <div class={`kb-typed${typoFresh ? ' typo' : ''}`} data-testid="typed">
-          {stage.buffer || <span class="muted">{!started ? 'Carregando a música…' : t < stage.leadMs ? 'Digite a leitura quando a nota chegar na linha' : ' '}</span>}
-        </div>
+        <label class={`kb-typed${typoFresh ? ' typo' : ''}`}>
+          <input
+            ref={inputEl}
+            class="kb-entrada"
+            data-tecla-jogo
+            data-testid="entrada"
+            aria-label="Digite a leitura da nota destacada"
+            autocomplete="off"
+            autocapitalize="off"
+            spellcheck={false}
+            onInput={discard}
+            onCompositionStart={cancelIme}
+            onBlur={keepFocus}
+          />
+          <span data-testid="typed">
+            {stage.buffer}
+            {typoFresh && wrong && <s class="kb-wrong">{wrong}</s>}
+            {!stage.buffer && !(typoFresh && wrong) && (
+              <span class="muted">{!started ? 'Carregando a música…' : t < stage.leadMs ? 'Digite a leitura da nota escura, a qualquer hora' : ' '}</span>
+            )}
+          </span>
+        </label>
         <p class="muted kb-help">
           Digite em romaji · <kbd>Espaço</kbd> pausa · <kbd>Backspace</kbd> apaga
         </p>

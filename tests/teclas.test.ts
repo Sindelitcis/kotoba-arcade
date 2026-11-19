@@ -44,4 +44,16 @@ describe('tecla de jogo com o IME japonês do Windows', () => {
   it('número de largura dupla vira o comum', () => {
     expect(teclaDe(evento({ key: '１' }))).toBe('1');
   });
+
+  it('no campo do próprio jogo (data-tecla-jogo), a tecla vale mesmo no meio da composição', () => {
+    // A caixa do Kana Beat recusava a tecla quando o IME marcava composição, e o Rafael não conseguia digitar.
+    const caixa = document.createElement('input');
+    caixa.dataset.teclaJogo = '';
+    expect(teclaDe(evento({ key: 'Process', code: 'KeyS', keyCode: 229, isComposing: true }, caixa))).toBe('s');
+    expect(teclaDe(evento({ key: 'Process', code: 'KeyA', keyCode: 229 }, caixa))).toBe('a');
+    expect(teclaDe(evento({ key: 'Escape', code: 'Escape', isComposing: true }, caixa))).toBe('Escape');
+    // Campo de texto comum continua com o IME.
+    const campo = document.createElement('input');
+    expect(teclaDe(evento({ key: 'Process', code: 'KeyS', keyCode: 229 }, campo))).toBeNull();
+  });
 });

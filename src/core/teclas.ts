@@ -23,8 +23,17 @@ const CODES: Record<string, string> = {
   ArrowRight: 'ArrowRight',
 };
 
+/**
+ * Campo de digitar que é o próprio jogo (a caixa do Kana Beat): tudo que chega nele é
+ * tecla de jogo, mesmo com o IME ligado. Marque com `data-tecla-jogo`.
+ */
+export function campoDoJogo(alvo: EventTarget | null): boolean {
+  return !!alvo && typeof (alvo as HTMLElement).tagName === 'string' && (alvo as HTMLElement).dataset?.teclaJogo !== undefined;
+}
+
 function editavel(alvo: EventTarget | null): boolean {
   if (!alvo || typeof (alvo as HTMLElement).tagName !== 'string') return false;
+  if (campoDoJogo(alvo)) return false;
   const el = alvo as HTMLElement;
   return el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable;
 }
@@ -44,8 +53,11 @@ function pelaPosicao(code: string): string | null {
  * Letras e números de largura dupla (１, Ａ) viram os comuns.
  */
 export function teclaDe(e: KeyboardEvent): string | null {
-  if (e.isComposing) return null;
+  const doJogo = campoDoJogo(e.target);
   const processo = e.key === 'Process' || e.keyCode === 229;
+  // No campo do próprio jogo, a composição do IME não conta: vale a tecla física.
+  if (e.isComposing && !doJogo) return null;
+  if (e.isComposing && !processo) return pelaPosicao(e.code) ?? (e.key.length === 1 ? toHalfWidth(e.key) : e.key);
   if (processo) {
     // Num campo de texto, a tecla vai começar uma composição: é do IME, não do jogo.
     if (editavel(e.target)) return null;

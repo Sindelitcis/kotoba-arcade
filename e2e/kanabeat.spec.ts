@@ -141,3 +141,43 @@ test('a primeira tecla logo que o Kana Beat abre não se perde', async ({ page }
   });
   await expect(page.getByRole('heading', { name: 'Pausado' })).toBeVisible();
 });
+
+// O Rafael não conseguia digitar nem clicando na caixa. A caixa agora é um campo de verdade,
+// marcado como do jogo, que fica sempre com o foco: o IME do Windows e extensões que só
+// entregam teclas a campos de texto passam a chegar no jogo.
+test('a caixa de digitar já abre com o foco e mostra cada letra digitada', async ({ page }) => {
+  await open(page);
+  await expect(page.getByTestId('entrada')).toBeFocused();
+  const romaji = (await page.getByTestId('target-note').getAttribute('data-romaji')) ?? '';
+  await page.keyboard.press(romaji[0] as string);
+  await expect(page.getByTestId('typed')).toHaveText(romaji[0] as string);
+});
+
+test('clicar em qualquer lugar da tela não tira o teclado do jogo', async ({ page }) => {
+  await open(page);
+  await page.getByTestId('song').click();
+  await page.getByTestId('kb-track').click({ position: { x: 5, y: 5 } });
+  await expect(page.getByTestId('entrada')).toBeFocused();
+  await hitTarget(page);
+  await expect(page.getByTestId('score')).not.toHaveText('0');
+});
+
+test('com o teclado japonês ligado, a tecla no meio da composição conta pela posição', async ({ page }) => {
+  await open(page);
+  const romaji = (await page.getByTestId('target-note').getAttribute('data-romaji')) ?? '';
+  const ch = romaji[0] as string;
+  await page.evaluate((c) => {
+    const ev = new KeyboardEvent('keydown', { key: 'Process', code: `Key${c.toUpperCase()}`, isComposing: true, bubbles: true, cancelable: true });
+    Object.defineProperty(ev, 'keyCode', { get: () => 229 });
+    document.activeElement?.dispatchEvent(ev);
+  }, ch);
+  await expect(page.getByTestId('typed')).toHaveText(ch);
+});
+
+test('letra errada aparece riscada na caixa', async ({ page }) => {
+  await open(page);
+  const romaji = (await page.getByTestId('target-note').getAttribute('data-romaji')) ?? '';
+  const errada = romaji.startsWith('q') ? 'x' : 'q';
+  await page.keyboard.press(errada);
+  await expect(page.locator('.kb-wrong')).toHaveText(errada);
+});

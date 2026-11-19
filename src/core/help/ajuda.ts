@@ -66,6 +66,8 @@ export function useSubtelaAjuda(sub: TelaAjuda | null): void {
 /** Campo onde a pessoa está digitando texto: ali a tecla ? é texto, não ajuda. */
 export function emCampoDeTexto(alvo: EventTarget | null): boolean {
   if (!(alvo instanceof HTMLElement)) return false;
+  // A caixa do Kana Beat recebe teclas de jogo, não texto: ali o ? ainda abre a ajuda.
+  if (alvo.dataset.teclaJogo !== undefined) return false;
   if (alvo.isContentEditable) return true;
   if (alvo instanceof HTMLTextAreaElement) return true;
   if (alvo instanceof HTMLInputElement) return !['checkbox', 'radio', 'button', 'submit', 'file', 'range'].includes(alvo.type);
