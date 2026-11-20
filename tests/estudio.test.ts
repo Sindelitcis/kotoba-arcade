@@ -92,7 +92,7 @@ print(json.dumps([estudio.escolhidas(lista, rel), estudio.escolhidas({**lista, "
 });
 
 describe.runIf(TEM_PIL)('estúdio: exportar cenários e retratos', () => {
-  it('a versão mangá vai para destino_tinta e o retrato é cortado na cintura', () => {
+  it('só a versão colorida vai para o repositório, e o retrato é cortado na cintura', () => {
     const r = py(`
 from PIL import Image
 base = pathlib.Path(${JSON.stringify(pasta)}) / "exp"
@@ -100,12 +100,13 @@ out = base / "lote"
 out.mkdir(parents=True, exist_ok=True)
 estudio.pasta = lambda lista: out
 Image.new("RGB", (100, 200), (200, 50, 50)).save(out / "yui-10001.png")
-lista = {"itens": [{"id": "yui"}], "destino": "cor", "destino_tinta": "manga", "saida": 1000, "corte_altura": 0.5}
+lista = {"itens": [{"id": "yui"}], "destino": "cor", "saida": 1000, "corte_altura": 0.5}
 falta = estudio.exportar(lista, base, {"yui-10001": {"id": "yui", "ok": True, "p": 1.0}})
-cor, manga = Image.open(base / "cor" / "yui.webp"), Image.open(base / "manga" / "yui.webp")
-r, g, b = manga.convert("RGB").getpixel((50, 50))
-print(json.dumps([falta, cor.size, manga.size, r == g == b, (base / "cor-tinta").exists()]))`);
-    expect(r).toEqual([[], [100, 100], [100, 100], true, false]);
+cor = Image.open(base / "cor" / "yui.webp")
+r, g, b = cor.convert("RGB").getpixel((50, 50))
+print(json.dumps([falta, cor.size, r > g + 100, sorted(p.name for p in base.iterdir())]))`);
+    // Nada de cópia em cinza ao lado (o visual Sora usa só a ilustração colorida).
+    expect(r).toEqual([[], [100, 100], true, ['cor', 'lote']]);
   });
 });
 

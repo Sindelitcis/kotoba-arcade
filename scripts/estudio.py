@@ -10,7 +10,7 @@ Uso (de dentro da pasta do repositório):
     $PY -I scripts/estudio.py conferir scripts/imagens/objetos.json            # CLIP: a imagem mostra a ideia certa?
     $PY -I scripts/estudio.py revisar  scripts/imagens/objetos.json [id ...]   # modelo de visão: tem defeito?
     $PY -I scripts/estudio.py folha    scripts/imagens/objetos.json            # folhas de contato para olhar
-    $PY -I scripts/estudio.py exportar scripts/imagens/objetos.json            # WebP cor + tinta no repositório
+    $PY -I scripts/estudio.py exportar scripts/imagens/objetos.json            # WebP no repositório
     $PY -I scripts/estudio.py tudo     scripts/imagens/objetos.json            # todos acima, refazendo as reprovadas
 
 As candidatas e os relatórios ficam fora do repositório, em D:\\KotobaArcade\\arte\\estudio\\<lote>\\.
@@ -27,7 +27,7 @@ Formato da lista (JSON):
 
     {
       "lote": "objetos",                       nome da pasta de trabalho
-      "destino": "src/assets/imagens",         pasta no repositório (cor); a versão mangá vai em <destino>-tinta
+      "destino": "src/assets/imagens",         pasta no repositório
       "largura": 1024, "altura": 1024,         tamanho da geração
       "saida": 384,                            lado maior do WebP final
       "recorte": true,                         tira o fundo branco (fica transparente)
@@ -631,28 +631,13 @@ def recortar(img):
     return rgba.crop(caixa) if caixa else rgba
 
 
-def tinta(img):
-    """Versão mangá: cinza com contraste de nanquim. Mantém o alfa."""
-    from PIL import Image, ImageEnhance, ImageOps
-
-    alfa = img.getchannel("A") if img.mode == "RGBA" else None
-    cinza = ImageOps.autocontrast(img.convert("L"), cutoff=0.5)
-    cinza = ImageEnhance.Contrast(cinza).enhance(1.15)
-    if alfa is None:
-        return cinza
-    out = Image.merge("LA", (cinza, alfa))
-    return out
-
 
 def exportar(lista: dict, repo: pathlib.Path, relatorio: dict) -> list[str]:
     from PIL import Image
 
     out = pasta(lista)
     destino = repo / lista["destino"]
-    # Cenários e retratos guardam a versão mangá numa pasta própria (cenas, pessoas); o resto em <destino>-tinta.
-    destino_tinta = repo / lista.get("destino_tinta", f"{lista['destino']}-tinta")
     destino.mkdir(parents=True, exist_ok=True)
-    destino_tinta.mkdir(parents=True, exist_ok=True)
     lado = lista.get("saida", 384)
     faltando = []
     medidas: dict[str, list[int]] = {}
@@ -667,7 +652,6 @@ def exportar(lista: dict, repo: pathlib.Path, relatorio: dict) -> list[str]:
             img = img.crop((0, 0, img.width, int(img.height * lista["corte_altura"])))
         img.thumbnail((lado, lado), Image.LANCZOS)
         img.save(destino / f"{iid}.webp", "WEBP", quality=lista.get("qualidade", 72), method=6)
-        tinta(img).save(destino_tinta / f"{iid}.webp", "WEBP", quality=lista.get("qualidade", 72), method=6)
         medidas[iid] = [img.width, img.height]
     # Largura e altura de cada imagem: os jogos usam para montar a cena sem esperar a imagem carregar.
     (destino / "medidas.json").write_text(json.dumps(dict(sorted(medidas.items())), indent=0) + "\n", encoding="utf-8", newline="\n")

@@ -5,7 +5,7 @@ Tudo foi gerado no PC, numa RTX 5060 Ti de 16 GB. Nenhuma imagem passou por serv
 - Cenários e personagens, e as primeiras ilustrações de vocabulário: [Animagine XL 4.0](https://huggingface.co/cagliostrolab/animagine-xl-4.0), da Cagliostro Research Lab (licença CreativeML Open RAIL++-M). O arquivo do modelo foi apagado do PC em novembro de 2026; para gerar estas de novo, baixe outra vez.
 - Ilustrações de vocabulário daqui para a frente (Memória, Cena Viva, kana com imagem): [Anima Turbo v1.1](https://huggingface.co/circlestone-labs/Anima), da CircleStone Labs. Ganhou de seis modelos num teste com os mesmos prompts: traço de anime mais natural, gato com o rabo ligado ao corpo, konbini sem texto falso e o único que fez uma reverência de verdade.
 
-O que fica no repositório são só as imagens finais: a versão de mangá em `src/assets/cenas/` e `src/assets/pessoas/` (WebP em tons de cinza) e a versão anime em `src/assets/cenas-cor/` e `src/assets/pessoas-cor/` (WebP colorido). Todas com até 960px de largura e menos de 160 KB cada (um teste confere).
+O que fica no repositório são só as imagens finais, sempre coloridas: cenários em `src/assets/cenas-cor/`, retratos em `src/assets/pessoas-cor/` e vocabulário em `imagens/`, `acoes/`, `gente/`, `lugares/` e `kana/`. Até novembro de 2026 cada imagem tinha também uma cópia em cinza para o visual de mangá; o visual Sora (docs/estilo.md) usa só a colorida, e as cópias saíram. Todas com até 960px de largura e menos de 160 KB cada (um teste confere).
 
 ## Gerar de novo
 
@@ -33,7 +33,7 @@ python -I scripts/otimizar.py D:/Rafael/Documents/GitHub/kotoba-arcade
 
 `gerar.py` aceita ids para gerar só alguns (`scripts/gerar.py p-yui kotodama-inari`). Cada imagem leva uns 12 segundos.
 
-Os prompts seguem o guia de estilo: mangá em preto e branco, retícula, nanquim. O prompt negativo tira cor, texto, balão e qualquer coisa com cara de anos 80 ou 90.
+Os prompts seguiam o guia de estilo da época: mangá em preto e branco, retícula, nanquim. O prompt negativo tira cor, texto, balão e qualquer coisa com cara de anos 80 ou 90.
 
 ## Versão anime
 
@@ -99,7 +99,7 @@ $PY -I scripts/estudio.py tudo scripts/imagens/objetos.json
 2. **conferir**: o CLIP compara cada candidata com o rótulo do próprio item, com os rótulos de todos os outros itens do lote, com os `distratores` da lista e com alguns gerais (forma abstrata, objeto deformado, texto escrito). A imagem só passa se o próprio rótulo ganhar com chance de pelo menos 45% e 15 pontos de folga sobre o segundo. O relatório fica em `conferencia.json`. A nota guardada só é reaproveitada para o mesmo arquivo com a mesma lista de rótulos: imagem refeita com a mesma seed é conferida de novo.
 3. **revisar**: o CLIP vê que é um gato, mas não vê que o rabo virou uma mancha solta. Por isso a candidata escolhida passa ainda por um modelo de visão local (`gemma4:12b`, no Ollama), que responde o que a figura mostra e se tem membro solto, parte faltando, pedaço solto ou se está ambígua (um bicho só de costas, por exemplo). Com qualquer defeito, ela sai e a próxima aprovada pelo CLIP é revista. O resultado fica em `revisao.json` e só é refeito para arquivo novo ou outro modelo. Roda com o modelo de imagem e o CLIP já fora da placa, sob a mesma trava, e o modelo de visão é descarregado no fim (`keep_alive: 0`). Troque o modelo com `KOTOBA_VISAO`.
 4. **refazer**: item sem nenhuma candidata aprovada ganha outra leva de seeds, até duas vezes.
-5. **exportar**: a melhor candidata aprovada vira WebP no `destino` da lista (cor) e em `<destino>-tinta` (versão mangá, em cinza). Com `"recorte": true` o fundo some (fica transparente).
+5. **exportar**: a melhor candidata aprovada vira WebP no `destino` da lista. Com `"recorte": true` o fundo some (fica transparente).
 6. **folha**: folhas de contato em JPG para olhar tudo de uma vez. A reprovada na revisão aparece em vermelho com o defeito. Mesmo com as duas conferências, olhe a folha antes de publicar.
 
 Cada passo também roda sozinho: `gerar`, `conferir`, `exportar`, `folha` (e `folha ... x` para ver só as reprovadas). `gerar` aceita ids para gerar só alguns.
