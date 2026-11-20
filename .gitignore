@@ -12,3 +12,11 @@ __pycache__/
 # Segredos da Conversa para `wrangler pages dev` (nunca no Git)
 .dev.vars
 .wrangler/
+
+# Voz de referência da Voz 1 e pesos de modelo: nunca no repositório (tests/vozes-pt.test.ts)
+amigo.wav
+amigo.txt
+*.safetensors
+*.pth
+*.ckpt
+*.bin

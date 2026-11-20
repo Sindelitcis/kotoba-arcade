@@ -7,7 +7,6 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { AULAS, duracao, type Aula } from '../aulas';
 import { app, commit, go, ouvirSave, screen, tick } from '../core/app';
 import { sfx } from '../core/audio';
-import { esquecerPt, vozLocalNoAr } from '../core/fala-pt';
 import { tocarSequencia, type Tocador, type Trecho } from '../core/sequencia';
 import { teclaDe } from '../core/teclas';
 import { ETAPAS, missoesDa } from '../jornada/etapas';
@@ -184,12 +183,6 @@ export function OuvirTela() {
     commit();
     sfx.click();
   };
-  const trocarVozLocal = () => {
-    settings.vozLocal = !settings.vozLocal;
-    esquecerPt();
-    commit();
-    sfx.click();
-  };
 
   let n = 0;
   return (
@@ -234,17 +227,6 @@ export function OuvirTela() {
             Texto <kbd>T</kbd>
           </button>
         </div>
-        <label class="check">
-          <input type="checkbox" checked={settings.vozLocal} onChange={trocarVozLocal} /> Voz do PC
-          <small class="muted">
-            {' '}
-            {settings.vozLocal
-              ? vozLocalNoAr.value
-                ? '(no ar: as aulas usam a voz gravada neste PC)'
-                : '(não achei o servidor: rode npm run aulas neste PC)'
-              : '(desligada: usa a voz livre do site)'}
-          </small>
-        </label>
         {texto && (
           <ol class="ouvir-texto" data-testid="ouvir-texto">
             {aula.trechos.map((t, i) =>

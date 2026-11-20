@@ -2,8 +2,8 @@
  * Todo o português falado: as aulas do modo Ouvir, a lição falada do Kumitate, a narração
  * da Aventura e o retorno das perguntas da Jornada.
  *
- * `scripts/gravar-aulas.mjs` grava esta lista duas vezes: na voz livre, que vai para
- * `public/vozes-pt/`, e na voz do PC, que fica fora do repositório (ver docs/vozes.md).
+ * `scripts/gravar-vozes-pt.mjs` grava esta lista nas duas vozes, em `public/vozes-pt/voz1/`
+ * e `public/vozes-pt/voz2/` (ver docs/vozes.md).
  * `tests/vozes-pt.test.ts` confere que cada texto tem gravação na voz livre.
  */
 import { AULAS } from '../src/aulas';

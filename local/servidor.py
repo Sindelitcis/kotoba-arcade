@@ -4,16 +4,13 @@ Junta em http://127.0.0.1:8791 as três peças que o jogo usa:
   /ouvir     fala em japonês -> texto (Whisper, pelo faster-whisper)
   /conversa  o modelo que faz o personagem (Ollama)
   /voz       texto -> fala em japonês (AivisSpeech ou VOICEVOX)
-e mais /leitura (separa a frase em palavras com a leitura, para o furigana),
-/aulas (as aulas em português gravadas na voz do PC, que nunca saem dele)
+e mais /leitura (separa a frase em palavras com a leitura, para o furigana)
 e /saude (o que está ligado).
 
-Só atende a própria máquina. Quem sobe tudo é `npm run local` (local/iniciar.mjs);
-`npm run aulas` sobe só as aulas (`--aulas`), sem carregar nenhum modelo.
+Só atende a própria máquina. Quem sobe tudo é `npm run local` (local/iniciar.mjs).
 """
 import asyncio
 import io
-import json
 import os
 import re
 import sys
@@ -24,7 +21,7 @@ from pathlib import Path
 import httpx
 from fastapi import Body, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, Response
+from fastapi.responses import Response
 
 AQUI = Path(__file__).resolve().parent
 sys.path.insert(0, str(AQUI))
@@ -32,30 +29,14 @@ from config import carregar_config  # noqa: E402
 
 
 CFG = carregar_config()
-# `--aulas`: só entrega as aulas gravadas. Não carrega o Whisper nem o modelo de conversa (nada na placa).
-SO_AULAS = "--aulas" in sys.argv
 app = FastAPI(title="Kotoba Arcade: conversa local")
-
-
-def origens_permitidas(cfg):
-    """Páginas abertas nesta máquina e o site do próprio fliperama (config "origens").
-
-    Um site qualquer não consegue usar o modelo, o microfone nem as aulas daqui.
-    """
-    publicas = "|".join(re.escape(o.rstrip("/")) for o in cfg.get("origens", []))
-    return r"^(http://(localhost|127\.0\.0\.1|\[::1\])(:\d+)?" + (f"|{publicas}" if publicas else "") + r")$"
-
-
+# Só páginas abertas nesta máquina podem chamar: um site qualquer não consegue usar o modelo nem o microfone daqui.
 app.add_middleware(
     CORSMiddleware,
-    allow_origin_regex=origens_permitidas(CFG),
+    allow_origin_regex=r"^http://(localhost|127\.0\.0\.1|\[::1\])(:\d+)?$",
     allow_methods=["GET", "POST"],
     allow_headers=["*"],
-    # O Chrome pede licença antes de um site público falar com 127.0.0.1 (Private Network Access). Só as origens
-    # acima recebem o sim; para qualquer outra a pré-verificação é recusada.
-    allow_private_network=True,
 )
-
 http = httpx.Client(timeout=120)
 
 # ---------------------------------------------------------------- fala -> texto
@@ -96,8 +77,7 @@ def _carregar_whisper():
     _whisper["estado"] = "erro"
 
 
-if not SO_AULAS:
-    threading.Thread(target=_carregar_whisper, daemon=True).start()
+threading.Thread(target=_carregar_whisper, daemon=True).start()
 
 # Frases que o Whisper inventa quando só ouve silêncio ou ruído.
 ALUCINACOES = re.compile(r"ご視聴ありがとうございました|チャンネル登録|字幕|おやすみなさい。?$^")
@@ -173,8 +153,7 @@ def _aquecer_modelo():
             time.sleep(2)  # o Ollama ainda está abrindo
 
 
-if not SO_AULAS:
-    threading.Thread(target=_aquecer_modelo, daemon=True).start()
+threading.Thread(target=_aquecer_modelo, daemon=True).start()
 
 
 # ---------------------------------------------------------------- leitura (furigana)
@@ -250,45 +229,6 @@ def voz(dados: dict = Body(...)):
     return Response(wav, media_type="audio/wav", headers={"X-Tempo-Ms": str(round((time.time() - t) * 1000))})
 
 
-# ---------------------------------------------------------------- aulas na voz do PC
-
-# Gravadas por local/gravar_aulas.py numa pasta fora do repositório (config "aulas.pasta"). O site pede o
-# manifesto e toca cada arquivo daqui; nenhum desses áudios vai para o Git nem para o site público.
-ARQUIVO_AULA = re.compile(r"^[0-9a-f]{16}\.mp3$")
-
-
-def _pasta_aulas():
-    pasta = (CFG.get("aulas") or {}).get("pasta") or ""
-    return Path(pasta) if pasta else None
-
-
-def _manifesto_aulas():
-    pasta = _pasta_aulas()
-    if not pasta or not (pasta / "manifesto.json").exists():
-        return None
-    try:
-        return json.loads((pasta / "manifesto.json").read_text(encoding="utf-8"))
-    except ValueError:
-        return None
-
-
-@app.get("/aulas/manifesto.json")
-def aulas_manifesto():
-    m = _manifesto_aulas()
-    if not m:
-        raise HTTPException(404, "Sem aulas gravadas na voz do PC (veja aulas.pasta no config).")
-    return {"versao": m.get("versao", 1), "voz": "local", "falas": m.get("falas", {})}
-
-
-@app.get("/aulas/{arquivo}")
-def aulas_arquivo(arquivo: str):
-    m = _manifesto_aulas()
-    # Só arquivo listado no manifesto e com nome de hash: nada de caminho vindo de fora.
-    if not m or not ARQUIVO_AULA.match(arquivo) or arquivo not in set(m.get("falas", {}).values()):
-        raise HTTPException(404, "Essa aula não existe.")
-    return FileResponse(_pasta_aulas() / arquivo, media_type="audio/mpeg", headers={"Cache-Control": "max-age=86400"})
-
-
 # ---------------------------------------------------------------- saúde
 
 @app.get("/saude")
@@ -298,7 +238,6 @@ def saude():
         "conversa": {"ok": _modelo["pronto"], "modelo": CFG["conversa"]["modelo"], "erro": _modelo["erro"]},
         "fala": {"ok": _whisper["estado"] == "ok", "estado": _whisper["estado"], "modelo": CFG["fala"]["modelo"], "onde": _whisper["onde"]},
         "voz": {"ok": _motor_vivo(), "motor": CFG["voz"]["motor"]},
-        "aulas": {"ok": bool(_manifesto_aulas()), "falas": len((_manifesto_aulas() or {}).get("falas", {}))},
     }
 
 

@@ -2,43 +2,37 @@
  * De onde vem o português falado (aulas do modo Ouvir, narração da Aventura, lições do
  * Kumitate, retorno das perguntas da Jornada). Ver docs/vozes.md.
  *
- * - Voz do PC: o servidor local (`npm run aulas`) entrega gravações que ficam só no PC,
- *   fora do Git e do site. O site pergunta por ele quando a página é local ou quando o
- *   ajuste "voz do PC" está ligado.
- * - Voz livre: gravações em `public/vozes-pt/`, com licença que permite publicar.
+ * Duas vozes gravadas, com o mesmo texto como chave:
+ * - Voz 1 (`public/vozes-pt/voz1/`), a padrão.
+ * - Voz 2 (`public/vozes-pt/voz2/`), sintética.
  *
- * As duas usam o mesmo texto como chave. Texto sem gravação em nenhuma das duas cai na
- * voz do navegador.
+ * Toca a voz escolhida nos Ajustes; texto que só a outra tem toca na outra. Sem gravação
+ * em nenhuma das duas, a voz do navegador.
  */
-import { signal } from '@preact/signals';
 
-export const SERVIDOR_LOCAL = 'http://127.0.0.1:8791';
+export const VOZES_PT = ['voz1', 'voz2'] as const;
+export type VozPt = (typeof VOZES_PT)[number];
+export const VOZ_PT_PADRAO: VozPt = 'voz1';
+
+/** Nome de cada voz como aparece nos Ajustes. */
+export const NOME_VOZ_PT: Record<VozPt, string> = {
+  voz1: 'Voz 1',
+  voz2: 'Voz 2',
+};
 
 export interface ManifestoPt {
   versao: number;
-  /** Quem fala (crédito da voz livre, ou "local"). */
   voz: string;
   /** texto → arquivo. */
   falas: Record<string, string>;
 }
 
-export interface FontesPt {
-  /** Gravações do servidor local, com o endereço de cada arquivo. */
-  local: ManifestoPt | null;
-  publico: ManifestoPt | null;
-}
+/** Manifestos já baixados de cada voz (null: não veio). */
+export type FontesPt = Record<VozPt, ManifestoPt | null>;
 
-/** A voz do PC respondeu na última procura. */
-export const vozLocalNoAr = signal(false);
-
-const PUBLICO_URL = `${import.meta.env.BASE_URL}vozes-pt/`;
+const BASE = `${import.meta.env.BASE_URL}vozes-pt/`;
 
 type Fetch = typeof fetch;
-
-/** Página aberta no próprio PC: pode procurar o servidor sem pedir licença ao navegador. */
-export function paginaLocal(hostname: string): boolean {
-  return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '[::1]' || hostname.endsWith('.localhost');
-}
 
 function valido(m: unknown): m is ManifestoPt {
   if (typeof m !== 'object' || m === null) return false;
@@ -46,9 +40,9 @@ function valido(m: unknown): m is ManifestoPt {
   return typeof x.voz === 'string' && typeof x.falas === 'object' && x.falas !== null;
 }
 
-async function baixar(url: string, f: Fetch, timeoutMs?: number): Promise<ManifestoPt | null> {
+async function baixar(url: string, f: Fetch): Promise<ManifestoPt | null> {
   try {
-    const r = await f(url, timeoutMs ? { signal: AbortSignal.timeout(timeoutMs) } : undefined);
+    const r = await f(url);
     if (!r.ok) return null;
     const m: unknown = await r.json();
     return valido(m) ? m : null;
@@ -57,41 +51,27 @@ async function baixar(url: string, f: Fetch, timeoutMs?: number): Promise<Manife
   }
 }
 
-/** Procura o servidor local. Só responde quem roda no PC; um site qualquer não chega nele. */
-export function procurarLocal(f: Fetch = fetch, base = SERVIDOR_LOCAL, timeoutMs = 1200): Promise<ManifestoPt | null> {
-  return baixar(`${base}/aulas/manifesto.json`, f, timeoutMs);
-}
-
 let fontes: Promise<FontesPt> | null = null;
-let procurouLocal = false;
 
-/**
- * Carrega o manifesto público uma vez e, se `usarLocal`, procura o servidor local. Ligar o
- * ajuste depois faz uma nova procura; o manifesto público não é baixado de novo.
- */
-export function carregarPt(usarLocal: boolean, f: Fetch = fetch): Promise<FontesPt> {
-  if (fontes && (procurouLocal || !usarLocal)) return fontes;
-  const anterior = fontes;
-  procurouLocal = usarLocal;
-  fontes = (async () => {
-    const publico = anterior ? (await anterior).publico : await baixar(`${PUBLICO_URL}manifesto.json`, f);
-    const local = usarLocal ? await procurarLocal(f) : null;
-    vozLocalNoAr.value = !!local && Object.keys(local.falas).length > 0;
-    return { local, publico };
+/** Baixa os dois manifestos uma vez só. */
+export function carregarPt(f: Fetch = fetch): Promise<FontesPt> {
+  fontes ??= (async () => {
+    const [voz1, voz2] = await Promise.all(VOZES_PT.map((v) => baixar(`${BASE}${v}/manifesto.json`, f)));
+    return { voz1: voz1 ?? null, voz2: voz2 ?? null };
   })();
   return fontes;
 }
 
-/** Esquece a procura: a próxima fala procura o servidor de novo (ele pode ter subido agora). */
+/** Esquece os manifestos baixados (testes). */
 export function esquecerPt(): void {
   fontes = null;
-  procurouLocal = false;
 }
 
-/** Endereço da gravação do texto: a voz do PC primeiro, depois a livre. */
-export function urlPt(fontesPt: FontesPt, texto: string, base = SERVIDOR_LOCAL): string | undefined {
-  const local = fontesPt.local?.falas[texto];
-  if (local) return `${base}/aulas/${local}`;
-  const publico = fontesPt.publico?.falas[texto];
-  return publico ? PUBLICO_URL + publico : undefined;
+/** Endereço da gravação do texto: a voz escolhida primeiro, depois a outra. */
+export function urlPt(fontesPt: FontesPt, texto: string, voz: VozPt): string | undefined {
+  for (const v of [voz, ...VOZES_PT.filter((x) => x !== voz)]) {
+    const arquivo = fontesPt[v]?.falas[texto];
+    if (arquivo) return `${BASE}${v}/${arquivo}`;
+  }
+  return undefined;
 }

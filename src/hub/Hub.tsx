@@ -9,7 +9,7 @@ import { Icone } from '../core/Icone';
 import type { Tema } from '../core/save';
 import { useSubtelaAjuda } from '../core/help/ajuda';
 import { levelInfo, readingMeter, recentDays } from '../core/progress';
-import { esquecerPt } from '../core/fala-pt';
+import { NOME_VOZ_PT, VOZES_PT, type VozPt } from '../core/fala-pt';
 import { exportSave } from '../core/save';
 import { teclaDe } from '../core/teclas';
 import { BOOSTER_COST, canOpenBooster } from '../games/kanjimon/engine';
@@ -128,10 +128,14 @@ export function Hub() {
     sfx.click();
   };
 
-  const toggle = (opcao: 'sound' | 'voice' | 'calm' | 'vozLocal') => {
+  const escolherVozPt = (voz: VozPt) => {
+    settings.vozPt = voz;
+    commit();
+    sfx.click();
+  };
+
+  const toggle = (opcao: 'sound' | 'voice' | 'calm') => {
     settings[opcao] = !settings[opcao];
-    // Voz do PC ligada ou desligada: a próxima fala procura o servidor de novo.
-    if (opcao === 'vozLocal') esquecerPt();
     commit();
     sfx.click();
   };
@@ -325,12 +329,16 @@ export function Hub() {
               {!hasJapaneseVoice() && <small class="muted"> (este navegador não tem voz japonesa instalada)</small>}
             </label>
             <label class="check">
-              <input type="checkbox" checked={settings.vozLocal} onChange={() => toggle('vozLocal')} /> Voz do PC nas aulas
-              <small class="muted"> (usa as aulas gravadas neste computador, com o servidor aberto: npm run aulas)</small>
-            </label>
-            <label class="check">
               <input type="checkbox" checked={settings.calm} onChange={() => toggle('calm')} /> Modo calmo (menos movimento e faíscas)
             </label>
+            <h3 id="voz-pt-titulo">Voz em português</h3>
+            <div class="segmento" role="group" aria-labelledby="voz-pt-titulo">
+              {VOZES_PT.map((v) => (
+                <button key={v} aria-pressed={settings.vozPt === v} onClick={() => escolherVozPt(v)} data-testid={`voz-pt-${v}`}>
+                  {NOME_VOZ_PT[v]}
+                </button>
+              ))}
+            </div>
             <h3 id="tema-titulo">Tema</h3>
             <div class="segmento" role="group" aria-labelledby="tema-titulo">
               {(

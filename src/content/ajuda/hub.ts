@@ -69,7 +69,7 @@ export const AJUSTES: Ajuda = {
   elementos: [
     { nome: 'Efeitos sonoros', texto: 'Os sons de acerto, erro, combo e baú.' },
     { nome: 'Voz em japonês', texto: 'A voz que lê palavras e frases. Usa a voz japonesa do navegador. Se o navegador não tiver uma, aparece um aviso do lado.' },
-    { nome: 'Voz do PC nas aulas', texto: 'Faz as aulas do modo Ouvir usarem a voz gravada no seu computador. Precisa do servidor das aulas aberto no PC (npm run aulas). Desligado, vale a voz livre do site.' },
+    { nome: 'Voz em português', texto: 'Escolhe quem fala o português das aulas e das explicações: Voz 1 ou Voz 2. As duas já vêm no site. Se uma fala faltar na voz escolhida, toca a outra.' },
     { nome: 'Modo calmo', texto: 'Para as animações que se repetem, deixa o brilho mais lento e diminui os efeitos e as onomatopeias. Bom para dias de cabeça cheia. Toda a informação continua na tela.' },
     { nome: 'Exportar backup', texto: 'Baixa um arquivo .json com todo o seu progresso.' },
     { nome: 'Importar backup', texto: 'Troca o progresso deste navegador pelo do arquivo. O progresso atual é substituído.' },

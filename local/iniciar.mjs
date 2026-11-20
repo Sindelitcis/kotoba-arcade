@@ -1,9 +1,8 @@
 // `npm run local`: sobe tudo que a Conversa por voz precisa neste PC e abre o jogo.
-//   - o servidor local (fala, conversa, furigana e aulas) em Python
+//   - o servidor local (fala, conversa e furigana) em Python
 //   - o AivisSpeech ou o VOICEVOX (voz dos personagens), se o config apontar o run.exe
 //   - o Ollama, se ainda não estiver rodando
 //   - o fliperama em http://localhost:5173
-// `npm run aulas` (`--aulas`): só o servidor, entregando as aulas gravadas na voz do PC. Nada usa a placa.
 // Ctrl+C fecha tudo que foi aberto aqui.
 import { spawn } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
@@ -65,32 +64,6 @@ async function responde(url) {
 // Avisos de bibliotecas (torch, triton) só poluem a tela.
 const semAviso = (l) => !/warn|deprecat|^\s+(warnings\.|equal \||mask \||return node|WeightNorm)|softmax|split the|important use|tracemalloc/i.test(l);
 
-const soAulas = process.argv.includes('--aulas');
-const porta = cfg.porta ?? 8791;
-let timer;
-if (soAulas) {
-  subir('aulas', python, [join(AQUI, 'servidor.py'), '--aulas'], { filtro: semAviso });
-  timer = setInterval(async () => {
-    try {
-      // O manifesto responde na hora; o /saude espera os motores de voz e passa do tempo.
-      const r = await fetch(`http://127.0.0.1:${porta}/aulas/manifesto.json`, { signal: AbortSignal.timeout(1500) });
-      clearInterval(timer);
-      console.log(
-        r.ok
-          ? `\naulas no ar: ${Object.keys((await r.json()).falas).length} falas na voz do PC. No site, ligue "Voz do PC" no modo Ouvir. (Ctrl+C fecha)\n`
-          : '\no servidor subiu, mas não achou aulas gravadas: confira "aulas.pasta" em local/config.local.json.\n',
-      );
-    } catch {
-      // ainda subindo
-    }
-  }, 1000);
-  process.on('SIGINT', () => fechar());
-  process.on('SIGTERM', () => fechar());
-} else {
-  await subirTudo();
-}
-
-async function subirTudo() {
 if (!(await responde(`${cfg.conversa.ollama}/api/version`))) {
   console.log('[ollama] não estava rodando, abrindo...');
   subir('ollama', 'ollama', ['serve'], { filtro: () => false });
@@ -118,7 +91,8 @@ console.log('\nSubindo. A primeira vez pode levar alguns minutos (o reconhecimen
 console.log('Quando aparecer "tudo pronto", abra http://localhost:5173 e escolha Conversa.\n');
 
 const inicio = Date.now();
-timer = setInterval(async () => {
+const porta = cfg.porta ?? 8791;
+const timer = setInterval(async () => {
   try {
     const s = await (
       await fetch(`http://127.0.0.1:${porta}/saude`, {
@@ -133,9 +107,6 @@ timer = setInterval(async () => {
     // ainda subindo
   }
 }, 3000);
-process.on('SIGINT', fechar);
-process.on('SIGTERM', fechar);
-}
 
 function fechar() {
   clearInterval(timer);
@@ -149,3 +120,5 @@ function fechar() {
   }
   setTimeout(() => process.exit(0), 500);
 }
+process.on('SIGINT', fechar);
+process.on('SIGTERM', fechar);

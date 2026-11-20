@@ -2,6 +2,7 @@
  * Save local, versionado, com exportar e importar. Sem login e sem servidor.
  * Tudo que um jogo quiser guardar vai em `games[idDoJogo]`.
  */
+import { VOZ_PT_PADRAO, VOZES_PT, type VozPt } from './fala-pt';
 import type { CardState } from './srs';
 
 export const SAVE_VERSION = 1;
@@ -12,12 +13,8 @@ export interface Settings {
   voice: boolean;
   /** Reduz tremor de tela e partículas. */
   calm: boolean;
-  /**
-   * Português das aulas pela voz do servidor local (`npm run aulas`), quando ele estiver no ar.
-   * Desligado, o site nem procura o servidor e usa a voz livre gravada em `public/vozes-pt`.
-   * Numa página aberta no próprio PC (localhost), ele é procurado sempre.
-   */
-  vozLocal: boolean;
+  /** Voz do português falado (aulas, Kumitate, Aventura, Jornada): Voz 1 ou Voz 2. */
+  vozPt: VozPt;
   /** Tema da tela: o do sistema, claro ou escuro (docs/estilo.md). */
   tema: Tema;
 }
@@ -55,7 +52,7 @@ export function emptySave(now: number): SaveData {
     createdAt: now,
     updatedAt: now,
     profile: { xp: 0, coins: 0, daysPlayed: [] },
-    settings: { sound: true, voice: true, calm: false, vozLocal: false, tema: 'auto' },
+    settings: { sound: true, voice: true, calm: false, vozPt: VOZ_PT_PADRAO, tema: 'auto' },
     cards: {},
     games: {},
   };
@@ -108,7 +105,7 @@ export function normalizeSave(input: unknown, now: number): SaveData {
       sound: typeof settings.sound === 'boolean' ? settings.sound : base.settings.sound,
       voice: typeof settings.voice === 'boolean' ? settings.voice : base.settings.voice,
       calm: typeof settings.calm === 'boolean' ? settings.calm : base.settings.calm,
-      vozLocal: typeof settings.vozLocal === 'boolean' ? settings.vozLocal : base.settings.vozLocal,
+      vozPt: VOZES_PT.includes(settings.vozPt as VozPt) ? (settings.vozPt as VozPt) : base.settings.vozPt,
       tema: TEMAS.includes(settings.tema as Tema) ? (settings.tema as Tema) : base.settings.tema,
     },
     cards: cleanCards(input.cards),

@@ -4,12 +4,12 @@
  * dos jogos (explicação em português e, logo depois, o exemplo em japonês).
  *
  * Japonês vem de `public/vozes` (as mesmas gravações dos jogos). Português vem de
- * `fala-pt.ts`: a voz do PC, quando o servidor local está no ar, ou a voz livre.
+ * `fala-pt.ts`, na voz em português escolhida nos Ajustes.
  * Sem gravação, a voz do navegador. Qualquer fala nova (`speak()`) para a sequência.
  */
 import { app } from './app';
 import { assumirFala, largarFala, loadVoices, recordedFile, VOZES_URL, type Manifesto } from './audio';
-import { carregarPt, paginaLocal, urlPt, type FontesPt } from './fala-pt';
+import { carregarPt, urlPt, type FontesPt } from './fala-pt';
 import { VOZ_PADRAO, VOZ_PALAVRA } from './vozes';
 
 /** Japonês falado: a chave da gravação, a voz e o kana para a voz do navegador. */
@@ -81,13 +81,8 @@ export interface Fontes {
   pt: FontesPt;
 }
 
-/** Usa a voz do PC: na página local, sempre; no site, só com o ajuste ligado. */
-export function usarVozLocal(): boolean {
-  return app.data.settings.vozLocal || (typeof location !== 'undefined' && paginaLocal(location.hostname));
-}
-
 async function fontesPadrao(): Promise<Fontes> {
-  const [jp, pt] = await Promise.all([loadVoices(), carregarPt(usarVozLocal())]);
+  const [jp, pt] = await Promise.all([loadVoices(), carregarPt()]);
   return { jp, pt };
 }
 
@@ -128,7 +123,7 @@ export function tocarSequencia(trechos: readonly Trecho[], opcoes: Opcoes = {}):
       if (t.tipo === 'pausa') {
         await saida.esperar(msDaPausa(t.vezes, ultimoJp), ctrl.signal);
       } else if (t.tipo === 'pt') {
-        const url = urlPt(fontes.pt, t.texto);
+        const url = urlPt(fontes.pt, t.texto, app.data.settings.vozPt);
         const dur = url ? await saida.tocar(url, ctrl.signal) : 0;
         if (!dur && !ctrl.signal.aborted) await saida.falarNavegador(t.texto, 'pt-BR', ctrl.signal);
       } else {

@@ -3,7 +3,7 @@ import { act } from 'preact/test-utils';
 import { afterEach, describe, expect, it } from 'vitest';
 import { AULAS } from '../src/aulas';
 import { app, screen } from '../src/core/app';
-import { carregarPt, esquecerPt, paginaLocal, procurarLocal, urlPt, type ManifestoPt } from '../src/core/fala-pt';
+import { carregarPt, esquecerPt, urlPt, VOZ_PT_PADRAO, type ManifestoPt } from '../src/core/fala-pt';
 import { emptySave, importSave } from '../src/core/save';
 import { tocarSequencia, type Saida, type Trecho } from '../src/core/sequencia';
 import { Hub } from '../src/hub/Hub';
@@ -31,15 +31,19 @@ function saidaFalsa(duracoes: Record<string, number> = {}) {
   return { log, saida };
 }
 
-const manifestoPt = (falas: Record<string, string>, voz = 'kokoro-pf_dora'): ManifestoPt => ({ versao: 1, voz, falas });
+const manifestoPt = (falas: Record<string, string>, voz = 'voz1'): ManifestoPt => ({ versao: 1, voz, falas });
 const jp = (texto: string, kana = texto) => ({ tipo: 'jp', fala: { texto, voz: 'frase', kana } }) as const;
 
 describe('save do modo Ouvir', () => {
-  it('voz do PC começa desligada e valor estranho vira desligado', () => {
-    expect(emptySave(T0).settings.vozLocal).toBe(false);
-    const s = importSave(JSON.stringify({ v: 1, settings: { vozLocal: 'sim' } }), T0);
-    expect(s.settings.vozLocal).toBe(false);
-    expect(importSave(JSON.stringify({ v: 1, settings: { vozLocal: true } }), T0).settings.vozLocal).toBe(true);
+  it('a Voz 1 é a padrão, e valor estranho volta para ela', () => {
+    expect(VOZ_PT_PADRAO).toBe('voz1');
+    expect(emptySave(T0).settings.vozPt).toBe('voz1');
+    expect(importSave(JSON.stringify({ v: 1, settings: { vozPt: 'amigo' } }), T0).settings.vozPt).toBe('voz1');
+    expect(importSave(JSON.stringify({ v: 1, settings: { vozPt: 'voz2' } }), T0).settings.vozPt).toBe('voz2');
+    // Save antigo, do tempo da voz do PC: o ajuste velho some sem quebrar nada.
+    const velho = importSave(JSON.stringify({ v: 1, settings: { vozLocal: true } }), T0);
+    expect(velho.settings.vozPt).toBe('voz1');
+    expect('vozLocal' in velho.settings).toBe(false);
   });
 
   it('aulas ouvidas: conserta o que vier estragado e conta cada vez', () => {
@@ -56,42 +60,43 @@ describe('save do modo Ouvir', () => {
 describe('de onde vem o português', () => {
   afterEach(() => esquecerPt());
 
-  it('só a própria máquina conta como página local', () => {
-    for (const h of ['localhost', '127.0.0.1', '[::1]', 'app.localhost']) expect(paginaLocal(h), h).toBe(true);
-    for (const h of ['sindelitcis.github.io', 'localhost.com', '192.168.0.2']) expect(paginaLocal(h), h).toBe(false);
+  it('a voz escolhida vem primeiro; sem ela, a outra; sem as duas, nada', () => {
+    const fontes = { voz1: manifestoPt({ Oi: 'a.mp3' }), voz2: manifestoPt({ Oi: 'b.mp3', Tchau: 'c.mp3' }, 'voz2') };
+    expect(urlPt(fontes, 'Oi', 'voz1')).toBe('/vozes-pt/voz1/a.mp3');
+    expect(urlPt(fontes, 'Oi', 'voz2')).toBe('/vozes-pt/voz2/b.mp3');
+    expect(urlPt(fontes, 'Tchau', 'voz1')).toBe('/vozes-pt/voz2/c.mp3');
+    expect(urlPt({ voz1: null, voz2: null }, 'Oi', 'voz1')).toBeUndefined();
+    expect(urlPt(fontes, 'Nada', 'voz1')).toBeUndefined();
   });
 
-  it('a voz do PC vem primeiro; sem ela, a livre; sem as duas, nada', () => {
-    const fontes = { local: manifestoPt({ Oi: 'aaaaaaaaaaaaaaaa.mp3' }, 'local'), publico: manifestoPt({ Oi: 'b.mp3', Tchau: 'c.mp3' }) };
-    expect(urlPt(fontes, 'Oi', 'http://pc')).toBe('http://pc/aulas/aaaaaaaaaaaaaaaa.mp3');
-    expect(urlPt(fontes, 'Tchau')).toBe('/vozes-pt/c.mp3');
-    expect(urlPt(fontes, 'Nada')).toBeUndefined();
-  });
-
-  it('visitante do site não faz pergunta à rede local: só procura o servidor com o ajuste ligado', async () => {
+  it('baixa os dois manifestos do próprio site, uma vez só, e nunca pergunta à rede local', async () => {
     const pedidos: string[] = [];
     const f = (async (url: string) => {
       pedidos.push(url);
       return new Response(JSON.stringify(manifestoPt({ Oi: 'b.mp3' })));
     }) as typeof fetch;
-    await carregarPt(false, f);
-    expect(pedidos).toEqual(['/vozes-pt/manifesto.json']);
-    // Ligou o ajuste: procura o servidor, sem baixar o manifesto público de novo.
-    await carregarPt(true, f);
-    expect(pedidos).toEqual(['/vozes-pt/manifesto.json', 'http://127.0.0.1:8791/aulas/manifesto.json']);
+    await carregarPt(f);
+    await carregarPt(f);
+    expect(pedidos.sort()).toEqual(['/vozes-pt/voz1/manifesto.json', '/vozes-pt/voz2/manifesto.json']);
   });
 
-  it('servidor fora do ar ou resposta estranha não quebram nada', async () => {
-    expect(await procurarLocal((async () => Promise.reject(new Error('recusado'))) as typeof fetch)).toBeNull();
-    expect(await procurarLocal((async () => new Response('{"oi":1}')) as typeof fetch)).toBeNull();
-    expect(await procurarLocal((async () => new Response('', { status: 404 })) as typeof fetch)).toBeNull();
+  it('manifesto fora do ar ou estranho vira nulo, sem quebrar a outra voz', async () => {
+    const f = (async (url: string) =>
+      url.includes('voz1') ? Promise.reject(new Error('recusado')) : new Response('{"oi":1}')) as typeof fetch;
+    expect(await carregarPt(f)).toEqual({ voz1: null, voz2: null });
+    esquecerPt();
+    const g = (async (url: string) =>
+      url.includes('voz1') ? new Response('', { status: 404 }) : new Response(JSON.stringify(manifestoPt({ Oi: 'b.mp3' }, 'voz2')))) as typeof fetch;
+    const r = await carregarPt(g);
+    expect(r.voz1).toBeNull();
+    expect(r.voz2?.falas.Oi).toBe('b.mp3');
   });
 });
 
 describe('tocar uma aula', () => {
   const fontes = (pt: Record<string, string>) => async () => ({
     jp: { versao: 1, falas: { 水: { mao: 'agua.mp3' } } } as never,
-    pt: { local: null, publico: manifestoPt(pt) },
+    pt: { voz1: manifestoPt(pt), voz2: manifestoPt({ 'Água.': 'z.mp3' }, 'voz2') },
   });
 
   it('português, japonês, pausa do tamanho da fala e japonês de novo', async () => {
@@ -99,7 +104,7 @@ describe('tocar uma aula', () => {
     const trechos: Trecho[] = [{ tipo: 'pt', texto: 'Água.' }, jp('水', 'みず'), { tipo: 'pausa', vezes: 1.5 }, jp('水', 'みず')];
     const t = tocarSequencia(trechos, { saida, fontes: fontes({ 'Água.': 'a.mp3' }) });
     expect(await t.fim).toBe(true);
-    expect(log).toEqual(['tocar /vozes-pt/a.mp3', 'tocar /vozes/agua.mp3', 'esperar 3400', 'tocar /vozes/agua.mp3']);
+    expect(log).toEqual(['tocar /vozes-pt/voz1/a.mp3', 'tocar /vozes/agua.mp3', 'esperar 3400', 'tocar /vozes/agua.mp3']);
   });
 
   it('sem gravação, cai na voz do navegador (o japonês pela leitura em kana)', async () => {
@@ -114,7 +119,7 @@ describe('tocar uma aula', () => {
     const vistos: number[] = [];
     const t = tocarSequencia([{ tipo: 'pt', texto: 'A.' }, { tipo: 'pt', texto: 'B.' }], { saida, fontes: fontes({ 'A.': 'a.mp3', 'B.': 'b.mp3' }), desde: 1, aoTrecho: (i) => vistos.push(i) });
     await t.fim;
-    expect(log).toEqual(['tocar /vozes-pt/b.mp3']);
+    expect(log).toEqual(['tocar /vozes-pt/voz1/b.mp3']);
     expect(vistos).toEqual([1]);
   });
 
@@ -133,7 +138,18 @@ describe('tocar uma aula', () => {
     const t = tocarSequencia([{ tipo: 'pt', texto: 'A.' }, { tipo: 'pt', texto: 'B.' }], { saida, fontes: fontes({ 'A.': 'a.mp3', 'B.': 'b.mp3' }) });
     parar = t.parar;
     expect(await t.fim).toBe(false);
-    expect(log).toEqual(['/vozes-pt/a.mp3']);
+    expect(log).toEqual(['/vozes-pt/voz1/a.mp3']);
+  });
+
+  it('com a Voz 2 escolhida nos ajustes, toca a Voz 2', async () => {
+    const { log, saida } = saidaFalsa();
+    app.data.settings.vozPt = 'voz2';
+    try {
+      await tocarSequencia([{ tipo: 'pt', texto: 'Água.' }], { saida, fontes: fontes({ 'Água.': 'a.mp3' }) }).fim;
+      expect(log).toEqual(['tocar /vozes-pt/voz2/z.mp3']);
+    } finally {
+      app.data.settings.vozPt = 'voz1';
+    }
   });
 
   it('com a voz desligada nos ajustes, não toca nada', async () => {
@@ -177,6 +193,22 @@ describe('tela do modo Ouvir', () => {
     await act(() => render(<OuvirTela />, document.body));
     press('Escape');
     expect(screen.value).toBe('hub');
+  });
+
+  it('nos Ajustes do fliperama dá para trocar a voz em português', async () => {
+    await act(() => render(<Hub />, document.body));
+    await act(() => document.querySelector<HTMLButtonElement>('button[aria-label="Ajustes"]')?.click());
+    const v2 = document.querySelector<HTMLButtonElement>('[data-testid="voz-pt-voz2"]');
+    const v1 = document.querySelector<HTMLButtonElement>('[data-testid="voz-pt-voz1"]');
+    expect(v1?.textContent).toBe('Voz 1');
+    expect(v1?.getAttribute('aria-pressed')).toBe('true');
+    try {
+      await act(() => v2?.click());
+      expect(app.data.settings.vozPt).toBe('voz2');
+      expect(v2?.getAttribute('aria-pressed')).toBe('true');
+    } finally {
+      app.data.settings.vozPt = 'voz1';
+    }
   });
 
   it('↓ escolhe a próxima aula, T mostra o texto, e com a voz desligada avisa', async () => {

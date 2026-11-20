@@ -2,14 +2,10 @@
   "porta": 8791,
   "python": "",
   "cache_modelos": "",
-  "origens": [
-    "https://sindelitcis.github.io"
-  ],
-  "aulas": {
-    "pasta": "",
+  "voz1": {
     "python": "",
     "motor": "",
-    "voz": "amigo",
+    "referencia": "",
     "hf_home": "",
     "torch_home": ""
   },
@@ -27,7 +23,7 @@
       "url": "http://127.0.0.1:10101",
       "exe": "",
       "gpu": true,
-      "velocidade": 1.0,
+      "velocidade": 1,
       "vozes": {
         "padrao": 888753760,
         "sakura": 1878365376,

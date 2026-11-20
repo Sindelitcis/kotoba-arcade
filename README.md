@@ -4,7 +4,7 @@ Fliperama de jogos para aprender japonês, feito pensando em quem tem TDAH. A re
 
 Por cima dos jogos fica a **Jornada** (tecla `J` no fliperama): um mapa em quadros de mangá com o caminho do zero até trabalhar no Japão. Cada passo é uma missão curta, uma lição em quadrinhos ou um dos jogos abaixo só com o conteúdo daquela parte. O Enter do fliperama continua abrindo o jogo da vez.
 
-Para aprender só ouvindo existe o modo **Ouvir** (tecla `O`): uma aula de um a três minutos para cada lição da Jornada. A explicação vem em português, depois o exemplo em japonês, uma pausa para você repetir em voz alta e o japonês de novo. Dá para usar sem olhar a tela: espaço toca e pausa, as setas pulam, uma aula puxa a outra e os botões do fone funcionam.
+Para aprender só ouvindo existe o modo **Ouvir** (tecla `O`): uma aula de um a três minutos para cada lição da Jornada. A explicação vem em português, depois o exemplo em japonês, uma pausa para você repetir em voz alta e o japonês de novo. O português tem duas vozes, Voz 1 e Voz 2; a escolha fica em Ajustes. Dá para usar sem olhar a tela: espaço toca e pausa, as setas pulam, uma aula puxa a outra e os botões do fone funcionam.
 
 Jogos que já dá para jogar:
 
@@ -130,7 +130,7 @@ src/core      memória espaçada, seletor de cartas, perguntas, save, kana, som,
 src/assets    fontes recortadas, cenários, personagens, músicas do Kana Beat e as ilustrações do estúdio (imagens, acoes, lugares)
 docs          a nuvem (nuvem.md), guia de estilo (estilo.md), como as imagens (imagens.md) e as vozes (vozes.md) foram feitas, dados do Kanji em peças (pecas.md), kana (kana.md)
 public/vozes  falas gravadas em mp3 e o manifesto texto → arquivo
-public/vozes-pt  português falado (aulas, Kumitate, Aventura) na voz livre
+public/vozes-pt  português falado (aulas, Kumitate, Aventura): voz1/ e voz2/
 src/content   kanji, palavras, frases e kana (os 94 kanji do KanjiMon original, o vocabulário do dia a dia, os mnemônicos de kana e, em escola/, o conteúdo da escola-japones)
 src/jornada   a Jornada: mapa, missões, lições em quadrinhos
 src/hub       o fliperama
@@ -193,4 +193,4 @@ Músicas do Kana Beat: trechos de cerca de 1 minuto, cortados em loop, de faixas
 
 Os trechos foram cortados, tiveram o volume igualado e foram convertidos para ogg; fora isso, a música é a original.
 
-Vozes: AivisSpeech, modelos do AivisHub pela licença ACML 1.0. AivisSpeech: まお e AivisSpeech: コハク (©Oz Chat/Trippy, CV: ねゆたろ), AivisSpeech: まい, AivisSpeech: にせ e AivisSpeech: 阿井田 茂 (CV: 古山キリヲ). Palavras soltas e kana: VOICEVOX:四国めたん. Português falado: [Kokoro-82M](https://huggingface.co/hexgrad/Kokoro-82M), voz pf_dora (Apache-2.0). O acento das palavras foi conferido na base da [Kanjium](https://github.com/mifunetoshiro/kanjium), de Uros O. (CC BY-SA 4.0).
+Vozes: AivisSpeech, modelos do AivisHub pela licença ACML 1.0. AivisSpeech: まお e AivisSpeech: コハク (©Oz Chat/Trippy, CV: ねゆたろ), AivisSpeech: まい, AivisSpeech: にせ e AivisSpeech: 阿井田 茂 (CV: 古山キリヲ). Palavras soltas e kana: VOICEVOX:四国めたん. Português falado: Voz 1, voz em português de um amigo do Rafael, usada com autorização; Voz 2, [Kokoro-82M](https://huggingface.co/hexgrad/Kokoro-82M), voz pf_dora (Apache-2.0). O acento das palavras foi conferido na base da [Kanjium](https://github.com/mifunetoshiro/kanjium), de Uros O. (CC BY-SA 4.0).
