@@ -186,3 +186,21 @@ test('no celular o fliperama cabe na largura, sem rolagem de lado, e sem atalho 
   await expect(page.locator('.tile-title kbd').first()).toBeHidden();
   await ctx.close();
 });
+
+test('no celular a tela de senha da Conversa cabe na largura, num cartão no meio', async ({ browser }) => {
+  // O campo de senha esticava a coluna e o cartão passava da borda direita da tela.
+  const ctx = await browser.newContext({ viewport: { width: 360, height: 760 }, isMobile: true, hasTouch: true });
+  const page = await ctx.newPage();
+  await page.route('https://kanjimon.online/**', (route) => route.abort());
+  await page.route('http://127.0.0.1:8791/**', (route) => route.abort('connectionrefused'));
+  await page.route('**/api/estado', (route) => route.fulfill({ status: 401, contentType: 'application/json', body: '{"erro":"sessao"}' }));
+  await page.goto('/');
+  await page.getByTestId('tile-conversa').click();
+  await expect(page.getByTestId('cv-senha-campo')).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(360);
+  const caixa = await page.getByTestId('cv-senha').boundingBox();
+  expect(caixa!.x).toBeGreaterThanOrEqual(0);
+  expect(caixa!.x + caixa!.width).toBeLessThanOrEqual(360);
+  await expect(page.getByTestId('cv-senha')).not.toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
+  await ctx.close();
+});

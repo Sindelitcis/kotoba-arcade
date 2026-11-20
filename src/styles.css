@@ -826,6 +826,22 @@ input[type='text'], input:not([type]) { color: var(--text); }
 .cv { max-width: 980px; margin: 0 auto; padding: 16px 20px 24px; display: grid; gap: 16px; min-height: 100vh; grid-template-rows: auto 1fr auto; }
 .cv-center { text-align: center; align-self: center; }
 .cv-off-text { font-size: 1.1rem; max-width: 56ch; }
+/* Senha e sem servidor: um cartão no meio da tela, com o ícone 会話 em cima. */
+.cv[data-phase='senha'], .cv[data-phase='desligado'] { grid-template-rows: auto 1fr; }
+.cv[data-phase='senha'] > .av-panel, .cv[data-phase='desligado'] > .av-panel {
+  align-self: center; justify-self: center; width: min(520px, 100%); min-width: 0;
+  padding: 28px 28px 24px; gap: 14px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-l); box-shadow: var(--sh-2);
+}
+.cv[data-phase='senha'] .tile-jp, .cv[data-phase='desligado'] .tile-jp {
+  display: grid; place-items: center; justify-self: center; order: 0; margin: 0; width: 64px; height: 64px; padding: 0; border-radius: 20px;
+  font: 700 1.4rem/1 var(--f-jp); color: var(--brand-text); background: var(--brand-soft);
+}
+.cv[data-phase='senha'] .av-panel h2.big, .cv[data-phase='desligado'] .av-panel h2.big { font-size: 1.8rem; margin: 0; }
+.cv[data-phase='senha'] .cv-off-text, .cv[data-phase='desligado'] .cv-off-text { font-size: 1rem; color: var(--text-2); margin: 0; }
+.cv[data-phase='senha'] .cv-form { width: 100%; grid-template-columns: minmax(0, 1fr) auto; }
+.cv[data-phase='senha'] .cv-form input { min-width: 0; }
+.cv[data-phase='senha'] .notice { width: 100%; margin: 0; color: var(--erro-text); background: var(--erro-soft); }
 .cv-off-text code { background: var(--surface-2); border-radius: 6px; padding: 2px 6px; font-family: var(--f-mono); }
 .cv-goals { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; color: var(--text-2); font-size: 0.85rem; }
 .cv-goals li { padding: 4px 10px; border-radius: var(--r-pill); background: var(--surface-2); }

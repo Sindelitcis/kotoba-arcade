@@ -7,8 +7,14 @@
 <title>Kotoba Arcade mudou de endereço</title>
 <link rel="canonical" href="https://kotoba-arcade.pages.dev/">
 <style>
-  body { font-family: system-ui, sans-serif; background: #fffaf0; color: #222; display: grid; place-items: center; min-height: 100vh; margin: 0; padding: 16px; text-align: center; }
-  a { color: #b4232a; font-weight: 700; }
+  /* Cores do visual Sora (docs/estilo.md), claro e escuro. */
+  :root { --bg: #f3f6fb; --surface: #ffffff; --line: #dfe5ef; --text: #141c2e; --text-2: #475069; --brand-text: #2350c8; color-scheme: light dark; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #0d1220; --surface: #161e31; --line: #2a3554; --text: #edf1fa; --text-2: #b9c2d9; --brand-text: #a9c0ff; } }
+  body { font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); display: grid; place-items: center; min-height: 100vh; margin: 0; padding: 16px; text-align: center; }
+  main { max-width: 460px; padding: 24px; background: var(--surface); border: 1px solid var(--line); border-radius: 24px; }
+  h1 { font-size: 1.35rem; margin: 0 0 8px; }
+  p { color: var(--text-2); }
+  a { color: var(--brand-text); font-weight: 700; }
 </style>
 </head>
 <body>
