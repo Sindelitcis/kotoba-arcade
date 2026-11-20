@@ -11,6 +11,7 @@ import { KanaBeatGame } from './games/kanabeat/KanaBeatGame';
 import { Booster } from './games/kanjimon/Booster';
 import { Dex } from './games/kanjimon/Dex';
 import { KanjiMonGame } from './games/kanjimon/KanjiMonGame';
+import { PecasGame } from './games/pecas/PecasGame';
 import { RoguelikeGame } from './games/roguelike/RoguelikeGame';
 import { Hub } from './hub/Hub';
 import { JornadaTela } from './jornada/JornadaTela';
@@ -42,6 +43,8 @@ function App() {
       return <JornadaTela />;
     case 'licao':
       return <LicaoTela />;
+    case 'pecas':
+      return <PecasGame />;
     default:
       return <Hub />;
   }

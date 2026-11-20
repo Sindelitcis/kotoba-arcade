@@ -1,3 +1,4 @@
+import { ensurePecasSave } from '../src/games/pecas/engine';
 import { afterEach, describe, expect, it } from 'vitest';
 import { acertou, cor, COMBO_CHEIO, corDoCombo, corStyle, errou, progresso, visitados, zerar, type Saves } from '../src/core/cor';
 import { emptyAventuraSave } from '../src/games/aventura/engine';
@@ -15,6 +16,7 @@ function saves(): Saves {
     aventura: emptyAventuraSave(),
     gramatica: emptyGramaticaSave(),
     conversa: emptyConversaSave(),
+    pecas: ensurePecasSave({}),
   };
 }
 
@@ -76,10 +78,11 @@ describe('mapa sendo pintado', () => {
     s.kanjimon.captures = 1;
     s.aventura.done = ['aeroporto'];
     s.conversa.conversas = 2;
-    expect(visitados(s)).toEqual({ kanjimon: true, kanabeat: false, roguelike: false, aventura: true, gramatica: false, conversa: true });
+    expect(visitados(s)).toEqual({ kanjimon: true, kanabeat: false, roguelike: false, aventura: true, gramatica: false, conversa: true, pecas: false });
     s.kanabeat.plays = 1;
     s.roguelike.runs = 1;
     s.gramatica.rounds = 1;
+    s.pecas.rounds = 1;
     expect(Object.values(visitados(s)).every(Boolean)).toBe(true);
   });
 });

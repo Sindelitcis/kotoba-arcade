@@ -17,6 +17,8 @@ import { SCENES } from '../src/games/aventura/cenas';
 import { CENAS, marcado } from '../src/games/conversa/engine';
 import { ANSWERS, MAX_OPEN, conjugateWritten, parseSentence, type Block, type Ending, type Piece } from '../src/games/gramatica/engine';
 import { COURSE } from '../src/games/gramatica/pontos';
+import { KANJI_PECAS } from '../src/games/pecas/dados';
+import { leituraOficial } from '../src/games/pecas/engine';
 import { VOZ_CONVERSA, VOZ_PADRAO, VOZ_PALAVRA, VOZES, vozDaAventura, type VozId } from '../src/core/vozes';
 import { JORNADA_WORDS } from '../src/content/escola';
 import { palavras as palavrasMarcadas } from '../src/content/escola/ruby';
@@ -248,6 +250,31 @@ function jornada(): Fala[] {
   return LICOES.flatMap((l) => l.passos.flatMap((p) => (p.tipo === 'quadro' && p.fala ? [falaDoQuadro(p.fala, 'jornada/' + l.id)] : [])));
 }
 
+/**
+ * Kanji em peças: a leitura de cada kanji sozinho e a palavra de exemplo. As duas ficam
+ * gravadas no texto com kanji, porque o kana se repete (日 e 火 são ひ; 着る e 切る são きる).
+ */
+function pecas(): Fala[] {
+  return KANJI_PECAS.flatMap((k): Fala[] => [
+    {
+      texto: k.kanji,
+      voz: VOZ_PALAVRA,
+      tts: k.kanji,
+      partes: [{ t: k.kanji, r: leituraOficial(k) }],
+      palavra: { jp: k.kanji, kana: leituraOficial(k) },
+      origem: 'pecas/kanji',
+    },
+    {
+      texto: k.palavra.jp,
+      voz: VOZ_PALAVRA,
+      tts: k.palavra.jp,
+      partes: [{ t: k.palavra.jp, r: kataToHira(k.palavra.kana) }],
+      palavra: { jp: k.palavra.jp, kana: k.palavra.kana },
+      origem: 'pecas/palavra',
+    },
+  ]);
+}
+
 /** Lista sem repetição (mesmo texto na mesma voz entra uma vez só). */
 export function listarFalas(): Fala[] {
   const todas: Fala[] = [
@@ -277,6 +304,7 @@ export function listarFalas(): Fala[] {
     ...kumitate(),
     ...conversa(),
     ...jornada(),
+    ...pecas(),
   ];
   const vistas = new Set<string>();
   return todas.filter((f) => {

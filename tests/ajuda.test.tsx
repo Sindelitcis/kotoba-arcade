@@ -23,6 +23,7 @@ const FONTE: Record<TelaAjuda, string> = {
   gramatica: 'games/gramatica/GramaticaGame.tsx',
   jornada: 'jornada/JornadaTela.tsx',
   licao: 'jornada/LicaoTela.tsx',
+  pecas: 'games/pecas/PecasGame.tsx',
 };
 
 const NOMES: Record<string, string> = { Esc: 'Escape', Espaço: ' ', '↑': 'ArrowUp', '↓': 'ArrowDown' };

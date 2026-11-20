@@ -130,7 +130,8 @@ export function getWord(id: string): Word {
 }
 
 /** Habilidades treinadas. A chave da carta no save é `${itemId}#${skill}`. */
-export type Skill = 'meaning' | 'reading' | 'recall';
+/** `pecas`: reconhecer as peças do kanji (jogo Kanji em peças). */
+export type Skill = 'meaning' | 'reading' | 'recall' | 'pecas';
 
 export function cardKey(itemId: string, skill: Skill): string {
   return `${itemId}#${skill}`;

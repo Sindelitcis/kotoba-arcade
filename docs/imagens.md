@@ -59,6 +59,7 @@ O prompt é o mesmo do mangá, trocando o estilo por anime atual: cor viva, cel 
 | `conversa-osaka` | rua de bairro em Osaka |
 | `conversa-sharehouse` | cozinha de casa compartilhada |
 | `conversa-restaurante` | restaurante pequeno (izakaya) |
+| `pecas-ryoanji` | jardim de pedras do templo Ryoan-ji, Kyoto |
 
 O modelo não copia o lugar ao pé da letra: é a impressão do lugar, como num mangá.
 

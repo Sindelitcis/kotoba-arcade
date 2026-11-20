@@ -539,6 +539,9 @@
 "おんなのひと": {
 "metan": "62a1f4d8b2a61504.mp3"
 },
+"お互い": {
+"metan": "7488583b3fd37440.mp3"
+},
 "お元気ですか？": {
 "mao": "94f38f72d2a41e70.mp3"
 },
@@ -550,6 +553,12 @@
 },
 "お土産を買いたいです": {
 "mao": "02bd9976ba5e1bda.mp3"
+},
+"お姉さん": {
+"metan": "919f1cb5ae9823a2.mp3"
+},
+"お客さん": {
+"metan": "7660dd8911ef9ad1.mp3"
 },
 "お帰りなさい": {
 "mao": "0a29913d7ff31484.mp3"
@@ -580,6 +589,9 @@
 },
 "お弁当食べる": {
 "mao": "47eb42555f02c170.mp3"
+},
+"お母さん": {
+"metan": "0f702fd5fd049200.mp3"
 },
 "お母さんと和食を食べます": {
 "mao": "902d68ee77924a29.mp3"
@@ -629,6 +641,9 @@
 "お水飲む": {
 "mao": "f39c31866c415dd7.mp3"
 },
+"お父さん": {
+"metan": "42bb42e0b8303629.mp3"
+},
 "お父さんは天ぷらを食べません": {
 "mao": "364280a72518a7eb.mp3"
 },
@@ -671,8 +686,26 @@
 "お疲れ様です。": {
 "mao": "95175897bc40a951.mp3"
 },
+"お米": {
+"metan": "bd8b4e5c66839e9f.mp3"
+},
+"お腹": {
+"metan": "44e0689076516b51.mp3"
+},
+"お茶": {
+"metan": "70fb6de4ee82c6ce.mp3"
+},
+"お酒": {
+"metan": "7e0f8352adb63c8c.mp3"
+},
+"お金": {
+"metan": "524690785096ae27.mp3"
+},
 "お金がありません。": {
 "mao": "c2587c2d74f93b59.mp3"
+},
+"お願い": {
+"metan": "f02238d324343a30.mp3"
 },
 "お願いします": {
 "mao": "45caca987ebb3b20.mp3"
@@ -1160,6 +1193,9 @@
 },
 "ごめんなさい": {
 "mao": "0a5fb614e25fbeb8.mp3"
+},
+"ご飯": {
+"metan": "9e641e8327bd815c.mp3"
 },
 "さ": {
 "metan": "d0c6cd6db511d611.mp3"
@@ -3095,6 +3131,12 @@
 "一": {
 "metan": "67376f1c38239c18.mp3"
 },
+"一つ": {
+"metan": "8b85acf4b5052fb6.mp3"
+},
+"一万": {
+"metan": "db281a7fc6b07e43.mp3"
+},
 "一万円かかります。": {
 "mao": "08307c0cc43bbd45.mp3"
 },
@@ -3104,8 +3146,17 @@
 "一日三回ですね。分かりました。": {
 "mao": "0e16cabaa93fdabd.mp3"
 },
+"一杯": {
+"metan": "c1f9a32d4715fe47.mp3"
+},
+"一番": {
+"metan": "274fb5840f34fe2e.mp3"
+},
 "一番線ですね。ありがとうございます。": {
 "mao": "4e7aba00f07b47fd.mp3"
+},
+"一緒": {
+"metan": "08ec63426264bdeb.mp3"
 },
 "一緒に昼ご飯を食べませんか。": {
 "mao": "8e6d4e88ad7b6d72.mp3"
@@ -3115,6 +3166,9 @@
 },
 "七十五円ですね。": {
 "mao": "f22ee6e6f1e6821b.mp3"
+},
+"七時": {
+"metan": "77e414473446da3b.mp3"
 },
 "七時に起きます。": {
 "mao": "5839e845036a93f7.mp3"
@@ -3131,14 +3185,65 @@
 "三人家族です。": {
 "mao": "96a37908238750a1.mp3"
 },
+"三月": {
+"metan": "b0077c62019956d4.mp3"
+},
+"三百": {
+"metan": "704882379307c11c.mp3"
+},
 "上": {
 "metan": "ac8afc73f5919277.mp3"
+},
+"上手": {
+"metan": "701413f2ccfe2ed2.mp3"
 },
 "下": {
 "metan": "eb693690796cb247.mp3"
 },
+"不": {
+"metan": "3db03af6d150acc2.mp3"
+},
+"不便": {
+"metan": "874570af224e943b.mp3"
+},
+"与": {
+"metan": "5eec66fcb1c4a96b.mp3"
+},
+"世": {
+"metan": "418b21b4aa5383fb.mp3"
+},
+"世界": {
+"metan": "73ebec6c1dd9cb8c.mp3"
+},
+"両": {
+"metan": "e2e5eb4f0066d50c.mp3"
+},
+"両手": {
+"metan": "690c53f465d5b8c0.mp3"
+},
+"両親": {
+"metan": "410ada371eba03b1.mp3"
+},
 "中": {
 "metan": "da8ba7794eb9222a.mp3"
+},
+"中国": {
+"metan": "efa894e1a747631c.mp3"
+},
+"中止": {
+"metan": "abf97ae09514af40.mp3"
+},
+"主": {
+"metan": "b4e61918e5cda18c.mp3"
+},
+"主人": {
+"metan": "9b9aaff4d5582224.mp3"
+},
+"乗": {
+"metan": "c37bab4350262d6a.mp3"
+},
+"乗る": {
+"metan": "4fcd0bbe06733a3f.mp3"
 },
 "九": {
 "metan": "960835b26e1d0288.mp3"
@@ -3146,14 +3251,44 @@
 "九時です。": {
 "mao": "8563660dba863491.mp3"
 },
+"九月": {
+"metan": "bb091056061127ec.mp3"
+},
+"予": {
+"metan": "dbe305d71fbafce6.mp3"
+},
+"予定": {
+"metan": "1e294edf2c222dfc.mp3"
+},
+"予約": {
+"metan": "8a1811c860466e37.mp3"
+},
+"争": {
+"metan": "7cd38f88338a2763.mp3"
+},
+"事": {
+"metan": "be8a942c01253a70.mp3"
+},
+"事件": {
+"metan": "42c1f072d078f5ac.mp3"
+},
+"事務所": {
+"metan": "50c0f6c433d66e4c.mp3"
+},
 "二": {
 "metan": "65942d0edf8695ca.mp3"
 },
 "二つください。": {
 "mao": "1f70dbd7efcb7e20.mp3"
 },
+"二人": {
+"metan": "278f7963da7c10d2.mp3"
+},
 "二人です。": {
 "mao": "f7b2bca2df7ebbf9.mp3"
+},
+"二十歳": {
+"metan": "bc5420a83d031f53.mp3"
 },
 "二千円お預かりします。六百六十円のお返しです。": {
 "nise": "942c8c6fb7017279.mp3"
@@ -3161,14 +3296,38 @@
 "二千円でおねがいします。": {
 "mao": "23b3272c1c2c4dd3.mp3"
 },
+"互": {
+"metan": "072356c16b1573a2.mp3"
+},
 "五": {
 "metan": "6cbf5953bb312c61.mp3"
 },
 "五分待ってください。": {
 "mao": "8ec3bc091ccfc5cd.mp3"
 },
+"五月": {
+"metan": "d91d4c3aaf6fe8bd.mp3"
+},
+"亡": {
+"metan": "1e638fb77624fc20.mp3"
+},
+"交": {
+"metan": "3e86897d593f8974.mp3"
+},
+"交通": {
+"metan": "f1e802d25e0903cd.mp3"
+},
+"京": {
+"metan": "65132d009cc1114a.mp3"
+},
 "人": {
 "metan": "32334dc90677453e.mp3"
+},
+"人形": {
+"metan": "dd80e1434493b993.mp3"
+},
+"人間": {
+"metan": "d8fb117ae0af6ac0.mp3"
 },
 "今": {
 "metan": "8667a6c6bb0bf454.mp3"
@@ -3190,6 +3349,18 @@
 },
 "今何時ですか。": {
 "mao": "3d393de40182e4e1.mp3"
+},
+"今回": {
+"metan": "89a44e0cdc7631ff.mp3"
+},
+"今夜": {
+"metan": "a140b96c21186951.mp3"
+},
+"今度": {
+"metan": "c9351d179a4d2835.mp3"
+},
+"今日": {
+"metan": "2915b4cb40666c9b.mp3"
 },
 "今日お弁当を食べました": {
 "mao": "72545f7456bca1fb.mp3"
@@ -3266,17 +3437,65 @@
 "今日行く": {
 "mao": "197e1a164221adb0.mp3"
 },
+"今月": {
+"metan": "4fc3e6f6b79fe898.mp3"
+},
 "今朝朝ご飯を食べませんでした。": {
 "mao": "3aa8c58c64917a4a.mp3"
+},
+"今週": {
+"metan": "0231e59c4756a3ee.mp3"
+},
+"仕": {
+"metan": "70cd98dca08c0483.mp3"
+},
+"仕事": {
+"metan": "ae78a71a0ae41412.mp3"
 },
 "仕事は大変でした。": {
 "mao": "040d78a2355790a5.mp3"
 },
+"他": {
+"metan": "45cd6cefccf5714c.mp3"
+},
+"付": {
+"metan": "a01728d695ff4865.mp3"
+},
+"付ける": {
+"metan": "ba55ea1e2fc20bb4.mp3"
+},
+"代": {
+"metan": "75ff498c81a4bdae.mp3"
+},
+"以": {
+"metan": "822ddcf9cf998a1d.mp3"
+},
+"以上": {
+"metan": "12464dc35b057418.mp3"
+},
+"件": {
+"metan": "3cf3a155a2e4a7fa.mp3"
+},
+"任": {
+"metan": "7dbb6bcc00161a6e.mp3"
+},
 "休": {
 "metan": "9af78949ca360442.mp3"
 },
+"休み": {
+"metan": "39c0747a9e883402.mp3"
+},
 "会": {
 "metan": "d857ab45046a215e.mp3"
+},
+"会社": {
+"metan": "77158a7585de0024.mp3"
+},
+"会社員": {
+"metan": "068e72931ca09555.mp3"
+},
+"会議": {
+"metan": "ab0ef7328633a38f.mp3"
 },
 "会議は十時からです。": {
 "mao": "15a370243b3c0366.mp3"
@@ -3284,11 +3503,149 @@
 "会議室に田中さんがいます。": {
 "mao": "4cf2caa9586391e7.mp3"
 },
+"伝": {
+"metan": "0eb93ed14202d097.mp3"
+},
+"似": {
+"metan": "85db6ae698dcdc0c.mp3"
+},
+"似る": {
+"metan": "62a28812a1e152fc.mp3"
+},
+"位": {
+"metan": "8b06a1238ab93e90.mp3"
+},
+"位置": {
+"metan": "93fcd9283d0e5606.mp3"
+},
+"住": {
+"metan": "dba9597c76d70dc0.mp3"
+},
+"住所": {
+"metan": "4f870c654ab931b8.mp3"
+},
+"体": {
+"metan": "c584906aba7bf85b.mp3"
+},
+"体育": {
+"metan": "60c6f4018ed4f3cd.mp3"
+},
 "何": {
 "metan": "763b4c477378909a.mp3"
 },
+"何時": {
+"metan": "cda532906b8bbe43.mp3"
+},
+"余": {
+"metan": "a773a6f0785467c1.mp3"
+},
+"余る": {
+"metan": "88cb5d7f9045f03f.mp3"
+},
+"作": {
+"metan": "1de79f48d6787b3a.mp3"
+},
+"作る": {
+"metan": "a390f4ae7a182b0e.mp3"
+},
+"使": {
+"metan": "574880d1d257b207.mp3"
+},
+"使う": {
+"metan": "d2d77a91754a32ba.mp3"
+},
+"例": {
+"metan": "6d508cad62b9beaa.mp3"
+},
+"例えば": {
+"metan": "ade8d0c4820a8fb9.mp3"
+},
+"供": {
+"metan": "19a09121d9f80245.mp3"
+},
+"便": {
+"metan": "b9f1db4f0c5872c3.mp3"
+},
+"便利": {
+"metan": "a691f47416f4c1ee.mp3"
+},
+"係": {
+"metan": "a36271433ff64773.mp3"
+},
+"信": {
+"metan": "e917c1a69bc23a0a.mp3"
+},
+"信号": {
+"metan": "80ea72e610c2b286.mp3"
+},
+"倒": {
+"metan": "0869dfe3de4cafbf.mp3"
+},
+"倒れる": {
+"metan": "f6e72f9e9c62d868.mp3"
+},
+"候": {
+"metan": "483c122e6e5d60a4.mp3"
+},
+"借": {
+"metan": "4c349b45d4e7c129.mp3"
+},
+"借りる": {
+"metan": "17e70f025e88deff.mp3"
+},
+"値": {
+"metan": "15c79e38c399afd0.mp3"
+},
+"値段": {
+"metan": "85dc2355d48f2d6d.mp3"
+},
+"偉": {
+"metan": "2e85d4538ee05630.mp3"
+},
+"偉い": {
+"metan": "8db234b7613ed636.mp3"
+},
+"側": {
+"metan": "5cef90e09531d2ce.mp3"
+},
+"偶": {
+"metan": "f845d25f227d77df.mp3"
+},
+"偶然": {
+"metan": "60b9b13b7a5352b7.mp3"
+},
+"備": {
+"metan": "616558c91c57d374.mp3"
+},
+"働": {
+"metan": "52d64641e47af92a.mp3"
+},
+"働く": {
+"metan": "669b93da2632c26c.mp3"
+},
+"優": {
+"metan": "9ae4d48e03c023ff.mp3"
+},
+"優しい": {
+"metan": "706690005a6fddea.mp3"
+},
+"元": {
+"metan": "1e60b545d4d54195.mp3"
+},
+"元気": {
+"metan": "584e452e4d8ba105.mp3"
+},
+"兄": {
+"metan": "d93d306497b2f039.mp3"
+},
+"兄弟": {
+"metan": "1e77571c3055dbf9.mp3"
+},
 "先": {
 "metan": "ec07002d38c00448.mp3"
+},
+"先生": {
+"metan": "6c6b32b94a2d17a4.mp3"
 },
 "先生と話しました。": {
 "mao": "51ad7b3b7b12203c.mp3"
@@ -3308,8 +3665,23 @@
 "先生話す": {
 "mao": "d7079ee6747d45ee.mp3"
 },
+"先週": {
+"metan": "f0c8bb88599fac1f.mp3"
+},
+"光": {
+"metan": "40636bb41d21a967.mp3"
+},
 "入": {
 "metan": "72989dc068c10f1f.mp3"
+},
+"入口": {
+"metan": "dac55197f63ce00d.mp3"
+},
+"全": {
+"metan": "4716dd06ed2faa10.mp3"
+},
+"全部": {
+"metan": "b6d63744a4af1562.mp3"
 },
 "全部で七百五十円です。": {
 "nise": "8169f740f4ef7073.mp3"
@@ -3320,23 +3692,83 @@
 "八時に始まります。": {
 "mao": "612bcd6c85eb9b15.mp3"
 },
+"八月": {
+"metan": "d23d7eb338cad84f.mp3"
+},
 "八番線ですね。": {
 "mao": "7a10efcb134105c2.mp3"
+},
+"公": {
+"metan": "5bface0730111c1d.mp3"
+},
+"公園": {
+"metan": "389b727b5e0e9f8d.mp3"
 },
 "六": {
 "metan": "ba655672ffce7883.mp3"
 },
+"六月": {
+"metan": "efd3769d831c309c.mp3"
+},
 "六百五十円です。": {
 "mao": "3fbdac372c6479a8.mp3"
+},
+"共": {
+"metan": "c1d8e50910c5eb5c.mp3"
+},
+"共通": {
+"metan": "ea3029d281242c3f.mp3"
+},
+"具": {
+"metan": "00c2cefacf3b2d43.mp3"
+},
+"内": {
+"metan": "b450adaee721c643.mp3"
+},
+"内容": {
+"metan": "baf772b5457610bb.mp3"
 },
 "円": {
 "metan": "452ab737faa8a595.mp3"
 },
+"写": {
+"metan": "3f38f38082a946eb.mp3"
+},
+"写真": {
+"metan": "523b8fbc1fe0f65f.mp3"
+},
 "写真を撮ってもいいですか。": {
 "mao": "1236e97b9b6593b6.mp3"
 },
+"冬": {
+"metan": "27c70a930c326123.mp3"
+},
+"冬休み": {
+"metan": "e0a905cbf6cfee25.mp3"
+},
+"冷": {
+"metan": "980d455c71a1ed24.mp3"
+},
+"冷たい": {
+"metan": "5fa009428f364cf9.mp3"
+},
+"処": {
+"metan": "152ad18306dffc25.mp3"
+},
+"処理": {
+"metan": "986ed462a0d0d1a4.mp3"
+},
 "出": {
 "metan": "9a7305d5f461633d.mp3"
+},
+"出口": {
+"metan": "edde390fe4a33425.mp3"
+},
+"出席": {
+"metan": "4b995dd7010cac5e.mp3"
+},
+"出発": {
+"metan": "24bb502e52c380e3.mp3"
 },
 "分": {
 "metan": "714815d952e1074b.mp3"
@@ -3350,6 +3782,9 @@
 "分かりません": {
 "mao": "b0f7a0ac7ad908ac.mp3"
 },
+"切": {
+"metan": "cdf965e5c7a8fe01.mp3"
+},
 "切符を買います": {
 "mao": "98852a5c413cbfc0.mp3"
 },
@@ -3362,11 +3797,113 @@
 "切符買う": {
 "mao": "9e1bb17ceac97bcb.mp3"
 },
+"列": {
+"metan": "0ece5bd70352a9b1.mp3"
+},
+"列車": {
+"metan": "dc4b8b415bc6e28c.mp3"
+},
+"初": {
+"metan": "5f2b3b6155b34d36.mp3"
+},
+"判": {
+"metan": "e687c2b6d5bd2765.mp3"
+},
+"判断": {
+"metan": "7a97ef06c2cda829.mp3"
+},
+"別": {
+"metan": "a518089451a39594.mp3"
+},
+"利": {
+"metan": "9141bed4f2640519.mp3"
+},
+"到": {
+"metan": "49fa1ef7c0104603.mp3"
+},
+"到着": {
+"metan": "111335927080fb41.mp3"
+},
+"制": {
+"metan": "ce0513c655993e0b.mp3"
+},
+"制服": {
+"metan": "07a2ec21a068d178.mp3"
+},
+"制限": {
+"metan": "cdcad4d14dc854dc.mp3"
+},
+"刻": {
+"metan": "7304307aa74b46e6.mp3"
+},
 "前": {
 "metan": "16d574ccbae05db1.mp3"
 },
+"割": {
+"metan": "4cfdd1293751e9c3.mp3"
+},
+"割引": {
+"metan": "2f185c82505dec43.mp3"
+},
+"力": {
+"metan": "4f56fd1f1226ceba.mp3"
+},
+"加": {
+"metan": "e8039189cc151bba.mp3"
+},
+"助": {
+"metan": "3ccb932127a08668.mp3"
+},
+"助ける": {
+"metan": "1bc6ed1aaf5dee03.mp3"
+},
+"努": {
+"metan": "23267a2c6cf36118.mp3"
+},
+"努力": {
+"metan": "cd81a6de9441b41d.mp3"
+},
+"労": {
+"metan": "0db6d898df3607b0.mp3"
+},
+"勉": {
+"metan": "9c6f64d7fcc04c83.mp3"
+},
+"勉強": {
+"metan": "94c56ea602ba3f7d.mp3"
+},
+"動": {
+"metan": "8e0658d510b6973f.mp3"
+},
+"動物": {
+"metan": "f81b692f2399b0be.mp3"
+},
+"務": {
+"metan": "666f361e49fcd31d.mp3"
+},
+"勝": {
+"metan": "9336af9f129a3476.mp3"
+},
+"勝つ": {
+"metan": "f447f1d75785d6fd.mp3"
+},
+"勤": {
+"metan": "90495ac6c318a31c.mp3"
+},
+"化": {
+"metan": "15c91407e01dee45.mp3"
+},
 "北": {
 "metan": "7e6025af280b719a.mp3"
+},
+"北口": {
+"metan": "f85016472b30a9ec.mp3"
+},
+"医": {
+"metan": "95cd14581ff831d6.mp3"
+},
+"医者": {
+"metan": "0b52586e71508432.mp3"
 },
 "十": {
 "metan": "7282d847ea48176f.mp3"
@@ -3376,6 +3913,9 @@
 },
 "十時からです。三階の会議室です。": {
 "mao": "47e98b07e4337567.mp3"
+},
+"十月": {
+"metan": "ff1c906a709611ee.mp3"
 },
 "千": {
 "metan": "b1c54194b1d8eeab.mp3"
@@ -3395,14 +3935,50 @@
 "午": {
 "metan": "5e44d4b7de67f709.mp3"
 },
+"午前": {
+"metan": "7ea017f846da3d18.mp3"
+},
+"午後": {
+"metan": "84bc986ca91eddbd.mp3"
+},
 "午後三時半です。": {
 "mao": "3131b3a7cd6de820.mp3"
 },
 "半": {
 "metan": "138c9b18559d2d86.mp3"
 },
+"半分": {
+"metan": "b56ac1bbcfe15240.mp3"
+},
 "南": {
 "metan": "bd8514131dc0aabf.mp3"
+},
+"南口": {
+"metan": "9a3bf76bd4d895c4.mp3"
+},
+"単": {
+"metan": "882c21ff6d88734b.mp3"
+},
+"危": {
+"metan": "dacaa010c4f0cfb8.mp3"
+},
+"危ない": {
+"metan": "9b4e7a14c2fa4503.mp3"
+},
+"危険": {
+"metan": "a3df0b21c43654b9.mp3"
+},
+"原": {
+"metan": "32ea056dedf2e25b.mp3"
+},
+"原因": {
+"metan": "1ce61be0bba5e76b.mp3"
+},
+"去": {
+"metan": "53e7183445398bee.mp3"
+},
+"去年": {
+"metan": "75f40017413f78c2.mp3"
 },
 "去年日本に行きました": {
 "mao": "9d3eefc55decb72c.mp3"
@@ -3437,8 +4013,20 @@
 "去年花見をしました": {
 "mao": "344a3c93d109e821.mp3"
 },
+"参": {
+"metan": "4c65a580101f4100.mp3"
+},
+"参加": {
+"metan": "d387222890771b49.mp3"
+},
 "友": {
 "metan": "dba658b86c8d74fd.mp3"
+},
+"友だち": {
+"metan": "d58ba0c51f640c26.mp3"
+},
+"友達": {
+"metan": "603bca542acc3994.mp3"
 },
 "友達が家へ来ます。": {
 "mao": "fe222ac8eb4e49e9.mp3"
@@ -3551,11 +4139,50 @@
 "友達駅来る": {
 "mao": "f02f083c412a96d1.mp3"
 },
+"反": {
+"metan": "c9b98518a65e30dc.mp3"
+},
+"反対": {
+"metan": "7883be3322792b14.mp3"
+},
+"収": {
+"metan": "e9fa6e6328b6b1f9.mp3"
+},
+"収入": {
+"metan": "735de5ea5376d4a4.mp3"
+},
+"取": {
+"metan": "80d7ef863b260694.mp3"
+},
+"取る": {
+"metan": "dce2d1c69c395142.mp3"
+},
+"受": {
+"metan": "394aefe00c70a724.mp3"
+},
+"受ける": {
+"metan": "a145a142caaf7b50.mp3"
+},
 "口": {
 "metan": "0e74c607e5808456.mp3"
 },
 "古": {
 "metan": "35d67496d1a8284e.mp3"
+},
+"古い": {
+"metan": "47ff9f4f73c75668.mp3"
+},
+"可能": {
+"metan": "4df63be7223528c1.mp3"
+},
+"台": {
+"metan": "7ed138da100e97ef.mp3"
+},
+"台所": {
+"metan": "cdfeb92fb0da987e.mp3"
+},
+"台風": {
+"metan": "b3da307e61823cf2.mp3"
 },
 "右": {
 "metan": "1fce3ced51a1c0ea.mp3"
@@ -3566,8 +4193,29 @@
 "右を見てください。": {
 "mao": "bb279ce2612ce391.mp3"
 },
+"右側": {
+"metan": "8713b80d99012156.mp3"
+},
+"右手": {
+"metan": "589b7ccc20d6281b.mp3"
+},
+"号": {
+"metan": "e2f8a6c5d18a1722.mp3"
+},
+"合": {
+"metan": "a81b948c09015929.mp3"
+},
+"同": {
+"metan": "eb74f4e0bddac748.mp3"
+},
+"同じ": {
+"metan": "a1dec9dba3814abf.mp3"
+},
 "名": {
 "metan": "94e7a4473eaa2abb.mp3"
+},
+"名前": {
+"metan": "d4c26e243846a1e5.mp3"
 },
 "名前を書いてください": {
 "mao": "f52ab99686dd8a63.mp3"
@@ -3577,6 +4225,81 @@
 },
 "名前書くください": {
 "mao": "0c173b0cca513bf4.mp3"
+},
+"向": {
+"metan": "4ca2e7ccb4a38e1c.mp3"
+},
+"君": {
+"metan": "67640203c7a5cb84.mp3"
+},
+"否": {
+"metan": "20047f89a24d55d8.mp3"
+},
+"否定": {
+"metan": "76ea795e1fe0d268.mp3"
+},
+"吸": {
+"metan": "35d40b828f988973.mp3"
+},
+"吸う": {
+"metan": "887ad0c6e87fde29.mp3"
+},
+"吹": {
+"metan": "c3db3601808572e7.mp3"
+},
+"吹く": {
+"metan": "3ab53fb2c791ba17.mp3"
+},
+"告": {
+"metan": "7fa8aa1f5b8331d3.mp3"
+},
+"味": {
+"metan": "d52f40092b6c2a99.mp3"
+},
+"呼": {
+"metan": "25497b8044d97e75.mp3"
+},
+"呼ぶ": {
+"metan": "c321c3a2acc7bdc3.mp3"
+},
+"命": {
+"metan": "f6b7711de24dcc8d.mp3"
+},
+"命令": {
+"metan": "886f5e3e27fb3cdc.mp3"
+},
+"和": {
+"metan": "a31683052bf71fc3.mp3"
+},
+"和食": {
+"metan": "04b86bebef60b15d.mp3"
+},
+"品": {
+"metan": "7aa0ec2ab7f6e485.mp3"
+},
+"品物": {
+"metan": "b78ee9f028866201.mp3"
+},
+"員": {
+"metan": "f88dae4c0a70a07a.mp3"
+},
+"商": {
+"metan": "09a003ec28bbd756.mp3"
+},
+"商品": {
+"metan": "47ac7416ce79698f.mp3"
+},
+"問": {
+"metan": "6c4cbe624702e2ec.mp3"
+},
+"問題": {
+"metan": "0d8d33b8e0f9ff98.mp3"
+},
+"喜": {
+"metan": "4b78291d96871aec.mp3"
+},
+"喜ぶ": {
+"metan": "47993fed29f85f0f.mp3"
 },
 "喫茶店でコーヒーを飲みます": {
 "mao": "1455b2d09385e0e8.mp3"
@@ -3607,6 +4330,27 @@
 },
 "四時に会いましょう。": {
 "mao": "0681a597f86e6b4b.mp3"
+},
+"四月": {
+"metan": "1ef57b237944a62d.mp3"
+},
+"回": {
+"metan": "2b1b5c8f9b03e522.mp3"
+},
+"因": {
+"metan": "1d5bdc03c4ea9d2f.mp3"
+},
+"困": {
+"metan": "4359bf1aa5c41b9c.mp3"
+},
+"困る": {
+"metan": "c5d26bd0964aec74.mp3"
+},
+"図": {
+"metan": "e570ed1914c97d80.mp3"
+},
+"図書館": {
+"metan": "b3a90fe99d7056d2.mp3"
 },
 "図書館で本を読みます": {
 "mao": "8cf087c73094e875.mp3"
@@ -3641,11 +4385,80 @@
 "国": {
 "metan": "a12224c554427c0d.mp3"
 },
+"国民": {
+"metan": "6adcdee8f891b064.mp3"
+},
+"国際": {
+"metan": "76958d6e11b82972.mp3"
+},
+"園": {
+"metan": "2ecb6924fd9783a8.mp3"
+},
 "土": {
 "metan": "77e217a051465b55.mp3"
 },
+"土曜日": {
+"metan": "437f5b5f3202677b.mp3"
+},
 "土曜日が休みです。": {
 "mao": "e4950aa51464e239.mp3"
+},
+"在": {
+"metan": "f871bdcb8b6672d0.mp3"
+},
+"地": {
+"metan": "a5cf8899b5a5b7c9.mp3"
+},
+"地下鉄": {
+"metan": "c0483aa0a56a9db0.mp3"
+},
+"地図": {
+"metan": "dfee8f8ee7ebdcd5.mp3"
+},
+"堂": {
+"metan": "d4ff074f69e59841.mp3"
+},
+"報": {
+"metan": "3f38988151c89d4e.mp3"
+},
+"場": {
+"metan": "f72097b2bd9e7784.mp3"
+},
+"場所": {
+"metan": "42604fc89a330cd3.mp3"
+},
+"増": {
+"metan": "10bdc5a0cf04ab3f.mp3"
+},
+"増える": {
+"metan": "86a467eb1642f8da.mp3"
+},
+"士": {
+"metan": "c10a84b8c87d1aa5.mp3"
+},
+"声": {
+"metan": "b40cd1ffc3e9f577.mp3"
+},
+"売": {
+"metan": "c12dd9a8530510ab.mp3"
+},
+"売る": {
+"metan": "319a1a4f960846f1.mp3"
+},
+"変": {
+"metan": "47fd7d4ca8711a61.mp3"
+},
+"夏": {
+"metan": "c6eccd83b7c247ba.mp3"
+},
+"夏休み": {
+"metan": "39809631daff2e9e.mp3"
+},
+"夕": {
+"metan": "835235a72374bcb5.mp3"
+},
+"夕方": {
+"metan": "a8d55a76a364ccfc.mp3"
 },
 "外": {
 "metan": "69aa41647c816606.mp3"
@@ -3653,8 +4466,23 @@
 "外は寒いです。": {
 "mao": "ce4faedee421924b.mp3"
 },
+"外国": {
+"metan": "6cc1c9b9b80942e5.mp3"
+},
+"外国人": {
+"metan": "3341da6c9e150b0a.mp3"
+},
 "多": {
 "metan": "b49da3bb9e2cbb22.mp3"
+},
+"多い": {
+"metan": "5fcc171d11284f95.mp3"
+},
+"夜": {
+"metan": "2032316b808384c5.mp3"
+},
+"夢": {
+"metan": "16920d41d998fa71.mp3"
 },
 "大": {
 "metan": "27b89c4676657412.mp3"
@@ -3664,6 +4492,15 @@
 },
 "大丈夫です": {
 "mao": "40e7fb01aa35ce3a.mp3"
+},
+"大切": {
+"metan": "c829e25c958823f4.mp3"
+},
+"大変": {
+"metan": "da46e2e3f769472d.mp3"
+},
+"大学": {
+"metan": "dc8343dec1f358bf.mp3"
 },
 "大学で日本語を話します": {
 "mao": "8ec0fa5d3cf34a31.mp3"
@@ -3689,6 +4526,9 @@
 "大学日本語話す": {
 "mao": "f1ea3f93a774d971.mp3"
 },
+"大雨": {
+"metan": "25070c1988b2e3ff.mp3"
+},
 "天": {
 "metan": "6c842ee50eb8ca71.mp3"
 },
@@ -3701,8 +4541,41 @@
 "天ぷら食べるです": {
 "mao": "fb16fbe820832772.mp3"
 },
+"天候": {
+"metan": "21455bd9ee5c5e10.mp3"
+},
+"天才": {
+"metan": "1e0d6e0229a49ecd.mp3"
+},
+"天気": {
+"metan": "783a53fd6255ca07.mp3"
+},
+"太": {
+"metan": "e82f070ad6a3ac5a.mp3"
+},
+"太い": {
+"metan": "a4c67ec061b72155.mp3"
+},
+"太陽": {
+"metan": "23705914f39deae8.mp3"
+},
 "太陽は東から昇ります。": {
 "mao": "169d9f4191e1056b.mp3"
+},
+"夫": {
+"metan": "baefd5a0b80a490d.mp3"
+},
+"夫婦": {
+"metan": "ee350e8e177c6e28.mp3"
+},
+"失": {
+"metan": "e79e241949e09eb2.mp3"
+},
+"失敗": {
+"metan": "2cdc873e1e66583c.mp3"
+},
+"失礼": {
+"metan": "2eed91a68b1d659c.mp3"
 },
 "失礼します": {
 "mao": "2d7239b9a4bf2c02.mp3"
@@ -3713,14 +4586,59 @@
 "女の人がいます。": {
 "mao": "2062d7e58d20ddbf.mp3"
 },
+"女の子": {
+"metan": "e95839b8aaf6160a.mp3"
+},
+"女性": {
+"metan": "4d3adc1ad9b03e0b.mp3"
+},
+"好": {
+"metan": "352d63854749e1f7.mp3"
+},
+"好き": {
+"metan": "6786a4de75fdf47d.mp3"
+},
+"妹": {
+"metan": "51af07440df5ddb3.mp3"
+},
 "妹は九歳です。": {
 "mao": "53166e208d72f7bb.mp3"
+},
+"妻": {
+"metan": "b6ac00760c192ced.mp3"
+},
+"姉": {
+"metan": "7f3276538af24ec3.mp3"
+},
+"姉妹": {
+"metan": "8915b7040a4268c5.mp3"
+},
+"始": {
+"metan": "5cb076fd539fe7f2.mp3"
+},
+"始める": {
+"metan": "c7c3c269efec8664.mp3"
+},
+"娘": {
+"metan": "418eaefb4a56eaf6.mp3"
+},
+"婚": {
+"metan": "4d15f208b7f03a8f.mp3"
+},
+"婦": {
+"metan": "22f08e4ec07be52d.mp3"
 },
 "子": {
 "metan": "93aa812c5ba02f28.mp3"
 },
+"子ども": {
+"metan": "92bc6de16362abbc.mp3"
+},
 "子どもが二人います。": {
 "mao": "b86959bfac605e31.mp3"
+},
+"子供": {
+"metan": "1e25add5b119167c.mp3"
 },
 "子供が遊んでいます。": {
 "mao": "06ffe79a82fed65b.mp3"
@@ -3758,11 +4676,101 @@
 "子供花火見る": {
 "mao": "68fe81625381c2c2.mp3"
 },
+"子犬": {
+"metan": "700ecad87d841c73.mp3"
+},
+"字": {
+"metan": "a483e5231fd31b35.mp3"
+},
+"存": {
+"metan": "ee57d40a294ef767.mp3"
+},
+"存在": {
+"metan": "42bf4e13a825e887.mp3"
+},
 "学": {
 "metan": "b25745e8b0de2314.mp3"
 },
+"学期": {
+"metan": "7ca593518af9d031.mp3"
+},
+"学校": {
+"metan": "9df8d51b33467a3b.mp3"
+},
+"学生": {
+"metan": "277ae1b99d5ed3e5.mp3"
+},
+"宅": {
+"metan": "cd4f3739786c8989.mp3"
+},
+"守": {
+"metan": "67af2cde013b7b62.mp3"
+},
+"守る": {
+"metan": "40fad160f2593946.mp3"
+},
 "安": {
 "metan": "e32f6c2e96e58a47.mp3"
+},
+"安い": {
+"metan": "5c91b7b2abcad449.mp3"
+},
+"安心": {
+"metan": "6870938605e662af.mp3"
+},
+"完": {
+"metan": "247f507bb910dd38.mp3"
+},
+"完全": {
+"metan": "627db66f383aa9dd.mp3"
+},
+"官": {
+"metan": "287090600436e74d.mp3"
+},
+"定": {
+"metan": "892e7518c2d03900.mp3"
+},
+"実": {
+"metan": "8f6d5f7a521eccc8.mp3"
+},
+"実は": {
+"metan": "0eb3ad2659a9cbbc.mp3"
+},
+"客": {
+"metan": "9dbec54056c86b03.mp3"
+},
+"室": {
+"metan": "4362c477f9b8f431.mp3"
+},
+"害": {
+"metan": "2c797c88f8ad182f.mp3"
+},
+"家": {
+"metan": "ac6d17c66b2c1a23.mp3"
+},
+"家族": {
+"metan": "b2da50a0642d9a5c.mp3"
+},
+"容": {
+"metan": "6bccce095c6b3e4f.mp3"
+},
+"宿": {
+"metan": "2dcb782a78d5fc4f.mp3"
+},
+"宿題": {
+"metan": "4808b58ffec30fb6.mp3"
+},
+"寄": {
+"metan": "6af1cbb81f4f1a09.mp3"
+},
+"寄る": {
+"metan": "1530d579f7149c75.mp3"
+},
+"富": {
+"metan": "2af32cbbfc25a629.mp3"
+},
+"富士山": {
+"metan": "cf803e505cec2439.mp3"
 },
 "富士山を見たいです": {
 "mao": "2cd66f1d8a2d74a3.mp3"
@@ -3773,6 +4781,24 @@
 "富士山見るです": {
 "mao": "3772aedb84a1665d.mp3"
 },
+"寒": {
+"metan": "ffd42fa8e4f87173.mp3"
+},
+"寒い": {
+"metan": "548ae17234ed5446.mp3"
+},
+"寝": {
+"metan": "c23abb82b066c487.mp3"
+},
+"寝る": {
+"metan": "8066c2194a831f17.mp3"
+},
+"察": {
+"metan": "422dd8361d867aca.mp3"
+},
+"対": {
+"metan": "71d9f4b74b3f6e95.mp3"
+},
 "寿司を食べます。": {
 "mao": "59c1e38c19c6bd9d.mp3"
 },
@@ -3782,11 +4808,32 @@
 "小さい犬を飼っています。": {
 "mao": "bece7da36b1956b6.mp3"
 },
+"小学校": {
+"metan": "d9e5a13821ad857e.mp3"
+},
+"小川": {
+"metan": "9c1751dc109545a0.mp3"
+},
 "少": {
 "metan": "ac8c797e37bf6d38.mp3"
 },
 "少々お待ちください。": {
 "mao": "708cfadb2ea70c02.mp3"
+},
+"少し": {
+"metan": "f8da68659e17d0f4.mp3"
+},
+"局": {
+"metan": "7482bd8a6ae5eb08.mp3"
+},
+"居": {
+"metan": "9f080086915b3305.mp3"
+},
+"居間": {
+"metan": "0c71322d52a91740.mp3"
+},
+"屋": {
+"metan": "cd6e184d4394dc23.mp3"
 },
 "山": {
 "metan": "cd823838d3de2275.mp3"
@@ -3806,20 +4853,149 @@
 "川で泳ぎます。": {
 "mao": "1ba931e339834c8a.mp3"
 },
+"工": {
+"metan": "28883cf47ebc743d.mp3"
+},
+"工場": {
+"metan": "a10eb6b9c2d7b52c.mp3"
+},
 "左": {
 "metan": "8165265a1edb75c4.mp3"
 },
 "左へ曲がってください。": {
 "mao": "de0c25d5bfd2ac4a.mp3"
 },
+"左手": {
+"metan": "279b9f8e4486af68.mp3"
+},
+"差": {
+"metan": "ef73277e6edf35c1.mp3"
+},
+"市": {
+"metan": "f5826a0cd03026a8.mp3"
+},
+"市場": {
+"metan": "70b0234e1f76cb04.mp3"
+},
+"希望": {
+"metan": "45eee248a82e30c5.mp3"
+},
+"師": {
+"metan": "f5056bfd76dba984.mp3"
+},
+"席": {
+"metan": "d7e65a4ccf8db60d.mp3"
+},
+"帰": {
+"metan": "4ab1cc1e0db62b77.mp3"
+},
+"帰る": {
+"metan": "1fee6878790c3267.mp3"
+},
+"常": {
+"metan": "ac5b9f0d6a3ef530.mp3"
+},
+"平": {
+"metan": "4d6f3b7d5b5203f3.mp3"
+},
+"平和": {
+"metan": "2464e2847632efaa.mp3"
+},
+"平等": {
+"metan": "3be84fc13c3e0005.mp3"
+},
 "年": {
 "metan": "7805edff2f2cf652.mp3"
+},
+"幸": {
+"metan": "6b128da706546c81.mp3"
+},
+"幸せ": {
+"metan": "f3b3e8de8dd83fd2.mp3"
+},
+"幸福": {
+"metan": "88302a676f106005.mp3"
+},
+"幾": {
+"metan": "a12b2677040bd8a4.mp3"
+},
+"幾つ": {
+"metan": "133e2d0242f44023.mp3"
+},
+"広": {
+"metan": "882569b2bc95fb1d.mp3"
+},
+"広い": {
+"metan": "2f682d2d4aa84473.mp3"
+},
+"広告": {
+"metan": "b61a54ca692dcd6a.mp3"
 },
 "店": {
 "metan": "5af7cead119754de.mp3"
 },
+"店員": {
+"metan": "eea16649ea996be8.mp3"
+},
+"度": {
+"metan": "c0c3f6f17b1badf4.mp3"
+},
+"座": {
+"metan": "ff7d4b9f9c0e1463.mp3"
+},
+"座る": {
+"metan": "c86f6a7e8a91465b.mp3"
+},
+"庭": {
+"metan": "178ca6dca8684f7a.mp3"
+},
+"建": {
+"metan": "6651c353c7f67f37.mp3"
+},
+"建物": {
+"metan": "59b0aefcaf02f079.mp3"
+},
+"式": {
+"metan": "24aa1f6f3892aa8c.mp3"
+},
+"引": {
+"metan": "ff8f7a845da1e94c.mp3"
+},
+"引く": {
+"metan": "685236fe7b3469df.mp3"
+},
+"引っ越す": {
+"metan": "01261a0971a15dde.mp3"
+},
+"引退": {
+"metan": "02d2f7d561b653ca.mp3"
+},
+"弟": {
+"metan": "133a1bc20ad39023.mp3"
+},
+"強": {
+"metan": "bce1315fb6d0cd70.mp3"
+},
+"当": {
+"metan": "6bbf39e617f0863f.mp3"
+},
+"形": {
+"metan": "e4aabdb033007385.mp3"
+},
+"役": {
+"metan": "87646d4b0fa32f31.mp3"
+},
+"役に立つ": {
+"metan": "72ddfdd6a59e13c5.mp3"
+},
+"彼": {
+"metan": "9ca21b069f145367.mp3"
+},
 "彼はいい人です。": {
 "mao": "cd81401e8b17341c.mp3"
+},
+"彼女": {
+"metan": "4f3419e7772f21a2.mp3"
 },
 "彼女もコーヒーを飲みません": {
 "mao": "b4be6d28308e9d9c.mp3"
@@ -3845,6 +5021,12 @@
 "彼女コーヒー飲む": {
 "mao": "6cd4839f08bf03b3.mp3"
 },
+"待": {
+"metan": "be6c696444ac0654.mp3"
+},
+"待つ": {
+"metan": "d8214a40e65f8c71.mp3"
+},
 "後": {
 "metan": "c3c0393d675e3521.mp3"
 },
@@ -3854,14 +5036,332 @@
 "後ほどこちらからお電話いたします。": {
 "mao": "8f3c4ad151728a9f.mp3"
 },
+"徒": {
+"metan": "3d0ba1996f20198e.mp3"
+},
+"得": {
+"metan": "5f3da9fb9749d11c.mp3"
+},
+"得意": {
+"metan": "ee7624c55f3c6887.mp3"
+},
+"御": {
+"metan": "37102594617d2016.mp3"
+},
+"御飯": {
+"metan": "2c4bf3df16b5e217.mp3"
+},
+"心": {
+"metan": "5234a60ae8499c13.mp3"
+},
+"心配": {
+"metan": "17e69f15701583c7.mp3"
+},
+"必": {
+"metan": "3c1caf3831e321ce.mp3"
+},
+"必ず": {
+"metan": "3402ccf99e3f2825.mp3"
+},
+"必要": {
+"metan": "fabfff5e30de77ba.mp3"
+},
+"忘": {
+"metan": "ec47f2d69b377841.mp3"
+},
+"忘れる": {
+"metan": "21bd40bc4eabf1df.mp3"
+},
+"忙": {
+"metan": "a4da630c4fb85e52.mp3"
+},
+"忙しい": {
+"metan": "d6f3659dfa7c586f.mp3"
+},
+"念": {
+"metan": "005ef26378594c76.mp3"
+},
+"怒": {
+"metan": "49b397941ffacdd6.mp3"
+},
+"怒る": {
+"metan": "99946f84382963bf.mp3"
+},
+"怖": {
+"metan": "242f475bfacf3507.mp3"
+},
+"怖い": {
+"metan": "a54112bd3d3709d4.mp3"
+},
+"思": {
+"metan": "9ca38dab7c8c4fde.mp3"
+},
+"思う": {
+"metan": "e85c1be26236443a.mp3"
+},
+"思想": {
+"metan": "935ae06882947afe.mp3"
+},
+"急": {
+"metan": "5678c67ffaac6de5.mp3"
+},
+"急行": {
+"metan": "959249e0bfb2c6bf.mp3"
+},
+"性": {
+"metan": "c0aaf2746e168175.mp3"
+},
+"性格": {
+"metan": "0a82f712a760ba67.mp3"
+},
+"恐": {
+"metan": "bad2c50d105ef7fb.mp3"
+},
+"恐ろしい": {
+"metan": "6f3fe0928aab1bf6.mp3"
+},
+"恥": {
+"metan": "de50037244e40210.mp3"
+},
+"恥ずかしい": {
+"metan": "19d2b40f40e1e228.mp3"
+},
+"息": {
+"metan": "8470a8cb6ebe3f49.mp3"
+},
+"息子": {
+"metan": "c6ddb194958c19f8.mp3"
+},
+"悪": {
+"metan": "8e1e0f0b9c47e532.mp3"
+},
+"悪い": {
+"metan": "7c90b076d2ef8a6c.mp3"
+},
+"悲": {
+"metan": "e2a288fdb7e8b724.mp3"
+},
+"悲しい": {
+"metan": "61567e68310004ba.mp3"
+},
+"情": {
+"metan": "51019ee13a01ec46.mp3"
+},
+"情報": {
+"metan": "ce43890c07d0d380.mp3"
+},
+"想": {
+"metan": "7e88c3923978cd32.mp3"
+},
+"意": {
+"metan": "a79eb320dc8279e2.mp3"
+},
+"意味": {
+"metan": "0650916db319a42a.mp3"
+},
+"愛": {
+"metan": "5fc3a4e3eff57962.mp3"
+},
+"感": {
+"metan": "99a77b68388da0e4.mp3"
+},
+"感じる": {
+"metan": "73e463fe65b86b34.mp3"
+},
+"慣": {
+"metan": "3608a4becf1e740e.mp3"
+},
+"慣れる": {
+"metan": "55cb650096aab9cf.mp3"
+},
+"成": {
+"metan": "e290fe78751a4173.mp3"
+},
+"成功": {
+"metan": "aefdadccfea67f49.mp3"
+},
+"戦": {
+"metan": "cf977bae4dd8352c.mp3"
+},
+"戦争": {
+"metan": "cc01a26445f82d7d.mp3"
+},
+"戻": {
+"metan": "74e30a2b97eb575b.mp3"
+},
+"戻る": {
+"metan": "30f411656ff7eb0c.mp3"
+},
+"所": {
+"metan": "65e35bdc1b4716fa.mp3"
+},
 "手": {
 "metan": "8d4573d417358176.mp3"
 },
 "手を洗ってください。": {
 "mao": "a3e6fad125747951.mp3"
 },
+"手伝う": {
+"metan": "ccf69c2f97f586fc.mp3"
+},
+"手紙": {
+"metan": "7763eda31df71ac5.mp3"
+},
+"才": {
+"metan": "da81416ec0280e6d.mp3"
+},
+"打": {
+"metan": "c1b86d7cdaafdb5a.mp3"
+},
+"打つ": {
+"metan": "ed6cc4daf1130655.mp3"
+},
+"払": {
+"metan": "12ad26fe3d62480c.mp3"
+},
+"払う": {
+"metan": "d567c8363dc7c253.mp3"
+},
+"技術": {
+"metan": "7c7f08607c93aeda.mp3"
+},
+"投": {
+"metan": "18af01fea1f3163f.mp3"
+},
+"投げる": {
+"metan": "4edbc82a0d6743b7.mp3"
+},
+"折": {
+"metan": "28874b08e233e88f.mp3"
+},
+"折る": {
+"metan": "6df0a895da6aad0e.mp3"
+},
+"抜": {
+"metan": "42e28c6667a11281.mp3"
+},
+"抜く": {
+"metan": "a2a0b9630814893b.mp3"
+},
+"抱": {
+"metan": "766846aa01ad89c1.mp3"
+},
+"抱く": {
+"metan": "4f6817c3353b5845.mp3"
+},
+"押": {
+"metan": "e473e933f2a49749.mp3"
+},
+"押す": {
+"metan": "e31256f46404da12.mp3"
+},
+"招": {
+"metan": "78d492a295d50e4a.mp3"
+},
+"招待": {
+"metan": "6e9eff2fea8a4443.mp3"
+},
+"持": {
+"metan": "e59111ec8d2ed792.mp3"
+},
+"持つ": {
+"metan": "a061bd3db49ee9be.mp3"
+},
+"指": {
+"metan": "77b67e5c48956e92.mp3"
+},
+"指示": {
+"metan": "82b67751fb9ba8b2.mp3"
+},
+"捕": {
+"metan": "f2b712c03232c425.mp3"
+},
+"捕まえる": {
+"metan": "c9fb66cbd824da1e.mp3"
+},
+"掃除": {
+"metan": "7e9ceb60a13c2794.mp3"
+},
+"授業": {
+"metan": "99eea08c4366c36a.mp3"
+},
+"掛": {
+"metan": "66b88794adc26c4c.mp3"
+},
+"掛ける": {
+"metan": "f387ff51f3cccf1c.mp3"
+},
+"探": {
+"metan": "508d629b52de062f.mp3"
+},
+"探す": {
+"metan": "ca25b1fc7118836d.mp3"
+},
+"支": {
+"metan": "08305afd9dd262e1.mp3"
+},
+"支店": {
+"metan": "de410f9e8f1750d2.mp3"
+},
+"放": {
+"metan": "07c153ff384c64d6.mp3"
+},
+"放送": {
+"metan": "5344ded9d6d8123e.mp3"
+},
+"政": {
+"metan": "67f5f475c1404119.mp3"
+},
+"政治": {
+"metan": "eb81e15073e2d06e.mp3"
+},
+"敗": {
+"metan": "4cc27669968ebf2a.mp3"
+},
+"教": {
+"metan": "b9dd99d1e33c7950.mp3"
+},
+"教室": {
+"metan": "633b79f0ac4e6652.mp3"
+},
+"教師": {
+"metan": "b6ff6fa64e9b6d23.mp3"
+},
+"教育": {
+"metan": "3392ff9668423dbc.mp3"
+},
+"散": {
+"metan": "099a5461e5ff4011.mp3"
+},
+"散歩": {
+"metan": "9e963b9be232e022.mp3"
+},
+"数": {
+"metan": "553f9447463a67f1.mp3"
+},
+"数字": {
+"metan": "5a089b3628868125.mp3"
+},
+"文": {
+"metan": "156d47beb375b3e7.mp3"
+},
+"文化": {
+"metan": "00c367d5ef08efd1.mp3"
+},
+"料": {
+"metan": "36b188ee5678b33d.mp3"
+},
+"料理": {
+"metan": "68ea515e06720e24.mp3"
+},
+"断": {
+"metan": "e5532a0487dfd2c1.mp3"
+},
 "新": {
 "metan": "6a5359ac2cd4b25f.mp3"
+},
+"新しい": {
+"metan": "03c07fc9e2f6107f.mp3"
 },
 "新しい車を買いました。": {
 "mao": "5cca6ce1df879580.mp3"
@@ -3869,8 +5369,35 @@
 "新宿に行きたいですが、何番線ですか。": {
 "mao": "626ddf0f6e638d11.mp3"
 },
+"新聞": {
+"metan": "85723763587615e9.mp3"
+},
+"方": {
+"metan": "3af03d716610859e.mp3"
+},
+"方向": {
+"metan": "1648a5a8ab9a900a.mp3"
+},
+"方法": {
+"metan": "ed203804ab2dd638.mp3"
+},
+"旅": {
+"metan": "b29080ce469e90ea.mp3"
+},
+"旅行": {
+"metan": "9966227bcc3e0823.mp3"
+},
+"族": {
+"metan": "551136b68c17c937.mp3"
+},
 "日": {
 "metan": "3a49e37ae23a6801.mp3"
+},
+"日曜日": {
+"metan": "928dbc0f6e850ef9.mp3"
+},
+"日本": {
+"metan": "c71fe8a614c26b11.mp3"
 },
 "日本に行きたいです": {
 "mao": "1ac89adcbfedb229.mp3"
@@ -3896,8 +5423,14 @@
 "日本へ行くです": {
 "mao": "e14a3b5685a9d3aa.mp3"
 },
+"日本人": {
+"metan": "823410f29417bec6.mp3"
+},
 "日本行くです": {
 "mao": "7e38b8a0aa52da64.mp3"
+},
+"日本語": {
+"metan": "5550bbf2b3d10a9d.mp3"
 },
 "日本語が分からない": {
 "mao": "0c2ffe4423e6644b.mp3"
@@ -3932,6 +5465,21 @@
 "日本語話すです": {
 "mao": "394dae3c2cc850fe.mp3"
 },
+"日記": {
+"metan": "4ea6a2e650a7e309.mp3"
+},
+"早": {
+"metan": "b783e21a012bb752.mp3"
+},
+"早い": {
+"metan": "870c00361a26151e.mp3"
+},
+"明": {
+"metan": "3294a691961f8bbc.mp3"
+},
+"明日": {
+"metan": "2efc6faa1ec53f14.mp3"
+},
 "明日はちょっと…。": {
 "mao": "ceeeecfe3891352d.mp3"
 },
@@ -3950,8 +5498,35 @@
 "明日銀行へ行きます。": {
 "mao": "cc87a39fc4bf9ba3.mp3"
 },
+"易": {
+"metan": "f1b3f401ca0ba7c2.mp3"
+},
+"易しい": {
+"metan": "70ab4bf4edb926cf.mp3"
+},
+"昔": {
+"metan": "d2cb1a0a53d51ef1.mp3"
+},
+"映": {
+"metan": "f2668e70ea416d99.mp3"
+},
+"映画": {
+"metan": "1890447f8110a913.mp3"
+},
 "映画を見ます。": {
 "mao": "9bf2d9c8c9b9e5d0.mp3"
+},
+"春": {
+"metan": "7860e7608504368e.mp3"
+},
+"春休み": {
+"metan": "7174ae52445c7234.mp3"
+},
+"昨": {
+"metan": "7f26d7a8055c26f9.mp3"
+},
+"昨日": {
+"metan": "f77614b7cabc44b5.mp3"
 },
 "昨日は忙しかったです。": {
 "mao": "ad5ffa7d42bc18db.mp3"
@@ -3959,8 +5534,26 @@
 "昨日本を読みました。": {
 "mao": "df0a1ead8bf25fe9.mp3"
 },
+"昼": {
+"metan": "236257c13bb91bb9.mp3"
+},
+"昼ご飯": {
+"metan": "ff924545b32530f2.mp3"
+},
 "時": {
 "metan": "59432b2ed5bcf85e.mp3"
+},
+"時代": {
+"metan": "a4a93ae9c1eb007f.mp3"
+},
+"時刻": {
+"metan": "52568b342f6852e1.mp3"
+},
+"時計": {
+"metan": "71066124fc7ea650.mp3"
+},
+"時間": {
+"metan": "39a8724104a0b431.mp3"
 },
 "時間がありません。": {
 "mao": "9c06a782ffbd9aed.mp3"
@@ -3968,8 +5561,59 @@
 "時間がありませんから、明日話しましょう。": {
 "mao": "9e70a239a50708e9.mp3"
 },
+"晩": {
+"metan": "6bcec377620928e9.mp3"
+},
+"晩ご飯": {
+"metan": "af4cc1a160db4d76.mp3"
+},
+"景": {
+"metan": "ee668bd455a185b2.mp3"
+},
+"景色": {
+"metan": "b500b34fc6522a92.mp3"
+},
+"晴": {
+"metan": "86d0c54b1d34d956.mp3"
+},
+"晴れ": {
+"metan": "80d0934e66f3fdd5.mp3"
+},
+"暗": {
+"metan": "85ca7cab351a98b4.mp3"
+},
+"暗い": {
+"metan": "ccf6e0e33433af2b.mp3"
+},
+"暮": {
+"metan": "c8d1a2c585237fc3.mp3"
+},
+"暮らす": {
+"metan": "34aa7843ed394674.mp3"
+},
+"曜": {
+"metan": "9455156edc05bd33.mp3"
+},
+"曲": {
+"metan": "5b20c1f5c7b3a9af.mp3"
+},
+"更": {
+"metan": "b7c914cc885f467c.mp3"
+},
+"更新": {
+"metan": "46bcb31de7c99896.mp3"
+},
 "書": {
 "metan": "b1a90392ea469171.mp3"
+},
+"最": {
+"metan": "75d83071a7890bf2.mp3"
+},
+"最初": {
+"metan": "6c87e153711dd433.mp3"
+},
+"最後": {
+"metan": "fd58f58cf3f15357.mp3"
 },
 "月": {
 "metan": "11c5f5d8581039e6.mp3"
@@ -3977,11 +5621,41 @@
 "月が綺麗ですね。": {
 "mao": "bfbe7b0125edb0c9.mp3"
 },
+"有": {
+"metan": "b88eebd1acbd4749.mp3"
+},
+"有名": {
+"metan": "343edc2a5ec80fbc.mp3"
+},
+"服": {
+"metan": "fca82b93df22ade9.mp3"
+},
+"望": {
+"metan": "2b06566b4bf6323d.mp3"
+},
+"朝": {
+"metan": "47917536eeae666f.mp3"
+},
 "朝起きて、コーヒーを飲みます。": {
 "mao": "1a750f112b7e257f.mp3"
 },
+"期": {
+"metan": "92fc429f480033dd.mp3"
+},
 "木": {
 "metan": "64d586b2479c722f.mp3"
+},
+"木曜日": {
+"metan": "1e4e3369d197811e.mp3"
+},
+"未": {
+"metan": "7f158da0599de7ee.mp3"
+},
+"未来": {
+"metan": "9567ef877b07932a.mp3"
+},
+"末": {
+"metan": "7903a53b41523f59.mp3"
 },
 "本": {
 "metan": "a97119e87096a199.mp3"
@@ -3991,6 +5665,9 @@
 },
 "本を読む": {
 "mao": "286cfa560119011b.mp3"
+},
+"本当": {
+"metan": "1e583e3b7b2b815c.mp3"
 },
 "本読みます": {
 "mao": "b0c5ee4b7833acba.mp3"
@@ -4004,8 +5681,14 @@
 "机の下に猫がいます。": {
 "mao": "a1361d27bae13d94.mp3"
 },
+"束": {
+"metan": "3f3717a04dcfeb10.mp3"
+},
 "来": {
 "metan": "a3566d21bb77913f.mp3"
+},
+"来年": {
+"metan": "90477e2804f39348.mp3"
 },
 "来年日本に行きます": {
 "mao": "1ad0343fde62c8c7.mp3"
@@ -4028,14 +5711,23 @@
 "来年日本行く": {
 "mao": "8469ad158ca6b991.mp3"
 },
+"来週": {
+"metan": "10dbec7bdc6dde67.mp3"
+},
 "来週は来ない": {
 "mao": "be6c015b90f20cdd.mp3"
 },
 "来週空港に行きます": {
 "mao": "d41e6631a09d5767.mp3"
 },
+"杯": {
+"metan": "409c523cd3285a43.mp3"
+},
 "東": {
 "metan": "cb5ac2c77ce8ab5b.mp3"
+},
+"東京": {
+"metan": "bcbe949afccd20e8.mp3"
 },
 "東京から、一枚おねがいします。": {
 "mao": "6ebc9d6fed22d62c.mp3"
@@ -4067,14 +5759,122 @@
 "東京駅までですね。千三百四十円です。": {
 "nise": "b908540f0af6e5d9.mp3"
 },
+"果": {
+"metan": "c3a9058478ace2e1.mp3"
+},
 "校": {
 "metan": "d02125359719e525.mp3"
+},
+"格": {
+"metan": "0dee4781d9061965.mp3"
+},
+"案内": {
+"metan": "117792530f0bf993.mp3"
+},
+"業": {
+"metan": "f232a1c336fff5db.mp3"
+},
+"楽": {
+"metan": "eb1d2f32a163a080.mp3"
+},
+"構": {
+"metan": "9774640523019e00.mp3"
+},
+"様": {
+"metan": "ee403467996864bf.mp3"
+},
+"権": {
+"metan": "9799a972fefb412a.mp3"
+},
+"権利": {
+"metan": "f876009a78518311.mp3"
+},
+"横": {
+"metan": "0d96c8e31f9c08c8.mp3"
+},
+"機": {
+"metan": "ecec9c954ace0033.mp3"
+},
+"欠": {
+"metan": "1516c7c866957f3f.mp3"
+},
+"欠席": {
+"metan": "f0cba24cd769de41.mp3"
+},
+"次": {
+"metan": "5181b42bdf1804b4.mp3"
+},
+"欲": {
+"metan": "fae4e098881d0c65.mp3"
+},
+"欲しい": {
+"metan": "7b04278ba943abd8.mp3"
+},
+"歌": {
+"metan": "9b39084a85557259.mp3"
+},
+"歌手": {
+"metan": "ada531fc61732d6a.mp3"
+},
+"止": {
+"metan": "e02ad2b4994c0a8b.mp3"
+},
+"正": {
+"metan": "c9d932fc6dd78002.mp3"
+},
+"正しい": {
+"metan": "80b7026619fe3920.mp3"
+},
+"武士": {
+"metan": "efb1a66a238ebf38.mp3"
+},
+"歩": {
+"metan": "a158bddbf941d486.mp3"
+},
+"歩く": {
+"metan": "39bb3659b72731a9.mp3"
+},
+"歯": {
+"metan": "a7595d760458fd91.mp3"
+},
+"歳": {
+"metan": "dc54207ddc4a931c.mp3"
+},
+"死": {
+"metan": "e9fcae8f4edf3809.mp3"
+},
+"死ぬ": {
+"metan": "3cf0efc29f0516c3.mp3"
+},
+"死亡": {
+"metan": "b4bed53834d5709e.mp3"
+},
+"残": {
+"metan": "88fe6764af6e2788.mp3"
+},
+"残念": {
+"metan": "f681319c85fd91dc.mp3"
+},
+"段": {
+"metan": "02cc9ae61ebcb92a.mp3"
+},
+"殺": {
+"metan": "151aa7dd265b822e.mp3"
+},
+"殺人": {
+"metan": "68086a72e427824b.mp3"
 },
 "母": {
 "metan": "4a3751120e5cb201.mp3"
 },
 "母は料理が上手です。": {
 "mao": "26f2c0df9a5d1ccb.mp3"
+},
+"毎": {
+"metan": "ea5032414122a579.mp3"
+},
+"毎日": {
+"metan": "9a1a1bef39c98bc4.mp3"
 },
 "毎日コーヒーを飲みます。": {
 "mao": "d3969272a0df516b.mp3"
@@ -4085,6 +5885,9 @@
 "毎晩、本を読みます。": {
 "mao": "3f9d43e18801419e.mp3"
 },
+"毎朝": {
+"metan": "b7f886881e49eb7b.mp3"
+},
 "毎週買い物する": {
 "mao": "7ecda9df46e38d81.mp3"
 },
@@ -4093,6 +5896,9 @@
 },
 "毎週買い物をする": {
 "mao": "f39cf865d8c201fa.mp3"
+},
+"民": {
+"metan": "761e3b5fe9222804.mp3"
 },
 "気": {
 "metan": "22c18621ed8845fb.mp3"
@@ -4106,11 +5912,143 @@
 "水を飲みます。": {
 "mao": "84051a02e3ad7c67.mp3"
 },
+"水曜日": {
+"metan": "2a87dcd47e71170c.mp3"
+},
+"水道": {
+"metan": "6b4ee0d5662bbd77.mp3"
+},
+"求": {
+"metan": "456810ca65727dbb.mp3"
+},
+"決": {
+"metan": "10f8b7ef34b03807.mp3"
+},
+"決める": {
+"metan": "a66235f1a4723ad3.mp3"
+},
+"治": {
+"metan": "29dab8f6a9ece1b7.mp3"
+},
+"法": {
+"metan": "335df7411ccdf0fd.mp3"
+},
+"注": {
+"metan": "66b8a1f4dae9e06c.mp3"
+},
+"注意": {
+"metan": "6593f6b5078339f5.mp3"
+},
+"泳": {
+"metan": "494032f7337fce38.mp3"
+},
+"泳ぐ": {
+"metan": "d65bc2d9b35f760c.mp3"
+},
+"洋": {
+"metan": "0b0c0d9cbddd9633.mp3"
+},
+"洋服": {
+"metan": "b390f5700578c607.mp3"
+},
+"洗": {
+"metan": "ff4e8a3d3715efbc.mp3"
+},
+"洗う": {
+"metan": "8f65af8478345929.mp3"
+},
+"活": {
+"metan": "4f7b32a7c2da9749.mp3"
+},
+"流": {
+"metan": "a873cc628f5eb035.mp3"
+},
+"流行": {
+"metan": "262bc4a92fb112ee.mp3"
+},
+"浮": {
+"metan": "26efa1f62e689721.mp3"
+},
+"浮く": {
+"metan": "ec26e404520ed176.mp3"
+},
+"海": {
+"metan": "e3b99bb08e552663.mp3"
+},
+"海外": {
+"metan": "2eba01641173ae8c.mp3"
+},
+"消": {
+"metan": "a1341cf1435631eb.mp3"
+},
+"消す": {
+"metan": "e756562dad51a20a.mp3"
+},
+"深": {
+"metan": "b984be142ada6ff0.mp3"
+},
+"深い": {
+"metan": "3fc7c28863557139.mp3"
+},
+"済": {
+"metan": "8af0c501ff32938f.mp3"
+},
+"渡": {
+"metan": "25d34c6527930b17.mp3"
+},
+"渡す": {
+"metan": "8ac832d7b699ed1f.mp3"
+},
+"港": {
+"metan": "c455d9a444be35cb.mp3"
+},
+"満": {
+"metan": "23fd209ef5e4f1e3.mp3"
+},
+"満足": {
+"metan": "f440e7014064a4aa.mp3"
+},
+"準備": {
+"metan": "e7d62daca064a6d7.mp3"
+},
+"演": {
+"metan": "16fd88caa9b3ca0b.mp3"
+},
+"演奏": {
+"metan": "5e9b8d80606fb630.mp3"
+},
+"漢": {
+"metan": "75a1069a6f98fc95.mp3"
+},
+"漢字": {
+"metan": "3b0f0b2befc0c293.mp3"
+},
 "火": {
 "metan": "22859c3b33d23295.mp3"
 },
 "火を消して。": {
 "mao": "9a61a8a48a25092c.mp3"
+},
+"火曜日": {
+"metan": "f8d4f0f1d3c3b4e6.mp3"
+},
+"点": {
+"metan": "1d062378744be550.mp3"
+},
+"点数": {
+"metan": "fa6c1a25535c2755.mp3"
+},
+"然": {
+"metan": "d785fe4b41621e98.mp3"
+},
+"焼き鳥": {
+"metan": "bcd89fc9f0b52881.mp3"
+},
+"煙": {
+"metan": "51c1ebd66060cb73.mp3"
+},
+"熱": {
+"metan": "1d1e454a8ca2bb4f.mp3"
 },
 "父": {
 "metan": "e84e22da392d21ea.mp3"
@@ -4118,11 +6056,101 @@
 "父は会社員です。": {
 "mao": "5d048365c686ebf7.mp3"
 },
+"牛": {
+"metan": "81e9968e645b5140.mp3"
+},
+"牛乳": {
+"metan": "ec297191ea2ae8c5.mp3"
+},
+"牛肉": {
+"metan": "9937dff0be571d1c.mp3"
+},
+"物": {
+"metan": "4c40927a7e5d863e.mp3"
+},
+"特": {
+"metan": "6abe2057b15428ca.mp3"
+},
+"特に": {
+"metan": "b2cbec036bde5a96.mp3"
+},
+"特別": {
+"metan": "3498aeb4b5a60a40.mp3"
+},
+"犬": {
+"metan": "db95cb97c5e466e5.mp3"
+},
+"犯": {
+"metan": "f6daa48973109b8b.mp3"
+},
+"犯人": {
+"metan": "46ad02b07419b987.mp3"
+},
+"犯罪": {
+"metan": "d456cc161bbc841b.mp3"
+},
+"状": {
+"metan": "515dbd889cbdccfb.mp3"
+},
+"状態": {
+"metan": "ae79f4df909d0081.mp3"
+},
+"猫": {
+"metan": "7c58a00d187e8830.mp3"
+},
+"王": {
+"metan": "f715ecdefe552684.mp3"
+},
+"王様": {
+"metan": "4f0516c13f923668.mp3"
+},
+"現": {
+"metan": "3f88d1a90f6c7178.mp3"
+},
+"現在": {
+"metan": "652474aa0e642db5.mp3"
+},
+"球": {
+"metan": "056c37737e063538.mp3"
+},
+"理": {
+"metan": "d41c357ef9383001.mp3"
+},
+"理由": {
+"metan": "01219e96cbddcf88.mp3"
+},
+"理解": {
+"metan": "d4b948def07e42f1.mp3"
+},
 "生": {
 "metan": "c28b8f9db0c858f1.mp3"
 },
 "生ビールを一つください。": {
 "mao": "b0efe104c9dda5ff.mp3"
+},
+"生徒": {
+"metan": "882172dfa2a3fc8f.mp3"
+},
+"生活": {
+"metan": "15b2dab3e1ab0bcb.mp3"
+},
+"生産": {
+"metan": "87493e3edb2de401.mp3"
+},
+"産": {
+"metan": "253b7378004d61cf.mp3"
+},
+"用": {
+"metan": "0ccd82ba948c64f6.mp3"
+},
+"用事": {
+"metan": "ea966615699458ab.mp3"
+},
+"田": {
+"metan": "639a7cf575a51dec.mp3"
+},
+"田んぼ": {
+"metan": "51e1e003e9c2e0fd.mp3"
 },
 "田中さんは会社員です。": {
 "mao": "570a34fc7341b3c2.mp3"
@@ -4133,17 +6161,98 @@
 "田中です。よろしくお願いします。": {
 "mao": "044bd88d987e1846.mp3"
 },
+"由": {
+"metan": "1e6a4331839fbfbd.mp3"
+},
+"申": {
+"metan": "559a46fedc21be2f.mp3"
+},
 "申し訳ありません": {
 "mao": "3075fb031b2e2e69.mp3"
 },
 "申し訳ございません。田中は今、席を外しております。": {
 "mao": "71a6b2bdaae6616d.mp3"
 },
+"申し込む": {
+"metan": "5a580c859481f2ec.mp3"
+},
 "男": {
 "metan": "cc34e98aa7b4e5e9.mp3"
 },
+"男の子": {
+"metan": "c9ad7c477b8715b0.mp3"
+},
+"町": {
+"metan": "e5e3b7edca98a079.mp3"
+},
+"画": {
+"metan": "bfa06379bc3b54b0.mp3"
+},
+"画面": {
+"metan": "dfe4a343d9e41264.mp3"
+},
+"界": {
+"metan": "162cbcaa33a8a824.mp3"
+},
+"留": {
+"metan": "7bead7c3373827a7.mp3"
+},
+"留学": {
+"metan": "c36d951ecf855654.mp3"
+},
+"番": {
+"metan": "049ca864d9e96367.mp3"
+},
+"番号": {
+"metan": "e264fc73bd4e1ab9.mp3"
+},
+"番組": {
+"metan": "dec0fe08700fa15a.mp3"
+},
+"疑": {
+"metan": "5b1555ecd1df4ecd.mp3"
+},
+"疑問": {
+"metan": "d302690c1e731c3b.mp3"
+},
+"疲": {
+"metan": "345434ba812011fe.mp3"
+},
+"疲れる": {
+"metan": "d2b85a3f98288b29.mp3"
+},
+"病": {
+"metan": "13a65e7e07b35d8c.mp3"
+},
+"病気": {
+"metan": "cdd8ac64b141be26.mp3"
+},
+"病院": {
+"metan": "f4b3df092742e6d0.mp3"
+},
+"痛": {
+"metan": "27e2664bcd58726b.mp3"
+},
+"痛い": {
+"metan": "24e40526d6c55125.mp3"
+},
+"発": {
+"metan": "2d81522ce58e2224.mp3"
+},
+"発表": {
+"metan": "da97d3c1443ab981.mp3"
+},
+"登": {
+"metan": "742c244ea670f9d0.mp3"
+},
+"登山": {
+"metan": "c2326108f9a7f69b.mp3"
+},
 "白": {
 "metan": "7215cc4334f6b912.mp3"
+},
+"白い": {
+"metan": "c016c657a3687a68.mp3"
 },
 "白いシャツが好きです。": {
 "mao": "571d0368f962ba5d.mp3"
@@ -4154,17 +6263,122 @@
 "百十円です。あちらにありますよ。": {
 "nise": "29b751170ef823c3.mp3"
 },
+"皆": {
+"metan": "9893998aa918d644.mp3"
+},
+"皆さん": {
+"metan": "85ba74bcbaaf7fa2.mp3"
+},
+"盗": {
+"metan": "d14572ae8df46aff.mp3"
+},
+"盗む": {
+"metan": "57a979fdad05d94c.mp3"
+},
 "目": {
 "metan": "f2eac4486486b3bb.mp3"
 },
 "目が痛いです。": {
 "mao": "81b29e9a28109596.mp3"
 },
+"目的": {
+"metan": "cbd7702348735639.mp3"
+},
+"直": {
+"metan": "67a93f1db665c869.mp3"
+},
+"直す": {
+"metan": "bc136eb913354420.mp3"
+},
+"相": {
+"metan": "9fcf33b902ce0474.mp3"
+},
+"相手": {
+"metan": "43d4d2d795544ab8.mp3"
+},
+"相談": {
+"metan": "afc196686ef1abd4.mp3"
+},
+"真": {
+"metan": "d5ce5264b2cdd9df.mp3"
+},
+"真ん中": {
+"metan": "d24839f6b404b5b4.mp3"
+},
+"眠": {
+"metan": "25c3ac4b261d9e49.mp3"
+},
+"眠い": {
+"metan": "ea404394b241667d.mp3"
+},
+"着": {
+"metan": "c37744fd228ff246.mp3"
+},
+"着る": {
+"metan": "69694faf4bd7d8bf.mp3"
+},
+"知": {
+"metan": "6762f5c86040b82c.mp3"
+},
+"知る": {
+"metan": "76edf3e4cdf7383d.mp3"
+},
+"知識": {
+"metan": "989ed1d408e79dc3.mp3"
+},
+"石": {
+"metan": "4aed97ef72e76141.mp3"
+},
+"研": {
+"metan": "057c85b5e047a673.mp3"
+},
+"研究": {
+"metan": "2b9177ffa48f21f8.mp3"
+},
+"破": {
+"metan": "b6b2146fc6df2574.mp3"
+},
+"破る": {
+"metan": "aeb00bb9fdfb6f0c.mp3"
+},
+"確": {
+"metan": "8237426028a74d98.mp3"
+},
+"確認": {
+"metan": "c9496d2035246fe7.mp3"
+},
 "確認いたします。": {
 "mao": "d8bc58b44f260e46.mp3"
 },
+"示": {
+"metan": "fcbdc270ae3d9a97.mp3"
+},
+"礼": {
+"metan": "9b6a2bb6a43243fe.mp3"
+},
 "社": {
 "metan": "8b1953302b5e6eac.mp3"
+},
+"社長": {
+"metan": "f60498b8d3156f5f.mp3"
+},
+"祖": {
+"metan": "de52f033c0ce1d40.mp3"
+},
+"祖父": {
+"metan": "dbbc7c82b2593f99.mp3"
+},
+"神": {
+"metan": "7ba6d4e97b2bc8b2.mp3"
+},
+"神社": {
+"metan": "04b84d6d2a93beb1.mp3"
+},
+"福": {
+"metan": "4dd96b96dd9aca7d.mp3"
+},
+"私": {
+"metan": "8ec7f420b0d030fc.mp3"
 },
 "私の名前はシルバです。": {
 "mao": "f60a88724a13f19f.mp3"
@@ -4184,11 +6398,50 @@
 "私もブラジル人です。": {
 "mao": "82fd07297a6580a2.mp3"
 },
+"秋": {
+"metan": "2337c1e97675918c.mp3"
+},
+"科": {
+"metan": "aa97f24e00612beb.mp3"
+},
+"科学": {
+"metan": "61345dcda19fa783.mp3"
+},
+"程": {
+"metan": "3e1c988d1fe79ccb.mp3"
+},
+"程度": {
+"metan": "49711bc16e7df7c7.mp3"
+},
+"種": {
+"metan": "1bd9f48c1d275eaa.mp3"
+},
+"種類": {
+"metan": "5158ccfdfc6727c8.mp3"
+},
+"積": {
+"metan": "2f30cfe9aa9a6a6a.mp3"
+},
+"究": {
+"metan": "0fc8f3a62e77fa89.mp3"
+},
 "空": {
 "metan": "f6cb7892721d0203.mp3"
 },
 "空が青いです。": {
 "mao": "633d09b14bb02018.mp3"
+},
+"空港": {
+"metan": "598a2cd851b45a70.mp3"
+},
+"突": {
+"metan": "ea3bb31d54fad5b7.mp3"
+},
+"突然": {
+"metan": "16a6a44372e85d50.mp3"
+},
+"窓": {
+"metan": "6ab26663c78a6242.mp3"
 },
 "立": {
 "metan": "bc10883d83a92811.mp3"
@@ -4196,11 +6449,149 @@
 "立ってください。": {
 "mao": "2e68a43026eccdc7.mp3"
 },
+"立つ": {
+"metan": "d7ee9945292c9c61.mp3"
+},
+"笑": {
+"metan": "b96508b09d625bfc.mp3"
+},
+"笑う": {
+"metan": "004382a4bc6ad1c7.mp3"
+},
+"笑顔": {
+"metan": "de05ece15fbe8d37.mp3"
+},
+"等": {
+"metan": "f6ffb222705440be.mp3"
+},
+"答": {
+"metan": "31467b1deef6c5bc.mp3"
+},
+"答え": {
+"metan": "7ff8033d5039751f.mp3"
+},
+"箱": {
+"metan": "7cea98ea7844d4aa.mp3"
+},
+"簡単": {
+"metan": "2227f0bee4b2f136.mp3"
+},
+"米": {
+"metan": "1e33e894a8872cef.mp3"
+},
+"精": {
+"metan": "d941d7dba96a20be.mp3"
+},
+"精神": {
+"metan": "a2ef805709c2558e.mp3"
+},
+"約": {
+"metan": "d394e956f21e8ccd.mp3"
+},
+"約束": {
+"metan": "69aeec722539ed9c.mp3"
+},
+"紙": {
+"metan": "e21a3388147361c7.mp3"
+},
+"終": {
+"metan": "2b1ba3b3eacaefb0.mp3"
+},
+"終わる": {
+"metan": "59f9cfdd3dbe4657.mp3"
+},
+"組": {
+"metan": "4811debe1129705c.mp3"
+},
+"経": {
+"metan": "8dea01de8f23f53b.mp3"
+},
+"経済": {
+"metan": "564359ecde1fce17.mp3"
+},
+"経験": {
+"metan": "0b4e7468173a00af.mp3"
+},
+"結婚": {
+"metan": "35da468eae7e6574.mp3"
+},
+"結婚式": {
+"metan": "1b08350468dbe814.mp3"
+},
+"結果": {
+"metan": "f22dec5a3a03c8b7.mp3"
+},
+"結構": {
+"metan": "ae22a2e1bd5aa847.mp3"
+},
 "結構です": {
 "mao": "5cfd977ce07c30db.mp3"
 },
+"給": {
+"metan": "dc5ab8d2320c04ab.mp3"
+},
+"給与": {
+"metan": "ca0ab97df158256a.mp3"
+},
+"給料": {
+"metan": "188cc37519b6130e.mp3"
+},
+"絵": {
+"metan": "4aebfb3c3873156c.mp3"
+},
+"絶": {
+"metan": "ebe3d053f17f4572.mp3"
+},
+"絶対": {
+"metan": "ac780bb0d2cf7793.mp3"
+},
+"続": {
+"metan": "54d745f90b17ed32.mp3"
+},
+"続く": {
+"metan": "69a54f12442d093c.mp3"
+},
 "綺麗な花ですね。": {
 "mao": "9af750e7771c31d6.mp3"
+},
+"緒": {
+"metan": "a932a1774899ee15.mp3"
+},
+"練習": {
+"metan": "fa549ca7f4bb3450.mp3"
+},
+"罪": {
+"metan": "dce22729bd03ab8b.mp3"
+},
+"置": {
+"metan": "f9fb8def5f4b59cb.mp3"
+},
+"置く": {
+"metan": "1bf70c66726df827.mp3"
+},
+"美": {
+"metan": "fb76ead81236903b.mp3"
+},
+"美しい": {
+"metan": "b3cc7af2e2404646.mp3"
+},
+"習": {
+"metan": "aa3ed947407c06c1.mp3"
+},
+"老": {
+"metan": "480a952ddd6602b2.mp3"
+},
+"老人": {
+"metan": "80cc583dab9be695.mp3"
+},
+"考": {
+"metan": "91028a3fb1eeb51b.mp3"
+},
+"考える": {
+"metan": "17ed11a3eb960f33.mp3"
+},
+"者": {
+"metan": "fb8148d25b61166e.mp3"
 },
 "耳": {
 "metan": "9e42991eacc1bccd.mp3"
@@ -4208,11 +6599,116 @@
 "耳が遠いです。": {
 "mao": "9e70e4ce945a8d98.mp3"
 },
+"聞": {
+"metan": "1aacd1f81d384f05.mp3"
+},
+"職": {
+"metan": "d92102922d2626dd.mp3"
+},
+"職業": {
+"metan": "169ee9f9808437bb.mp3"
+},
+"肉": {
+"metan": "e16ea53489836cc8.mp3"
+},
 "肉を食べません。": {
 "mao": "36727965a255e42c.mp3"
 },
+"育": {
+"metan": "76eed12bf6765c56.mp3"
+},
+"背": {
+"metan": "5f350409f9f64607.mp3"
+},
+"背中": {
+"metan": "ddc10798ad6bea0e.mp3"
+},
+"能": {
+"metan": "4f05b96212cde558.mp3"
+},
+"腹": {
+"metan": "f3697b9e006d95eb.mp3"
+},
+"自": {
+"metan": "aba02576b36a1c20.mp3"
+},
+"自分": {
+"metan": "c89a109bb4d36138.mp3"
+},
+"自動車": {
+"metan": "74eb2829ed39b37c.mp3"
+},
+"自宅": {
+"metan": "626ab3efe67ea892.mp3"
+},
+"自然": {
+"metan": "edc72589755ef3ae.mp3"
+},
+"自転車": {
+"metan": "be9f066ba297e8c0.mp3"
+},
+"舞": {
+"metan": "ee17184d6f7b2d81.mp3"
+},
+"舞台": {
+"metan": "cad8bf599b0dc737.mp3"
+},
+"船": {
+"metan": "ff29d62882b8281c.mp3"
+},
+"良": {
+"metan": "0a78a9734d2170f1.mp3"
+},
+"良い": {
+"metan": "c5aafdf1f4783a6d.mp3"
+},
+"色": {
+"metan": "7f08bee652f08b73.mp3"
+},
 "花": {
 "metan": "749d531d3302ff4a.mp3"
+},
+"花火": {
+"metan": "a01b4cb8c4916c65.mp3"
+},
+"若": {
+"metan": "1a2495da9409f579.mp3"
+},
+"若い": {
+"metan": "b7f8514bb90f480d.mp3"
+},
+"苦": {
+"metan": "de23f519f5c6c9ad.mp3"
+},
+"苦い": {
+"metan": "1ac8564b0c4d33d0.mp3"
+},
+"苦労": {
+"metan": "9bc14a723f847875.mp3"
+},
+"英": {
+"metan": "7ddd870b32b981f1.mp3"
+},
+"英語": {
+"metan": "b7ac8170325169ee.mp3"
+},
+"茶": {
+"metan": "1e057bf37f7d889f.mp3"
+},
+"草": {
+"metan": "db53b110d329b95c.mp3"
+},
+"落": {
+"metan": "44dac7537288a6fb.mp3"
+},
+"落ちる": {
+"metan": "6f1d8225413ef052.mp3"
+},
+"葉": {
+"metan": "1fefc0aa11673451.mp3"
+},
+"薬": {
+"metan": "738a42cf5894b07b.mp3"
 },
 "行": {
 "metan": "738004fdc88f57f9.mp3"
@@ -4222,6 +6718,12 @@
 },
 "行ってらっしゃい": {
 "mao": "e1c577865b0833ce.mp3"
+},
+"術": {
+"metan": "d135840af1bf4b1c.mp3"
+},
+"表": {
+"metan": "1abac1a3e395ef4b.mp3"
 },
 "袋に入れてください": {
 "mao": "fe9916b92cb2c5e9.mp3"
@@ -4242,26 +6744,230 @@
 "袋入れるください": {
 "mao": "f6d154c4dfd327a8.mp3"
 },
+"被害": {
+"metan": "73bb1703a0de0c7d.mp3"
+},
 "西": {
 "metan": "685b43f3f6b56300.mp3"
+},
+"西口": {
+"metan": "18bb0d2e36eb11b4.mp3"
 },
 "西口で会いましょう。": {
 "mao": "589f188e75e95bc9.mp3"
 },
+"要": {
+"metan": "3aef02eea9cf9410.mp3"
+},
+"要求": {
+"metan": "77415ac00c60d465.mp3"
+},
 "見": {
 "metan": "c9c8944d3366cabc.mp3"
+},
+"見る": {
+"metan": "cbae2a79fab4c351.mp3"
+},
+"規": {
+"metan": "2397f6d3f8d481c4.mp3"
+},
+"規則": {
+"metan": "841d80a6204448f7.mp3"
+},
+"覚": {
+"metan": "78e5ad58e37a16a1.mp3"
+},
+"覚える": {
+"metan": "964ce05b9e49f43e.mp3"
+},
+"親": {
+"metan": "3128ee1fceb73399.mp3"
+},
+"観": {
+"metan": "dc819cdeaeaf3bed.mp3"
+},
+"観光": {
+"metan": "78601c3742b6b725.mp3"
+},
+"解": {
+"metan": "9dc2a06d42becf6b.mp3"
+},
+"言": {
+"metan": "b52f881ae8c8f71d.mp3"
+},
+"言葉": {
+"metan": "45841dac4b1f4dba.mp3"
+},
+"計": {
+"metan": "e2163485a4cdce67.mp3"
+},
+"記": {
+"metan": "ec45cf153a396ce1.mp3"
+},
+"記念": {
+"metan": "9871f321d2b9bddc.mp3"
+},
+"訪": {
+"metan": "1aeafbbab612790c.mp3"
+},
+"訪問": {
+"metan": "bd43d5ccc82e9460.mp3"
+},
+"許": {
+"metan": "738a1567ea5363ee.mp3"
+},
+"許す": {
+"metan": "2844ff7981992771.mp3"
+},
+"試": {
+"metan": "1c40dd96c7abada8.mp3"
+},
+"試合": {
+"metan": "01d1cb20fa1f1503.mp3"
+},
+"試験": {
+"metan": "005fdce4cdf90e45.mp3"
 },
 "話": {
 "metan": "78a5ab00285a6011.mp3"
 },
+"認": {
+"metan": "1a58342b05bf40c7.mp3"
+},
 "語": {
 "metan": "532186f5f17f66ba.mp3"
+},
+"誤": {
+"metan": "615acb1d331c8545.mp3"
+},
+"誤解": {
+"metan": "0ca0ea6ea0bded1c.mp3"
+},
+"説": {
+"metan": "9917b0f69946e845.mp3"
+},
+"説明": {
+"metan": "ff42cd0d539adf52.mp3"
 },
 "読": {
 "metan": "bf1d078c9f0dfb43.mp3"
 },
+"読書": {
+"metan": "a40b2dd4b4247a69.mp3"
+},
+"調": {
+"metan": "4d044ea8c4d2c64b.mp3"
+},
+"調べる": {
+"metan": "7fe2bcd218350f10.mp3"
+},
+"談": {
+"metan": "eec157c3b1fc9667.mp3"
+},
+"論": {
+"metan": "4a614d79beaa6a07.mp3"
+},
+"識": {
+"metan": "55c26d44693c8bc5.mp3"
+},
+"警": {
+"metan": "3a40d5531407a97d.mp3"
+},
+"警官": {
+"metan": "ac6008b12a183eeb.mp3"
+},
+"警察": {
+"metan": "b61e7049e11627bd.mp3"
+},
+"議": {
+"metan": "8238f5690703e0ad.mp3"
+},
+"議論": {
+"metan": "5dd8ecb44e2dfc4b.mp3"
+},
+"豊富": {
+"metan": "527c87a40888326e.mp3"
+},
+"負": {
+"metan": "8ceb05656d3d5e27.mp3"
+},
+"負ける": {
+"metan": "04444057e3aa3f4e.mp3"
+},
+"財": {
+"metan": "9ce0ce9197554d13.mp3"
+},
+"財布": {
+"metan": "5a77a1e2f360cd12.mp3"
+},
+"貧": {
+"metan": "279327ac5e2e7005.mp3"
+},
+"貧乏": {
+"metan": "339b3aee6601a6a9.mp3"
+},
+"責": {
+"metan": "976ff9ad4339603d.mp3"
+},
+"責任": {
+"metan": "0c89d8550bac6661.mp3"
+},
 "買": {
 "metan": "b571f191d738b6ec.mp3"
+},
+"買い物": {
+"metan": "5ea6665881bd0975.mp3"
+},
+"貸": {
+"metan": "f2e3f71688a358d0.mp3"
+},
+"貸す": {
+"metan": "bb45e8e471acc2cf.mp3"
+},
+"費": {
+"metan": "101cc39c29ee4699.mp3"
+},
+"費用": {
+"metan": "ebf6013bf767fb90.mp3"
+},
+"資": {
+"metan": "b92a628003228efa.mp3"
+},
+"資料": {
+"metan": "a64aeb272a0ef295.mp3"
+},
+"賛": {
+"metan": "4d94e15dfcc8b941.mp3"
+},
+"賛成": {
+"metan": "d4008adfbef5524d.mp3"
+},
+"質": {
+"metan": "6ce1cf023322e882.mp3"
+},
+"質問": {
+"metan": "dad6831d7098c612.mp3"
+},
+"赤": {
+"metan": "a5b302a3e00c2355.mp3"
+},
+"赤い": {
+"metan": "605d4d11c8e8475d.mp3"
+},
+"走": {
+"metan": "042b23ee92f4a451.mp3"
+},
+"走る": {
+"metan": "d475906ba5de85a4.mp3"
+},
+"起": {
+"metan": "42b9116070c6d095.mp3"
+},
+"起きる": {
+"metan": "802b70dbc71cb983.mp3"
+},
+"越": {
+"metan": "3bf305e1022062c0.mp3"
 },
 "足": {
 "metan": "65acee57bb2b0576.mp3"
@@ -4269,14 +6975,107 @@
 "足が疲れました。": {
 "mao": "6ebd8efa8907edcf.mp3"
 },
+"足りる": {
+"metan": "3262e24456451a25.mp3"
+},
+"路": {
+"metan": "4736e9493f0910f5.mp3"
+},
 "車": {
 "metan": "b148d34c197c058c.mp3"
 },
 "車で会社へ行きます。": {
 "mao": "25a2b68e1179875d.mp3"
 },
+"転": {
+"metan": "2757f082bf107e56.mp3"
+},
+"辞": {
+"metan": "a1e7bf643419daea.mp3"
+},
+"辞書": {
+"metan": "544f7a025dd5e097.mp3"
+},
+"込": {
+"metan": "cd89222c96e71252.mp3"
+},
+"込む": {
+"metan": "e3389c0d8144f690.mp3"
+},
+"迎": {
+"metan": "e65719fc479f2f73.mp3"
+},
+"迎える": {
+"metan": "094108a28a661044.mp3"
+},
+"近": {
+"metan": "f2bc3bcc672491a9.mp3"
+},
+"近い": {
+"metan": "bb6a0be74490f94c.mp3"
+},
+"返": {
+"metan": "961dc40b6a603749.mp3"
+},
+"返す": {
+"metan": "2c0dea71215fc729.mp3"
+},
+"迷": {
+"metan": "bd2d5571adba4911.mp3"
+},
+"迷う": {
+"metan": "4bf96dd573324819.mp3"
+},
+"追": {
+"metan": "906a11a8d3be3d70.mp3"
+},
+"追う": {
+"metan": "b60c888fc2bea110.mp3"
+},
+"退": {
+"metan": "6427ad6c94cce6e6.mp3"
+},
+"送": {
+"metan": "f54ae82dfebd0ad4.mp3"
+},
+"送る": {
+"metan": "6e5afff5dd0e86cd.mp3"
+},
+"逃": {
+"metan": "930dcc923008b79f.mp3"
+},
+"逃げる": {
+"metan": "5d764d63899c731e.mp3"
+},
+"途": {
+"metan": "07746c246fc7b233.mp3"
+},
+"途中": {
+"metan": "989d52131bf228ed.mp3"
+},
+"通": {
+"metan": "98ede91848397f85.mp3"
+},
+"通勤": {
+"metan": "70b963689f7e447c.mp3"
+},
+"速": {
+"metan": "8f644b5cfffbfdc9.mp3"
+},
+"速い": {
+"metan": "6e25ad83e4962be3.mp3"
+},
+"連": {
+"metan": "107644cd61467910.mp3"
+},
+"連絡": {
+"metan": "f3bd7c4114af06fc.mp3"
+},
 "週": {
 "metan": "8a88c778e59343bd.mp3"
+},
+"週末": {
+"metan": "f384f2bf8d245299.mp3"
 },
 "週末は休まない": {
 "mao": "3be7ddf8bb1e51c9.mp3"
@@ -4326,17 +7125,128 @@
 "週末銀行行く": {
 "mao": "a1fab9fb7604190f.mp3"
 },
+"進": {
+"metan": "77b9c5385124e630.mp3"
+},
+"進む": {
+"metan": "5a3089b7895ed777.mp3"
+},
+"遅": {
+"metan": "7bec77de453660ee.mp3"
+},
+"遅い": {
+"metan": "3aeff7c9a8aaf4f7.mp3"
+},
+"遊": {
+"metan": "2b8e53a36f1fd4cf.mp3"
+},
+"遊ぶ": {
+"metan": "3b98e1a10b9df268.mp3"
+},
+"運": {
+"metan": "2b0f39220d439bbe.mp3"
+},
+"運動": {
+"metan": "4ed2c18305e3fe6a.mp3"
+},
+"運転": {
+"metan": "9ca50114dce30359.mp3"
+},
+"過": {
+"metan": "0f31153014ec98e4.mp3"
+},
+"過去": {
+"metan": "ec436737a335b374.mp3"
+},
 "道": {
 "metan": "a20cf4999c66484d.mp3"
 },
 "道に迷いました。": {
 "mao": "928740251a71eec6.mp3"
 },
+"道具": {
+"metan": "c11272da14e8e5ed.mp3"
+},
+"道路": {
+"metan": "ead1798e036b8bad.mp3"
+},
+"達": {
+"metan": "8fabb3cdf001c6d9.mp3"
+},
+"違": {
+"metan": "7d385306230e21de.mp3"
+},
+"違う": {
+"metan": "2a468274bb67830c.mp3"
+},
+"遠": {
+"metan": "708b9aa5f81a6e3d.mp3"
+},
+"遠い": {
+"metan": "31f60721756673d7.mp3"
+},
+"適": {
+"metan": "dc72bbc4aeaf069d.mp3"
+},
+"適当": {
+"metan": "a01d48b28679ebd2.mp3"
+},
+"選": {
+"metan": "946f1cecbbefb649.mp3"
+},
+"選ぶ": {
+"metan": "250a1f04c20bcc37.mp3"
+},
+"部": {
+"metan": "7038a636d5d9e865.mp3"
+},
+"部屋": {
+"metan": "05453182773a078c.mp3"
+},
 "部長はいらっしゃいますか。": {
 "mao": "c29dc0ea4ffbdbe9.mp3"
 },
+"郵便局": {
+"metan": "d13beb3734924cfc.mp3"
+},
+"都": {
+"metan": "9948a9c6d0b36128.mp3"
+},
+"都合": {
+"metan": "d4b681b1cf12c860.mp3"
+},
+"配": {
+"metan": "1a26681278eb76ee.mp3"
+},
+"酒": {
+"metan": "d82c5b08e5bf23f0.mp3"
+},
+"重": {
+"metan": "567fd4d93c768203.mp3"
+},
+"重い": {
+"metan": "48e9f45c52cf24ae.mp3"
+},
+"野": {
+"metan": "65523a47766c560c.mp3"
+},
+"野球": {
+"metan": "989223c3e8a19770.mp3"
+},
+"野菜": {
+"metan": "0e107cb0c33549f6.mp3"
+},
 "金": {
 "metan": "34a8a06ec9db7506.mp3"
+},
+"金魚": {
+"metan": "97330409972555fa.mp3"
+},
+"銀": {
+"metan": "39adb254a8c3854e.mp3"
+},
+"銀行": {
+"metan": "70b25f57f2d71b8a.mp3"
 },
 "銀行で働いています。": {
 "mao": "2d8f834befd3740f.mp3"
@@ -4347,8 +7257,71 @@
 "長い間、待っていました。": {
 "mao": "435b267e15ce8140.mp3"
 },
+"閉": {
+"metan": "2aa10645481852b9.mp3"
+},
+"閉める": {
+"metan": "a337e284197230e6.mp3"
+},
+"開": {
+"metan": "58d853e0de50c85c.mp3"
+},
+"開ける": {
+"metan": "54f7e921ce475e38.mp3"
+},
 "間": {
 "metan": "0f40b45b82e7bb73.mp3"
+},
+"関": {
+"metan": "2deb02fe441ee6df.mp3"
+},
+"関係": {
+"metan": "dea2bdac0374e60f.mp3"
+},
+"降": {
+"metan": "f6c9ab8f7d29a96d.mp3"
+},
+"降りる": {
+"metan": "1a60851dfa20e0cc.mp3"
+},
+"限": {
+"metan": "99df397076a8f28f.mp3"
+},
+"院": {
+"metan": "131689b875356564.mp3"
+},
+"除": {
+"metan": "01b07a351400da1e.mp3"
+},
+"険": {
+"metan": "c1c018fe6faf3a71.mp3"
+},
+"陽": {
+"metan": "568b48503a4816e0.mp3"
+},
+"階段": {
+"metan": "d0be1c42061451ee.mp3"
+},
+"際": {
+"metan": "04b143ff318f4be3.mp3"
+},
+"集": {
+"metan": "b44a0cc41faa4714.mp3"
+},
+"集める": {
+"metan": "2266b3a7c04f48b5.mp3"
+},
+"雑": {
+"metan": "4784b5ee90b45e1f.mp3"
+},
+"雑誌": {
+"metan": "f8a520bf734bb5ef.mp3"
+},
+"難": {
+"metan": "7fd0e67f1cc5fcda.mp3"
+},
+"難しい": {
+"metan": "1290479416b0bd42.mp3"
 },
 "雨": {
 "metan": "92c83ed1da9b7751.mp3"
@@ -4359,11 +7332,20 @@
 "雨ですから、タクシーで行きます。": {
 "mao": "28a1a7bceac69699.mp3"
 },
+"雪": {
+"metan": "d3fc1a63b75e2138.mp3"
+},
 "電": {
 "metan": "00261e7f4b14e056.mp3"
 },
 "電気を消してください。": {
 "mao": "ccc35f7a652e481d.mp3"
+},
+"電話": {
+"metan": "38f3619756674013.mp3"
+},
+"電車": {
+"metan": "a05f4c41fd388fcc.mp3"
 },
 "電車で会社に行きます。": {
 "mao": "1a5f783bf957c26a.mp3"
@@ -4371,17 +7353,110 @@
 "電車に間に合いました。": {
 "mao": "2a32539186bbe1e6.mp3"
 },
+"青": {
+"metan": "72e87fa0a61920fe.mp3"
+},
+"青い": {
+"metan": "b190c830ebfd28e8.mp3"
+},
+"静": {
+"metan": "59ccf9489c0fe463.mp3"
+},
+"静か": {
+"metan": "6bb3f2e9c8dc9ab7.mp3"
+},
 "静かな部屋です。": {
 "mao": "9fe45227b261fb10.mp3"
+},
+"非": {
+"metan": "cb1a04475877b745.mp3"
+},
+"非常": {
+"metan": "61f6d071aab0126b.mp3"
+},
+"非常口": {
+"metan": "6f47fb4982d89321.mp3"
+},
+"面": {
+"metan": "148b7d659e2c248d.mp3"
+},
+"面積": {
+"metan": "86c81c3d7c713314.mp3"
+},
+"靴": {
+"metan": "0513cc745babd8cd.mp3"
+},
+"音": {
+"metan": "5111942e56526e86.mp3"
+},
+"音楽": {
+"metan": "665df9ea94637c1a.mp3"
+},
+"頂": {
+"metan": "684e41dc88f2cf6b.mp3"
+},
+"頂上": {
+"metan": "a22b9930ded38368.mp3"
+},
+"頭": {
+"metan": "fa887e7f5486c387.mp3"
+},
+"頼": {
+"metan": "8eb57edcf86623a0.mp3"
+},
+"頼む": {
+"metan": "8d6d63b18165c8ce.mp3"
+},
+"題": {
+"metan": "b030bdcf1a281a35.mp3"
+},
+"顔": {
+"metan": "4ff89709dcbcf1e3.mp3"
+},
+"願": {
+"metan": "f34ecff83e0fcd1b.mp3"
+},
+"類": {
+"metan": "bb75349699c4cc38.mp3"
+},
+"風": {
+"metan": "9c5ffe15bc1a48fc.mp3"
+},
+"飛": {
+"metan": "1fa8d0edbf8550cf.mp3"
+},
+"飛行機": {
+"metan": "0de7963923ebb40b.mp3"
 },
 "食": {
 "metan": "d2d2b2914ec5a825.mp3"
 },
+"食べる": {
+"metan": "aa841af60f068b42.mp3"
+},
+"食堂": {
+"metan": "1932ccc1e74d2e3d.mp3"
+},
+"飯": {
+"metan": "e7b69520f8f8349a.mp3"
+},
 "飲": {
 "metan": "9357ba5a0aa69578.mp3"
 },
+"飲み物": {
+"metan": "f9abce96f694ed11.mp3"
+},
 "飲み物を買います": {
 "mao": "add90132a1e2b65b.mp3"
+},
+"館": {
+"metan": "e2c54a23f044a088.mp3"
+},
+"首": {
+"metan": "4bc632a8d212e248.mp3"
+},
+"馬": {
+"metan": "dff6bdb34d30c635.mp3"
 },
 "駅": {
 "metan": "91faf125b0e55afd.mp3"
@@ -4455,8 +7530,38 @@
 "駅前に銀行があります": {
 "mao": "55ef06f8623cef1e.mp3"
 },
+"駅員": {
+"metan": "5dd081221706087c.mp3"
+},
+"験": {
+"metan": "4cda0f377a0ea379.mp3"
+},
 "高": {
 "metan": "5da9c73001f0bea6.mp3"
+},
+"高校": {
+"metan": "79b347bbbcc26011.mp3"
+},
+"髪": {
+"metan": "5e4731553e0af0db.mp3"
+},
+"魚": {
+"metan": "dd88e6c364384774.mp3"
+},
+"鳥": {
+"metan": "e8c0cf57776109e0.mp3"
+},
+"鳴": {
+"metan": "d3760ea8918ad209.mp3"
+},
+"鳴く": {
+"metan": "039564e76366b88c.mp3"
+},
+"黒": {
+"metan": "9a89fd8f339971cd.mp3"
+},
+"黒い": {
+"metan": "0a38d3ee5683b332.mp3"
 }
 }
 }

@@ -15,6 +15,7 @@ export const NOMES_CENAS = [
   'kanabeat-dotonbori',
   'kotodama-inari',
   'kumitate-gion',
+  'pecas-ryoanji',
   'aventura-narita',
   'aventura-shinjuku',
   'aventura-konbini',

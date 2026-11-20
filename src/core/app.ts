@@ -5,13 +5,14 @@ import { ensureConversaSave, type ConversaSave } from '../games/conversa/engine'
 import { ensureGramaticaSave, type GramaticaSave } from '../games/gramatica/engine';
 import { ensureKanaBeatSave, type KanaBeatSave } from '../games/kanabeat/engine';
 import { ensureKanjimonSave, type KanjimonSave } from '../games/kanjimon/engine';
+import { ensurePecasSave, type PecasSave } from '../games/pecas/engine';
 import { ensureRoguelikeSave, type RoguelikeSave } from '../games/roguelike/engine';
 import { ensureJornadaSave, registrarMissao, type JornadaSave } from '../jornada/etapas';
 import { foco } from './foco';
 import { markPlayed } from './progress';
 import { importSave, loadSave, writeSave, type SaveData } from './save';
 
-export type Screen = 'hub' | 'kanjimon' | 'kanjidex' | 'booster' | 'kanabeat' | 'roguelike' | 'aventura' | 'conversa' | 'gramatica' | 'jornada' | 'licao';
+export type Screen = 'hub' | 'kanjimon' | 'kanjidex' | 'booster' | 'kanabeat' | 'roguelike' | 'aventura' | 'conversa' | 'gramatica' | 'jornada' | 'licao' | 'pecas';
 
 export const app: { data: SaveData } = { data: loadSave(localStorage, Date.now()) };
 
@@ -77,4 +78,8 @@ export function gramaticaSave(): GramaticaSave {
 
 export function jornadaSave(): JornadaSave {
   return ensureJornadaSave(app.data.games);
+}
+
+export function pecasSave(): PecasSave {
+  return ensurePecasSave(app.data.games);
 }

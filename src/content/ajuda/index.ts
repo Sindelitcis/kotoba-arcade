@@ -8,6 +8,7 @@ import { KANABEAT } from './kanabeat';
 import { BOOSTER, KANJIDEX, KANJIMON } from './kanjimon';
 import { KOTODAMA } from './kotodama';
 import { KUMITATE } from './kumitate';
+import { PECAS } from './pecas';
 import type { Ajuda } from './tipos';
 
 export type { Ajuda, Item, LinhaTecla, Pergunta } from './tipos';
@@ -26,6 +27,7 @@ export const AJUDA: Record<TelaAjuda, Ajuda> = {
   gramatica: KUMITATE,
   jornada: JORNADA,
   licao: LICAO,
+  pecas: PECAS,
 };
 
 /** A tela usa a F1 para outra coisa (a Conversa traduz com ela). Ali a F1 não abre a ajuda. */

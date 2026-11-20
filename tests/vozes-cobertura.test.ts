@@ -52,6 +52,8 @@ const CHAMADAS: Record<string, string[]> = {
   'src/games/kanjimon/Booster.tsx': ['speakKanji(card.kanji.kanji, card.kanji.reading)'], // kanji sozinho
   'src/games/kanjimon/Dex.tsx': ['speakKanji(open.kanji, open.reading)', 'speakWord(w.kana)', 'speak(s.jp)'],
   'src/games/kanjimon/KanjiMonGame.tsx': ['speak(asked.speak, VOZ_PALAVRA, asked.speakKana)'], // kanji sozinho ou palavra
+  // Kanji em peças: kanji sozinho e palavra de exemplo, os dois de KANJI_PECAS (scripts/falas.ts, origem pecas/).
+  'src/games/pecas/PecasGame.tsx': ['speak(p.jp, VOZ_PALAVRA, p.kana)', 'speakKanji(k.kanji, leituraOficial(k))'],
   'src/games/roguelike/RoguelikeGame.tsx': ['speak(q.speak, VOZ_PALAVRA, q.speakKana)'],
   'src/hub/Hub.tsx': ['speak(sentence.jp)'],
   'src/jornada/LicaoTela.tsx': ["speak(f.texto, f.voz === 'palavra' ? VOZ_PALAVRA : VOZ_PADRAO, f.kana)"], // quadros das lições: jornada() em scripts/falas.ts
