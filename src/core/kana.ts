@@ -39,11 +39,24 @@ const ALIASES: [string, string][] = [
   ['jya', 'じゃ'], ['jyu', 'じゅ'], ['jyo', 'じょ'],
 ];
 
+/** Sons de palavras estrangeiras (ファイル, パーティー, シェフ). Ficam fora da tabela de kana do Kana Beat. */
+const ESTRANGEIRAS: [string, string][] = [
+  ['fa', 'ふぁ'], ['fi', 'ふぃ'], ['fe', 'ふぇ'], ['fo', 'ふぉ'],
+  ['ti', 'てぃ'], ['di', 'でぃ'], ['tu', 'とぅ'], ['du', 'どぅ'],
+  ['she', 'しぇ'], ['je', 'じぇ'], ['che', 'ちぇ'],
+  ['wi', 'うぃ'], ['we', 'うぇ'], ['wo', 'うぉ'],
+  ['va', 'ゔぁ'], ['vi', 'ゔぃ'], ['vu', 'ゔ'], ['ve', 'ゔぇ'], ['vo', 'ゔぉ'],
+];
+/** ti, di, tu, du e wo digitados continuam sendo ち, ぢ, つ, づ e を. */
+const SO_LEITURA = new Set(['ti', 'di', 'tu', 'du', 'wo']);
+
 const TO_KANA = new Map<string, string>();
 for (const [r, k] of ALIASES) if (r !== 'o') TO_KANA.set(r, k);
+for (const [r, k] of ESTRANGEIRAS) if (!SO_LEITURA.has(r)) TO_KANA.set(r, k);
 for (const [r, k] of ROWS) TO_KANA.set(r, k);
 
 const TO_ROMAJI = new Map<string, string>();
+for (const [r, k] of ESTRANGEIRAS) TO_ROMAJI.set(k, r);
 for (const [r, k] of ROWS) TO_ROMAJI.set(k, r);
 TO_ROMAJI.set('ぢ', 'ji');
 TO_ROMAJI.set('づ', 'zu');
@@ -213,7 +226,7 @@ export function normalizePt(s: string): string {
 /* ───────── Digitação letra a letra (jogos de ritmo) ───────── */
 
 const SPELLINGS = new Map<string, string[]>();
-for (const [r, k] of [...ROWS, ...ALIASES]) {
+for (const [r, k] of [...ROWS, ...ALIASES, ...ESTRANGEIRAS]) {
   if (r === 'o' && k === 'を') continue;
   const list = SPELLINGS.get(k) ?? [];
   if (!list.includes(r)) list.push(r);

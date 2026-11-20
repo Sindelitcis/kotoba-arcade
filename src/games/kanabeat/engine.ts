@@ -5,6 +5,8 @@
  * a música sempre termina, e a nota final diz como foi.
  */
 import { cardKey, KANA, WORDS } from '../../content';
+import { acharPalavra } from '../../content/escola';
+import { foco } from '../../core/foco';
 import { kanaToRomaji, matchTyping } from '../../core/kana';
 import { pickNext } from '../../core/picker';
 import type { Rng } from '../../core/rng';
@@ -119,7 +121,10 @@ interface Candidate {
 function candidates(mode: Mode): Candidate[] {
   if (mode === 'hiragana') return KANA.map((k) => ({ card: cardKey(k.id, 'reading'), text: k.hira, kana: k.hira }));
   if (mode === 'katakana') return KANA.map((k) => ({ card: cardKey(`ak:${k.kata}`, 'reading'), text: k.kata, kana: k.kata }));
-  return WORDS.map((w) => ({ card: cardKey(w.id, 'reading'), text: w.jp, kana: w.kana, pt: w.pt }));
+  // Missão da Jornada com palavras de um tema: só elas (de qualquer parte do conteúdo).
+  const ids = foco.value?.palavras;
+  const words = ids && ids.length > 0 ? ids.flatMap((id) => acharPalavra(id) ?? []) : WORDS;
+  return words.map((w) => ({ card: cardKey(w.id, 'reading'), text: w.jp, kana: w.kana, pt: w.pt }));
 }
 
 /** Quantas batidas uma nota ocupa: kana solto é uma; palavra cresce com o tamanho. */

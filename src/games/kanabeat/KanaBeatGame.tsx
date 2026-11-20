@@ -3,6 +3,7 @@ import { app, commit, go, kanaBeatSave } from '../../core/app';
 import { sfx, speakWord } from '../../core/audio';
 import { cenaStyle } from '../../core/arte';
 import { acertou, cor, corStyle, errou, zerar } from '../../core/cor';
+import { foco } from '../../core/foco';
 import { Pintura } from '../../core/Pintura';
 import { ajudaAberta, useAoAbrirAjuda } from '../../core/help/ajuda';
 import { teclaDe } from '../../core/teclas';
@@ -35,7 +36,10 @@ interface Run {
 
 function newRun(mode?: Mode): Run {
   const save = kanaBeatSave();
-  const chosen = mode ?? modeForPlay(save.plays);
+  // Missão da Jornada: o modo vem dela (hiragana, katakana ou as palavras do tema).
+  const f = foco.value;
+  const doFoco: Mode | undefined = f?.kana ?? (f?.palavras ? 'palavras' : undefined);
+  const chosen = mode ?? doFoco ?? modeForPlay(save.plays);
   const stage = new Stage(
     { cards: app.data.cards, profile: app.data.profile, save, rng: Math.random, now: () => Date.now() },
     chosen,

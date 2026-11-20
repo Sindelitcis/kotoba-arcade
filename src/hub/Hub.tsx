@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { KANJI, type Sentence } from '../content';
-import { app, aventuraSave, commit, conversaSave, go, gramaticaSave, kanaBeatSave, kanjimonSave, replaceSave, roguelikeSave, saved, screen, tick, type Screen } from '../core/app';
+import { app, aventuraSave, commit, conversaSave, go, gramaticaSave, jornadaSave, kanaBeatSave, kanjimonSave, replaceSave, roguelikeSave, saved, screen, tick, type Screen } from '../core/app';
 import { cenaStyle, type Cena } from '../core/arte';
 import { hasJapaneseVoice, sfx, speak } from '../core/audio';
 import { corStyle, visitados, type Saves } from '../core/cor';
@@ -10,6 +10,7 @@ import { levelInfo, readingMeter, recentDays } from '../core/progress';
 import { exportSave } from '../core/save';
 import { teclaDe } from '../core/teclas';
 import { BOOSTER_COST, canOpenBooster } from '../games/kanjimon/engine';
+import { andamento, ETAPAS, etapaDa, proximaMissao } from '../jornada/etapas';
 
 interface Tile {
   id: string;
@@ -66,6 +67,11 @@ export function Hub() {
   // Mapa sendo pintado: cada jogo já jogado ganha cor no fliperama, e a capa pinta junto.
   const pintados = visitados({ kanjimon: km, kanabeat: kanaBeatSave(), roguelike: roguelikeSave(), aventura: aventuraSave(), gramatica: gramaticaSave(), conversa: conversaSave() });
   const quantos = Object.values(pintados).filter(Boolean).length;
+  // Jornada: o caminho principal, com a próxima missão à vista.
+  const jornada = jornadaSave();
+  const proxima = proximaMissao(jornada);
+  const etapaProx = proxima ? etapaDa(proxima.id) : undefined;
+  const feitasJornada = ETAPAS.reduce((t, e) => t + andamento(e, jornada), 0) / ETAPAS.length;
 
   // Ligado junto com o desenho da tela: tecla apertada logo que a tela aparece não se perde.
   useLayoutEffect(() => {
@@ -91,6 +97,7 @@ export function Hub() {
       else if (tecla.toLowerCase() === 'a') go('aventura');
       else if (tecla.toLowerCase() === 'v') go('conversa');
       else if (tecla.toLowerCase() === 'g') go('gramatica');
+      else if (tecla.toLowerCase() === 'j') go('jornada');
     };
     addEventListener('keydown', onKey);
     return () => removeEventListener('keydown', onKey);
@@ -163,6 +170,22 @@ export function Hub() {
           O navegador não deixou gravar o progresso. Ele continua valendo enquanto esta aba estiver aberta: em Ajustes, exporte um backup.
         </p>
       )}
+
+      <button class="koma jornada-faixa" style={{ ...cenaStyle(etapaProx?.cena ?? 'hub-shibuya'), ...corStyle(feitasJornada) }} onClick={() => go('jornada')} data-testid="hub-jornada">
+        <Pintura cena={etapaProx?.cena ?? 'hub-shibuya'} />
+        <span class="jornada-faixa-jp">旅</span>
+        <span class="jornada-faixa-txt">
+          <b>
+            Jornada <kbd>J</kbd>
+          </b>
+          <span>Do zero até trabalhar no Japão, em missões de 3 a 10 minutos.</span>
+          {proxima && (
+            <span class="jornada-faixa-prox">
+              Próxima: {proxima.titulo} · {proxima.minutos} min
+            </span>
+          )}
+        </span>
+      </button>
 
       <button class="play-now" style={{ ...cenaStyle('hub-shibuya'), ...corStyle(quantos / TILES.length) }} onClick={() => go(nextGame)} data-testid="play-now">
         <Pintura cena="hub-shibuya" />

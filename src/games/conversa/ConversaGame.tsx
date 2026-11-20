@@ -6,6 +6,7 @@ import { Pintura } from '../../core/Pintura';
 import { sfx, speak, speakWord } from '../../core/audio';
 import { VOZ_CONVERSA } from '../../core/vozes';
 import { onomato } from '../../core/fx';
+import { foco } from '../../core/foco';
 import { teclaDe } from '../../core/teclas';
 import { criarCliente, procurarServidor, type Cliente, type Saude } from './cliente';
 import { CENAS, Conversa, proximaCena, type Cena, type Dica, type Evento, type Linha, type Resumo, type Ruby } from './engine';
@@ -28,6 +29,11 @@ function RubyText({ ruby }: { ruby: readonly Ruby[] }) {
       )}
     </>
   );
+}
+
+/** Missão da Jornada: a situação dela vem primeiro no Enter. Sem missão, a próxima da lista. */
+function cenaSugerida(save: Parameters<typeof proximaCena>[0]): Cena {
+  return CENAS.find((c) => c.id === foco.value?.conversa) ?? proximaCena(save);
 }
 
 export function ConversaGame() {
@@ -258,7 +264,7 @@ export function ConversaGame() {
       if (cena) comecar(cena);
     } else if (tecla === 'Enter') {
       e.preventDefault();
-      if (fase === 'menu' || fase === 'resumo') comecar(proximaCena(conversaSave()));
+      if (fase === 'menu' || fase === 'resumo') comecar(cenaSugerida(conversaSave()));
       else if (fase === 'desligado') void procurar();
     }
   };
@@ -316,7 +322,7 @@ export function ConversaGame() {
 
   if (fase === 'menu') {
     const save = conversaSave();
-    const sugerida = proximaCena(save);
+    const sugerida = cenaSugerida(save);
     return (
       <main class="cv" data-testid="cv" data-phase="menu">
         <header class="km-top">
@@ -441,7 +447,7 @@ export function ConversaGame() {
             </div>
           )}
           <div class="actions center">
-            <button class="primary" onClick={() => comecar(proximaCena(conversaSave()))} data-testid="cv-again">
+            <button class="primary" onClick={() => comecar(cenaSugerida(conversaSave()))} data-testid="cv-again">
               Outra conversa <kbd>Enter</kbd>
             </button>
             <button class="ghost" onClick={() => setFase('menu')}>

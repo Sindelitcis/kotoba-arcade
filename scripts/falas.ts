@@ -18,6 +18,9 @@ import { CENAS, marcado } from '../src/games/conversa/engine';
 import { ANSWERS, MAX_OPEN, conjugateWritten, parseSentence, type Block, type Ending, type Piece } from '../src/games/gramatica/engine';
 import { COURSE } from '../src/games/gramatica/pontos';
 import { VOZ_CONVERSA, VOZ_PADRAO, VOZ_PALAVRA, VOZES, vozDaAventura, type VozId } from '../src/core/vozes';
+import { JORNADA_WORDS } from '../src/content/escola';
+import { palavras as palavrasMarcadas } from '../src/content/escola/ruby';
+import { LICOES, type FalaQuadro } from '../src/jornada/licoes';
 
 export interface Fala {
   /** Exatamente o texto que o jogo passa para `speak()`. */
@@ -198,6 +201,53 @@ function conversa(): Fala[] {
   return out;
 }
 
+/**
+ * Quadros das lições da Jornada. Palavra solta e kanji sozinho vão como nos jogos (chave
+ * no kana, ou no kanji). Frase vai palavra por palavra: cada bloco da marcação da
+ * escola-japones com kanji leva a leitura dele.
+ */
+function falaDoQuadro(f: FalaQuadro, origem: string): Fala {
+  if (f.palavra) {
+    const { jp, kana } = f.palavra;
+    return { texto: f.texto, voz: VOZ_PALAVRA, tts: hasKanji(jp) ? jp : kana, partes: [hasKanji(jp) ? { t: jp, r: kataToHira(kana) } : { t: kana }], palavra: { jp, kana }, origem };
+  }
+  // A marcação não põe espaço depois de 、 e 。: a pontuação vira parte própria, e cada
+  // pedaço entre ela é uma palavra (今、電話 são duas, cada uma com a sua leitura).
+  const partes: Parte[] = [];
+  for (const segs of palavrasMarcadas(f.marcado ?? f.texto)) {
+    let t = '';
+    let r = '';
+    const fechar = () => {
+      if (t) partes.push(hasKanji(t) ? { t, r: kataToHira(r) } : { t });
+      t = '';
+      r = '';
+    };
+    for (const s of segs) {
+      if (s.leitura) {
+        t += s.texto;
+        r += s.leitura;
+        continue;
+      }
+      for (const pedaco of s.texto.split(/([、。？！…]+)/)) {
+        if (!pedaco) continue;
+        if (/^[、。？！…]+$/.test(pedaco)) {
+          fechar();
+          partes.push({ t: pedaco });
+        } else {
+          t += pedaco;
+          r += pedaco;
+        }
+      }
+    }
+    fechar();
+  }
+  return { texto: f.texto, voz: VOZ_PADRAO, tts: juntar(partes), partes, origem };
+}
+
+function jornada(): Fala[] {
+  return LICOES.flatMap((l) => l.passos.flatMap((p) => (p.tipo === 'quadro' && p.fala ? [falaDoQuadro(p.fala, 'jornada/' + l.id)] : [])));
+}
+
 /** Lista sem repetição (mesmo texto na mesma voz entra uma vez só). */
 export function listarFalas(): Fala[] {
   const todas: Fala[] = [
@@ -212,6 +262,7 @@ export function listarFalas(): Fala[] {
       origem: 'conteudo/kanji',
     })),
     ...DAILY_WORDS.map((w) => palavra(w, 'conteudo/vida')),
+    ...JORNADA_WORDS.map((w) => palavra(w, 'conteudo/escola')),
     ...KANJI.flatMap((k) =>
       k.sentences.map((s) => {
         const tts = TTS_CORRIGIDO[s.jp] ?? s.jp;
@@ -225,6 +276,7 @@ export function listarFalas(): Fala[] {
     ...aventura(SCENES),
     ...kumitate(),
     ...conversa(),
+    ...jornada(),
   ];
   const vistas = new Set<string>();
   return todas.filter((f) => {

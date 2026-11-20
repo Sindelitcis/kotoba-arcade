@@ -21,6 +21,8 @@ const FONTE: Record<TelaAjuda, string> = {
   aventura: 'games/aventura/AventuraGame.tsx',
   conversa: 'games/conversa/ConversaGame.tsx',
   gramatica: 'games/gramatica/GramaticaGame.tsx',
+  jornada: 'jornada/JornadaTela.tsx',
+  licao: 'jornada/LicaoTela.tsx',
 };
 
 const NOMES: Record<string, string> = { Esc: 'Escape', Espaço: ' ', '↑': 'ArrowUp', '↓': 'ArrowDown' };

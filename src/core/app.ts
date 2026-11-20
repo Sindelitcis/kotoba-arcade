@@ -6,10 +6,12 @@ import { ensureGramaticaSave, type GramaticaSave } from '../games/gramatica/engi
 import { ensureKanaBeatSave, type KanaBeatSave } from '../games/kanabeat/engine';
 import { ensureKanjimonSave, type KanjimonSave } from '../games/kanjimon/engine';
 import { ensureRoguelikeSave, type RoguelikeSave } from '../games/roguelike/engine';
+import { ensureJornadaSave, registrarMissao, type JornadaSave } from '../jornada/etapas';
+import { foco } from './foco';
 import { markPlayed } from './progress';
 import { importSave, loadSave, writeSave, type SaveData } from './save';
 
-export type Screen = 'hub' | 'kanjimon' | 'kanjidex' | 'booster' | 'kanabeat' | 'roguelike' | 'aventura' | 'conversa' | 'gramatica';
+export type Screen = 'hub' | 'kanjimon' | 'kanjidex' | 'booster' | 'kanabeat' | 'roguelike' | 'aventura' | 'conversa' | 'gramatica' | 'jornada' | 'licao';
 
 export const app: { data: SaveData } = { data: loadSave(localStorage, Date.now()) };
 
@@ -25,12 +27,22 @@ export function commit(): void {
   tick.value++;
 }
 
+/** Lição em quadrinhos aberta e a missão da Jornada que a abriu. */
+export const licaoAberta = signal<{ licao: string; missao: string } | null>(null);
+
 export function go(next: Screen): void {
-  if (next !== 'hub') {
-    app.data.profile.lastGame = next === 'kanjidex' || next === 'booster' ? 'kanjimon' : next;
+  // Jogo aberto por uma missão da Jornada: a saída dele volta para a Jornada e conta a missão.
+  const f = foco.value;
+  if (next === 'hub' && f) {
+    registrarMissao(jornadaSave(), f.missao);
+    foco.value = null;
+    next = 'jornada';
+  }
+  if (next !== 'hub' && next !== 'jornada') {
+    if (next !== 'licao') app.data.profile.lastGame = next === 'kanjidex' || next === 'booster' ? 'kanjimon' : next;
     markPlayed(app.data, Date.now());
     commit();
-  }
+  } else if (next === 'jornada') commit();
   screen.value = next;
 }
 
@@ -61,4 +73,8 @@ export function roguelikeSave(): RoguelikeSave {
 
 export function gramaticaSave(): GramaticaSave {
   return ensureGramaticaSave(app.data.games);
+}
+
+export function jornadaSave(): JornadaSave {
+  return ensureJornadaSave(app.data.games);
 }

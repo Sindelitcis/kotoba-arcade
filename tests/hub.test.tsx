@@ -83,4 +83,14 @@ describe('aviso de gravação', () => {
     await act(() => render(<Hub />, document.body));
     expect(document.querySelector('[data-testid="save-failed"]')?.textContent).toContain('backup');
   });
+
+  it('J no fliperama abre a Jornada, e Enter continua abrindo o jogo da vez', async () => {
+    await act(() => render(<Hub />, document.body));
+    press('j');
+    expect(screen.value).toBe('jornada');
+    screen.value = 'hub';
+    // A Jornada não vira o "jogo da vez": Enter segue com uma tecla só.
+    press('Enter');
+    expect(['kanjimon', 'kanabeat', 'roguelike', 'aventura', 'conversa', 'gramatica']).toContain(screen.value);
+  });
 });

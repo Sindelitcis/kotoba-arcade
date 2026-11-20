@@ -54,6 +54,7 @@ const CHAMADAS: Record<string, string[]> = {
   'src/games/kanjimon/KanjiMonGame.tsx': ['speak(asked.speak, VOZ_PALAVRA, asked.speakKana)'], // kanji sozinho ou palavra
   'src/games/roguelike/RoguelikeGame.tsx': ['speak(q.speak, VOZ_PALAVRA, q.speakKana)'],
   'src/hub/Hub.tsx': ['speak(sentence.jp)'],
+  'src/jornada/LicaoTela.tsx': ["speak(f.texto, f.voz === 'palavra' ? VOZ_PALAVRA : VOZ_PADRAO, f.kana)"], // quadros das lições: jornada() em scripts/falas.ts
 };
 
 /** Pega `speak(...)`, `speakWord(...)` e `speakKanji(...)` com os parênteses balanceados. */

@@ -7,6 +7,7 @@ export const HUB: Ajuda = {
   jp: '言葉',
   objetivo: ['É a entrada de tudo. Daqui você abre qualquer jogo e vê o quanto de japonês já consegue ler.', 'Não tem tarefa do dia. Abra, aperte Enter e jogue.'],
   passos: [
+    'A Jornada (tecla J) é o caminho principal: do zero até trabalhar no Japão, em missões curtas.',
     'Aperte Enter (ou clique em Jogar agora) para voltar ao último jogo que você jogou.',
     'Quer outro? Clique no quadro do jogo ou aperte a letra dele.',
     'Na parte de baixo você vê o que já lê e a sua coleção do KanjiMon.',
@@ -14,6 +15,7 @@ export const HUB: Ajuda = {
   ],
   teclas: [
     { teclas: ['Enter', 'Espaço'], faz: 'Jogar agora: abre o último jogo' },
+    { teclas: ['J'], faz: 'Jornada: o mapa do zero ao trabalho no Japão' },
     { teclas: ['C'], faz: 'KanjiMon (caçada)' },
     { teclas: ['K'], faz: 'Kana Beat' },
     { teclas: ['R'], faz: 'Kotodama' },
@@ -27,6 +29,7 @@ export const HUB: Ajuda = {
     { nome: 'Nível', texto: 'Sobe com o XP que você ganha em qualquer jogo. A barra mostra quanto falta para o próximo.' },
     { nome: 'Moedas (●)', texto: 'Ganhas jogando. Servem para abrir booster de cartas do KanjiMon.' },
     { nome: 'Sete quadradinhos', texto: 'Os últimos sete dias. Preenchido é dia em que você jogou. Faltar um dia não apaga nada.' },
+    { nome: 'Jornada', texto: 'O mapa em quadros do caminho inteiro, com a próxima missão sugerida. Nada fica trancado.' },
     { nome: 'Jogar agora', texto: 'Leva direto ao último jogo, já no ponto de começar.' },
     { nome: 'O que você já lê', texto: 'Kanji e palavras que você já encontrou (barra clara) e os que já estão firmes na memória (barra escura). Firme é o que você lembraria mesmo depois de uma semana sem ver.' },
     { nome: 'Frase da vez', texto: 'Uma frase que você já consegue ler com os kanji que encontrou. Clique para ouvir. Ex.: 山に行きます (やまに いきます, vou à montanha).' },
@@ -38,7 +41,7 @@ export const HUB: Ajuda = {
     'O progresso é concreto: kanji, palavras e frases que você já lê.',
   ],
   perguntas: [
-    { p: 'Qual jogo eu jogo primeiro?', r: 'Qualquer um. Se não souber, comece pelo KanjiMon: ele apresenta os kanji que os outros jogos usam.' },
+    { p: 'Qual jogo eu jogo primeiro?', r: 'Qualquer um. Se não souber, abra a Jornada (tecla J) e aperte Enter: ela sugere o próximo passo.' },
     { p: 'Faltei uns dias. Perdi alguma coisa?', r: 'Nada. Não tem sequência que quebra. Na volta, o jogo traz primeiro o que mais precisa de revisão.' },
     MEMORIA_UNICA,
     SAVE,

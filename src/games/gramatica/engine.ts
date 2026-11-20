@@ -440,6 +440,17 @@ export interface RoundDeps {
   lookup: (id: string) => { pt: string } | undefined;
   now: () => number;
   rng: Rng;
+  /**
+   * Missão da Jornada: só estes pontos, destravados ou não (na Jornada nada fica
+   * trancado). Ponto ainda não visto chega com a lição, como sempre.
+   */
+  focus?: readonly string[];
+}
+
+/** Pontos da rodada: os da missão da Jornada, se houver; senão os destravados. */
+export function roundPoints(course: Course, save: GramaticaSave, focus?: readonly string[]): Point[] {
+  const doFoco = focus ? course.points.filter((p) => focus.includes(p.id)) : [];
+  return doFoco.length > 0 ? doFoco : openPoints(course, save);
 }
 
 export type Phase = 'lesson' | 'build' | 'solved' | 'end';
@@ -480,7 +491,7 @@ export class GramaticaRound {
 
   private load(): void {
     const { course, cards, save, now, rng } = this.deps;
-    const pool = openPoints(course, save);
+    const pool = roundPoints(course, save, this.deps.focus);
     const pick = pickNext(
       pool.map((p) => cardOf(p.id)),
       cards,

@@ -8,6 +8,7 @@ import { sfx, speak, speakWord } from '../../core/audio';
 import { vozDaAventura } from '../../core/vozes';
 import { onomato } from '../../core/fx';
 import { hasKanji } from '../../core/kana';
+import { foco } from '../../core/foco';
 import { teclaDe } from '../../core/teclas';
 import { SCENES, SPEAKERS } from './cenas';
 import { diaryEntries, isUnlocked, PLAYER, ScenePlay, suggestScene, type PlayEvent, type Scene, type SceneSummary, type TokenView } from './engine';
@@ -87,7 +88,9 @@ export function AventuraGame() {
   const diaryEl = useRef<HTMLOListElement>(null);
   const play = playRef.current;
 
-  const suggested = suggestScene(SCENES, save, app.data.cards, Date.now());
+  // Missão da Jornada: o Enter abre a cena da missão, mesmo antes de a história chegar nela.
+  const sugerida = () => SCENES.find((s) => s.id === foco.value?.cena) ?? suggestScene(SCENES, save, app.data.cards, Date.now());
+  const suggested = sugerida();
   const allDone = SCENES.every((s) => save.done.includes(s.id));
   const diary = mode === 'diary' ? diaryEntries(SCENES, save, app.data.cards, findWord) : [];
 
@@ -171,7 +174,7 @@ export function AventuraGame() {
       const summary = playRef.current?.summary ?? null;
       if (mode === 'menu') {
         if (tecla === 'Escape') go('hub');
-        else if (confirm) start(suggestScene(SCENES, save, app.data.cards, Date.now()));
+        else if (confirm) start(sugerida());
         else if (key === 'd' && save.diary.length > 0) openDiary();
         else if (digit && isUnlocked(SCENES, save, digit - 1)) start(SCENES[digit - 1]);
       } else if (mode === 'play') {
@@ -191,6 +194,7 @@ export function AventuraGame() {
         } else if (confirm) advance();
       } else if (mode === 'summary') {
         if (tecla === 'Escape') setMode('menu');
+        else if (confirm && foco.value) go('hub');
         else if (confirm) {
           const index = summary ? SCENES.indexOf(summary.scene) : -1;
           const next = SCENES[index + 1];
@@ -348,9 +352,15 @@ export function AventuraGame() {
             </p>
           )}
           <div class="actions center">
-            <button class="primary" onClick={() => (next ? start(next) : setMode('menu'))}>
-              {next ? `Próxima cena: ${next.title}` : 'Voltar às cenas'} <kbd>Enter</kbd>
-            </button>
+            {foco.value ? (
+              <button class="primary" onClick={() => go('hub')}>
+                Voltar à Jornada <kbd>Enter</kbd>
+              </button>
+            ) : (
+              <button class="primary" onClick={() => (next ? start(next) : setMode('menu'))}>
+                {next ? `Próxima cena: ${next.title}` : 'Voltar às cenas'} <kbd>Enter</kbd>
+              </button>
+            )}
             <button onClick={openDiary}>
               Diário <kbd>D</kbd>
             </button>

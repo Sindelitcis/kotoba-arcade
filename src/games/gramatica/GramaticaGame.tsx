@@ -7,6 +7,7 @@ import { Pintura } from '../../core/Pintura';
 import { sfx, speak } from '../../core/audio';
 import { onomato } from '../../core/fx';
 import { masteryLevel } from '../../core/srs';
+import { foco } from '../../core/foco';
 import { teclaDe } from '../../core/teclas';
 import { cardOf, exampleView, fits, GramaticaRound, openPoints, plainSentence, ROUND_SIZE, slotWritten, WINS_TO_UNLOCK, type RoundEvent, type RoundSummary, type Written } from './engine';
 import { COURSE, POINTS } from './pontos';
@@ -54,6 +55,7 @@ export function GramaticaGame() {
       lookup: findWord,
       now: () => Date.now(),
       rng: Math.random,
+      focus: foco.value?.pontos,
     });
     setSummary(null);
     setNote('');

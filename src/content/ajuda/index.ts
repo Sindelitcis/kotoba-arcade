@@ -3,6 +3,7 @@ import type { TelaAjuda } from '../../core/help/ajuda';
 import { AVENTURA } from './aventura';
 import { CONVERSA } from './conversa';
 import { AJUSTES, HUB } from './hub';
+import { JORNADA, LICAO } from './jornada';
 import { KANABEAT } from './kanabeat';
 import { BOOSTER, KANJIDEX, KANJIMON } from './kanjimon';
 import { KOTODAMA } from './kotodama';
@@ -23,6 +24,8 @@ export const AJUDA: Record<TelaAjuda, Ajuda> = {
   aventura: AVENTURA,
   conversa: CONVERSA,
   gramatica: KUMITATE,
+  jornada: JORNADA,
+  licao: LICAO,
 };
 
 /** A tela usa a F1 para outra coisa (a Conversa traduz com ela). Ali a F1 não abre a ajuda. */

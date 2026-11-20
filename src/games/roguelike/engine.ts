@@ -4,7 +4,9 @@
  * a carta abre uma pergunta sobre o item: acertou, o efeito sai forte; errou,
  * sai fraco. Morrer encerra a run, mas o que foi estudado fica na memória.
  */
-import { cardKey, getKanji, getWord, KANJI, parseCardKey, WORDS } from '../../content';
+import { cardKey, getKanji, getWord, KANJI, parseCardKey, WORDS, type Word } from '../../content';
+import { acharPalavra } from '../../content/escola';
+import { foco } from '../../core/foco';
 import { pickNext } from '../../core/picker';
 import { levelInfo } from '../../core/progress';
 import {
@@ -91,7 +93,7 @@ export function faceOf(itemId: string): Face {
     const k = getKanji(itemId);
     return { kind: 'kanji', jp: k.kanji, pt: k.pt.join(', ') };
   }
-  const w = getWord(itemId);
+  const w = palavra(itemId);
   return { kind: 'word', jp: w.jp, pt: w.pt, kana: w.kana };
 }
 
@@ -225,6 +227,21 @@ const meaningKey = (itemId: string) => cardKey(itemId, 'meaning');
 const KANJI_IDS = KANJI.map((k) => k.id);
 const WORD_IDS = WORDS.map((w) => w.id);
 
+/** Palavra de qualquer parte do conteúdo (a missão da Jornada traz palavras dos temas da escola). */
+function palavra(id: string): Word {
+  return acharPalavra(id) ?? getWord(id);
+}
+
+/**
+ * O que pode virar carta nesta run. Missão da Jornada: só o conteúdo dela, e palavra
+ * entra mesmo sem os kanji vistos, porque a lição da missão já apresentou a palavra.
+ */
+function itensDaRun(): { kanji: readonly string[]; words: readonly string[]; gate: boolean } {
+  const f = foco.value;
+  if (f && (f.kanji?.length || f.palavras?.length)) return { kanji: f.kanji ?? [], words: f.palavras ?? [], gate: false };
+  return { kanji: KANJI_IDS, words: WORD_IDS, gate: true };
+}
+
 export class Run {
   hp = MAX_HP;
   readonly maxHp = MAX_HP;
@@ -313,7 +330,8 @@ export class Run {
   private pickItems(slots: Slot[], maxNew: number): string[] {
     const { cards, rng, now } = this.deps;
     const taken = new Set(this.deck.map((c) => c.itemId));
-    const young = [...KANJI_IDS, ...WORD_IDS].filter((id) => {
+    const itens = itensDaRun();
+    const young = [...itens.kanji, ...itens.words].filter((id) => {
       const c = cards[meaningKey(id)];
       return c && isYoung(c);
     }).length;
@@ -323,8 +341,8 @@ export class Run {
     for (const slot of slots) {
       const known = (kanjiId: string) => !!cards[meaningKey(kanjiId)] || taken.has(kanjiId) || out.includes(kanjiId);
       const free = (id: string) => !taken.has(id) && !out.includes(id);
-      const kanji = KANJI_IDS.filter(free);
-      const words = WORD_IDS.filter((id) => free(id) && getWord(id).kanji.every((c) => known(`k:${c}`)));
+      const kanji = itens.kanji.filter(free);
+      const words = itens.words.filter((id) => free(id) && (!itens.gate || palavra(id).kanji.every((c) => known(`k:${c}`))));
       let ids = slot === 'kanji' ? kanji : slot === 'word' ? words : rng() < 0.5 ? kanji : words;
       if (ids.length === 0) ids = kanji.length > 0 ? kanji : words;
       let pool = ids.map(meaningKey);
@@ -435,7 +453,7 @@ export class Run {
         const k = getKanji(id);
         return useOther ? kanjiRecallQuestion(k, rng) : kanjiMeaningQuestion(k, rng, !meaning);
       }
-      const w = getWord(id);
+      const w = palavra(id);
       return useOther ? wordReadingQuestion(w, rng, masteryLevel(cards[other]) >= 3) : wordMeaningQuestion(w, rng, !meaning);
     };
     // O caminho inverso (e a leitura) só entram depois de o significado ter sido visto de verdade.

@@ -130,3 +130,24 @@ describe('matchTyping (digitação letra a letra)', () => {
     expect(matchTyping('SAKURA', 'さくら')).toBe('complete');
   });
 });
+
+describe('sons de palavras estrangeiras', () => {
+  // ファイル virava "fuぁiru" e quem digitava "fairu" errava.
+  it('viram romaji Hepburn', () => {
+    expect(kanaToRomaji('ファイル')).toBe('fairu');
+    expect(kanaToRomaji('パーティー')).toBe('paatii');
+    expect(kanaToRomaji('シェフ')).toBe('shefu');
+  });
+
+  it('digitar em romaji acerta', () => {
+    expect(compareReading('fairu', 'ファイル')).toBe('exact');
+    expect(matchTyping('fairu', 'ファイル')).toBe('complete');
+    expect(matchTyping('shefu', 'シェフ')).toBe('complete');
+  });
+
+  it('ti, tu e wo digitados continuam sendo ち, つ e を', () => {
+    expect(romajiToHiragana('ti')).toBe('ち');
+    expect(romajiToHiragana('tu')).toBe('つ');
+    expect(romajiToHiragana('wo')).toBe('を');
+  });
+});

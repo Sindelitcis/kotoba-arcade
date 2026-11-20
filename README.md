@@ -2,6 +2,8 @@
 
 Fliperama de jogos para aprender japonês, feito pensando em quem tem TDAH. A regra da casa é simples: primeiro tem que ser um jogo bom. O estudo acontece por dentro dele.
 
+Por cima dos jogos fica a **Jornada** (tecla `J` no fliperama): um mapa em quadros de mangá com o caminho do zero até trabalhar no Japão. Cada passo é uma missão curta, uma lição em quadrinhos ou um dos jogos abaixo só com o conteúdo daquela parte. O Enter do fliperama continua abrindo o jogo da vez.
+
 Jogos que já dá para jogar:
 
 - **KanjiMon**: o [KanjiMon original](https://github.com/Sindelitcis/KanjiMon) refeito aqui dentro. Você caça kanji, quebra os selos respondendo e junta as cartas na KanjiDex.
@@ -76,6 +78,19 @@ Todo bug corrigido entra com um teste que reproduz o caso.
 
 Cada commit no `main` passa por essa bateria no GitHub Actions e, se tudo passar, o site em https://sindelitcis.github.io/kotoba-arcade/ é atualizado sozinho. Se algum teste falhar, nada é publicado.
 
+## Jornada
+
+O mapa tem sete etapas, nesta ordem: Fundamentos, Kana, Expressões de sobrevivência, N5, N4, Trabalho e dia a dia, N3. Cada etapa tem missões de 3 a 10 minutos:
+
+- **Lição em quadrinhos.** Uma ideia por quadro, Enter avança, e nunca mais que três quadros sem uma pergunta sobre o que acabou de aparecer. Errou, a resposta certa aparece com a explicação e a lição segue.
+- **Missão de jogo.** Abre o KanjiMon, o Kana Beat, o Kotodama, a Aventura, o Kumitate ou a Conversa só com os kanji, palavras, pontos de gramática ou cena daquela missão. Saiu do jogo, volta para a Jornada e a missão fica marcada.
+
+Nada fica trancado. A Jornada sugere a primeira missão ainda não feita, mas dá para abrir qualquer uma. Não existe contador de atraso e ficar dias sem abrir não apaga nada. Palavras e kanji das lições entram na mesma memória espaçada dos jogos.
+
+O N4, o trabalho e o N3 também mostram o que ainda não tem conteúdo, com a fonte de cada tema (lista do JLPT, tópico do Marugoto ou do JF Standard). O N3 por enquanto é só isso.
+
+O conteúdo das lições veio da [escola-japones](https://github.com/Sindelitcis/escola-japones), do mesmo autor, e fica em `src/content/escola/`: os quatro fundamentos, 36 expressões com registro e quando usar, 14 lições de gramática (regra, padrão, exemplos e erros comuns), 260 palavras em 14 temas, 60 kanji e 8 situações de trabalho e dia a dia. As regras de cuidado vieram junto e viraram teste (`tests/escola-conteudo.test.ts`): japonês padrão, alternativa errada que é japonês de verdade usado no lugar errado, に e へ nunca uma como errada da outra, vogal longa e っ marcadas como diferença de significado, furigana em todo kanji. A gramática da escola aponta para os pontos do Kumitate em vez de copiar, e as palavras que o arcade já tinha usam a mesma carta.
+
 ## Como o jogo ensina
 
 Essas escolhas vêm do que se sabe sobre TDAH e sobre memória, e do que costuma fazer a gente largar app de estudo.
@@ -109,7 +124,8 @@ src/core      memória espaçada, seletor de cartas, perguntas, save, kana, som,
 src/assets    fontes recortadas, cenários, personagens e músicas do Kana Beat
 docs          guia de estilo (estilo.md), como as imagens (imagens.md) e as vozes (vozes.md) foram feitas
 public/vozes  falas gravadas em mp3 e o manifesto texto → arquivo
-src/content   kanji, palavras e frases (os 94 kanji do KanjiMon original e o vocabulário do dia a dia)
+src/content   kanji, palavras e frases (os 94 kanji do KanjiMon original, o vocabulário do dia a dia e, em escola/, o conteúdo da escola-japones)
+src/jornada   a Jornada: mapa, missões, lições em quadrinhos
 src/hub       o fliperama
 src/games     um jogo por pasta; as regras ficam separadas da tela
 local         servidor da Conversa por voz (Whisper, Ollama e AivisSpeech) e o `npm run local`
@@ -137,6 +153,8 @@ O jogo mistura mangá em preto e branco (tinta, retícula, quadros, onomatopeia 
 ## Créditos
 
 As artes das cartas e o conteúdo dos 94 kanji vêm do KanjiMon original, feito com Leonardo Carvalho.
+
+O conteúdo das lições da Jornada vem da [escola-japones](https://github.com/Sindelitcis/escola-japones), de Sindelitcis.
 
 Fontes, as duas pela SIL Open Font License 1.1 (o texto da licença está em `src/assets/fontes/`):
 

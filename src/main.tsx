@@ -13,6 +13,8 @@ import { Dex } from './games/kanjimon/Dex';
 import { KanjiMonGame } from './games/kanjimon/KanjiMonGame';
 import { RoguelikeGame } from './games/roguelike/RoguelikeGame';
 import { Hub } from './hub/Hub';
+import { JornadaTela } from './jornada/JornadaTela';
+import { LicaoTela } from './jornada/LicaoTela';
 import './styles.css';
 
 // O manifesto das vozes gravadas já vem antes da primeira fala.
@@ -36,6 +38,10 @@ function App() {
       return <ConversaGame />;
     case 'gramatica':
       return <GramaticaGame />;
+    case 'jornada':
+      return <JornadaTela />;
+    case 'licao':
+      return <LicaoTela />;
     default:
       return <Hub />;
   }

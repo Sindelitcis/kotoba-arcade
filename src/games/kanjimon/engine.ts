@@ -5,6 +5,7 @@
  * todos os selos, capturou a carta.
  */
 import { cardKey, getKanji, KANJI, type Kanji, type Skill, type Word } from '../../content';
+import { foco, recortar } from '../../core/foco';
 import { pickNext } from '../../core/picker';
 import { levelInfo } from '../../core/progress';
 import { checkAnswer, kanjiMeaningQuestion, kanjiRecallQuestion, wordMeaningQuestion, wordReadingQuestion, type Question } from '../../core/questions';
@@ -136,7 +137,8 @@ export class Hunt {
 
   private spawn(): HuntEvent {
     const { cards, rng, now } = this.deps;
-    const pool = KANJI.map((k) => cardKey(k.id, 'meaning'));
+    // Missão da Jornada: só os kanji da etapa.
+    const pool = recortar(KANJI, foco.value?.kanji, (k) => k.id).map((k) => cardKey(k.id, 'meaning'));
     const chosen = pickNext(pool, cards, now(), rng, { recent: this.recent, maxYoung: 6 });
     const key = chosen?.key ?? (pool[0] as string);
     const kanji = getKanji(key.slice(0, key.lastIndexOf('#')));
