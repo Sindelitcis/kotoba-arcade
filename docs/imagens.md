@@ -97,7 +97,24 @@ O CLIP pega muita coisa (um "comendo" que parece só um hashi, uma chave deforma
 
 ### A placa é dividida
 
-Antes de carregar qualquer modelo, o estúdio cria `D:\KotobaArcade-Arte\gpu.lock` com o nome da sessão (`KOTOBA_SESSAO`). Se o arquivo já existir, se o Ollama tiver um modelo carregado ou se um motor de voz (AivisSpeech ou VOICEVOX) estiver no ar, ele espera e confere de novo a cada 30 segundos. O lock é apagado ao terminar, mesmo se der erro.
+Tudo que usa a placa de vídeo passa por `scripts/placa.py`: o estúdio, a gravação de vozes e qualquer teste de modelo. Ela prende `D:\KotobaArcade-Arte\gpu.lock` com uma trava do sistema, num arquivo mantido aberto. Se o processo morre, o sistema solta a trava sozinho; enquanto ela está presa, o arquivo não pode ser apagado. O texto dentro do arquivo (sessão, hora, pid) é só para gente ler. Um lock do jeito antigo (só o arquivo) com o processo já morto não prende ninguém.
+
+Antes de prender, ela espera o Ollama não ter modelo carregado, os motores de voz de outra pessoa saírem do ar e sobrar memória livre na placa (o Rafael pode estar jogando). Para envolver qualquer comando:
+
+```bash
+python -I scripts/placa.py --nome teste-flux --vram 12 -- D:/KotobaArcade-Arte/venv/Scripts/python -I meu-teste.py
+python -I scripts/placa.py status
+```
+
+No Windows, se o `placa.py` for fechado, o comando morre junto: nunca fica nada usando a placa sem trava.
+
+### Memória da placa
+
+Só um modelo fica na placa por vez: no `tudo`, o modelo de imagem sai antes de o CLIP entrar, e o contrário antes de refazer as reprovadas. A VAE decodifica uma imagem por vez e em ladrilhos. O PyTorch recebe um teto igual à memória livre no começo: passar dele vira erro, e o estúdio segue com uma imagem por vez, em vez de o driver jogar o excesso na RAM (o que deixa tudo dezenas de vezes mais lento). O pico de cada fase sai no log.
+
+### Motores
+
+O modelo de imagem vem de `scripts/imagens/motores.json`. Cada motor diz o tipo (`sdxl-arquivo`, um `.safetensors` em `D:\KotobaArcade-Arte`, ou `diffusers`, uma pasta ou repositório), os passos, o cfg, o offload (`nenhum`, `modelo` ou `sequencial`), a memória que precisa livre (`vram`, em GB) e as palavras de qualidade que o modelo espera. Para trocar, use `"motor": "nome"` na lista ou `KOTOBA_MOTOR=nome`. Uma lista pode ajustar um motor em `"por_motor": {"nome": {"passos": 24}}`. Trocar de motor não refaz o que já foi aprovado: só gera as candidatas que faltam.
 
 ### Formato da lista
 

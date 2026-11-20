@@ -15,9 +15,12 @@ Uso (de dentro da pasta do repositório):
 As candidatas e os relatórios ficam fora do repositório, em D:\\KotobaArcade-Arte\\estudio\\<lote>\\.
 Só a imagem final (WebP) entra no repositório.
 
-A placa é dividida com outras sessões. Antes de carregar qualquer modelo o estúdio cria
-D:\\KotobaArcade-Arte\\gpu.lock com o nome de quem está usando e espera se o arquivo já existir,
-ou se o Ollama tiver um modelo carregado, ou se um motor de voz estiver no ar. Apaga o lock ao terminar.
+A placa é dividida com outras sessões. Antes de carregar qualquer modelo o estúdio prende a placa com
+scripts/placa.py (trava do sistema, solta sozinha se o processo morrer) e espera o Ollama descarregar, os
+motores de voz saírem do ar e sobrar memória livre na placa. Só um modelo fica na placa por vez.
+
+O modelo de imagem vem de scripts/imagens/motores.json (um "motor" por modelo, com passos, cfg e offload
+próprios). Troque com "motor" na lista ou com KOTOBA_MOTOR=<nome>.
 
 Formato da lista (JSON):
 
@@ -52,16 +55,18 @@ import pathlib
 import re
 import sys
 import time
-import urllib.request
 from collections import deque
 
-ARTE = pathlib.Path(os.environ.get("KOTOBA_ARTE", "D:/KotobaArcade-Arte"))
-MODELO = ARTE / "modelos" / "animagine-xl-4.0-opt.safetensors"
-CLIP = "laion/CLIP-ViT-H-14-laion2B-s32B-b79K"
-LOCK = ARTE / "gpu.lock"
-SESSAO = os.environ.get("KOTOBA_SESSAO", "estudio")
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))  # -I tira a pasta do script do caminho
+from placa import Placa  # noqa: E402
 
-QUAL = "masterpiece, high score, great score, absurdres"
+ARTE = pathlib.Path(os.environ.get("KOTOBA_ARTE", "D:/KotobaArcade-Arte"))
+MOTORES = pathlib.Path(__file__).resolve().parent / "imagens" / "motores.json"
+CLIP = "laion/CLIP-ViT-H-14-laion2B-s32B-b79K"
+CLIP_VRAM_GB = 4
+SESSAO = os.environ.get("KOTOBA_SESSAO", "estudio")
+# Folga deixada fora do teto de memória do PyTorch (o Windows usa um pouco da placa para a tela).
+FOLGA_GB = 0.8
 NEG_BASE = (
     "lowres, bad anatomy, bad hands, text, letters, words, writing, logo, label, caption, kanji, english text, "
     "speech bubble, signature, watermark, username, error, cropped, worst quality, low quality, low score, "
@@ -104,74 +109,113 @@ def seeds_de(lista: dict, item: dict, rodada: int = 0) -> list[int]:
 # ---------------------------------------------------------------- placa de vídeo
 
 
-def _ollama_carregado() -> bool:
-    try:
-        with urllib.request.urlopen("http://127.0.0.1:11434/api/ps", timeout=2) as r:
-            return bool(json.load(r).get("models"))
-    except Exception:
-        return False
+def motor(lista: dict) -> dict:
+    """O motor de geração (modelo + passos, cfg, offload) da lista, do ambiente ou o padrão.
+    A lista pode ajustar um motor em "por_motor": {"nome": {"passos": 24}}."""
+    tabela = json.loads(MOTORES.read_text(encoding="utf-8"))
+    nome = os.environ.get("KOTOBA_MOTOR") or lista.get("motor") or tabela["padrao"]
+    if nome not in tabela["motores"]:
+        raise SystemExit(f"motor desconhecido: {nome} (veja {MOTORES.name})")
+    m = {"nome": nome, "cfg": 5, "passos": 26, "offload": "nenhum", "vram": 10, "qualidade": "", "negativo": True}
+    m.update(tabela["motores"][nome])
+    m.update(lista.get("por_motor", {}).get(nome, {}))
+    return m
 
 
-def _voz_no_ar() -> bool:
-    for porta in (10101, 50021):
-        try:
-            urllib.request.urlopen(f"http://127.0.0.1:{porta}/version", timeout=2)
-            return True
-        except Exception:
-            pass
-    return False
+def teto_de_memoria() -> None:
+    """Põe um teto no PyTorch igual ao que está livre agora. Passar dele vira erro de memória,
+    em vez de o driver do Windows jogar o excesso na RAM em silêncio (fica dezenas de vezes mais lento)."""
+    import torch
+
+    livre, total = torch.cuda.mem_get_info()
+    fracao = max(0.1, min(0.95, (livre - FOLGA_GB * 2**30) / total))
+    torch.cuda.set_per_process_memory_fraction(fracao)
+    print(f"teto de memória: {fracao * total / 2**30:.1f} GB de {total / 2**30:.1f}", flush=True)
 
 
-class Placa:
-    """Trava da placa de vídeo, dividida entre as sessões. Use com `with Placa():`."""
+def pico(fase: str) -> None:
+    import torch
 
-    def __enter__(self):
-        avisou = False
-        while True:
-            ocupada = LOCK.exists() or _ollama_carregado() or _voz_no_ar()
-            if not ocupada:
-                try:
-                    with open(LOCK, "x", encoding="utf-8") as f:
-                        f.write(f"{SESSAO} {time.strftime('%Y-%m-%d %H:%M:%S')} pid {os.getpid()}\n")
-                    return self
-                except FileExistsError:
-                    pass
-            if not avisou:
-                dono = LOCK.read_text(encoding="utf-8").strip() if LOCK.exists() else "Ollama ou motor de voz"
-                print(f"placa ocupada ({dono}); esperando...", flush=True)
-                avisou = True
-            time.sleep(30)
+    print(f"[{fase}] pico de memória na placa: {torch.cuda.max_memory_allocated() / 2**30:.1f} GB", flush=True)
+    torch.cuda.reset_peak_memory_stats()
 
-    def __exit__(self, *exc):
-        try:
-            if LOCK.exists() and f"pid {os.getpid()}" in LOCK.read_text(encoding="utf-8"):
-                LOCK.unlink()
-        except OSError:
-            pass
-        return False
+
+def descarregar() -> None:
+    """Devolve à placa a memória dos modelos que ninguém mais usa. Quem chama solta a referência antes."""
+    import gc
+
+    import torch
+
+    gc.collect()
+    torch.cuda.empty_cache()
 
 
 # ---------------------------------------------------------------- gerar
 
 
-def _pipe():
+def _pipe(m: dict):
     import torch
-    from diffusers import EulerAncestralDiscreteScheduler, StableDiffusionXLPipeline
     from diffusers.utils import logging as dlog
 
     dlog.set_verbosity_error()
     dlog.disable_progress_bar()
+    teto_de_memoria()
+    dtype = getattr(torch, m.get("dtype", "float16"))
+    if m["tipo"] == "sdxl-arquivo":
+        from diffusers import EulerAncestralDiscreteScheduler, StableDiffusionXLPipeline
 
-    pipe = StableDiffusionXLPipeline.from_single_file(str(MODELO), torch_dtype=torch.float16, use_safetensors=True)
-    pipe.scheduler = EulerAncestralDiscreteScheduler.from_config(pipe.scheduler.config)
-    pipe.to("cuda")
+        pipe = StableDiffusionXLPipeline.from_single_file(str(ARTE / m["arquivo"]), torch_dtype=dtype, use_safetensors=True)
+        if m.get("agendador", "euler-a") == "euler-a":
+            pipe.scheduler = EulerAncestralDiscreteScheduler.from_config(pipe.scheduler.config)
+    elif m["tipo"] == "diffusers":
+        from diffusers import DiffusionPipeline
+
+        origem = str(ARTE / m["pasta"]) if "pasta" in m else m["repo"]
+        pipe = DiffusionPipeline.from_pretrained(origem, torch_dtype=dtype)
+    else:
+        raise SystemExit(f"tipo de motor desconhecido: {m['tipo']}")
+    if m["offload"] == "modelo":
+        pipe.enable_model_cpu_offload()
+    elif m["offload"] == "sequencial":
+        pipe.enable_sequential_cpu_offload()
+    else:
+        pipe.to("cuda")
+    # A VAE decodifica uma imagem por vez e em ladrilhos: o lote de 3 em 1024² não estoura mais a memória.
+    # (diffusers 0.43 tirou pipe.enable_vae_slicing; o método ficou na própria VAE.)
+    vae = getattr(pipe, "vae", None)
+    for antigo, novo in (("enable_vae_slicing", "enable_slicing"), ("enable_vae_tiling", "enable_tiling")):
+        if hasattr(vae, novo):
+            getattr(vae, novo)()
+        elif hasattr(pipe, antigo):
+            getattr(pipe, antigo)()
     pipe.set_progress_bar_config(disable=True)
     return pipe
 
 
-def gerar(lista: dict, so: set[str] | None = None, rodada: int = 0, pipe=None) -> None:
+def _chamar(pipe, m: dict, prompts: list[str], negativos: list[str], seeds: list[int], w: int, h: int):
+    """Uma chamada do modelo, só com os argumentos que ele aceita (FLUX não tem negativo, por exemplo)."""
+    import inspect
+
     import torch
 
+    aceita = inspect.signature(pipe.__call__).parameters
+    args = dict(
+        prompt=prompts, width=w, height=h, guidance_scale=m["cfg"], num_inference_steps=m["passos"],
+        generator=[torch.Generator("cuda").manual_seed(s) for s in seeds],
+    )
+    if m["negativo"] and "negative_prompt" in aceita:
+        args["negative_prompt"] = negativos
+    return pipe(**{k: v for k, v in args.items() if k in aceita}).images
+
+
+def lotes(seeds: list[int], tamanho: int) -> list[list[int]]:
+    return [seeds[i:i + tamanho] for i in range(0, len(seeds), tamanho)]
+
+
+def gerar(lista: dict, so: set[str] | None = None, rodada: int = 0, pipe=None):
+    import torch
+
+    m = motor(lista)
     out = pasta(lista)
     w, h = lista.get("largura", 1024), lista.get("altura", 1024)
     neg = f"{lista.get('negativo', '')}, {NEG_BASE}".strip(", ")
@@ -184,21 +228,25 @@ def gerar(lista: dict, so: set[str] | None = None, rodada: int = 0, pipe=None) -
             pendentes.append((item, seeds))
     if not pendentes:
         return
-    pipe = pipe or _pipe()
+    pipe = pipe or _pipe(m)
     t0 = time.time()
+    lote = len(seeds_de(lista, pendentes[0][0]))
     for n, (item, seeds) in enumerate(pendentes, 1):
-        prompt = f"{item['prompt']}, {lista.get('estilo', '')}, {QUAL}"
-        imgs = pipe(
-            prompt=[prompt] * len(seeds),
-            negative_prompt=[f"{item.get('negativo', '')}, {neg}".strip(", ")] * len(seeds),
-            width=w,
-            height=h,
-            guidance_scale=lista.get("cfg", 5),
-            num_inference_steps=lista.get("passos", 26),
-            generator=[torch.Generator("cuda").manual_seed(s) for s in seeds],
-        ).images
-        for s, img in zip(seeds, imgs):
-            img.save(out / f"{item['id']}-{s}.png")
+        prompt = ", ".join(x for x in (item["prompt"], lista.get("estilo", ""), m["qualidade"]) if x)
+        negativo = f"{item.get('negativo', '')}, {neg}".strip(", ")
+        for grupo in lotes(seeds, lote):
+            try:
+                imgs = _chamar(pipe, m, [prompt] * len(grupo), [negativo] * len(grupo), grupo, w, h)
+            except torch.cuda.OutOfMemoryError:
+                if lote == 1:
+                    raise
+                # Bateu no teto: segue de uma em uma, em vez de vazar para a RAM.
+                torch.cuda.empty_cache()
+                lote = 1
+                print("memória cheia com o lote; seguindo de uma imagem por vez", flush=True)
+                imgs = [_chamar(pipe, m, [prompt], [negativo], [s], w, h)[0] for s in grupo]
+            for s, img in zip(grupo, imgs):
+                img.save(out / f"{item['id']}-{s}.png")
         resta = (time.time() - t0) / n * (len(pendentes) - n)
         print(f"[{n}/{len(pendentes)}] {item['id']} seeds {seeds} (faltam ~{resta / 60:.0f} min)", flush=True)
     return pipe
@@ -215,6 +263,7 @@ def _clip():
 
     tlog.disable_progress_bar()
     tlog.set_verbosity_error()
+    teto_de_memoria()
     modelo = CLIPModel.from_pretrained(CLIP, dtype=torch.float16).to("cuda").eval()
     proc = CLIPProcessor.from_pretrained(CLIP)
     return modelo, proc
@@ -414,11 +463,13 @@ def main(argv: list[str]) -> None:
     resto = argv[2:]
     repo = pathlib.Path(__file__).resolve().parent.parent
     if cmd == "gerar":
-        with Placa():
-            gerar(lista, set(resto) or None)
+        with Placa(SESSAO, vram_gb=motor(lista)["vram"]):
+            if gerar(lista, set(resto) or None):
+                pico("gerar")
     elif cmd == "conferir":
-        with Placa():
+        with Placa(SESSAO, vram_gb=CLIP_VRAM_GB):
             rel = conferir(lista)
+            pico("conferir")
         ok = sum(1 for k in escolhidas(lista, rel).values() if k)
         print(f"{ok}/{len(lista['itens'])} itens com candidata aprovada")
     elif cmd == "folha":
@@ -430,17 +481,30 @@ def main(argv: list[str]) -> None:
         faltando = exportar(lista, repo, rel)
         print("sem imagem aprovada:", faltando or "nenhum")
     elif cmd == "tudo":
-        with Placa():
+        # Gerar e conferir se alternam, e só um modelo fica na placa por vez: o SDXL e o CLIP juntos
+        # passavam da memória da placa e o excesso ia para a RAM.
+        with Placa(SESSAO, vram_gb=motor(lista)["vram"]):
             pipe = gerar(lista, set(resto) or None)
-            clip = _clip()
-            rel = conferir(lista, clip)
+            if pipe:
+                pico("gerar")
+                pipe = None
+                descarregar()
+            rel = conferir(lista)
+            pico("conferir")
+            descarregar()
             for rodada in range(1, RODADAS_EXTRAS + 1):
                 faltam = {i for i, k in escolhidas(lista, rel).items() if not k and (not resto or i in resto)}
                 if not faltam:
                     break
                 print(f"refazendo {len(faltam)} reprovadas (rodada {rodada}): {sorted(faltam)}", flush=True)
-                pipe = gerar(lista, faltam, rodada, pipe) or pipe
-                rel = conferir(lista, clip)
+                pipe = gerar(lista, faltam, rodada)
+                if pipe:
+                    pico(f"gerar, rodada {rodada}")
+                    pipe = None
+                    descarregar()
+                rel = conferir(lista)
+                pico(f"conferir, rodada {rodada}")
+                descarregar()
         faltando = exportar(lista, repo, rel)
         print("sem imagem aprovada:", faltando or "nenhum")
         for p in folha(lista, rel):

@@ -26,14 +26,14 @@ O motor e os modelos ficam fora do repositório, em `D:\KotobaArcade-Voz`:
 Os modelos de voz ficam onde o AivisSpeech guarda (`%APPDATA%\AivisSpeech-Engine\Models`). O VOICEVOX (palavras e kana) e o Whisper são os mesmos da Conversa por voz, em `D:\KotobaArcade-IA`.
 
 ```bash
-D:/KotobaArcade-Voz/aivis/Windows-x64/run.exe --use_gpu --port 10101
-D:/KotobaArcade-IA/voicevox/run.exe --port 50021
 npm run vozes
 ```
 
+O `npm run vozes` passa pela trava da placa (`scripts/placa.py`, explicada em `docs/imagens.md`): espera a placa ficar livre, sobe o AivisSpeech (`--use_gpu`, porta 10101) e o VOICEVOX (porta 50021), grava e derruba os dois no fim. O log de cada motor fica em `trabalho/`. Se outra pessoa estiver com um motor de voz no ar, ele espera. Os executáveis podem ser trocados com `AIVIS_EXE` e `VOICEVOX_EXE`.
+
 Na primeira vez o motor baixa o modelo de texto (deberta, 650 MB). Se a pasta de cache dele quebrar no Windows, apague `%APPDATA%\AivisSpeech-Engine\BertModelCaches` e rode com `HF_HUB_OFFLINE=1` depois de copiar os arquivos de `D:\KotobaArcade-Voz\bert-onnx` para a pasta do snapshot.
 
-Variáveis: `VOZ_DIR`, `VOZ_PYTHON`, `AIVIS_URL`, `VOICEVOX_URL`. `npm run vozes -- --listar` só escreve a lista de falas. `-- --refazer` grava tudo de novo.
+Variáveis: `VOZ_DIR`, `VOZ_PYTHON`, `AIVIS_URL`, `VOICEVOX_URL`, `AIVIS_EXE`, `VOICEVOX_EXE`. `node scripts/gravar-vozes.mjs --listar` só escreve a lista de falas, sem prender a placa. `-- --refazer` grava tudo de novo.
 
 ## O que o gravador confere
 

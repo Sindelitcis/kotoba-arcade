@@ -1,0 +1,16 @@
+{
+  "padrao": "animagine-xl-4",
+  "motores": {
+    "animagine-xl-4": {
+      "tipo": "sdxl-arquivo",
+      "arquivo": "modelos/animagine-xl-4.0-opt.safetensors",
+      "licenca": "CreativeML Open RAIL++-M",
+      "passos": 26,
+      "cfg": 5,
+      "agendador": "euler-a",
+      "offload": "nenhum",
+      "vram": 10,
+      "qualidade": "masterpiece, high score, great score, absurdres"
+    }
+  }
+}
