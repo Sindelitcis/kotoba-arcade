@@ -22,6 +22,9 @@ function arquivos(dir: string): string[] {
   return readdirSync(dir, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? arquivos(join(dir, e.name)) : [join(dir, e.name)]));
 }
 
+// Lê byte a byte milhares de mp3: com os outros testes rodando junto, passa dos 5 s padrão.
+const LER_TUDO = 60_000;
+
 const rel = (f: string) => relative(RAIZ, f).replaceAll('\\', '/');
 
 const git = (...args: string[]) => execFileSync('git', args, { cwd: RAIZ, encoding: 'utf8' });
@@ -30,7 +33,7 @@ describe('a voz do PC fica no PC', () => {
   it('nenhum arquivo do site (public/) foi gravado com a voz do PC', () => {
     const achados = arquivos(join(RAIZ, 'public')).filter((f) => readFileSync(f).includes(MARCA_LOCAL));
     expect(achados.map(rel)).toEqual([]);
-  });
+  }, LER_TUDO);
 
   it('nenhum arquivo do Git foi gravado com a voz do PC', () => {
     const lista = git('ls-files', '-z').split('\0').filter(Boolean);
@@ -43,7 +46,7 @@ describe('a voz do PC fica no PC', () => {
     });
     // Este teste e o gravador citam a marca no código; áudio nenhum pode ter.
     expect(achados.filter((f) => !/\.(ts|tsx|py|mjs|md)$/.test(f))).toEqual([]);
-  });
+  }, LER_TUDO);
 
   it('nem voz de referência, nem pesos de modelo, nem config do PC no Git ou no site', () => {
     const noGit = git('ls-files', '-z').split('\0').filter((f) => PROIBIDO.test(f));
@@ -58,7 +61,7 @@ describe('a voz do PC fica no PC', () => {
   it('toda gravação em português do site é da voz livre', () => {
     const mp3 = arquivos(join(RAIZ, 'public', 'vozes-pt')).filter((f) => f.endsWith('.mp3'));
     expect(mp3.filter((f) => !readFileSync(f).includes(MARCA_LIVRE)).map(rel)).toEqual([]);
-  });
+  }, LER_TUDO);
 
   it('o gravador da voz do PC se recusa a gravar dentro do repositório', () => {
     const PY = ['python3', 'python'].find((c) => spawnSync(c, ['--version']).status === 0);
