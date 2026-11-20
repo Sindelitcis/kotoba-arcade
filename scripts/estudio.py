@@ -8,9 +8,10 @@ Uso (de dentro da pasta do repositório):
     PY=D:/KotobaArcade-Arte/venv/Scripts/python
     $PY -I scripts/estudio.py gerar    scripts/imagens/objetos.json [id ...]   # candidatas, várias seeds
     $PY -I scripts/estudio.py conferir scripts/imagens/objetos.json            # CLIP: a imagem mostra a ideia certa?
+    $PY -I scripts/estudio.py revisar  scripts/imagens/objetos.json [id ...]   # modelo de visão: tem defeito?
     $PY -I scripts/estudio.py folha    scripts/imagens/objetos.json            # folhas de contato para olhar
     $PY -I scripts/estudio.py exportar scripts/imagens/objetos.json            # WebP cor + tinta no repositório
-    $PY -I scripts/estudio.py tudo     scripts/imagens/objetos.json            # os quatro acima, refazendo as reprovadas
+    $PY -I scripts/estudio.py tudo     scripts/imagens/objetos.json            # todos acima, refazendo as reprovadas
 
 As candidatas e os relatórios ficam fora do repositório, em D:\\KotobaArcade-Arte\\estudio\\<lote>\\.
 Só a imagem final (WebP) entra no repositório.
@@ -49,12 +50,14 @@ import warnings
 
 warnings.filterwarnings("ignore")
 
+import hashlib
 import json
 import os
 import pathlib
 import re
 import sys
 import time
+import urllib.request
 from collections import deque
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))  # -I tira a pasta do script do caminho
@@ -64,6 +67,10 @@ ARTE = pathlib.Path(os.environ.get("KOTOBA_ARTE", "D:/KotobaArcade-Arte"))
 MOTORES = pathlib.Path(__file__).resolve().parent / "imagens" / "motores.json"
 CLIP = "laion/CLIP-ViT-H-14-laion2B-s32B-b79K"
 CLIP_VRAM_GB = 4
+# Revisão de defeitos: modelo de visão local, no Ollama. O CLIP vê "é um gato", mas não vê o rabo solto.
+OLLAMA = os.environ.get("OLLAMA_URL", "http://127.0.0.1:11434")
+VISAO = os.environ.get("KOTOBA_VISAO", "gemma4:12b")
+VISAO_VRAM_GB = 9
 SESSAO = os.environ.get("KOTOBA_SESSAO", "estudio")
 # Folga deixada fora do teto de memória do PyTorch (o Windows usa um pouco da placa para a tela).
 FOLGA_GB = 0.8
@@ -102,8 +109,10 @@ def pasta(lista: dict) -> pathlib.Path:
 
 
 def seeds_de(lista: dict, item: dict, rodada: int = 0) -> list[int]:
+    """Seeds da rodada. Cada motor soma o seu deslocamento ("seed"), para a candidata de um modelo
+    novo não ter o mesmo nome de arquivo que a de outro modelo (que seria pulada como já gerada)."""
     base = item.get("seeds") or lista.get("seeds") or [1, 2, 3]
-    return [s + 1000 * rodada for s in base]
+    return [s + 1000 * rodada + motor(lista).get("seed", 0) for s in base]
 
 
 # ---------------------------------------------------------------- placa de vídeo
@@ -116,7 +125,8 @@ def motor(lista: dict) -> dict:
     nome = os.environ.get("KOTOBA_MOTOR") or lista.get("motor") or tabela["padrao"]
     if nome not in tabela["motores"]:
         raise SystemExit(f"motor desconhecido: {nome} (veja {MOTORES.name})")
-    m = {"nome": nome, "cfg": 5, "passos": 26, "offload": "nenhum", "vram": 10, "qualidade": "", "negativo": True}
+    m = {"nome": nome, "cfg": 5, "passos": 26, "offload": "nenhum", "vram": 10, "prefixo": "", "qualidade": "",
+         "negativo": True, "gerador": "cuda", "seed": 0}
     m.update(tabela["motores"][nome])
     m.update(lista.get("por_motor", {}).get(nome, {}))
     return m
@@ -157,8 +167,12 @@ def _pipe(m: dict):
     import torch
     from diffusers.utils import logging as dlog
 
+    from transformers.utils import logging as tlog
+
     dlog.set_verbosity_error()
     dlog.disable_progress_bar()
+    tlog.set_verbosity_error()
+    tlog.disable_progress_bar()
     teto_de_memoria()
     dtype = getattr(torch, m.get("dtype", "float16"))
     if m["tipo"] == "sdxl-arquivo":
@@ -167,6 +181,8 @@ def _pipe(m: dict):
         pipe = StableDiffusionXLPipeline.from_single_file(str(ARTE / m["arquivo"]), torch_dtype=dtype, use_safetensors=True)
         if m.get("agendador", "euler-a") == "euler-a":
             pipe.scheduler = EulerAncestralDiscreteScheduler.from_config(pipe.scheduler.config)
+    elif m["tipo"] == "anima":
+        pipe = _Anima(ARTE / m["base"], ARTE / m["variante"] if m.get("variante") else None, dtype)
     elif m["tipo"] == "diffusers":
         from diffusers import DiffusionPipeline
 
@@ -192,6 +208,54 @@ def _pipe(m: dict):
     return pipe
 
 
+class _Anima:
+    """Anima (CircleStone Labs): pipeline modular do diffusers, com a mesma chamada dos outros.
+    A base fica no formato diffusers; a variante (Turbo, por exemplo) é um arquivo único do ComfyUI
+    com o transformer e o adaptador do LLM juntos, que entram por cima da base."""
+
+    def __init__(self, base: pathlib.Path, variante: pathlib.Path | None, dtype):
+        from diffusers import ClassifierFreeGuidance, ModularPipeline
+
+        self.p = ModularPipeline.from_pretrained(str(base))
+        self.p.load_components(torch_dtype=dtype)
+        if variante:
+            from diffusers.loaders.single_file_utils import convert_cosmos_transformer_checkpoint_to_diffusers
+            from safetensors.torch import load_file
+
+            sd = {k.removeprefix("model.diffusion_model."): v for k, v in load_file(str(variante)).items()}
+            adaptador = {k.removeprefix("llm_adapter."): v for k, v in sd.items() if k.startswith("llm_adapter.")}
+            transformer = convert_cosmos_transformer_checkpoint_to_diffusers({k: v for k, v in sd.items() if not k.startswith("llm_adapter.")})
+            self.p.transformer.load_state_dict(transformer, strict=True)
+            self.p.text_conditioner.load_state_dict(adaptador, strict=True)
+            del sd, adaptador, transformer
+        self._guia = ClassifierFreeGuidance
+        if hasattr(self.p, "set_progress_bar_config"):
+            self.p.set_progress_bar_config(disable=True)
+
+    def to(self, dispositivo: str) -> "_Anima":
+        self.p.to(dispositivo)
+        return self
+
+    def set_progress_bar_config(self, **kw) -> None:
+        pass
+
+    def __call__(self, prompt, guidance_scale: float, num_inference_steps: int, width: int, height: int, generator, negative_prompt=None):
+        """Uma imagem por prompt (o pipeline modular não recebe lista de seeds)."""
+        self.p.update_components(guider=self._guia(guidance_scale=guidance_scale))
+        prompts = [prompt] if isinstance(prompt, str) else prompt
+        geradores = generator if isinstance(generator, list) else [generator]
+        negativos = negative_prompt if isinstance(negative_prompt, list) else [negative_prompt] * len(prompts)
+        imgs = []
+        for pr, g, neg in zip(prompts, geradores, negativos):
+            extra = {"negative_prompt": neg} if neg else {}
+            imgs += list(self.p(prompt=pr, num_inference_steps=num_inference_steps, width=width, height=height, generator=g, output="images", **extra))
+
+        class Resultado:
+            images = imgs
+
+        return Resultado()
+
+
 def _chamar(pipe, m: dict, prompts: list[str], negativos: list[str], seeds: list[int], w: int, h: int):
     """Uma chamada do modelo, só com os argumentos que ele aceita (FLUX não tem negativo, por exemplo)."""
     import inspect
@@ -201,7 +265,7 @@ def _chamar(pipe, m: dict, prompts: list[str], negativos: list[str], seeds: list
     aceita = inspect.signature(pipe.__call__).parameters
     args = dict(
         prompt=prompts, width=w, height=h, guidance_scale=m["cfg"], num_inference_steps=m["passos"],
-        generator=[torch.Generator("cuda").manual_seed(s) for s in seeds],
+        generator=[torch.Generator(m["gerador"]).manual_seed(s) for s in seeds],
     )
     if m["negativo"] and "negative_prompt" in aceita:
         args["negative_prompt"] = negativos
@@ -230,9 +294,9 @@ def gerar(lista: dict, so: set[str] | None = None, rodada: int = 0, pipe=None):
         return
     pipe = pipe or _pipe(m)
     t0 = time.time()
-    lote = len(seeds_de(lista, pendentes[0][0]))
+    lote = min(m.get("lote", 99), len(seeds_de(lista, pendentes[0][0])))
     for n, (item, seeds) in enumerate(pendentes, 1):
-        prompt = ", ".join(x for x in (item["prompt"], lista.get("estilo", ""), m["qualidade"]) if x)
+        prompt = m["prefixo"] + ", ".join(x for x in (item["prompt"], lista.get("estilo", ""), m["qualidade"]) if x)
         negativo = f"{item.get('negativo', '')}, {neg}".strip(", ")
         for grupo in lotes(seeds, lote):
             try:
@@ -289,6 +353,38 @@ def _rotulos(lista: dict) -> list[str]:
     return vistos
 
 
+def assinatura(png: pathlib.Path) -> str:
+    """Identifica o arquivo: gerar de novo com a mesma seed troca a assinatura."""
+    st = png.stat()
+    return f"{st.st_size}-{st.st_mtime_ns}"
+
+
+def resumo_rotulos(rotulos: list[str]) -> str:
+    return hashlib.sha1("\n".join(rotulos).encode("utf-8")).hexdigest()[:12]
+
+
+def ainda_vale(entrada: dict | None, rotulo: str, rotulos: list[str], arquivo: str) -> bool:
+    """A nota guardada só vale para o mesmo arquivo, comparado com o mesmo rótulo e os mesmos rivais.
+    Antes valia só pelo rótulo: imagem refeita com a mesma seed herdava a nota da antiga."""
+    return bool(entrada) and entrada.get("rotulo") == rotulo and entrada.get("rotulos") == resumo_rotulos(rotulos) and entrada.get("arquivo") == arquivo
+
+
+def ler_relatorio(out: pathlib.Path, com_revisao: bool = True) -> dict:
+    """Lê `conferencia.json` sem as candidatas cujo arquivo não existe mais (apagada ou movida
+    para refazer com outro prompt). Antes elas ficavam e a folha quebrava ao abrir a imagem.
+    Com a revisão, a candidata que o modelo de visão reprovou conta como reprovada."""
+    caminho = out / "conferencia.json"
+    rel = json.loads(caminho.read_text(encoding="utf-8")) if caminho.exists() else {}
+    rel = {k: v for k, v in rel.items() if (out / f"{k}.png").exists()}
+    if com_revisao:
+        rev = ler_revisao(out)
+        for k, v in rel.items():
+            r = rev.get(k)
+            if r and revisao_vale(r, assinatura(out / f"{k}.png")) and not r["ok"]:
+                rel[k] = {**v, "ok": False, "defeitos": r["defeitos"]}
+    return rel
+
+
 def conferir(lista: dict, clip=None) -> dict:
     """Dá nota a cada candidata: chance do rótulo certo contra todos os outros rótulos."""
     import torch
@@ -300,14 +396,15 @@ def conferir(lista: dict, clip=None) -> dict:
     frase = lista.get("modelo_rotulo", "an illustration of {}")
     ti = proc(text=[frase.format(r) for r in rotulos], return_tensors="pt", padding=True).to("cuda")
     relatorio_path = out / "conferencia.json"
-    relatorio = json.loads(relatorio_path.read_text(encoding="utf-8")) if relatorio_path.exists() else {}
+    relatorio = ler_relatorio(out, com_revisao=False)
     for item in lista["itens"]:
         alvo = rotulos.index(item["rotulo"])
         for png in sorted(out.glob(f"{item['id']}-*.png")):
             if not re.fullmatch(rf"{re.escape(item['id'])}-\d+", png.stem):
                 continue
             chave = png.stem
-            if chave in relatorio and relatorio[chave].get("rotulo") == item["rotulo"] and relatorio[chave].get("n") == len(rotulos):
+            arquivo = assinatura(png)
+            if ainda_vale(relatorio.get(chave), item["rotulo"], rotulos, arquivo):
                 continue
             img = Image.open(png).convert("RGB")
             with torch.no_grad():
@@ -322,6 +419,8 @@ def conferir(lista: dict, clip=None) -> dict:
                 "id": item["id"],
                 "rotulo": item["rotulo"],
                 "n": len(rotulos),
+                "rotulos": resumo_rotulos(rotulos),
+                "arquivo": arquivo,
                 "p": round(probs[alvo], 3),
                 "sim": round(sim, 4),
                 "folga": round(probs[alvo] - probs[segundo], 3),
@@ -329,7 +428,7 @@ def conferir(lista: dict, clip=None) -> dict:
                 "segundo": rotulos[segundo],
                 "ok": ordem[0] == alvo and probs[alvo] >= ACEITE_P and probs[alvo] - probs[segundo] >= ACEITE_FOLGA,
             }
-    relatorio_path.write_text(json.dumps(relatorio, indent=1, ensure_ascii=False), encoding="utf-8")
+    relatorio_path.write_text(json.dumps(relatorio, indent=1, ensure_ascii=False), encoding="utf-8", newline="\n")
     return relatorio
 
 
@@ -345,6 +444,126 @@ def escolhidas(lista: dict, relatorio: dict) -> dict[str, str | None]:
         boas = [(round(v["p"], 2), v.get("sim", 0), k) for k, v in relatorio.items() if v["id"] == item["id"] and v["ok"] and k not in lista.get("vetadas", [])]
         res[item["id"]] = max(boas)[2] if boas else None
     return res
+
+
+# ---------------------------------------------------------------- revisar
+
+
+PERGUNTA = """This drawing should show: {rotulo}.
+Look closely at the whole drawing, part by part, and answer:
+- o_que_e: what the drawing shows, in a few English words.
+- e_o_esperado: true if a person would call it "{rotulo}" at first glance.
+- membro_solto: true if a limb, tail, ear, handle or other part floats detached from the body.
+- parte_faltando: true if a head, leg, limb or other essential part is missing or cut off.
+- partes_soltas: true if there are stray blobs, smudges or extra fragments not attached to anything.
+- ambigua: true if it is hard to tell what it is, or the angle hides what it is (for example an animal seen only from behind).
+- problemas: short list of the defects you see (empty if none)."""
+
+FORMATO = {
+    "type": "object",
+    "properties": {
+        "o_que_e": {"type": "string"},
+        "e_o_esperado": {"type": "boolean"},
+        "membro_solto": {"type": "boolean"},
+        "parte_faltando": {"type": "boolean"},
+        "partes_soltas": {"type": "boolean"},
+        "ambigua": {"type": "boolean"},
+        "problemas": {"type": "array", "items": {"type": "string"}},
+    },
+    "required": ["o_que_e", "e_o_esperado", "membro_solto", "parte_faltando", "partes_soltas", "ambigua", "problemas"],
+}
+
+DEFEITOS = {"membro_solto": "membro solto", "parte_faltando": "parte faltando", "partes_soltas": "pedaços soltos", "ambigua": "ambígua"}
+
+
+def veredito(resposta: dict) -> tuple[bool, list[str]]:
+    """Passa só sem nenhum defeito e se parecer o que devia."""
+    defeitos = [nome for chave, nome in DEFEITOS.items() if resposta.get(chave)]
+    if not resposta.get("e_o_esperado"):
+        defeitos.insert(0, f"parece {resposta.get('o_que_e') or 'outra coisa'}")
+    return not defeitos, defeitos + [str(x) for x in resposta.get("problemas", [])][:3]
+
+
+def _ollama(caminho: str, corpo: dict, espera: float = 600) -> dict:
+    req = urllib.request.Request(f"{OLLAMA}{caminho}", data=json.dumps(corpo).encode("utf-8"), headers={"Content-Type": "application/json"})
+    with urllib.request.urlopen(req, timeout=espera) as r:
+        return json.load(r)
+
+
+def perguntar_visao(png: pathlib.Path, rotulo: str) -> dict:
+    import base64
+    import io
+
+    from PIL import Image
+
+    img = Image.open(png).convert("RGB")
+    img.thumbnail((768, 768))
+    buf = io.BytesIO()
+    img.save(buf, "PNG")
+    r = _ollama("/api/generate", {
+        "model": VISAO, "prompt": PERGUNTA.format(rotulo=rotulo), "images": [base64.b64encode(buf.getvalue()).decode()],
+        "format": FORMATO, "stream": False, "think": False, "keep_alive": "10m", "options": {"temperature": 0},
+    })
+    return json.loads(r["response"])
+
+
+def descarregar_visao() -> None:
+    """Tira o modelo de visão da placa na hora (keep_alive 0)."""
+    try:
+        _ollama("/api/generate", {"model": VISAO, "keep_alive": 0}, espera=60)
+    except Exception as e:
+        print(f"não deu para descarregar {VISAO}: {e}", flush=True)
+
+
+def ler_revisao(out: pathlib.Path) -> dict:
+    caminho = out / "revisao.json"
+    return json.loads(caminho.read_text(encoding="utf-8")) if caminho.exists() else {}
+
+
+def revisao_vale(entrada: dict, arquivo: str) -> bool:
+    """A revisão guardada vale para o mesmo arquivo, vista pelo mesmo modelo."""
+    return entrada.get("arquivo") == arquivo and entrada.get("modelo") == VISAO
+
+
+def ordem_de_revisao(lista: dict, relatorio: dict, iid: str) -> list[str]:
+    """Candidatas de um item na ordem em que seriam escolhidas: a fixada à mão, ou as aprovadas pelo CLIP."""
+    fixa = lista.get("escolha", {}).get(iid)
+    if fixa is not None:
+        return [f"{iid}-{fixa}"]
+    boas = [(round(v["p"], 2), v.get("sim", 0), k) for k, v in relatorio.items() if v["id"] == iid and v["ok"] and k not in lista.get("vetadas", [])]
+    return [k for *_, k in sorted(boas, reverse=True)]
+
+
+def revisar(lista: dict, so: set[str] | None = None, perguntar=perguntar_visao) -> list[str]:
+    """Pergunta ao modelo de visão se a candidata escolhida tem defeito; se tiver, passa para a próxima
+    aprovada pelo CLIP. Devolve os itens que ficaram sem nenhuma candidata boa (para refazer)."""
+    out = pasta(lista)
+    rel = ler_relatorio(out, com_revisao=False)
+    rev = ler_revisao(out)
+    sem_boa = []
+    for item in lista["itens"]:
+        if so and item["id"] not in so:
+            continue
+        achou = False
+        for k in ordem_de_revisao(lista, rel, item["id"]):
+            png = out / f"{k}.png"
+            if not png.exists():
+                continue
+            arquivo = assinatura(png)
+            if not (k in rev and revisao_vale(rev[k], arquivo)):
+                ok, defeitos = veredito(perguntar(png, item["rotulo"]))
+                rev[k] = {"ok": ok, "defeitos": defeitos, "arquivo": arquivo, "modelo": VISAO}
+                (out / "revisao.json").write_text(json.dumps(rev, indent=1, ensure_ascii=False), encoding="utf-8", newline="\n")
+                print(f"{k}: {'ok' if ok else 'reprovada: ' + '; '.join(defeitos)}", flush=True)
+            if rev[k]["ok"]:
+                achou = True
+                break
+            if item["id"] in lista.get("escolha", {}):
+                print(f"{k} foi fixada à mão e continua, mesmo reprovada na revisão", flush=True)
+                achou = True
+        if not achou:
+            sem_boa.append(item["id"])
+    return sem_boa
 
 
 # ---------------------------------------------------------------- exportar
@@ -412,6 +631,7 @@ def exportar(lista: dict, repo: pathlib.Path, relatorio: dict) -> list[str]:
     destino_tinta.mkdir(parents=True, exist_ok=True)
     lado = lista.get("saida", 384)
     faltando = []
+    medidas: dict[str, list[int]] = {}
     for iid, chave in escolhidas(lista, relatorio).items():
         if not chave:
             faltando.append(iid)
@@ -421,6 +641,9 @@ def exportar(lista: dict, repo: pathlib.Path, relatorio: dict) -> list[str]:
         img.thumbnail((lado, lado), Image.LANCZOS)
         img.save(destino / f"{iid}.webp", "WEBP", quality=lista.get("qualidade", 72), method=6)
         tinta(img).save(destino_tinta / f"{iid}.webp", "WEBP", quality=lista.get("qualidade", 72), method=6)
+        medidas[iid] = [img.width, img.height]
+    # Largura e altura de cada imagem: os jogos usam para montar a cena sem esperar a imagem carregar.
+    (destino / "medidas.json").write_text(json.dumps(dict(sorted(medidas.items())), indent=0) + "\n", encoding="utf-8", newline="\n")
     return faltando
 
 
@@ -446,7 +669,8 @@ def folha(lista: dict, relatorio: dict, so_reprovadas: bool = False) -> list[pat
             sheet.paste(im, (x, y))
             v = relatorio[k]
             d.text((x + 2, y + cel + 1), f"{k} {'OK' if v['ok'] else 'X'} {v['p']:.2f}", fill="black")
-            d.text((x + 2, y + cel + 13), f"1:{v['primeiro'][:30]}", fill="black" if v["ok"] else "red")
+            nota = "defeito: " + "; ".join(v["defeitos"]) if v.get("defeitos") else f"1:{v['primeiro']}"
+            d.text((x + 2, y + cel + 13), nota[:32], fill="black" if v["ok"] else "red")
         p = out / f"folha-{f // por_folha + 1}{'-x' if so_reprovadas else ''}.jpg"
         sheet.save(p, quality=80)
         folhas.append(p)
@@ -454,6 +678,13 @@ def folha(lista: dict, relatorio: dict, so_reprovadas: bool = False) -> list[pat
 
 
 # ---------------------------------------------------------------- comandos
+
+
+def revisar_e_soltar(lista: dict, so: set[str] | None) -> None:
+    try:
+        revisar(lista, so)
+    finally:
+        descarregar_visao()
 
 
 def main(argv: list[str]) -> None:
@@ -472,12 +703,19 @@ def main(argv: list[str]) -> None:
             pico("conferir")
         ok = sum(1 for k in escolhidas(lista, rel).values() if k)
         print(f"{ok}/{len(lista['itens'])} itens com candidata aprovada")
+    elif cmd == "revisar":
+        with Placa(SESSAO, vram_gb=VISAO_VRAM_GB):
+            try:
+                sem_boa = revisar(lista, set(resto) or None)
+            finally:
+                descarregar_visao()
+        print("sem candidata sem defeito (refazer):", sem_boa or "nenhum")
     elif cmd == "folha":
-        rel = json.loads((pasta(lista) / "conferencia.json").read_text(encoding="utf-8"))
+        rel = ler_relatorio(pasta(lista))
         for p in folha(lista, rel, "x" in resto):
             print(p)
     elif cmd == "exportar":
-        rel = json.loads((pasta(lista) / "conferencia.json").read_text(encoding="utf-8"))
+        rel = ler_relatorio(pasta(lista))
         faltando = exportar(lista, repo, rel)
         print("sem imagem aprovada:", faltando or "nenhum")
     elif cmd == "tudo":
@@ -489,9 +727,11 @@ def main(argv: list[str]) -> None:
                 pico("gerar")
                 pipe = None
                 descarregar()
-            rel = conferir(lista)
+            conferir(lista)
             pico("conferir")
             descarregar()
+            revisar_e_soltar(lista, set(resto) or None)
+            rel = ler_relatorio(pasta(lista))
             for rodada in range(1, RODADAS_EXTRAS + 1):
                 faltam = {i for i, k in escolhidas(lista, rel).items() if not k and (not resto or i in resto)}
                 if not faltam:
@@ -502,9 +742,11 @@ def main(argv: list[str]) -> None:
                     pico(f"gerar, rodada {rodada}")
                     pipe = None
                     descarregar()
-                rel = conferir(lista)
+                conferir(lista)
                 pico(f"conferir, rodada {rodada}")
                 descarregar()
+                revisar_e_soltar(lista, faltam)
+                rel = ler_relatorio(pasta(lista))
         faltando = exportar(lista, repo, rel)
         print("sem imagem aprovada:", faltando or "nenhum")
         for p in folha(lista, rel):

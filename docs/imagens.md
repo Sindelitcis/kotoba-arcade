@@ -1,6 +1,9 @@
 # Como as imagens foram feitas
 
-Cenários e personagens foram gerados no PC, numa RTX 5060 Ti de 16 GB, com o modelo aberto [Animagine XL 4.0](https://huggingface.co/cagliostrolab/animagine-xl-4.0) (licença CreativeML Open RAIL++-M). Nenhuma imagem passou por serviço online.
+Tudo foi gerado no PC, numa RTX 5060 Ti de 16 GB. Nenhuma imagem passou por serviço online.
+
+- Cenários e personagens, e as primeiras ilustrações de vocabulário: [Animagine XL 4.0](https://huggingface.co/cagliostrolab/animagine-xl-4.0), da Cagliostro Research Lab (licença CreativeML Open RAIL++-M). O arquivo do modelo foi apagado do PC em novembro de 2026; para gerar estas de novo, baixe outra vez.
+- Ilustrações de vocabulário daqui para a frente (Memória, Cena Viva, kana com imagem): [Anima Turbo v1.1](https://huggingface.co/circlestone-labs/Anima), da CircleStone Labs. Ganhou de seis modelos num teste com os mesmos prompts: traço de anime mais natural, gato com o rabo ligado ao corpo, konbini sem texto falso e o único que fez uma reverência de verdade.
 
 O que fica no repositório são só as imagens finais: a versão de mangá em `src/assets/cenas/` e `src/assets/pessoas/` (WebP em tons de cinza) e a versão anime em `src/assets/cenas-cor/` e `src/assets/pessoas-cor/` (WebP colorido). Todas com até 960px de largura e menos de 160 KB cada (um teste confere).
 
@@ -10,7 +13,7 @@ Os scripts e o modelo ficam fora do repositório, em `D:\KotobaArcade-Arte`:
 
 ```
 D:\KotobaArcade-Arte
-  modelos\animagine-xl-4.0-opt.safetensors   (6,9 GB)
+  modelos\animagine-xl-4.0-opt.safetensors   (6,9 GB; apagado em novembro de 2026, baixe de novo para refazer)
   venv\                                       Python 3.11 + PyTorch (CUDA 12.8) + diffusers
   scripts\gerar.py                            prompts de cada cenário e personagem
   scripts\otimizar.py                         escolhe a versão, passa para cinza e copia para cá
@@ -71,8 +74,15 @@ O que ele usa, tudo fora do repositório em `D:\KotobaArcade-Arte`:
 
 | Modelo | Para quê | Tamanho | Licença |
 | --- | --- | --- | --- |
-| [Animagine XL 4.0](https://huggingface.co/cagliostrolab/animagine-xl-4.0) (`modelos\animagine-xl-4.0-opt.safetensors`) | gerar | 6,9 GB | CreativeML Open RAIL++-M (permite uso e publicação das imagens) |
+| [Anima Turbo v1.1](https://huggingface.co/circlestone-labs/Anima) (base em `modelos\anima`, pesos do Turbo em `modelos\anima-variantes\split_files\diffusion_models\anima-turbo-v1.1.safetensors`) | gerar | 5,3 GB + 3,9 GB | CircleStone Labs Non-Commercial License v1.0 |
 | [CLIP ViT-H-14 da LAION](https://huggingface.co/laion/CLIP-ViT-H-14-laion2B-s32B-b79K) (`hf\hub\models--laion--CLIP-ViT-H-14-laion2B-s32B-b79K`) | conferir | 3,9 GB | MIT |
+| [Gemma 4 12B](https://ollama.com/library/gemma4), no Ollama (`gemma4:12b`) | revisar defeitos | 7,6 GB | Apache 2.0 |
+
+A licença do Anima é não comercial. O Kotoba Arcade é um projeto pessoal, sem venda nem anúncio, e o Rafael liberou o uso por isso. Pela licença, a imagem gerada é de quem gerou e pode ser usada à vontade; a restrição vale para o modelo. Se o projeto um dia virar comercial, o modelo tem de ser trocado ou licenciado com a CircleStone. Aviso pedido pela licença:
+
+> The CircleStone Model is licensed by CircleStone Labs LLC under the CircleStone Non-Commercial License. Copyright CircleStone Labs LLC.
+
+O Anima Turbo roda com 10 passos e cfg 1. Com cfg 1 o prompt negativo não faz efeito, então a clareza vem do prompt e das duas conferências. O prompt começa com `masterpiece, best quality, safe, `, seguido das tags e da frase do item. Leva uns 7 segundos por imagem, com pico de 9,4 GB na placa. Objetos finos (um anzol, por exemplo) mudam muito de uma seed para outra; por isso continuam três seeds por item.
 
 ### Como rodar
 
@@ -86,10 +96,11 @@ $PY -I scripts/estudio.py tudo scripts/imagens/objetos.json
 `tudo` faz, em ordem:
 
 1. **gerar**: cada item sai em várias seeds (`seeds` da lista), em PNG, em `D:\KotobaArcade-Arte\estudio\<lote>\`. O que já existe não é gerado de novo.
-2. **conferir**: o CLIP compara cada candidata com o rótulo do próprio item, com os rótulos de todos os outros itens do lote, com os `distratores` da lista e com alguns gerais (forma abstrata, objeto deformado, texto escrito). A imagem só passa se o próprio rótulo ganhar com chance de pelo menos 45% e 15 pontos de folga sobre o segundo. O relatório fica em `conferencia.json`.
-3. **refazer**: item sem nenhuma candidata aprovada ganha outra leva de seeds, até duas vezes.
-4. **exportar**: a melhor candidata aprovada vira WebP no `destino` da lista (cor) e em `<destino>-tinta` (versão mangá, em cinza). Com `"recorte": true` o fundo some (fica transparente).
-5. **folha**: folhas de contato em JPG para olhar tudo de uma vez.
+2. **conferir**: o CLIP compara cada candidata com o rótulo do próprio item, com os rótulos de todos os outros itens do lote, com os `distratores` da lista e com alguns gerais (forma abstrata, objeto deformado, texto escrito). A imagem só passa se o próprio rótulo ganhar com chance de pelo menos 45% e 15 pontos de folga sobre o segundo. O relatório fica em `conferencia.json`. A nota guardada só é reaproveitada para o mesmo arquivo com a mesma lista de rótulos: imagem refeita com a mesma seed é conferida de novo.
+3. **revisar**: o CLIP vê que é um gato, mas não vê que o rabo virou uma mancha solta. Por isso a candidata escolhida passa ainda por um modelo de visão local (`gemma4:12b`, no Ollama), que responde o que a figura mostra e se tem membro solto, parte faltando, pedaço solto ou se está ambígua (um bicho só de costas, por exemplo). Com qualquer defeito, ela sai e a próxima aprovada pelo CLIP é revista. O resultado fica em `revisao.json` e só é refeito para arquivo novo ou outro modelo. Roda com o modelo de imagem e o CLIP já fora da placa, sob a mesma trava, e o modelo de visão é descarregado no fim (`keep_alive: 0`). Troque o modelo com `KOTOBA_VISAO`.
+4. **refazer**: item sem nenhuma candidata aprovada ganha outra leva de seeds, até duas vezes.
+5. **exportar**: a melhor candidata aprovada vira WebP no `destino` da lista (cor) e em `<destino>-tinta` (versão mangá, em cinza). Com `"recorte": true` o fundo some (fica transparente).
+6. **folha**: folhas de contato em JPG para olhar tudo de uma vez. A reprovada na revisão aparece em vermelho com o defeito. Mesmo com as duas conferências, olhe a folha antes de publicar.
 
 Cada passo também roda sozinho: `gerar`, `conferir`, `exportar`, `folha` (e `folha ... x` para ver só as reprovadas). `gerar` aceita ids para gerar só alguns.
 
@@ -114,7 +125,7 @@ Só um modelo fica na placa por vez: no `tudo`, o modelo de imagem sai antes de 
 
 ### Motores
 
-O modelo de imagem vem de `scripts/imagens/motores.json`. Cada motor diz o tipo (`sdxl-arquivo`, um `.safetensors` em `D:\KotobaArcade-Arte`, ou `diffusers`, uma pasta ou repositório), os passos, o cfg, o offload (`nenhum`, `modelo` ou `sequencial`), a memória que precisa livre (`vram`, em GB) e as palavras de qualidade que o modelo espera. Para trocar, use `"motor": "nome"` na lista ou `KOTOBA_MOTOR=nome`. Uma lista pode ajustar um motor em `"por_motor": {"nome": {"passos": 24}}`. Trocar de motor não refaz o que já foi aprovado: só gera as candidatas que faltam.
+O modelo de imagem vem de `scripts/imagens/motores.json`. Cada motor diz o tipo (`anima`, a base do Anima com os pesos de uma variante por cima; `sdxl-arquivo`, um `.safetensors` em `D:\KotobaArcade-Arte`; ou `diffusers`, uma pasta ou repositório), os passos, o cfg, o offload (`nenhum`, `modelo` ou `sequencial`), a memória que precisa livre (`vram`, em GB) as palavras que o modelo espera no começo (`prefixo`) e no fim (`qualidade`) do prompt, onde nasce a seed (`gerador`), quantas imagens por chamada (`lote`) e um deslocamento de seed (`seed`). O deslocamento dá outro nome de arquivo à candidata de um modelo novo: sem ele, o estúdio acharia que `neko-1` já foi gerada. Para trocar, use `"motor": "nome"` na lista ou `KOTOBA_MOTOR=nome`. Uma lista pode ajustar um motor em `"por_motor": {"nome": {"passos": 24}}`. Trocar de motor não refaz o que já foi aprovado: só gera as candidatas que faltam.
 
 ### Formato da lista
 

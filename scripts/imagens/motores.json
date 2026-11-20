@@ -1,16 +1,22 @@
 {
-  "padrao": "animagine-xl-4",
+  "padrao": "anima-turbo",
   "motores": {
-    "animagine-xl-4": {
-      "tipo": "sdxl-arquivo",
-      "arquivo": "modelos/animagine-xl-4.0-opt.safetensors",
-      "licenca": "CreativeML Open RAIL++-M",
-      "passos": 26,
-      "cfg": 5,
-      "agendador": "euler-a",
+    "anima-turbo": {
+      "tipo": "anima",
+      "base": "modelos/anima",
+      "variante": "modelos/anima-variantes/split_files/diffusion_models/anima-turbo-v1.1.safetensors",
+      "licenca": "CircleStone Labs Non-Commercial License v1.0",
+      "dtype": "bfloat16",
+      "passos": 10,
+      "cfg": 1.0,
+      "negativo": false,
+      "gerador": "cpu",
+      "lote": 1,
+      "seed": 10000,
       "offload": "nenhum",
-      "vram": 10,
-      "qualidade": "masterpiece, high score, great score, absurdres"
+      "vram": 12,
+      "prefixo": "masterpiece, best quality, safe, ",
+      "qualidade": "anime coloring, clean lineart"
     }
   }
 }

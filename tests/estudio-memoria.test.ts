@@ -65,6 +65,7 @@ def conferir(lista, clip=None):
     ordem.append("conferir com %d modelo(s) de imagem vivo(s)" % sum(1 for v in vivos if v()))
     return {}
 estudio.gerar, estudio.conferir = gerar, conferir
+estudio.revisar_e_soltar = lambda lista, so: None
 estudio.escolhidas = lambda lista, rel: {"neko": None}
 estudio.exportar = lambda *a: []
 estudio.folha = lambda *a, **k: []
@@ -84,6 +85,8 @@ print(json.dumps(ordem))`);
     const r = py(`
 lista = json.loads('${LISTA}')
 lista["itens"].append({"id": "inu", "rotulo": "a dog", "prompt": "dog"})
+# Lote de 3 e sem deslocamento de seed, seja qual for o motor padrão.
+lista["por_motor"] = {estudio.motor({})["nome"]: {"lote": 3, "seed": 0}}
 chamadas = []
 def chamar(pipe, m, prompts, negativos, seeds, w, h):
     chamadas.append(len(seeds))
@@ -104,7 +107,16 @@ try:
     estudio.motor({"motor": "nao-existe"}); erro = None
 except SystemExit as e:
     erro = str(e)
-print(json.dumps([padrao["nome"], padrao["passos"], ajustado["passos"], erro.startswith("motor desconhecido")]))`);
-    expect(r).toEqual(['animagine-xl-4', 26, 24, true]);
+print(json.dumps([padrao["nome"], ajustado["passos"], erro.startswith("motor desconhecido")]))`);
+    expect(r).toEqual(['anima-turbo', 24, true]);
+  });
+
+  it('as seeds de um motor novo não repetem o nome das candidatas de outro motor', () => {
+    const r = py(`
+lista = json.loads('${LISTA}')
+nome = estudio.motor({})["nome"]
+item = lista["itens"][0]
+print(json.dumps([estudio.seeds_de({**lista, "por_motor": {nome: {"seed": 0}}}, item), estudio.seeds_de({**lista, "por_motor": {nome: {"seed": 10000}}}, item, 1)]))`);
+    expect(r).toEqual([[1, 2, 3], [11001, 11002, 11003]]);
   });
 });
