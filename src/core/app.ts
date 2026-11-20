@@ -1,19 +1,21 @@
 /** Estado do app no navegador: save carregado, tela atual e gravação. */
 import { signal } from '@preact/signals';
 import { ensureAventuraSave, type AventuraSave } from '../games/aventura/engine';
+import { ensureCenaSave, type CenaSave } from '../games/cena/engine';
 import { ensureConversaSave, type ConversaSave } from '../games/conversa/engine';
 import { ensureGramaticaSave, type GramaticaSave } from '../games/gramatica/engine';
 import { ensureKanaBeatSave, type KanaBeatSave } from '../games/kanabeat/engine';
 import { ensureKanaImagensSave, type KanaImagensSave } from '../games/kanaimagens/engine';
 import { ensureKanjimonSave, type KanjimonSave } from '../games/kanjimon/engine';
 import { ensurePecasSave, type PecasSave } from '../games/pecas/engine';
+import { ensureMemoriaSave, type MemoriaSave } from '../games/memoria/engine';
 import { ensureRoguelikeSave, type RoguelikeSave } from '../games/roguelike/engine';
 import { ensureJornadaSave, registrarMissao, type JornadaSave } from '../jornada/etapas';
 import { foco } from './foco';
 import { markPlayed } from './progress';
 import { importSave, loadSave, writeSave, type SaveData } from './save';
 
-export type Screen = 'hub' | 'kanjimon' | 'kanjidex' | 'booster' | 'kanabeat' | 'roguelike' | 'aventura' | 'conversa' | 'gramatica' | 'jornada' | 'licao' | 'pecas' | 'kanaimagens';
+export type Screen = 'hub' | 'kanjimon' | 'kanjidex' | 'booster' | 'kanabeat' | 'roguelike' | 'aventura' | 'conversa' | 'gramatica' | 'jornada' | 'licao' | 'pecas' | 'kanaimagens' | 'memoria' | 'cena';
 
 export const app: { data: SaveData } = { data: loadSave(localStorage, Date.now()) };
 
@@ -87,4 +89,12 @@ export function jornadaSave(): JornadaSave {
 
 export function pecasSave(): PecasSave {
   return ensurePecasSave(app.data.games);
+}
+
+export function memoriaSave(): MemoriaSave {
+  return ensureMemoriaSave(app.data.games);
+}
+
+export function cenaSave(): CenaSave {
+  return ensureCenaSave(app.data.games);
 }

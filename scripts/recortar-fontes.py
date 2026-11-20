@@ -57,10 +57,10 @@ def main() -> None:
     lista = SAIDA / "caracteres.txt"
     lista_pecas = SAIDA / "caracteres-pecas.txt"
     # caracteres.txt tem tudo o que o jogo desenha (o teste de estilo confere contra ele).
-    lista.write_text("".join(sorted(set(base) | set(extra))), encoding="utf-8")
+    lista.write_text("".join(sorted(set(base) | set(extra))), encoding="utf-8", newline="\n")
     base_txt = SAIDA / "caracteres-base.tmp"
-    base_txt.write_text(base, encoding="utf-8")
-    lista_pecas.write_text(extra, encoding="utf-8")
+    base_txt.write_text(base, encoding="utf-8", newline="\n")
+    lista_pecas.write_text(extra, encoding="utf-8", newline="\n")
     try:
         for nome in FONTES:
             subset(origem, nome, base_txt, f"{nome}.woff2", UNICODES)
@@ -73,6 +73,7 @@ def main() -> None:
         "@font-face {\n  font-family: 'Yuji Syuku';\n  src: url('./YujiSyuku-Pecas.woff2') format('woff2');\n"
         f"  font-display: swap;\n  unicode-range: {faixa};\n}}\n",
         encoding="utf-8",
+        newline="\n",
     )
 
 

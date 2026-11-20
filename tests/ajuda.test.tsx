@@ -25,9 +25,11 @@ const FONTE: Record<TelaAjuda, string> = {
   licao: 'jornada/LicaoTela.tsx',
   pecas: 'games/pecas/PecasGame.tsx',
   kanaimagens: 'games/kanaimagens/KanaImagensGame.tsx',
+  memoria: 'games/memoria/MemoriaGame.tsx',
+  cena: 'games/cena/CenaGame.tsx',
 };
 
-const NOMES: Record<string, string> = { Esc: 'Escape', Espaço: ' ', '↑': 'ArrowUp', '↓': 'ArrowDown' };
+const NOMES: Record<string, string> = { Esc: 'Escape', Espaço: ' ', '↑': 'ArrowUp', '↓': 'ArrowDown', '←': 'ArrowLeft', '→': 'ArrowRight' };
 
 /** Faixas de dígito que o código aceita, tiradas de regex como /^[1-4]$/. */
 function faixas(fonte: string): Array<[number, number]> {

@@ -93,4 +93,14 @@ describe('aviso de gravação', () => {
     press('Enter');
     expect(['kanjimon', 'kanabeat', 'roguelike', 'aventura', 'conversa', 'gramatica']).toContain(screen.value);
   });
+
+  it('M abre a Memória e L abre a Cena Viva', async () => {
+    screen.value = 'hub';
+    await act(() => render(<Hub />, document.body));
+    press('m');
+    expect(screen.value).toBe('memoria');
+    screen.value = 'hub';
+    press('L');
+    expect(screen.value).toBe('cena');
+  });
 });

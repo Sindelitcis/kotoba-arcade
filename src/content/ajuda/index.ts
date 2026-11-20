@@ -1,6 +1,7 @@
 /** Texto de ajuda de cada tela. Tela nova no fliperama precisa de entrada aqui: um teste falha se faltar. */
 import type { TelaAjuda } from '../../core/help/ajuda';
 import { AVENTURA } from './aventura';
+import { CENA } from './cena';
 import { CONVERSA } from './conversa';
 import { AJUSTES, HUB } from './hub';
 import { JORNADA, LICAO } from './jornada';
@@ -10,6 +11,7 @@ import { KOTODAMA } from './kotodama';
 import { KANA_IMAGENS } from './kanaimagens';
 import { KUMITATE } from './kumitate';
 import { PECAS } from './pecas';
+import { MEMORIA } from './memoria';
 import type { Ajuda } from './tipos';
 
 export type { Ajuda, Item, LinhaTecla, Pergunta } from './tipos';
@@ -30,6 +32,8 @@ export const AJUDA: Record<TelaAjuda, Ajuda> = {
   licao: LICAO,
   pecas: PECAS,
   kanaimagens: KANA_IMAGENS,
+  memoria: MEMORIA,
+  cena: CENA,
 };
 
 /** A tela usa a F1 para outra coisa (a Conversa traduz com ela). Ali a F1 não abre a ajuda. */

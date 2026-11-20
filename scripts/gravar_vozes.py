@@ -358,12 +358,12 @@ def main():
         a.unlink()
     rel["removidas"] = len(sobras)
     corpo = {"versao": VERSAO, "falas": {k: dict(sorted(v.items())) for k, v in sorted(manifesto.items())}}
-    (saida / "manifesto.json").write_text(json.dumps(corpo, ensure_ascii=False, indent=0) + "\n", encoding="utf-8")
+    (saida / "manifesto.json").write_text(json.dumps(corpo, ensure_ascii=False, indent=0) + "\n", encoding="utf-8", newline="\n")
     duvidas = {a: d for a, d in duvidas.items() if a in usados}
     rel["duvidas"] = list(duvidas.values())
     if args.duvidas:
-        Path(args.duvidas).write_text(json.dumps(duvidas, ensure_ascii=False, indent=1, sort_keys=True), encoding="utf-8")
-    Path(args.relatorio).write_text(json.dumps(rel, ensure_ascii=False, indent=1), encoding="utf-8")
+        Path(args.duvidas).write_text(json.dumps(duvidas, ensure_ascii=False, indent=1, sort_keys=True), encoding="utf-8", newline="\n")
+    Path(args.relatorio).write_text(json.dumps(rel, ensure_ascii=False, indent=1), encoding="utf-8", newline="\n")
     print(f"gravadas {rel['gravadas']}, já existiam {rel['ja_existiam']}, removidas {len(sobras)}, "
           f"palavra em kana {len(rel['palavra_em_kana'])}, acento corrigido {len(rel['acento_corrigido'])}, "
           f"whisper divergente {len(rel['whisper_divergente'])}, sem conferir {rel['sem_conferir']}, "

@@ -1,0 +1,848 @@
+{
+ "lote": "objetos",
+ "destino": "src/assets/imagens",
+ "largura": 896,
+ "altura": 896,
+ "saida": 384,
+ "recorte": true,
+ "estilo": "no humans, object focus, still life, single object, centered, white background, simple background, black outline, clean lineart, flat color, anime coloring, cel shading, bright colors",
+ "negativo": "multiple objects, duplicate, frame, border, photo, realistic, 3d, scenery, person, hands, gradient background, drop shadow, cast shadow, glossy, rainbow, iridescent, holographic, sticker, price tag, text, letters, english text, japanese text, kanji, numbers, logo, label, brand name, watermark, signature",
+ "seeds": [
+  1,
+  2,
+  3
+ ],
+ "distratores": [
+  "a person",
+  "a room",
+  "a toy"
+ ],
+ "itens": [
+  {
+   "id": "hon",
+   "rotulo": "a book",
+   "prompt": "one closed hardcover book"
+  },
+  {
+   "id": "tsukue",
+   "rotulo": "a desk",
+   "prompt": "wooden study desk with drawers, side view"
+  },
+  {
+   "id": "isu",
+   "rotulo": "a chair",
+   "prompt": "one wooden chair, side view"
+  },
+  {
+   "id": "beddo",
+   "rotulo": "a bed",
+   "prompt": "single bed with blanket and pillow, side view"
+  },
+  {
+   "id": "makura",
+   "rotulo": "a pillow",
+   "prompt": "one white pillow"
+  },
+  {
+   "id": "tokei",
+   "rotulo": "a clock",
+   "prompt": "round wall clock with hands, no numbers"
+  },
+  {
+   "id": "terebi",
+   "rotulo": "a television",
+   "prompt": "flat screen television on stand, black screen"
+  },
+  {
+   "id": "pasokon",
+   "rotulo": "a laptop computer",
+   "prompt": "small open laptop computer, dark blank screen, centered, wide empty white margin all around"
+  },
+  {
+   "id": "sumaho",
+   "rotulo": "a smartphone",
+   "prompt": "one smartphone, black screen"
+  },
+  {
+   "id": "megane",
+   "rotulo": "eyeglasses",
+   "prompt": "pair of eyeglasses, black frame"
+  },
+  {
+   "id": "udedokei",
+   "rotulo": "a wristwatch",
+   "prompt": "one wristwatch seen from the front, round white dial with two black hands, brown leather strap curved in a circle"
+  },
+  {
+   "id": "kutsushita",
+   "rotulo": "socks",
+   "prompt": "pair of socks"
+  },
+  {
+   "id": "zubon",
+   "rotulo": "trousers",
+   "prompt": "pair of blue jeans, trousers, folded flat"
+  },
+  {
+   "id": "koto",
+   "rotulo": "a coat",
+   "prompt": "long winter coat on hanger"
+  },
+  {
+   "id": "shashin",
+   "rotulo": "a framed photo",
+   "prompt": "framed photograph of a mountain landscape, picture frame"
+  },
+  {
+   "id": "hana",
+   "rotulo": "a flower",
+   "prompt": "one red tulip flower in a small vase"
+  },
+  {
+   "id": "gomibako",
+   "rotulo": "a trash can",
+   "prompt": "small trash can, wastebasket"
+  },
+  {
+   "id": "kagi",
+   "rotulo": "a key",
+   "prompt": "one metal house key"
+  },
+  {
+   "id": "saifu",
+   "rotulo": "a wallet",
+   "prompt": "brown leather wallet, closed"
+  },
+  {
+   "id": "noto",
+   "rotulo": "a notebook",
+   "prompt": "closed spiral notebook, blank cover"
+  },
+  {
+   "id": "pen",
+   "rotulo": "a pen",
+   "prompt": "one ballpoint pen"
+  },
+  {
+   "id": "enpitsu",
+   "rotulo": "a pencil",
+   "prompt": "one yellow wooden pencil, sharpened"
+  },
+  {
+   "id": "keshigomu",
+   "rotulo": "an eraser",
+   "prompt": "one white rubber eraser"
+  },
+  {
+   "id": "hasami",
+   "rotulo": "scissors",
+   "prompt": "pair of scissors, open"
+  },
+  {
+   "id": "hako",
+   "rotulo": "a cardboard box",
+   "prompt": "closed cardboard box"
+  },
+  {
+   "id": "nuigurumi",
+   "rotulo": "a teddy bear",
+   "prompt": "brown teddy bear plush toy, sitting"
+  },
+  {
+   "id": "gita",
+   "rotulo": "a guitar",
+   "prompt": "one small acoustic guitar lying diagonally, zoomed out, the entire guitar visible including the headstock and tuning pegs, wide empty white margin all around"
+  },
+  {
+   "id": "kagami",
+   "rotulo": "a mirror",
+   "prompt": "round standing mirror on stand"
+  },
+  {
+   "id": "taoru",
+   "rotulo": "a towel",
+   "prompt": "folded blue towel"
+  },
+  {
+   "id": "haburashi",
+   "rotulo": "a toothbrush",
+   "prompt": "one toothbrush lying diagonally, blue plastic handle, white bristles at the end"
+  },
+  {
+   "id": "hondana",
+   "rotulo": "a bookshelf",
+   "prompt": "empty wooden bookshelf, three empty shelves, front view, nothing on the shelves"
+  },
+  {
+   "id": "sofa",
+   "rotulo": "a sofa",
+   "prompt": "green two-seat sofa, front view"
+  },
+  {
+   "id": "teburu",
+   "rotulo": "a table",
+   "prompt": "wide rectangular wooden dining table, front view, four legs, empty tabletop"
+  },
+  {
+   "id": "eakon",
+   "rotulo": "an air conditioner",
+   "prompt": "long white wall-mounted split air conditioner unit, front view, horizontal vent at the bottom"
+  },
+  {
+   "id": "sutando",
+   "rotulo": "a desk lamp",
+   "prompt": "desk lamp, adjustable arm"
+  },
+  {
+   "id": "kamera",
+   "rotulo": "a camera",
+   "prompt": "black digital camera"
+  },
+  {
+   "id": "tegami",
+   "rotulo": "an envelope",
+   "prompt": "closed white envelope, letter"
+  },
+  {
+   "id": "reizouko",
+   "rotulo": "a refrigerator",
+   "prompt": "white refrigerator, two doors, front view"
+  },
+  {
+   "id": "denshirenji",
+   "rotulo": "a microwave oven",
+   "prompt": "white microwave oven, front view"
+  },
+  {
+   "id": "suihanki",
+   "rotulo": "a rice cooker",
+   "prompt": "white electric rice cooker"
+  },
+  {
+   "id": "nabe",
+   "rotulo": "a cooking pot",
+   "prompt": "metal cooking pot with lid and two handles"
+  },
+  {
+   "id": "furaipan",
+   "rotulo": "a frying pan",
+   "prompt": "black frying pan"
+  },
+  {
+   "id": "houchou",
+   "rotulo": "a kitchen knife",
+   "prompt": "japanese kitchen knife"
+  },
+  {
+   "id": "manaita",
+   "rotulo": "a cutting board",
+   "prompt": "wooden cutting board, empty"
+  },
+  {
+   "id": "sara",
+   "rotulo": "a plate",
+   "prompt": "empty white plate"
+  },
+  {
+   "id": "chawan",
+   "rotulo": "a rice bowl",
+   "prompt": "empty japanese rice bowl, chawan"
+  },
+  {
+   "id": "hashi",
+   "rotulo": "chopsticks",
+   "prompt": "pair of wooden chopsticks lying side by side"
+  },
+  {
+   "id": "supun",
+   "rotulo": "a spoon",
+   "prompt": "one metal spoon"
+  },
+  {
+   "id": "foku",
+   "rotulo": "a fork",
+   "prompt": "one metal fork"
+  },
+  {
+   "id": "koppu",
+   "rotulo": "a glass of water",
+   "prompt": "clear drinking glass of water"
+  },
+  {
+   "id": "kappu",
+   "rotulo": "a coffee cup",
+   "prompt": "white coffee cup with saucer, steam"
+  },
+  {
+   "id": "yakan",
+   "rotulo": "a kettle",
+   "prompt": "metal kettle"
+  },
+  {
+   "id": "tamago",
+   "rotulo": "an egg",
+   "prompt": "one white chicken egg"
+  },
+  {
+   "id": "gyunyu",
+   "rotulo": "a carton of milk",
+   "prompt": "milk carton with gable top, white carton with blue cow spots, blank"
+  },
+  {
+   "id": "pan",
+   "rotulo": "bread",
+   "prompt": "loaf of bread"
+  },
+  {
+   "id": "gohan",
+   "rotulo": "a bowl of rice",
+   "prompt": "bowl of white rice"
+  },
+  {
+   "id": "ringo",
+   "rotulo": "an apple",
+   "prompt": "one red apple"
+  },
+  {
+   "id": "mikan",
+   "rotulo": "a mandarin orange",
+   "prompt": "one mandarin orange with leaf"
+  },
+  {
+   "id": "banana",
+   "rotulo": "a banana",
+   "prompt": "bunch of yellow bananas"
+  },
+  {
+   "id": "ichigo",
+   "rotulo": "a strawberry",
+   "prompt": "one red strawberry"
+  },
+  {
+   "id": "tomato",
+   "rotulo": "a tomato",
+   "prompt": "one red tomato"
+  },
+  {
+   "id": "ninjin",
+   "rotulo": "a carrot",
+   "prompt": "one orange carrot with green leaves"
+  },
+  {
+   "id": "tamanegi",
+   "rotulo": "an onion",
+   "prompt": "one brown onion"
+  },
+  {
+   "id": "kyabetsu",
+   "rotulo": "a cabbage",
+   "prompt": "one green cabbage"
+  },
+  {
+   "id": "sakana",
+   "rotulo": "a fish",
+   "prompt": "one whole raw fish"
+  },
+  {
+   "id": "niku",
+   "rotulo": "a piece of meat",
+   "prompt": "raw red meat steak"
+  },
+  {
+   "id": "budou",
+   "rotulo": "grapes",
+   "prompt": "bunch of purple grapes"
+  },
+  {
+   "id": "suika",
+   "rotulo": "a watermelon",
+   "prompt": "slice of watermelon"
+  },
+  {
+   "id": "jagaimo",
+   "rotulo": "a potato",
+   "prompt": "one potato"
+  },
+  {
+   "id": "ocha",
+   "rotulo": "a cup of green tea",
+   "prompt": "japanese teacup of green tea, yunomi"
+  },
+  {
+   "id": "koohii",
+   "rotulo": "a coffee can",
+   "prompt": "one small steel drink can, plain brown and cream stripes, blank"
+  },
+  {
+   "id": "mizu",
+   "rotulo": "a bottle of water",
+   "prompt": "plastic bottle of water, plain label"
+  },
+  {
+   "id": "jusu",
+   "rotulo": "a glass of orange juice",
+   "prompt": "glass of orange juice"
+  },
+  {
+   "id": "biru",
+   "rotulo": "a mug of beer",
+   "prompt": "glass beer mug with handle, golden beer and thick white foam on top"
+  },
+  {
+   "id": "onigiri",
+   "rotulo": "an onigiri rice ball",
+   "prompt": "one triangle onigiri, white rice, rectangular black nori sheet wrapped at the bottom, front view"
+  },
+  {
+   "id": "bento",
+   "rotulo": "a bento lunch box",
+   "prompt": "japanese bento lunch box, open, rice and side dishes"
+  },
+  {
+   "id": "sandoitchi",
+   "rotulo": "a sandwich",
+   "prompt": "triangle sandwich"
+  },
+  {
+   "id": "aisu",
+   "rotulo": "an ice cream cone",
+   "prompt": "ice cream cone"
+  },
+  {
+   "id": "okashi",
+   "rotulo": "a bag of snacks",
+   "prompt": "bag of potato chips, plain orange bag with a picture of chips, blank"
+  },
+  {
+   "id": "ramen",
+   "rotulo": "a bowl of ramen",
+   "prompt": "bowl of ramen noodles with egg and chashu"
+  },
+  {
+   "id": "sushi",
+   "rotulo": "sushi",
+   "prompt": "two pieces of nigiri sushi on wooden plate"
+  },
+  {
+   "id": "tenpura",
+   "rotulo": "tempura",
+   "prompt": "shrimp tempura on plate"
+  },
+  {
+   "id": "kare",
+   "rotulo": "curry rice",
+   "prompt": "plate of japanese curry rice"
+  },
+  {
+   "id": "udon",
+   "rotulo": "a bowl of udon",
+   "prompt": "bowl of udon noodles"
+  },
+  {
+   "id": "misoshiru",
+   "rotulo": "miso soup",
+   "prompt": "bowl of miso soup with tofu"
+  },
+  {
+   "id": "keki",
+   "rotulo": "a slice of cake",
+   "prompt": "slice of strawberry shortcake"
+  },
+  {
+   "id": "gyoza",
+   "rotulo": "gyoza dumplings",
+   "prompt": "plate of gyoza dumplings"
+  },
+  {
+   "id": "yakitori",
+   "rotulo": "yakitori skewers",
+   "prompt": "yakitori, grilled chicken skewers"
+  },
+  {
+   "id": "edamame",
+   "rotulo": "edamame beans",
+   "prompt": "bowl of green edamame pods"
+  },
+  {
+   "id": "shoyu",
+   "rotulo": "a soy sauce bottle",
+   "prompt": "small glass soy sauce dispenser with red cap, dark brown sauce, blank"
+  },
+  {
+   "id": "cupramen",
+   "rotulo": "a cup noodle",
+   "prompt": "cup noodles, instant ramen cup with lid"
+  },
+  {
+   "id": "donburi",
+   "rotulo": "a donburi bowl",
+   "prompt": "katsudon in a donburi bowl"
+  },
+  {
+   "id": "tana",
+   "rotulo": "a store shelf",
+   "prompt": "empty white metal store shelf unit, three empty shelves, front view, nothing on the shelves"
+  },
+  {
+   "id": "reji",
+   "rotulo": "a cash register",
+   "prompt": "cash register machine"
+  },
+  {
+   "id": "denchi",
+   "rotulo": "batteries",
+   "prompt": "two AA batteries"
+  },
+  {
+   "id": "kago",
+   "rotulo": "a shopping basket",
+   "prompt": "plastic shopping basket with handles, empty"
+  },
+  {
+   "id": "fukuro",
+   "rotulo": "a plastic bag",
+   "prompt": "white plastic shopping bag, empty"
+  },
+  {
+   "id": "kitte",
+   "rotulo": "a postage stamp",
+   "prompt": "one postage stamp with flower picture, perforated edge"
+  },
+  {
+   "id": "okane",
+   "rotulo": "coins",
+   "prompt": "pile of gold and silver coins"
+  },
+  {
+   "id": "kusuri",
+   "rotulo": "medicine pills",
+   "prompt": "white medicine pills and a pill bottle"
+  },
+  {
+   "id": "masuku",
+   "rotulo": "a face mask",
+   "prompt": "white surgical face mask"
+  },
+  {
+   "id": "taionkei",
+   "rotulo": "a thermometer",
+   "prompt": "digital thermometer"
+  },
+  {
+   "id": "houtai",
+   "rotulo": "a roll of bandage",
+   "prompt": "one roll of white gauze bandage, partly unrolled strip, side view"
+  },
+  {
+   "id": "shanpu",
+   "rotulo": "a shampoo bottle",
+   "prompt": "shampoo pump bottle, plain"
+  },
+  {
+   "id": "sekken",
+   "rotulo": "a bar of soap",
+   "prompt": "one bar of soap"
+  },
+  {
+   "id": "tisshu",
+   "rotulo": "a tissue box",
+   "prompt": "tissue box with tissue sticking out"
+  },
+  {
+   "id": "denwa",
+   "rotulo": "a desk telephone",
+   "prompt": "office desk telephone with handset"
+  },
+  {
+   "id": "kopiki",
+   "rotulo": "a photocopier",
+   "prompt": "large office photocopier machine"
+  },
+  {
+   "id": "fairu",
+   "rotulo": "a file folder",
+   "prompt": "blue ring binder file folder"
+  },
+  {
+   "id": "hotchikisu",
+   "rotulo": "a stapler",
+   "prompt": "black stapler"
+  },
+  {
+   "id": "karenda",
+   "rotulo": "a wall calendar",
+   "prompt": "wall calendar with blank grid, no numbers"
+  },
+  {
+   "id": "nekutai",
+   "rotulo": "a necktie",
+   "prompt": "one red striped necktie laid flat, full length, knot at top, pointed tip at bottom"
+  },
+  {
+   "id": "howaitobodo",
+   "rotulo": "a whiteboard",
+   "prompt": "blank whiteboard on stand"
+  },
+  {
+   "id": "purinta",
+   "rotulo": "a printer",
+   "prompt": "office printer"
+  },
+  {
+   "id": "hanko",
+   "rotulo": "a stamp seal",
+   "prompt": "one cylindrical japanese name seal stamp, hanko, standing upright, red ink on the bottom, small round red ink pad beside it"
+  },
+  {
+   "id": "kanyoshokubutsu",
+   "rotulo": "a potted plant",
+   "prompt": "green leafy potted plant"
+  },
+  {
+   "id": "basu",
+   "rotulo": "a bus",
+   "prompt": "city bus, side view"
+  },
+  {
+   "id": "takushi",
+   "rotulo": "a taxi",
+   "prompt": "japanese taxi car, side view"
+  },
+  {
+   "id": "densha",
+   "rotulo": "a train",
+   "prompt": "commuter train car, side view"
+  },
+  {
+   "id": "jitensha",
+   "rotulo": "a bicycle",
+   "prompt": "one whole bicycle, side view, both wheels fully visible, entire bicycle inside the frame, centered"
+  },
+  {
+   "id": "shingou",
+   "rotulo": "a traffic light",
+   "prompt": "traffic light on pole, green light"
+  },
+  {
+   "id": "ki",
+   "rotulo": "a tree",
+   "prompt": "one green tree"
+  },
+  {
+   "id": "posuto",
+   "rotulo": "a mailbox",
+   "prompt": "red japanese post box, mailbox"
+  },
+  {
+   "id": "jihanki",
+   "rotulo": "a vending machine",
+   "prompt": "drink vending machine, front view, no text"
+  },
+  {
+   "id": "inu",
+   "rotulo": "a dog",
+   "prompt": "shiba inu dog standing, full body, side view, four legs, curled tail"
+  },
+  {
+   "id": "neko",
+   "rotulo": "a cat",
+   "prompt": "one cat sitting, full body, side view, head turned to viewer, four legs, tail attached to body"
+  },
+  {
+   "id": "tori",
+   "rotulo": "a bird",
+   "prompt": "small sparrow bird"
+  },
+  {
+   "id": "ie",
+   "rotulo": "a house",
+   "prompt": "small japanese house"
+  },
+  {
+   "id": "benchi",
+   "rotulo": "a bench",
+   "prompt": "wooden park bench"
+  },
+  {
+   "id": "suutsukesu",
+   "rotulo": "a suitcase",
+   "prompt": "rolling suitcase"
+  },
+  {
+   "id": "ryukku",
+   "rotulo": "a backpack",
+   "prompt": "backpack"
+  },
+  {
+   "id": "chizu",
+   "rotulo": "a map",
+   "prompt": "unfolded paper map, green parks, blue river, red route line, blank"
+  },
+  {
+   "id": "kaidan",
+   "rotulo": "stairs",
+   "prompt": "staircase, steps"
+  },
+  {
+   "id": "chouchin",
+   "rotulo": "a paper lantern",
+   "prompt": "red japanese paper lantern, chochin, no text"
+  },
+  {
+   "id": "baiku",
+   "rotulo": "a motorcycle",
+   "prompt": "scooter motorcycle, side view"
+  },
+  {
+   "id": "ame-kyandi",
+   "rotulo": "a candy",
+   "prompt": "one round hard candy in a clear wrapper twisted at both ends, side view"
+  },
+  {
+   "id": "kumo",
+   "rotulo": "a cloud",
+   "prompt": "one white fluffy cloud"
+  },
+  {
+   "id": "tsuki",
+   "rotulo": "the moon",
+   "prompt": "one yellow crescent moon, simple shape"
+  },
+  {
+   "id": "yama",
+   "rotulo": "a mountain",
+   "prompt": "mount fuji, mountain"
+  },
+  {
+   "id": "umi",
+   "rotulo": "the sea",
+   "prompt": "small square view of the blue sea, horizon line, calm waves, light blue sky above"
+  },
+  {
+   "id": "kasa-aka",
+   "rotulo": "a red umbrella",
+   "prompt": "red open umbrella seen from the side, dome canopy, curved J handle, entirely red"
+  },
+  {
+   "id": "kasa-ao",
+   "rotulo": "a blue umbrella",
+   "prompt": "blue open umbrella seen from the side, dome canopy, curved J handle, entirely blue"
+  },
+  {
+   "id": "kasa-kuro",
+   "rotulo": "a black umbrella",
+   "prompt": "black open umbrella seen from the side, dome canopy, curved J handle, entirely black, jet black, very dark"
+  },
+  {
+   "id": "kaban-aka",
+   "rotulo": "a red bag",
+   "prompt": "red shoulder bag, entirely red"
+  },
+  {
+   "id": "kaban-ao",
+   "rotulo": "a blue bag",
+   "prompt": "blue shoulder bag, entirely blue"
+  },
+  {
+   "id": "kaban-kuro",
+   "rotulo": "a black bag",
+   "prompt": "black shoulder bag, entirely black, jet black, very dark"
+  },
+  {
+   "id": "kaban-shiro",
+   "rotulo": "a white bag",
+   "prompt": "white shoulder bag, entirely white, pure white with soft light grey shading, thick black outline"
+  },
+  {
+   "id": "kuruma-aka",
+   "rotulo": "a red car",
+   "prompt": "red small car, side view, entirely red"
+  },
+  {
+   "id": "kuruma-ao",
+   "rotulo": "a blue car",
+   "prompt": "blue small car, side view, entirely blue"
+  },
+  {
+   "id": "kuruma-kuro",
+   "rotulo": "a black car",
+   "prompt": "black small car, side view, entirely black, jet black, very dark"
+  },
+  {
+   "id": "kuruma-shiro",
+   "rotulo": "a white car",
+   "prompt": "white small car, side view, entirely white, pure white with soft light grey shading, thick black outline"
+  },
+  {
+   "id": "boushi-aka",
+   "rotulo": "a red hat",
+   "prompt": "red baseball cap, entirely red"
+  },
+  {
+   "id": "boushi-ao",
+   "rotulo": "a blue hat",
+   "prompt": "blue baseball cap, entirely blue"
+  },
+  {
+   "id": "boushi-kuro",
+   "rotulo": "a black hat",
+   "prompt": "black baseball cap, entirely black, jet black, very dark"
+  },
+  {
+   "id": "boushi-shiro",
+   "rotulo": "a white hat",
+   "prompt": "white baseball cap, entirely white, pure white with soft light grey shading, thick black outline"
+  },
+  {
+   "id": "kutsu-aka",
+   "rotulo": "a red shoes",
+   "prompt": "red pair of sneakers, entirely red"
+  },
+  {
+   "id": "kutsu-ao",
+   "rotulo": "a blue shoes",
+   "prompt": "blue pair of sneakers, entirely blue"
+  },
+  {
+   "id": "kutsu-kuro",
+   "rotulo": "a black shoes",
+   "prompt": "black pair of sneakers, entirely black, jet black, very dark"
+  },
+  {
+   "id": "kutsu-shiro",
+   "rotulo": "a white shoes",
+   "prompt": "white pair of sneakers, entirely white, pure white with soft light grey shading, thick black outline"
+  },
+  {
+   "id": "shatsu-aka",
+   "rotulo": "a red t-shirt",
+   "prompt": "red short sleeve t-shirt laid flat, front view, plain, no print, round collar, entirely red"
+  },
+  {
+   "id": "shatsu-ao",
+   "rotulo": "a blue t-shirt",
+   "prompt": "blue short sleeve t-shirt laid flat, front view, plain, no print, round collar, entirely blue"
+  },
+  {
+   "id": "shatsu-kuro",
+   "rotulo": "a black t-shirt",
+   "prompt": "black short sleeve t-shirt laid flat, front view, plain, no print, round collar, entirely black, jet black, very dark"
+  },
+  {
+   "id": "shatsu-shiro",
+   "rotulo": "a white t-shirt",
+   "prompt": "white short sleeve t-shirt laid flat, front view, plain, no print, round collar, entirely white, pure white with soft light grey shading, thick black outline"
+  }
+ ],
+ "escolha": {
+  "teburu": 3,
+  "neko": 10003,
+  "tsuki": 10001
+ },
+ "vetadas": [
+  "gita-2",
+  "gita-10001",
+  "gita-10002",
+  "gita-10003"
+ ]
+}

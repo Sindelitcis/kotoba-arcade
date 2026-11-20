@@ -1,0 +1,148 @@
+{
+ "lote": "acoes",
+ "destino": "src/assets/acoes",
+ "largura": 832,
+ "altura": 1216,
+ "saida": 512,
+ "recorte": true,
+ "estilo": "solo, full body, white background, simple background, black outline, clean lineart, flat color, anime coloring, cel shading, bright colors, casual clothes",
+ "negativo": "multiple people, crowd, frame, border, photo, realistic, 3d, scenery, gradient background, drop shadow, cropped feet, text, letters, logo",
+ "seeds": [
+  1,
+  2,
+  3
+ ],
+ "distratores": [
+  "a person posing",
+  "a group of people",
+  "an object"
+ ],
+ "itens": [
+  {
+   "id": "taberu",
+   "rotulo": "a person eating a meal",
+   "prompt": "1girl, sitting at small table, eating rice from bowl with chopsticks, mouth open"
+  },
+  {
+   "id": "nomu",
+   "rotulo": "a person drinking",
+   "prompt": "1boy, standing, drinking from a glass, head tilted back"
+  },
+  {
+   "id": "yomu",
+   "rotulo": "a person reading a book",
+   "prompt": "1girl, sitting, reading an open book, looking at book"
+  },
+  {
+   "id": "kaku",
+   "rotulo": "a person writing on a whiteboard",
+   "prompt": "1boy, standing, side view, writing on a whiteboard with a marker, arm raised"
+  },
+  {
+   "id": "neru",
+   "rotulo": "a person sleeping",
+   "prompt": "1boy, sleeping, lying down, eyes closed, futon, blanket"
+  },
+  {
+   "id": "hashiru",
+   "rotulo": "a person running",
+   "prompt": "1girl, running, motion lines, sportswear"
+  },
+  {
+   "id": "aruku",
+   "rotulo": "a person walking",
+   "prompt": "1boy, walking, side view, calm"
+  },
+  {
+   "id": "suwaru",
+   "rotulo": "a person sitting on a chair",
+   "prompt": "1girl, sitting on chair, hands on lap, chair"
+  },
+  {
+   "id": "tatsu",
+   "rotulo": "a person standing",
+   "prompt": "1boy, standing straight, arms at sides, front view"
+  },
+  {
+   "id": "denwasuru",
+   "rotulo": "a person talking on the phone",
+   "prompt": "1girl, standing, side view, holding a smartphone against her ear with one hand, talking, open mouth"
+  },
+  {
+   "id": "ryouri",
+   "rotulo": "a person cooking",
+   "prompt": "1boy, apron, cooking, stirring frying pan on stove"
+  },
+  {
+   "id": "arau",
+   "rotulo": "a person washing dishes",
+   "prompt": "1girl, apron, washing dishes at sink, water, sponge"
+  },
+  {
+   "id": "utau",
+   "rotulo": "a person singing",
+   "prompt": "1girl, singing into microphone, open mouth, music notes"
+  },
+  {
+   "id": "naku",
+   "rotulo": "a person crying",
+   "prompt": "1boy, crying, tears, sad"
+  },
+  {
+   "id": "warau",
+   "rotulo": "a person laughing",
+   "prompt": "1girl, laughing, big smile, closed eyes, happy"
+  },
+  {
+   "id": "kiku",
+   "rotulo": "a person listening to music",
+   "prompt": "1boy, wearing headphones, listening to music, eyes closed"
+  },
+  {
+   "id": "souji",
+   "rotulo": "a person cleaning with a vacuum",
+   "prompt": "1girl, cleaning floor with vacuum cleaner"
+  },
+  {
+   "id": "odoru",
+   "rotulo": "a person dancing",
+   "prompt": "1girl, dancing, dynamic pose"
+  },
+  {
+   "id": "hakobu",
+   "rotulo": "a person carrying a box",
+   "prompt": "1boy, carrying large cardboard box with both arms"
+  },
+  {
+   "id": "oyogu",
+   "rotulo": "a person swimming",
+   "prompt": "1boy, swimming, front crawl stroke, body horizontal in the water, one arm reaching forward over the water, face in the water, side view, swim cap, goggles"
+  },
+  {
+   "id": "toru",
+   "rotulo": "a person taking a photo",
+   "prompt": "1girl, holding camera up to face, taking photo"
+  },
+  {
+   "id": "kau",
+   "rotulo": "a person shopping with a basket",
+   "prompt": "1girl, standing, holding a shopping basket full of vegetables and bread in one hand and a wallet in the other"
+  },
+  {
+   "id": "benkyou",
+   "rotulo": "a person studying",
+   "prompt": "1boy, studying at desk, textbook, notebook, pencil, thinking"
+  }
+ ],
+ "escolha": {
+  "warau": 2
+ },
+ "vetadas": [
+  "oyogu-10001",
+  "oyogu-10002",
+  "oyogu-10003",
+  "oyogu-11001",
+  "oyogu-11002",
+  "oyogu-11003"
+ ]
+}

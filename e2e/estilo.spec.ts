@@ -32,7 +32,7 @@ test('o traço dos quadros fica dentro do quadro, mesmo quando o quadro corta o 
 
 test('os cartões do fliperama mostram o cenário de cada jogo', async ({ page }) => {
   const backgrounds = await page.locator('.tiles .tile').evaluateAll((els) => els.map((el) => getComputedStyle(el).backgroundImage));
-  expect(backgrounds).toHaveLength(8);
+  expect(backgrounds).toHaveLength(10);
   for (const bg of backgrounds) expect(bg).toMatch(/url\(/);
 });
 
@@ -62,7 +62,7 @@ test('o fliperama começa no traço e pinta o jogo que você já jogou', async (
       cor: (el.querySelector('.pinta') as HTMLElement | null)?.style.getPropertyValue('--cena-cor') ?? '',
     })),
   );
-  expect(camadas).toHaveLength(8);
+  expect(camadas).toHaveLength(10);
   for (const c of camadas) {
     expect(c.cor).toMatch(/url\(/);
     expect(c.cor).not.toBe(c.tinta);

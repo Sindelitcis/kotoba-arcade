@@ -2,11 +2,13 @@ import { ensurePecasSave } from '../src/games/pecas/engine';
 import { afterEach, describe, expect, it } from 'vitest';
 import { acertou, cor, COMBO_CHEIO, corDoCombo, corStyle, errou, progresso, visitados, zerar, type Saves } from '../src/core/cor';
 import { emptyAventuraSave } from '../src/games/aventura/engine';
+import { emptyCenaSave } from '../src/games/cena/engine';
 import { emptyConversaSave } from '../src/games/conversa/engine';
 import { emptyGramaticaSave } from '../src/games/gramatica/engine';
 import { ensureKanaBeatSave } from '../src/games/kanabeat/engine';
 import { emptyKanaImagensSave } from '../src/games/kanaimagens/engine';
 import { emptyKanjimonSave } from '../src/games/kanjimon/engine';
+import { emptyMemoriaSave } from '../src/games/memoria/engine';
 import { emptyRoguelikeSave } from '../src/games/roguelike/engine';
 
 function saves(): Saves {
@@ -19,6 +21,8 @@ function saves(): Saves {
     conversa: emptyConversaSave(),
     pecas: ensurePecasSave({}),
     kanaimagens: emptyKanaImagensSave(),
+    memoria: emptyMemoriaSave(),
+    cena: emptyCenaSave(),
   };
 }
 
@@ -80,12 +84,14 @@ describe('mapa sendo pintado', () => {
     s.kanjimon.captures = 1;
     s.aventura.done = ['aeroporto'];
     s.conversa.conversas = 2;
-    expect(visitados(s)).toEqual({ kanjimon: true, kanabeat: false, roguelike: false, aventura: true, gramatica: false, conversa: true, pecas: false, kanaimagens: false });
+    expect(visitados(s)).toEqual({ kanjimon: true, kanabeat: false, roguelike: false, aventura: true, gramatica: false, conversa: true, pecas: false, kanaimagens: false, memoria: false, cena: false });
     s.kanabeat.plays = 1;
     s.roguelike.runs = 1;
     s.gramatica.rounds = 1;
     s.pecas.rounds = 1;
     s.kanaimagens.rodadas = 1;
+    s.memoria.rounds = 1;
+    s.cena.rounds = 1;
     expect(Object.values(visitados(s)).every(Boolean)).toBe(true);
   });
 });

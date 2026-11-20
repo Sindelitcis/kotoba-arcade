@@ -57,6 +57,8 @@ const CASOS: Caso[] = [
   { nome: 'aventura', titulo: 'Aventura', entrar: (p) => p.keyboard.press('a'), marca: (p) => p.locator('main.av') },
   { nome: 'conversa', titulo: 'Conversa por voz', entrar: (p) => p.keyboard.press('v'), marca: (p) => p.getByTestId('cv') },
   { nome: 'kumitate', titulo: 'Kumitate', entrar: (p) => p.keyboard.press('g'), marca: (p) => p.locator('main.gr') },
+  { nome: 'memoria', titulo: 'Memória', entrar: (p) => p.keyboard.press('m'), marca: (p) => p.getByTestId('me-menu') },
+  { nome: 'cena', titulo: 'Cena Viva', entrar: (p) => p.keyboard.press('l'), marca: (p) => p.getByTestId('cn-menu') },
   { nome: 'jornada', titulo: 'Jornada', entrar: (p) => p.keyboard.press('j'), marca: (p) => p.getByTestId('jn-proxima') },
   {
     nome: 'licao',

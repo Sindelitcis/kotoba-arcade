@@ -5,6 +5,7 @@ import { loadVoices, sfx } from './core/audio';
 import { zerar } from './core/cor';
 import { HelpButton } from './core/help/HelpButton';
 import { AventuraGame } from './games/aventura/AventuraGame';
+import { CenaGame } from './games/cena/CenaGame';
 import { ConversaGame } from './games/conversa/ConversaGame';
 import { GramaticaGame } from './games/gramatica/GramaticaGame';
 import { KanaBeatGame } from './games/kanabeat/KanaBeatGame';
@@ -13,6 +14,7 @@ import { Booster } from './games/kanjimon/Booster';
 import { Dex } from './games/kanjimon/Dex';
 import { KanjiMonGame } from './games/kanjimon/KanjiMonGame';
 import { PecasGame } from './games/pecas/PecasGame';
+import { MemoriaGame } from './games/memoria/MemoriaGame';
 import { RoguelikeGame } from './games/roguelike/RoguelikeGame';
 import { Hub } from './hub/Hub';
 import { JornadaTela } from './jornada/JornadaTela';
@@ -40,6 +42,10 @@ function App() {
       return <ConversaGame />;
     case 'gramatica':
       return <GramaticaGame />;
+    case 'memoria':
+      return <MemoriaGame />;
+    case 'cena':
+      return <CenaGame />;
     case 'jornada':
       return <JornadaTela />;
     case 'licao':

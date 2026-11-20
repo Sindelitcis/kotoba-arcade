@@ -1,7 +1,8 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { KANJI, type Sentence } from '../content';
-import { app, aventuraSave, commit, conversaSave, go, gramaticaSave, jornadaSave, pecasSave, kanaBeatSave, kanaImagensSave, kanjimonSave, replaceSave, roguelikeSave, saved, screen, tick, type Screen } from '../core/app';
+import { app, aventuraSave, cenaSave, commit, conversaSave, go, gramaticaSave, jornadaSave, pecasSave, kanaBeatSave, kanaImagensSave, kanjimonSave, memoriaSave, replaceSave, roguelikeSave, saved, screen, tick, type Screen } from '../core/app';
 import { cenaStyle, type Cena } from '../core/arte';
+import { figuraTintaUrl, figuraUrl } from '../core/figuras';
 import { hasJapaneseVoice, sfx, speak } from '../core/audio';
 import { corStyle, visitados, type Saves } from '../core/cor';
 import { Pintura } from '../core/Pintura';
@@ -18,7 +19,9 @@ interface Tile {
   jp: string;
   blurb: string;
   screen?: Screen;
-  cena: Cena;
+  cena?: Cena;
+  /** Fundo desenhado no estúdio (src/assets/lugares), para os jogos de imagem. */
+  figura?: string;
 }
 
 const TILES: Tile[] = [
@@ -29,6 +32,8 @@ const TILES: Tile[] = [
   { id: 'aventura', title: 'Aventura', jp: '冒険', blurb: 'Você chegou ao Japão. Cenas curtas com japonês de verdade.', screen: 'aventura', cena: 'aventura-narita' },
   { id: 'gramatica', title: 'Kumitate', jp: '組み立て', blurb: 'Monte frases encaixando partículas e pontas de verbo.', screen: 'gramatica', cena: 'kumitate-gion' },
   { id: 'pecas', title: 'Kanji em peças', jp: '漢字パズル', blurb: 'Veja o kanji como desenho feito de peças. Monte, ache e adivinhe.', screen: 'pecas', cena: 'pecas-ryoanji' },
+  { id: 'memoria', title: 'Memória', jp: '絵合わせ', blurb: 'Ligue imagem e palavra. Do kana ao kanji, e depois só pelo som.', screen: 'memoria', figura: 'heya' },
+  { id: 'cena', title: 'Cena Viva', jp: '生きた場面', blurb: 'Lugares do Japão cheios de coisas. Ache o que a frase pede.', screen: 'cena', figura: 'konbini' },
   { id: 'conversa', title: 'Conversa por voz', jp: '会話', blurb: 'Fale japonês com personagens. A IA roda no seu PC.', screen: 'conversa', cena: 'conversa-cafe' },
 ];
 
@@ -61,13 +66,13 @@ export function Hub() {
   const sentences = readableSentences();
   const sentence = sentences.length > 0 ? sentences[sentences.length - 1] : undefined;
   const nextGame: Screen =
-    profile.lastGame === 'kanabeat' || profile.lastGame === 'roguelike' || profile.lastGame === 'aventura' || profile.lastGame === 'gramatica' || profile.lastGame === 'pecas' || profile.lastGame === 'kanaimagens'
+    profile.lastGame === 'kanabeat' || profile.lastGame === 'roguelike' || profile.lastGame === 'aventura' || profile.lastGame === 'gramatica' || profile.lastGame === 'pecas' || profile.lastGame === 'kanaimagens' || profile.lastGame === 'memoria' || profile.lastGame === 'cena'
       ? profile.lastGame
       : 'kanjimon';
-  const nextLabel = { kanabeat: 'Kana Beat · Próxima música', roguelike: 'Kotodama · Nova run', aventura: 'Aventura · Próxima cena', gramatica: 'Kumitate · Nova rodada', pecas: 'Kanji em peças · Nova rodada', kanaimagens: 'Kana em imagens · Nova rodada', kanjimon: 'KanjiMon · Caçada' }[nextGame];
+  const nextLabel = { kanabeat: 'Kana Beat · Próxima música', roguelike: 'Kotodama · Nova run', aventura: 'Aventura · Próxima cena', gramatica: 'Kumitate · Nova rodada', pecas: 'Kanji em peças · Nova rodada', kanaimagens: 'Kana em imagens · Nova rodada', memoria: 'Memória · Nova rodada', cena: 'Cena Viva · Nova rodada', kanjimon: 'KanjiMon · Caçada' }[nextGame];
   const booster = canOpenBooster(profile, km, cards);
   // Mapa sendo pintado: cada jogo já jogado ganha cor no fliperama, e a capa pinta junto.
-  const pintados = visitados({ kanjimon: km, kanabeat: kanaBeatSave(), roguelike: roguelikeSave(), aventura: aventuraSave(), gramatica: gramaticaSave(), conversa: conversaSave(), pecas: pecasSave(), kanaimagens: kanaImagensSave() });
+  const pintados = visitados({ kanjimon: km, kanabeat: kanaBeatSave(), roguelike: roguelikeSave(), aventura: aventuraSave(), gramatica: gramaticaSave(), conversa: conversaSave(), pecas: pecasSave(), kanaimagens: kanaImagensSave(), memoria: memoriaSave(), cena: cenaSave() });
   const quantos = Object.values(pintados).filter(Boolean).length;
   // Jornada: o caminho principal, com a próxima missão à vista.
   const jornada = jornadaSave();
@@ -99,6 +104,8 @@ export function Hub() {
       else if (tecla.toLowerCase() === 'a') go('aventura');
       else if (tecla.toLowerCase() === 'v') go('conversa');
       else if (tecla.toLowerCase() === 'g') go('gramatica');
+      else if (tecla.toLowerCase() === 'm') go('memoria');
+      else if (tecla.toLowerCase() === 'l') go('cena');
       else if (tecla.toLowerCase() === 'j') go('jornada');
       else if (tecla.toLowerCase() === 'p') go('pecas');
       else if (tecla.toLowerCase() === 'i') go('kanaimagens');
@@ -202,12 +209,12 @@ export function Hub() {
           <button
             key={t.id}
             class={`${t.screen ? 'tile' : 'tile soon'}${pintados[t.id as keyof Saves] ? ' pintado' : ''}`}
-            style={{ ...cenaStyle(t.cena), ...corStyle(pintados[t.id as keyof Saves] ? 1 : 0) }}
+            style={{ ...(t.figura ? { '--cena': `url("${figuraTintaUrl(t.figura)}")` } : cenaStyle(t.cena)), ...corStyle(pintados[t.id as keyof Saves] ? 1 : 0) }}
             data-testid={`tile-${t.id}`}
             disabled={!t.screen}
             onClick={() => t.screen && go(t.screen)}
           >
-            <Pintura cena={t.cena} />
+            {t.figura ? <span class="pinta" aria-hidden="true" style={{ '--cena-cor': `url("${figuraUrl(t.figura)}")` }} /> : <Pintura cena={t.cena} />}
             <span class="tile-jp">{t.jp}</span>
             <span class="tile-title">
               {t.title}
@@ -219,6 +226,8 @@ export function Hub() {
               {t.id === 'gramatica' && <kbd>G</kbd>}
               {t.id === 'pecas' && <kbd>P</kbd>}
               {t.id === 'kanaimagens' && <kbd>I</kbd>}
+              {t.id === 'memoria' && <kbd>M</kbd>}
+              {t.id === 'cena' && <kbd>L</kbd>}
             </span>
             <span class="tile-blurb">{t.blurb}</span>
           </button>

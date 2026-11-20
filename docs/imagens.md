@@ -150,3 +150,17 @@ O modelo de imagem vem de `scripts/imagens/motores.json`. Cada motor diz o tipo 
 - `evitar`: rótulos extras só daquele item (o que ele não pode parecer).
 
 Uma imagem precisa mostrar uma ideia só e não pode ter texto escrito. Por isso o estilo de objeto pede um objeto centralizado, sem pessoas, e o negativo tira letras, logotipos e etiquetas.
+
+### Os lotes do vocabulário
+
+Os prompts ficam em `scripts/imagens/gerar-listas.py`, que escreve as três listas. Os ajustes feitos depois de olhar as folhas (`vetadas`, `escolha`) ficam no fim dele, em `AJUSTES`, com o motivo.
+
+| Lote | O que tem | Gerado em | Sai em |
+| --- | --- | --- | --- |
+| `objetos.json` | 163 imagens: coisas do dia a dia, uma por imagem, mais seis objetos (guarda-chuva, bolsa, carro, chapéu, sapato, camiseta) em vermelho, azul, preto e branco. O guarda-chuva branco não tem imagem (`SEM_IMAGEM`): no fundo recortado ele some | 896×896, fundo recortado | `src/assets/imagens` (384 px) |
+| `acoes.json` | 23 imagens de uma pessoa fazendo uma coisa (ler, comer, beber, correr, dormir...), para 読んでいる人 | 832×1216, fundo recortado | `src/assets/acoes` (512 px) |
+| `lugares.json` | os oito fundos da Cena Viva, sem gente e sem objeto solto no meio | 1216×832 | `src/assets/lugares` (960 px) |
+
+Saíram da lista as palavras que o modelo não desenhou de forma reconhecível em três rodadas de prompt: cartão, boneco de neve, bilhete, cartão de visita, revista, jornal, papel, colírio, curativo, pasta de dente, bala, sol e o verbo esperar. Quase todas dependem de texto escrito ou são uma folha lisa, que vira só um retângulo. Elas continuam nos outros jogos, só não têm imagem.
+
+O conteúdo de cada imagem (palavra, kana, significado, nível, contador) fica em `src/content/imagens.ts`, que aponta para o id. A Cena Viva monta cada lugar por cima do fundo em `src/games/cena/lugares.ts`: as coisas são postas umas em relação às outras (em cima, embaixo, ao lado, na frente, dentro) usando a medida real de cada imagem, guardada em `medidas.json` pelo `exportar`. As frases dos pedidos saem desses dados; nenhuma é escrita à mão.

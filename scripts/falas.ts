@@ -1,6 +1,7 @@
 /**
  * Tudo o que os jogos falam em voz alta e que é fixo: palavras, frases, falas da
- * Aventura, frases do Kumitate, abertura, respostas prontas e palavras novas da Conversa.
+ * Aventura, frases do Kumitate, abertura, respostas prontas e palavras novas da Conversa,
+ * palavras do vocabulário em imagem (Memória) e pedidos e frases da Cena Viva.
  *
  * `scripts/gravar-vozes.mjs` usa esta lista para gravar os áudios, e
  * `tests/vozes.test.ts` confere que cada item tem arquivo no manifesto.
@@ -24,6 +25,9 @@ import { VOZ_CONVERSA, VOZ_PADRAO, VOZ_PALAVRA, VOZES, vozDaAventura, type VozId
 import { JORNADA_WORDS } from '../src/content/escola';
 import { palavras as palavrasMarcadas } from '../src/content/escola/ruby';
 import { LICOES, type FalaQuadro } from '../src/jornada/licoes';
+import { FIGURAS, IMAGEM_WORDS } from '../src/content/imagens';
+import { daCoisa, ETAPAS, falaDaTarefa, falaDoNome, nomeDe, tarefas, type Seg } from '../src/games/cena/engine';
+import { LUGARES } from '../src/games/cena/lugares';
 
 export interface Fala {
   /** Exatamente o texto que o jogo passa para `speak()`. */
@@ -276,6 +280,40 @@ function pecas(): Fala[] {
   ]);
 }
 
+/** Frase da Cena Viva: cada pedaço com kanji leva a leitura que a tela mostra. */
+function falaCena(segs: readonly Seg[], origem: string): Fala {
+  const partes: Parte[] = segs.map((x) => (x.r ? { t: x.t, r: kataToHira(x.r) } : { t: x.t }));
+  return { texto: juntar(partes), voz: VOZ_PADRAO, tts: juntar(partes), partes, origem };
+}
+
+/**
+ * Cena Viva: o pedido de cada tarefa, a frase de "descrever" em cada pedaço montado (tecla R
+ * no meio da montagem) e o nome que cada coisa diz quando é clicada.
+ */
+function cena(): Fala[] {
+  const out: Fala[] = [];
+  for (const l of LUGARES) {
+    for (const e of ETAPAS) {
+      for (const t of tarefas(l, e)) {
+        const origem = `cena/${l.id}/${e}`;
+        const n = t.pecas ? t.pecas.certas.length : 0;
+        for (let m = 0; m <= n; m++) {
+          if (!falaDaTarefa(t, m)) continue;
+          out.push(falaCena(t.pecas ? t.pecas.certas.slice(0, m) : t.segs, origem));
+        }
+      }
+    }
+    for (const c of l.coisas) {
+      const nome = nomeDe(c);
+      const f = falaDoNome(nome);
+      // Palavra solta já entra pelas figuras, com a chave no kana.
+      if (f.palavra && f.texto !== daCoisa(c).figura.word.kana) throw new Error(`nome fora do kana da palavra: ${c.img}`);
+      if (!f.palavra) out.push(falaCena(nome, `cena/${l.id}/nome`));
+    }
+  }
+  return out;
+}
+
 /** Lista sem repetição (mesmo texto na mesma voz entra uma vez só). */
 export function listarFalas(): Fala[] {
   const todas: Fala[] = [
@@ -313,6 +351,10 @@ export function listarFalas(): Fala[] {
     ...conversa(),
     ...jornada(),
     ...pecas(),
+    // Memória e Cena Viva: o nome de cada figura, na voz de palavra (chave no kana).
+    ...FIGURAS.map((f) => palavra(f.word, 'imagens/figura')),
+    ...IMAGEM_WORDS.map((w) => palavra(w, 'imagens/palavra')),
+    ...cena(),
   ];
   const vistas = new Set<string>();
   return todas.filter((f) => {

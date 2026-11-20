@@ -17,7 +17,7 @@ describe('vozes gravadas', () => {
 
   it('acha falas de todos os jogos', () => {
     const origens = new Set(falas.map((f) => f.origem.split('/')[0]));
-    expect([...origens].sort()).toEqual(['aventura', 'conteudo', 'conversa', 'jornada', 'kana', 'kanaimagens', 'kumitate', 'pecas']);
+    expect([...origens].sort()).toEqual(['aventura', 'cena', 'conteudo', 'conversa', 'imagens', 'jornada', 'kana', 'kanaimagens', 'kumitate', 'pecas']);
     expect(falas.length).toBeGreaterThan(700);
   });
 

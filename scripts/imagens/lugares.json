@@ -1,0 +1,62 @@
+{
+ "lote": "lugares",
+ "destino": "src/assets/lugares",
+ "largura": 1216,
+ "altura": 832,
+ "saida": 960,
+ "recorte": false,
+ "estilo": "no humans, scenery, empty room, wide shot, eye level, interior, clean lineart, anime background, cel shading, bright natural light, detailed background",
+ "negativo": "people, text, sign, letters, clutter, frame, border, photo, realistic, 3d, neon, dark",
+ "seeds": [
+  1,
+  2,
+  3
+ ],
+ "distratores": [
+  "a crowded room full of people",
+  "a forest",
+  "a shrine"
+ ],
+ "itens": [
+  {
+   "id": "konbini",
+   "rotulo": "an empty convenience store interior",
+   "prompt": "inside japanese convenience store, empty floor, white tiled floor, bare walls, glass door, bright ceiling lights"
+  },
+  {
+   "id": "eki",
+   "rotulo": "a train station platform",
+   "prompt": "japanese train station platform, empty, yellow tactile paving, roof, railway tracks"
+  },
+  {
+   "id": "heya",
+   "rotulo": "an empty bedroom",
+   "prompt": "empty japanese apartment bedroom, wooden floor, white walls, window with curtains, daylight"
+  },
+  {
+   "id": "jimusho",
+   "rotulo": "an empty office",
+   "prompt": "empty japanese office room, grey carpet floor, white walls, large windows, city view"
+  },
+  {
+   "id": "daidokoro",
+   "rotulo": "an empty kitchen",
+   "prompt": "japanese home kitchen, counter, sink, wooden floor, window, empty counter"
+  },
+  {
+   "id": "yakkyoku",
+   "rotulo": "an empty pharmacy interior",
+   "prompt": "inside japanese pharmacy, pharmacist counter at the back, green cross sign on the wall, white walls, shelves with medicine boxes, empty floor, clean, bright"
+  },
+  {
+   "id": "resutoran",
+   "rotulo": "an empty restaurant interior",
+   "prompt": "inside small japanese restaurant, wooden walls, wooden floor, warm light, noren curtain, empty"
+  },
+  {
+   "id": "michi",
+   "rotulo": "a residential street",
+   "prompt": "japanese residential street, asphalt road, sidewalk, houses in background, blue sky, utility poles, empty street"
+  }
+ ]
+}

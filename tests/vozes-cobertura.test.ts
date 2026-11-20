@@ -17,6 +17,9 @@ import { VOZ_PADRAO, VOZ_PALAVRA } from '../src/core/vozes';
 import { CENAS } from '../src/games/conversa/engine';
 import { cardOf, emptyGramaticaSave, exampleView, fits, GramaticaRound, plainSentence } from '../src/games/gramatica/engine';
 import { COURSE } from '../src/games/gramatica/pontos';
+import { FIGURAS } from '../src/content/imagens';
+import { ETAPAS, falaDaTarefa, falaDoNome, nomeDe, tarefas } from '../src/games/cena/engine';
+import { LUGARES } from '../src/games/cena/lugares';
 
 const T0 = new Date('2026-11-19T12:00:00').getTime();
 const RAIZ = join(__dirname, '..');
@@ -39,6 +42,14 @@ const CHAMADAS: Record<string, string[]> = {
     'speak(entry.plain, vozDaAventura(entry.who))',
     'speakWord(w.kana)', // glossário do resumo: palavras do conteúdo
   ],
+  'src/games/cena/CenaGame.tsx': [
+    'speakWord(f.texto)', // nome da coisa clicada: falaDoNome, palavra das figuras
+    'speak(f.texto)', // pessoa (読んでいる人): cena() em scripts/falas.ts
+    'speak(textoDe(t.pecas.certas))', // frase de "descrever" pronta
+    'speak(fala)', // pedido lido sozinho: falaDaTarefa
+    'speak(fala)', // tecla R: falaDaTarefa, inclusive pela metade
+    'speak(fala)', // botão de ouvir de novo: falaDaTarefa
+  ],
   'src/games/conversa/ConversaGame.tsx': [
     'speak(linha.jp, VOZ_CONVERSA[cena.personagem.voz])', // abertura gravada; resposta do modelo vem do servidor local
     'speakWord(t.kana)', // palavras novas do resumo
@@ -56,6 +67,13 @@ const CHAMADAS: Record<string, string[]> = {
   'src/games/kanjimon/KanjiMonGame.tsx': ['speak(asked.speak, VOZ_PALAVRA, asked.speakKana)'], // kanji sozinho ou palavra
   // Kanji em peças: kanji sozinho e palavra de exemplo, os dois de KANJI_PECAS (scripts/falas.ts, origem pecas/).
   'src/games/pecas/PecasGame.tsx': ['speak(p.jp, VOZ_PALAVRA, p.kana)', 'speakKanji(k.kanji, leituraOficial(k))'],
+  'src/games/memoria/MemoriaGame.tsx': [
+    'speakWord(novas[0].word.kana)', // lição: palavras das figuras
+    'speakWord(f.word.kana)',
+    'speakWord(e.fala)', // carta de palavra aberta
+    'speakWord(e.figura.word.kana)', // par feito
+    'speakWord(ultimaFala.current)', // tecla R
+  ],
   'src/games/roguelike/RoguelikeGame.tsx': ['speak(q.speak, VOZ_PALAVRA, q.speakKana)'],
   'src/hub/Hub.tsx': ['speak(sentence.jp)'],
   'src/jornada/LicaoTela.tsx': ["speak(f.texto, f.voz === 'palavra' ? VOZ_PALAVRA : VOZ_PADRAO, f.kana)"], // quadros das lições: jornada() em scripts/falas.ts
@@ -144,5 +162,28 @@ describe('cobertura das vozes a partir dos jogos', () => {
     // A simulação passou mesmo por frases pela metade, e não só pelas prontas.
     const prontas = new Set(listarFalas().filter((f) => f.origem.startsWith('kumitate') && !f.origem.endsWith('/metade')).map((f) => f.texto));
     expect([...ouvidas].filter((t) => !prontas.has(t)).length).toBeGreaterThan(30);
+  });
+
+  it('Memória: o nome de cada figura está na voz de palavra', () => {
+    expect([...new Set(FIGURAS.map((f) => f.word.kana))].filter((t) => !gravada(t, VOZ_PALAVRA))).toEqual([]);
+  });
+
+  it('Cena Viva: todo pedido, toda frase pela metade e todo nome de coisa têm áudio', () => {
+    const faltam = new Set<string>();
+    for (const l of LUGARES) {
+      for (const e of ETAPAS) {
+        for (const t of tarefas(l, e)) {
+          for (let m = 0; m <= (t.pecas?.certas.length ?? 0); m++) {
+            const fala = falaDaTarefa(t, m);
+            if (fala && !gravada(fala, VOZ_PADRAO)) faltam.add(fala);
+          }
+        }
+      }
+      for (const c of l.coisas) {
+        const f = falaDoNome(nomeDe(c));
+        if (!gravada(f.texto, f.palavra ? VOZ_PALAVRA : VOZ_PADRAO)) faltam.add(f.texto);
+      }
+    }
+    expect([...faltam]).toEqual([]);
   });
 });

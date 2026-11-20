@@ -14,6 +14,8 @@ Jogos que já dá para jogar:
 - **Kumitate**: puzzle de montar frases. Cada frase tem buracos e você encaixa partículas (は, を, に, で...) e pontas de verbo (ます, ません, た, ない...) até ela dizer o que foi pedido em português. A ponta encaixada transforma o verbo na hora: 飲む vira 飲みました. Peça que não serve volta para a bandeja com o motivo, sem tela de erro. Cada ponto de gramática é uma peça nova que destrava depois de você acertar a anterior de primeira algumas vezes, e chega com uma lição curta e um exemplo antes de ser cobrado. Uma rodada são seis frases.
 - **Kanji em peças**: o kanji visto como desenho feito de peças que se repetem. 休 é uma pessoa (亻) encostada na árvore (木): descansar. São cinco modos curtos: achar a peça, montar o kanji, achar o intruso entre kanji parecidos (未 e 末, 土 e 士), adivinhar o significado de um kanji nunca visto só pelas peças e ler palavras de dois kanji. Cobre todos os kanji do N5, N4 e N3 (612), com 383 peças, cada uma com nome em português e uma imagem. No fliperama, a tecla P abre direto.
 - **Conversa por voz**: você escolhe uma cena (pedir no café, perguntar o caminho, se apresentar, entrevista de trabalho) e conversa em japonês falando no microfone ou digitando em romaji ou kana. O personagem responde com voz e com furigana, no seu nível, puxando as palavras que você já está aprendendo. Travou, aperta Tab: vem uma dica e, na segunda vez, duas respostas prontas. Cada cena tem um objetivo, dura de 2 a 4 minutos e acaba num resumo com o que você disse bem, uma ou duas sugestões para soar mais natural e as palavras novas, que entram na memória. A IA roda no seu PC (veja abaixo); no site publicado esse jogo só explica como ligar.
+- **Memória** (tecla `M`): jogo da memória de imagem e palavra. Cada carta de imagem tem o par com a palavra em japonês. Começa com a palavra em kana, passa para o kanji, depois só o áudio (a carta fala e você acha a imagem) e por fim pares que se confundem, como いす (cadeira) e いぬ (cachorro). Uma rodada são três quadros curtos, com pausa entre eles, e leva de 1 a 3 minutos. Palavra nova aparece antes numa lição, com imagem e voz. Par errado só desvira; depois de dois enganos, o par certo brilha.
+- **Cena Viva** (tecla `L`): oito lugares de verdade (konbini, estação, quarto, escritório, cozinha, farmácia, restaurante e rua), cada um com 20 a 35 coisas que dá para clicar. A frase pede e você acha: começa em 傘はどこ？ e cresce para cor (赤い傘), tamanho, lugar (机の上の本), contadores (りんごが三つ), quem está fazendo o quê (読んでいる人), frases longas que juntam tudo e, no fim, você mesmo monta a frase que descreve a cena (テーブルの上にかばんがあります). Vai do N5 ao N3. Clicou na coisa errada, ela diz o próprio nome e o pedido continua. Cada rodada são oito pedidos.
 
 ## Como rodar
 
@@ -103,8 +105,8 @@ Essas escolhas vêm do que se sabe sobre TDAH e sobre memória, e do que costuma
 - **Primeiro contato não tem como errar.** Kanji novo aparece com o significado, uma historinha e a resposta destacada. A cobrança vem minutos depois, quando lembrar já dá trabalho.
 - **Cada acerto responde na hora.** Som que sobe com o combo, partículas, selo quebrando. Resposta rápida ganha bônus, resposta lenta não perde nada.
 - **A pergunta muda conforme você melhora.** Começa em reconhecer o significado, passa por ler a palavra e chega em digitar a leitura.
-- **Tem ponto de parada.** No Kana em imagens, cada rodada são dez perguntas. No Kumitate, cada rodada são seis frases e acaba num resumo. No Kanji em peças, são oito perguntas. Na Conversa por voz, cada cena dura no máximo 4 minutos. Na Aventura, cada cena termina com o resumo do que você passou a entender. No KanjiMon, a cada cinco capturas vem um baú com o resumo da sessão. No Kana Beat, cada música dura perto de um minuto. No Kotodama, o mapa aparece entre uma luta e outra. Dá para parar ali ou seguir por horas.
-- **Ninguém é expulso do jogo.** No Kana Beat a música sempre vai até o fim. Errou muito, a próxima vem mais lenta. No Kotodama, perder a run não apaga nada do que foi estudado. No Kumitate e no Kanji em peças não tem vida nem tempo: depois de duas peças erradas a certa brilha.
+- **Tem ponto de parada.** No Kana em imagens, cada rodada são dez perguntas. No Kumitate, cada rodada são seis frases e acaba num resumo. No Kanji em peças, são oito perguntas. Na Conversa por voz, cada cena dura no máximo 4 minutos. Na Aventura, cada cena termina com o resumo do que você passou a entender. No KanjiMon, a cada cinco capturas vem um baú com o resumo da sessão. No Kana Beat, cada música dura perto de um minuto. No Kotodama, o mapa aparece entre uma luta e outra. Na Memória, cada quadro termina numa pausa. Na Cena Viva, a rodada são oito pedidos. Dá para parar ali ou seguir por horas.
+- **Ninguém é expulso do jogo.** No Kana Beat a música sempre vai até o fim. Errou muito, a próxima vem mais lenta. No Kotodama, perder a run não apaga nada do que foi estudado. No Kumitate e no Kanji em peças não tem vida nem tempo: depois de duas peças erradas a certa brilha. Na Memória e na Cena Viva também não tem relógio contra você; o tempo só dá bônus.
 - **O progresso é concreto.** O fliperama mostra quantos kanji e palavras você já reconhece e as frases que já consegue ler.
 
 ### A ordem da gramática no Kumitate
@@ -123,7 +125,7 @@ Kanji nunca vem sozinho: toda carta traz palavras de verdade, com leitura em kan
 
 ```
 src/core      memória espaçada, seletor de cartas, perguntas, save, kana, som, efeitos, imagens, ajuda
-src/assets    fontes recortadas, cenários, personagens e músicas do Kana Beat
+src/assets    fontes recortadas, cenários, personagens, músicas do Kana Beat e as ilustrações do estúdio (imagens, acoes, lugares)
 docs          guia de estilo (estilo.md), como as imagens (imagens.md) e as vozes (vozes.md) foram feitas, dados do Kanji em peças (pecas.md), kana (kana.md)
 public/vozes  falas gravadas em mp3 e o manifesto texto → arquivo
 src/content   kanji, palavras, frases e kana (os 94 kanji do KanjiMon original, o vocabulário do dia a dia, os mnemônicos de kana e, em escola/, o conteúdo da escola-japones)
@@ -131,7 +133,7 @@ src/jornada   a Jornada: mapa, missões, lições em quadrinhos
 src/hub       o fliperama
 src/games     um jogo por pasta; as regras ficam separadas da tela
 local         servidor da Conversa por voz (Whisper, Ollama e AivisSpeech) e o `npm run local`
-scripts       importação do conteúdo, recorte das fontes e gravação das vozes (`npm run vozes`)
+scripts       importação do conteúdo, recorte das fontes, gravação das vozes (`npm run vozes`) e o estúdio de imagens (`estudio.py`)
 tests         testes das regras
 e2e           testes jogando no navegador
 ```
@@ -163,7 +165,7 @@ Fontes, as duas pela SIL Open Font License 1.1 (o texto da licença está em `sr
 - [Dela Gothic One](https://github.com/syakuzen/DelaGothic), de The Dela Gothic Project Authors: títulos e onomatopeias.
 - [Yuji Syuku](https://github.com/Kinutafontfactory/Yuji), de The Yuji Project Authors (Kinuta Font Factory): kanji em pincel.
 
-Cenários e personagens, nas versões mangá e anime: gerados no PC com o [Animagine XL 4.0](https://huggingface.co/cagliostrolab/animagine-xl-4.0) (Cagliostro Research Lab, licença CreativeML Open RAIL++-M, que permite usar as imagens geradas). Detalhes em [docs/imagens.md](docs/imagens.md).
+Cenários e personagens, nas versões mangá e anime, e as primeiras ilustrações de vocabulário: gerados no PC com o [Animagine XL 4.0](https://huggingface.co/cagliostrolab/animagine-xl-4.0) (Cagliostro Research Lab, licença CreativeML Open RAIL++-M, que permite usar as imagens geradas). As ilustrações novas da Memória e da Cena Viva: [Anima Turbo v1.1](https://huggingface.co/circlestone-labs/Anima), da CircleStone Labs, sob licença não comercial (a imagem gerada é livre). The CircleStone Model is licensed by CircleStone Labs LLC under the CircleStone Non-Commercial License. Copyright CircleStone Labs LLC. Detalhes em [docs/imagens.md](docs/imagens.md).
 
 Kanji em peças: traços e peças do [KanjiVG](https://kanjivg.tagaini.net), de Ulrich Apel (CC BY-SA 3.0); leituras, lista de peças e conferência das palavras pelo KANJIDIC2, KRADFILE e JMdict, da [EDRDG](https://www.edrdg.org) (CC BY-SA 4.0); nível do JLPT pelo [kanji-data](https://github.com/davidluzgouveia/kanji-data), de David Luz Gouveia (MIT). Os arquivos gerados desses dados seguem CC BY-SA. Nomes das peças, imagens e historinhas foram escritos para o jogo. Detalhes e como regenerar: [docs/pecas.md](docs/pecas.md).
 
