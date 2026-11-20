@@ -24,6 +24,7 @@ const FONTE: Record<TelaAjuda, string> = {
   jornada: 'jornada/JornadaTela.tsx',
   licao: 'jornada/LicaoTela.tsx',
   pecas: 'games/pecas/PecasGame.tsx',
+  kanaimagens: 'games/kanaimagens/KanaImagensGame.tsx',
 };
 
 const NOMES: Record<string, string> = { Esc: 'Escape', Espaço: ' ', '↑': 'ArrowUp', '↓': 'ArrowDown' };

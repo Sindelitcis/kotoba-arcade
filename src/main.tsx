@@ -8,6 +8,7 @@ import { AventuraGame } from './games/aventura/AventuraGame';
 import { ConversaGame } from './games/conversa/ConversaGame';
 import { GramaticaGame } from './games/gramatica/GramaticaGame';
 import { KanaBeatGame } from './games/kanabeat/KanaBeatGame';
+import { KanaImagensGame } from './games/kanaimagens/KanaImagensGame';
 import { Booster } from './games/kanjimon/Booster';
 import { Dex } from './games/kanjimon/Dex';
 import { KanjiMonGame } from './games/kanjimon/KanjiMonGame';
@@ -45,6 +46,8 @@ function App() {
       return <LicaoTela />;
     case 'pecas':
       return <PecasGame />;
+    case 'kanaimagens':
+      return <KanaImagensGame />;
     default:
       return <Hub />;
   }

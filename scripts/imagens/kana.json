@@ -1,0 +1,587 @@
+{
+ "lote": "kana",
+ "destino": "src/assets/kana",
+ "largura": 896,
+ "altura": 896,
+ "passos": 24,
+ "saida": 384,
+ "recorte": true,
+ "estilo": "simple illustration, single subject, centered, plain white background, clean bold lineart, flat colors, modern anime style",
+ "negativo": "multiple panels, cluttered background, photo, realistic, 3d, letters, numbers, symbols",
+ "distratores": [
+  "a letter of the alphabet",
+  "a landscape",
+  "a room"
+ ],
+ "seeds": [
+  1,
+  2,
+  3
+ ],
+ "itens": [
+  {
+   "id": "boca-aberta",
+   "objeto": "boca aberta",
+   "rotulo": "a person with a wide open mouth at the dentist",
+   "prompt": "1person, solo, chibi, cute person sitting in dentist chair with mouth wide open, dentist mirror"
+  },
+  {
+   "id": "dois-imas",
+   "objeto": "dois ímãs",
+   "rotulo": "two horseshoe magnets",
+   "prompt": "two red horseshoe magnets with silver tips facing each other, magnetic field lines between them, no humans",
+   "seeds": [
+    11,
+    12,
+    13,
+    14
+   ]
+  },
+  {
+   "id": "orelha",
+   "objeto": "orelha",
+   "rotulo": "a human ear",
+   "prompt": "a human ear, close-up, side view, simple drawing, small earring, no face",
+   "seeds": [
+    11,
+    12,
+    13,
+    14
+   ]
+  },
+  {
+   "id": "ema",
+   "objeto": "ema",
+   "rotulo": "an emu",
+   "prompt": "an emu, large flightless australian bird, long neck, running, side view, no humans",
+   "seeds": [
+    11,
+    12,
+    13,
+    14
+   ]
+  },
+  {
+   "id": "tropeco",
+   "objeto": "tropeço",
+   "rotulo": "a person tripping",
+   "prompt": "1person, solo, chibi, person tripping forward, hat flying off the head, surprised face"
+  },
+  {
+   "id": "mosquito",
+   "objeto": "mosquito",
+   "rotulo": "a mosquito",
+   "prompt": "one big mosquito insect, long stinger pointing down, transparent wings, no humans"
+  },
+  {
+   "id": "chave",
+   "objeto": "chave",
+   "rotulo": "an old key",
+   "prompt": "one antique iron key with big teeth, no humans"
+  },
+  {
+   "id": "bico-de-cuco",
+   "objeto": "bico de cuco",
+   "rotulo": "a cuckoo clock",
+   "prompt": "a cuckoo bird popping out of a wooden cuckoo clock with beak wide open, no humans"
+  },
+  {
+   "id": "espeto-de-queijo",
+   "objeto": "espeto de queijo",
+   "rotulo": "grilled cheese on skewers",
+   "prompt": "two wooden skewers with grilled cheese cubes over small barbecue flames, no humans"
+  },
+  {
+   "id": "duas-cobras",
+   "objeto": "duas cobras",
+   "rotulo": "two snakes",
+   "prompt": "two green snakes lying stretched out side by side on grass, sunbathing, no humans",
+   "seeds": [
+    11,
+    12,
+    13,
+    14
+   ]
+  },
+  {
+   "id": "saca-rolhas",
+   "objeto": "saca-rolhas",
+   "rotulo": "a corkscrew",
+   "prompt": "a metal corkscrew with wooden handle next to a wine bottle, no humans"
+  },
+  {
+   "id": "anzol",
+   "objeto": "anzol",
+   "rotulo": "a fishing hook",
+   "prompt": "one big shiny metal fishing hook on a fishing line, close-up, no humans",
+   "seeds": [
+    11,
+    12,
+    13,
+    14
+   ]
+  },
+  {
+   "id": "canudo",
+   "objeto": "canudo",
+   "rotulo": "a drinking straw in juice",
+   "prompt": "a glass of orange juice with a long bendy straw that makes a loop, no humans"
+  },
+  {
+   "id": "cerca",
+   "objeto": "cerca",
+   "rotulo": "a wooden fence",
+   "prompt": "a short section of white wooden picket fence, grass at the bottom, small flower, no humans",
+   "seeds": [
+    11,
+    12,
+    13,
+    14
+   ]
+  },
+  {
+   "id": "fumaca-da-sopa",
+   "objeto": "fumaça da sopa",
+   "rotulo": "a bowl of hot soup",
+   "prompt": "a bowl of hot soup with zigzag steam rising high, no humans"
+  },
+  {
+   "id": "tabuas",
+   "objeto": "tábuas",
+   "rotulo": "wooden planks",
+   "prompt": "stack of wooden planks with a hammer lying next to them, no humans"
+  },
+  {
+   "id": "mergulho",
+   "objeto": "mergulho",
+   "rotulo": "a person jumping into a pool",
+   "prompt": "1boy, solo, chibi, full body, large in frame, cannonball jump into a swimming pool, big water splash, swimming pool tiles",
+   "seeds": [
+    11,
+    12,
+    13,
+    14
+   ]
+  },
+  {
+   "id": "tsunami",
+   "objeto": "tsunami",
+   "rotulo": "a giant ocean wave",
+   "prompt": "one giant curling ocean wave, small boat, no humans"
+  },
+  {
+   "id": "teia",
+   "objeto": "teia",
+   "rotulo": "a spider hanging from a thread",
+   "prompt": "a black spider hanging from a single silk thread, spider web in the upper corner, clear outline, no humans",
+   "seeds": [
+    11,
+    12,
+    13,
+    14
+   ]
+  },
+  {
+   "id": "prego",
+   "objeto": "prego",
+   "rotulo": "a hammer and a nail",
+   "prompt": "a hammer hitting a steel nail into a wooden plank, close-up, no humans",
+   "seeds": [
+    11,
+    12,
+    13,
+    14
+   ]
+  },
+  {
+   "id": "nadador",
+   "objeto": "nadador",
+   "rotulo": "a person swimming",
+   "prompt": "1boy, solo, chibi, full body, large in frame, swimming in the sea, freestyle stroke, swimming goggles, splash",
+   "seeds": [
+    11,
+    12,
+    13,
+    14
+   ]
+  },
+  {
+   "id": "ninho",
+   "objeto": "ninho",
+   "rotulo": "a bird nest with eggs",
+   "prompt": "a bird nest with two eggs on a tree branch, small bird, no humans"
+  },
+  {
+   "id": "nuvem-enrolada",
+   "objeto": "nuvem enrolada",
+   "rotulo": "a rain cloud",
+   "prompt": "one curly fluffy cloud with rain drops falling, no humans"
+  },
+  {
+   "id": "gato",
+   "objeto": "gato",
+   "rotulo": "a cat",
+   "prompt": "a cute orange cat lying down, full body, tail curled around, no humans",
+   "seeds": [
+    11,
+    12,
+    13,
+    14
+   ]
+  },
+  {
+   "id": "novelo",
+   "objeto": "novelo",
+   "rotulo": "a ball of yarn",
+   "prompt": "a ball of yarn with a knitting needle, loose thread, no humans"
+  },
+  {
+   "id": "risada",
+   "objeto": "risada",
+   "rotulo": "a person laughing out loud",
+   "prompt": "1boy, solo, chibi, full body, large in frame, laughing hard, mouth wide open, holding belly, tears of joy, eyes closed",
+   "seeds": [
+    11,
+    12,
+    13,
+    14
+   ]
+  },
+  {
+   "id": "sorriso",
+   "objeto": "sorriso",
+   "rotulo": "a big smiling face",
+   "prompt": "a big wide smiling face, eyes closed happily, simple round face, no body"
+  },
+  {
+   "id": "sopro",
+   "objeto": "sopro",
+   "rotulo": "a person blowing out birthday candles",
+   "prompt": "1girl, solo, chibi, full body, large in frame, blowing out candles on a birthday cake, puffed cheeks, wind lines",
+   "seeds": [
+    11,
+    12,
+    13,
+    14
+   ]
+  },
+  {
+   "id": "morrinho",
+   "objeto": "morrinho",
+   "rotulo": "a small hill",
+   "prompt": "a small green hill with a winding path to the top, sun, no humans"
+  },
+  {
+   "id": "chamine",
+   "objeto": "chaminé",
+   "rotulo": "a chimney on a snowy roof",
+   "prompt": "a snowy roof with a brick chimney, smoke, wrapped gift box, christmas, no humans"
+  },
+  {
+   "id": "mastro",
+   "objeto": "mastro",
+   "rotulo": "a small sailboat",
+   "prompt": "a small wooden sailboat with tall mast and two sails, sea, seagull, no humans"
+  },
+  {
+   "id": "nota-musical",
+   "objeto": "nota musical",
+   "rotulo": "a musical note",
+   "prompt": "big black musical eighth note, small musical notes around, no humans"
+  },
+  {
+   "id": "vaca",
+   "objeto": "vaca",
+   "rotulo": "a cow",
+   "prompt": "a cute cow in side view mooing, horns, grass, no humans"
+  },
+  {
+   "id": "olho",
+   "objeto": "olho",
+   "rotulo": "an eye",
+   "prompt": "one big expressive anime eye with long eyelashes, sparkle, no humans"
+  },
+  {
+   "id": "isca",
+   "objeto": "isca",
+   "rotulo": "worms on a fishing hook",
+   "prompt": "fishing hook with two earthworms as bait, water drops, fish, no humans"
+  },
+  {
+   "id": "iate",
+   "objeto": "iate",
+   "rotulo": "a white motor yacht",
+   "prompt": "a white luxury motor yacht on the sea, no sails, side view, no humans",
+   "seeds": [
+    11,
+    12,
+    13,
+    14
+   ]
+  },
+  {
+   "id": "peixe-no-anzol",
+   "objeto": "peixe no anzol",
+   "rotulo": "a fish leaping out of water",
+   "prompt": "a happy fish leaping out of water and curling around, splash, no humans"
+  },
+  {
+   "id": "ioio",
+   "objeto": "ioiô",
+   "rotulo": "a yo-yo",
+   "prompt": "a red yo-yo hanging from its string, motion lines, no humans"
+  },
+  {
+   "id": "arara",
+   "objeto": "arara",
+   "rotulo": "a macaw parrot",
+   "prompt": "a colorful scarlet macaw parrot sitting on a branch, leaves, no humans"
+  },
+  {
+   "id": "siri",
+   "objeto": "siri",
+   "rotulo": "a crab",
+   "prompt": "a cute crab with two raised claws on the sand, small wave, no humans"
+  },
+  {
+   "id": "canguru",
+   "objeto": "canguru",
+   "rotulo": "a kangaroo",
+   "prompt": "a kangaroo standing on its hind legs, australian animal, big feet, long thick tail, side view, no humans",
+   "seeds": [
+    11,
+    12,
+    13,
+    14
+   ]
+  },
+  {
+   "id": "chute",
+   "objeto": "chute",
+   "rotulo": "a person kicking a ball",
+   "prompt": "1boy, solo, chibi, full body, large in frame, kicking a soccer ball hard, dynamic pose, leg raised, effort face",
+   "seeds": [
+    11,
+    12,
+    13,
+    14
+   ]
+  },
+  {
+   "id": "garoto-gritando",
+   "objeto": "garoto gritando",
+   "rotulo": "a boy shouting",
+   "prompt": "1boy, solo, chibi, boy shouting with hands around mouth, mouth wide open, sound lines"
+  },
+  {
+   "id": "abraco",
+   "objeto": "abraço",
+   "rotulo": "two people hugging",
+   "prompt": "1boy, 1girl, chibi, full body, large in frame, two friends hugging each other tightly, happy, small heart above",
+   "seeds": [
+    11,
+    12,
+    13,
+    14
+   ]
+  },
+  {
+   "id": "surfista",
+   "objeto": "surfista",
+   "rotulo": "a surfer on a wave",
+   "prompt": "1boy, solo, chibi, full body, large in frame, surfing, standing on a surfboard, riding a big blue wave, arms open",
+   "seeds": [
+    11,
+    12,
+    13,
+    14
+   ]
+  },
+  {
+   "id": "prancha-de-surfe",
+   "objeto": "prancha de surfe",
+   "rotulo": "a surfboard on the beach",
+   "prompt": "a single surfboard standing upright on the beach sand, no humans"
+  },
+  {
+   "id": "pensando",
+   "objeto": "pensando",
+   "rotulo": "a person thinking",
+   "prompt": "1girl, solo, chibi, full body, large in frame, sitting on the floor with one leg stretched, hand on chin, thinking, thought bubble above",
+   "seeds": [
+    11,
+    12,
+    13,
+    14
+   ]
+  },
+  {
+   "id": "machado",
+   "objeto": "machado",
+   "rotulo": "an axe in a tree trunk",
+   "prompt": "an axe stuck in a tree trunk, wood chips flying, no humans"
+  },
+  {
+   "id": "pessoa-encostada",
+   "objeto": "pessoa encostada",
+   "rotulo": "a person leaning on a lamp post",
+   "prompt": "1boy, solo, chibi, full body, large in frame, leaning against a street lamp post, arms crossed, relaxed, night",
+   "seeds": [
+    11,
+    12,
+    13,
+    14
+   ]
+  },
+  {
+   "id": "fantasma-de-capuz",
+   "objeto": "fantasma de capuz",
+   "rotulo": "a hooded ghost",
+   "prompt": "a cute white ghost wearing a hood, floating, moon, no humans"
+  },
+  {
+   "id": "elevador",
+   "objeto": "elevador",
+   "rotulo": "an elevator",
+   "prompt": "an open elevator door with up and down arrow buttons, no humans"
+  },
+  {
+   "id": "susto",
+   "objeto": "susto",
+   "rotulo": "a startled person",
+   "prompt": "1boy, solo, chibi, full body, large in frame, shocked, surprised, falling backwards, arms flailing, sweat drops",
+   "seeds": [
+    11,
+    12,
+    13,
+    14
+   ]
+  },
+  {
+   "id": "conteiner",
+   "objeto": "contêiner",
+   "rotulo": "a shipping container",
+   "prompt": "one open shipping container at the port, small ship, sea, no humans"
+  },
+  {
+   "id": "sacola",
+   "objeto": "sacola",
+   "rotulo": "a shopping bag",
+   "prompt": "a paper shopping bag with two handles, no humans"
+  },
+  {
+   "id": "vento-com-chuva",
+   "objeto": "vento com chuva",
+   "rotulo": "rain blown by strong wind",
+   "prompt": "dark rain cloud with heavy rain falling diagonally, strong wind lines, an umbrella blowing away, no humans",
+   "seeds": [
+    11,
+    12,
+    13,
+    14
+   ]
+  },
+  {
+   "id": "colher-pingando",
+   "objeto": "colher pingando",
+   "rotulo": "a spoon dripping soup",
+   "prompt": "a spoon dripping soup into a bowl, drops falling, no humans"
+  },
+  {
+   "id": "tabua-no-bico",
+   "objeto": "tábua no bico",
+   "rotulo": "a bird carrying a plank",
+   "prompt": "a small bird carrying a wooden plank in its beak, flying, no humans"
+  },
+  {
+   "id": "antena-de-tv",
+   "objeto": "antena de TV",
+   "rotulo": "a TV antenna on a roof",
+   "prompt": "an old television antenna on top of a house roof, signal waves, no humans"
+  },
+  {
+   "id": "tronco",
+   "objeto": "tronco",
+   "rotulo": "a woodpecker on a tree trunk",
+   "prompt": "a woodpecker pecking a tree trunk with one branch, no humans"
+  },
+  {
+   "id": "numero-dois",
+   "objeto": "número dois",
+   "rotulo": "a hand making a peace sign",
+   "prompt": "a hand showing two fingers, peace sign, v sign, close-up, no face",
+   "seeds": [
+    11,
+    12,
+    13,
+    14
+   ]
+  },
+  {
+   "id": "raio-na-nuvem",
+   "objeto": "raio na nuvem",
+   "rotulo": "lightning from a cloud",
+   "prompt": "a lightning bolt striking through a dark cloud, rain, no humans"
+  },
+  {
+   "id": "bandeira-ao-vento",
+   "objeto": "bandeira ao vento",
+   "rotulo": "a flag waving in the wind",
+   "prompt": "a flag on a pole waving strongly in the wind, wind lines, no humans"
+  },
+  {
+   "id": "arvore-de-natal",
+   "objeto": "árvore de Natal",
+   "rotulo": "a christmas tree",
+   "prompt": "a decorated christmas tree with a star on top, gifts, no humans"
+  },
+  {
+   "id": "fatia-de-pizza",
+   "objeto": "fatia de pizza",
+   "rotulo": "a slice of pizza",
+   "prompt": "one triangular slice of pizza with pepperoni, melted cheese, no humans"
+  },
+  {
+   "id": "minhocas",
+   "objeto": "minhocas",
+   "rotulo": "earthworms coming out of the soil",
+   "prompt": "three earthworms coming out of the ground, soil, grass, no humans"
+  },
+  {
+   "id": "tapa-olho",
+   "objeto": "tapa-olho",
+   "rotulo": "a pirate eye patch",
+   "prompt": "a black pirate eyepatch with a thin strap, single object, simple, no humans",
+   "seeds": [
+    11,
+    12,
+    13,
+    14
+   ]
+  },
+  {
+   "id": "banheira",
+   "objeto": "banheira",
+   "rotulo": "a bathtub with hot water",
+   "prompt": "a bathtub full of hot water with steam rising, rubber duck, no humans"
+  },
+  {
+   "id": "geladeira-de-iogurte",
+   "objeto": "geladeira de iogurte",
+   "rotulo": "a fridge full of yogurt",
+   "prompt": "an open refrigerator with three shelves full of yogurt cups, no humans"
+  },
+  {
+   "id": "estrada-comprida",
+   "objeto": "estrada comprida",
+   "rotulo": "a long straight road",
+   "prompt": "a long straight asphalt road with a white dashed center line stretching to the horizon, one point perspective, flat green fields, no humans",
+   "seeds": [
+    11,
+    12,
+    13,
+    14
+   ]
+  }
+ ]
+}

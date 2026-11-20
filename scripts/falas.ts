@@ -10,6 +10,7 @@
  * pela voz do navegador.
  */
 import { KANA, KANJI, WORDS, type Word } from '../src/content';
+import { KANA_IMAGENS, PALAVRAS_KATAKANA } from '../src/content/kana';
 import { DAILY_WORDS } from '../src/content/vida';
 import { hasKanji, kataToHira } from '../src/core/kana';
 import { parseLine, plainText, type Scene } from '../src/games/aventura/engine';
@@ -300,6 +301,13 @@ export function listarFalas(): Fala[] {
       { texto: k.hira, voz: VOZ_PALAVRA, tts: k.hira, partes: [{ t: k.hira }], origem: 'kana/hiragana' },
       { texto: k.kata, voz: VOZ_PALAVRA, tts: k.kata, partes: [{ t: k.kata }], origem: 'kana/katakana' },
     ]),
+    // Kana em imagens: as letras que o Kana Beat não tem (ぢ, ファ, ヴ...), o exemplo de cada kana
+    // e as palavras da leitura relâmpago. っ e ー não soam sozinhos: a fala deles é o exemplo.
+    ...KANA_IMAGENS.flatMap((k): Fala[] => [
+      ...(k.fala === k.char ? [{ texto: k.char, voz: VOZ_PALAVRA, tts: k.char, partes: [{ t: k.char }], origem: 'kana/letra' }] : []),
+      palavra(k.exemplo, 'kana/exemplo'),
+    ]),
+    ...PALAVRAS_KATAKANA.map((p) => palavra({ jp: p.kana, kana: p.kana }, 'kana/palavra')),
     ...aventura(SCENES),
     ...kumitate(),
     ...conversa(),

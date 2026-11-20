@@ -84,8 +84,9 @@ test('o fliperama começa no traço e pinta o jogo que você já jogou', async (
   await expect(page.getByTestId('tile-kanjimon')).toHaveClass(/pintado/);
   expect(await corDe(page, 'tile-kanjimon')).toBe(1);
   expect(await corDe(page, 'tile-kanabeat')).toBe(0);
-  // Um jogo de sete: a capa pinta um sétimo.
-  expect(await corDe(page, 'play-now')).toBeCloseTo(1 / 7, 2);
+  // Um jogo de todos: a capa pinta só a fração dele.
+  const jogos = await page.locator('.tiles .tile').count();
+  expect(await corDe(page, 'play-now')).toBeCloseTo(1 / jogos, 2);
 });
 
 test('na caçada a cor sobe com os acertos seguidos e cai no erro', async ({ page }) => {

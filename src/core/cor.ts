@@ -10,6 +10,7 @@ import type { AventuraSave } from '../games/aventura/engine';
 import type { ConversaSave } from '../games/conversa/engine';
 import type { GramaticaSave } from '../games/gramatica/engine';
 import type { KanaBeatSave } from '../games/kanabeat/engine';
+import type { KanaImagensSave } from '../games/kanaimagens/engine';
 import type { KanjimonSave } from '../games/kanjimon/engine';
 import type { PecasSave } from '../games/pecas/engine';
 import type { RoguelikeSave } from '../games/roguelike/engine';
@@ -59,6 +60,7 @@ export interface Saves {
   gramatica: GramaticaSave;
   conversa: ConversaSave;
   pecas: PecasSave;
+  kanaimagens: KanaImagensSave;
 }
 
 /** Jogos que o jogador já jogou de verdade: no fliperama eles aparecem pintados, como um mapa. */
@@ -71,5 +73,6 @@ export function visitados(s: Saves): Record<keyof Saves, boolean> {
     gramatica: s.gramatica.rounds > 0,
     conversa: s.conversa.conversas > 0,
     pecas: s.pecas.rounds > 0,
+    kanaimagens: s.kanaimagens.rodadas > 0,
   };
 }

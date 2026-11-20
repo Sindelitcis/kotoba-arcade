@@ -6,7 +6,7 @@
 import { computed, signal } from '@preact/signals';
 import { useEffect, useLayoutEffect, useRef } from 'preact/hooks';
 
-export type TelaAjuda = 'hub' | 'ajustes' | 'kanjimon' | 'kanjidex' | 'booster' | 'kanabeat' | 'roguelike' | 'aventura' | 'conversa' | 'gramatica' | 'jornada' | 'licao' | 'pecas';
+export type TelaAjuda = 'hub' | 'ajustes' | 'kanjimon' | 'kanjidex' | 'booster' | 'kanabeat' | 'roguelike' | 'aventura' | 'conversa' | 'gramatica' | 'jornada' | 'licao' | 'pecas' | 'kanaimagens';
 
 /** Tela atual do fliperama. Quem liga o botão define. */
 export const telaAjuda = signal<TelaAjuda>('hub');

@@ -22,6 +22,7 @@ export const HUB: Ajuda = {
     { teclas: ['A'], faz: 'Aventura' },
     { teclas: ['G'], faz: 'Kumitate' },
     { teclas: ['P'], faz: 'Kanji em peças' },
+    { teclas: ['I'], faz: 'Kana em imagens' },
     { teclas: ['V'], faz: 'Conversa por voz' },
     { teclas: ['D'], faz: 'KanjiDex, a coleção de cartas' },
     { teclas: ['B'], faz: 'Abrir um booster, quando dá' },

@@ -4,6 +4,7 @@ import { ensureAventuraSave, type AventuraSave } from '../games/aventura/engine'
 import { ensureConversaSave, type ConversaSave } from '../games/conversa/engine';
 import { ensureGramaticaSave, type GramaticaSave } from '../games/gramatica/engine';
 import { ensureKanaBeatSave, type KanaBeatSave } from '../games/kanabeat/engine';
+import { ensureKanaImagensSave, type KanaImagensSave } from '../games/kanaimagens/engine';
 import { ensureKanjimonSave, type KanjimonSave } from '../games/kanjimon/engine';
 import { ensurePecasSave, type PecasSave } from '../games/pecas/engine';
 import { ensureRoguelikeSave, type RoguelikeSave } from '../games/roguelike/engine';
@@ -12,7 +13,7 @@ import { foco } from './foco';
 import { markPlayed } from './progress';
 import { importSave, loadSave, writeSave, type SaveData } from './save';
 
-export type Screen = 'hub' | 'kanjimon' | 'kanjidex' | 'booster' | 'kanabeat' | 'roguelike' | 'aventura' | 'conversa' | 'gramatica' | 'jornada' | 'licao' | 'pecas';
+export type Screen = 'hub' | 'kanjimon' | 'kanjidex' | 'booster' | 'kanabeat' | 'roguelike' | 'aventura' | 'conversa' | 'gramatica' | 'jornada' | 'licao' | 'pecas' | 'kanaimagens';
 
 export const app: { data: SaveData } = { data: loadSave(localStorage, Date.now()) };
 
@@ -70,6 +71,10 @@ export function conversaSave(): ConversaSave {
 
 export function roguelikeSave(): RoguelikeSave {
   return ensureRoguelikeSave(app.data.games);
+}
+
+export function kanaImagensSave(): KanaImagensSave {
+  return ensureKanaImagensSave(app.data.games);
 }
 
 export function gramaticaSave(): GramaticaSave {

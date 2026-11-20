@@ -49,6 +49,8 @@ const CHAMADAS: Record<string, string[]> = {
     "speak(r.phase === 'lesson' ? exampleView(COURSE, r.puzzle.point).map((w) => w.text + w.tail).join('') : plainSentence(r.puzzle))", // tecla R, inclusive pela metade
   ],
   'src/games/kanabeat/KanaBeatGame.tsx': ['speakWord(e.note.kana)', 'speakWord(n.kana)'],
+  // Letras, exemplos e palavras do Kana em imagens: tudo passa por ouvir() (tests/kanaimagens.test.ts confere).
+  'src/games/kanaimagens/KanaImagensGame.tsx': ['speakWord(texto)'],
   'src/games/kanjimon/Booster.tsx': ['speakKanji(card.kanji.kanji, card.kanji.reading)'], // kanji sozinho
   'src/games/kanjimon/Dex.tsx': ['speakKanji(open.kanji, open.reading)', 'speakWord(w.kana)', 'speak(s.jp)'],
   'src/games/kanjimon/KanjiMonGame.tsx': ['speak(asked.speak, VOZ_PALAVRA, asked.speakKana)'], // kanji sozinho ou palavra

@@ -1,0 +1,77 @@
+/* Kana em imagens: tokens e quadros do guia de estilo (docs/estilo.md). */
+
+.ki { max-width: 960px; margin: 0 auto; padding: 18px 20px 40px; display: grid; gap: 18px; min-height: 100vh; grid-template-rows: auto 1fr auto; }
+
+.ki-quadro {
+  display: grid; gap: 16px; align-content: center; justify-items: center; text-align: center;
+  padding: 24px; background: var(--branco); border: var(--quadro); box-shadow: var(--sombra);
+}
+
+/* A imagem: traço de tinta; os preenchimentos e a ilustração colorida ganham cor com --cor. */
+.ki-img { width: 100%; height: auto; color: var(--tinta); display: block; }
+.ki-img .ki-f { --c: var(--sakura); fill: color-mix(in srgb, var(--c) calc(var(--cor, 0) * 100%), var(--branco)); transition: fill 0.9s; }
+.ki-img .ki-b { --c: var(--sora); }
+.ki-img .ki-c { --c: var(--yuuhi); }
+.ki-img .ki-d { --c: var(--midori); }
+.ki-img .ki-e { --c: var(--kin); }
+.ki-img .ki-cor { opacity: var(--cor, 0); transition: opacity 0.9s; }
+.ki-img .ki-letra {
+  font-family: var(--jp); font-weight: 800; fill: var(--tinta); fill-opacity: 0.88;
+  stroke: var(--branco); stroke-width: 3px; paint-order: stroke; stroke-linejoin: round;
+}
+.ki-img .ki-marca { color: var(--shu); }
+.ki-img .ki-vazio { fill: none; stroke: var(--cinza); stroke-width: 1.6; stroke-dasharray: 4 4; }
+.ki-img .ki-mini-fundo { fill: var(--branco); stroke: var(--tinta); stroke-width: 5; }
+
+/* Na lição a cor vem cheia: é a apresentação, o primeiro contato. */
+.ki-licao { display: grid; grid-template-columns: minmax(180px, 260px) 1fr; gap: 20px; align-items: center; text-align: left; max-width: 760px; }
+.ki-licao .ki-img { --cor: 1; border: var(--quadro); background: var(--branco); }
+.ki-licao.compacta { grid-template-columns: 110px 1fr; gap: 12px; }
+.ki-licao-texto { display: grid; gap: 8px; }
+.ki-char { font: 800 3.2rem/1 var(--jp); }
+.ki-licao.compacta .ki-char { font-size: 2rem; }
+.ki-romaji { font: 400 1.2rem/1 var(--f-titulo); color: var(--shu); margin-left: 8px; }
+.ki-soa { color: var(--tinta-2); }
+.ki-mnemo { font-size: 1.1rem; line-height: 1.45; }
+.ki-exemplo { display: grid; justify-items: start; gap: 2px; text-align: left; width: fit-content; }
+.ki-exemplo span { font: 700 1.3rem/1.2 var(--jp); }
+.ki-nota { color: var(--tinta-2); font-size: 0.95rem; border-left: 3px solid var(--tinta); padding-left: 10px; }
+.ki-parecidos b { font: 700 1.3rem/1 var(--jp); margin: 0 6px; }
+
+.ki-pede { font: 400 1.15rem/1.3 var(--f-titulo); }
+.ki-grande { max-width: 260px; border: var(--quadro); }
+.ki-media { max-width: 180px; border: var(--quadro); }
+.ki-dica { color: var(--tinta-2); }
+.ki-letra-grande { font: 800 7rem/1 var(--jp); }
+.ki-palavra { font: 800 3.6rem/1.1 var(--jp); letter-spacing: 0.04em; }
+.ki-som { font-size: 2.6rem; padding: 14px 28px; }
+
+.ki-opcoes { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; width: 100%; max-width: 720px; }
+.ki-opcoes.poucas { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+.ki-opcao { display: grid; justify-items: center; gap: 6px; padding: 12px 8px; position: relative; }
+.ki-opcao kbd { position: absolute; top: 6px; left: 6px; }
+.ki-op-letra { font: 800 2.8rem/1.1 var(--jp); }
+.ki-op-texto { font: 600 1.05rem/1.25 var(--f-texto); padding-top: 14px; }
+.ki-opcoes.imagens .ki-img { max-width: 140px; }
+.ki-opcao.certa { border-color: var(--shu); box-shadow: 4px 4px 0 var(--shu); }
+.ki-opcao.errada { background: var(--tom-forte), var(--branco); text-decoration: line-through; }
+.ki-opcao.apagada { opacity: 0.45; }
+.ki-opcao:disabled { cursor: default; }
+
+.ki-volta { display: grid; gap: 8px; justify-items: center; }
+
+.ki-teste-btn { width: 100%; margin-top: 10px; }
+.ki-modos { list-style: none; display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; padding: 0; }
+.ki-modo { width: 100%; text-align: left; }
+.ki-caminho { list-style: none; display: grid; gap: 8px; padding: 0; }
+.ki-caminho li { display: grid; grid-template-columns: minmax(150px, 260px) 1fr auto; gap: 12px; align-items: center; }
+.ki-caminho li.fechado { color: var(--cinza); }
+.ki-rever { display: grid; gap: 12px; }
+
+@media (max-width: 640px) {
+  .ki-licao, .ki-licao.compacta { grid-template-columns: 1fr; justify-items: center; text-align: center; }
+  .ki-opcoes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ki-letra-grande { font-size: 5rem; }
+  .ki-caminho li { grid-template-columns: 1fr auto; }
+  .ki-caminho li .bar { grid-column: 1 / -1; }
+}
