@@ -19,12 +19,15 @@ import { SCENES } from '../src/games/aventura/cenas';
 import { CENAS, marcado } from '../src/games/conversa/engine';
 import { ANSWERS, MAX_OPEN, conjugateWritten, parseSentence, type Block, type Ending, type Piece } from '../src/games/gramatica/engine';
 import { COURSE } from '../src/games/gramatica/pontos';
+import { LICOES_FALADAS } from '../src/games/gramatica/falado';
 import { KANJI_PECAS } from '../src/games/pecas/dados';
 import { leituraOficial } from '../src/games/pecas/engine';
 import { VOZ_CONVERSA, VOZ_PADRAO, VOZ_PALAVRA, VOZES, vozDaAventura, type VozId } from '../src/core/vozes';
 import { JORNADA_WORDS } from '../src/content/escola';
 import { palavras as palavrasMarcadas } from '../src/content/escola/ruby';
 import { LICOES, type FalaQuadro } from '../src/jornada/licoes';
+import { AULAS } from '../src/aulas';
+import type { FalaJp } from '../src/core/sequencia';
 import { FIGURAS, IMAGEM_WORDS } from '../src/content/imagens';
 import { daCoisa, ETAPAS, falaDaTarefa, falaDoNome, nomeDe, tarefas, type Seg } from '../src/games/cena/engine';
 import { LUGARES } from '../src/games/cena/lugares';
@@ -178,6 +181,9 @@ function tirarPausasSobrando(partes: Parte[]): Parte[] {
 function kumitate(): Fala[] {
   const out: Fala[] = [];
   for (const point of COURSE.points) {
+    // A peça nova dita sozinha na lição falada (は soa わ): o kana, na voz de palavra.
+    const peca = LICOES_FALADAS[point.id]?.peca;
+    if (peca) out.push({ texto: peca, voz: VOZ_PALAVRA, tts: peca, partes: [{ t: peca }], origem: `kumitate/${point.id}/peca` });
     const frases = [point.example.jp, ...point.sentences.map((s) => s.jp)];
     frases.forEach((markup, i) => {
       // O exemplo da lição usa só a primeira resposta de cada buraco.
@@ -209,19 +215,26 @@ function conversa(): Fala[] {
 }
 
 /**
- * Quadros das lições da Jornada. Palavra solta e kanji sozinho vão como nos jogos (chave
- * no kana, ou no kanji). Frase vai palavra por palavra: cada bloco da marcação da
- * escola-japones com kanji leva a leitura dele.
+ * Japonês das lições da Jornada e das aulas do modo Ouvir. Palavra solta e kanji sozinho
+ * vão como nos jogos (chave no kana, ou no kanji); kana solto (uma partícula dita sozinha)
+ * vai como os kana. Frase vai palavra por palavra: cada bloco da marcação da escola-japones
+ * com kanji leva a leitura dele.
  */
-function falaDoQuadro(f: FalaQuadro, origem: string): Fala {
-  if (f.palavra) {
-    const { jp, kana } = f.palavra;
+function falaDoQuadro(f: FalaQuadro | FalaJp, origem: string): Fala {
+  const palavraDoQuadro = 'palavra' in f ? f.palavra : undefined;
+  if (palavraDoQuadro) {
+    const { jp, kana } = palavraDoQuadro;
     return { texto: f.texto, voz: VOZ_PALAVRA, tts: hasKanji(jp) ? jp : kana, partes: [hasKanji(jp) ? { t: jp, r: kataToHira(kana) } : { t: kana }], palavra: { jp, kana }, origem };
   }
+  if (f.voz === 'palavra') {
+    if (hasKanji(f.texto)) throw new Error(`palavra com kanji sem leitura: ${f.texto}`);
+    return { texto: f.texto, voz: VOZ_PALAVRA, tts: f.texto, partes: [{ t: f.texto }], origem };
+  }
+  const marcadoDoQuadro = 'marcado' in f ? f.marcado : undefined;
   // A marcação não põe espaço depois de 、 e 。: a pontuação vira parte própria, e cada
   // pedaço entre ela é uma palavra (今、電話 são duas, cada uma com a sua leitura).
   const partes: Parte[] = [];
-  for (const segs of palavrasMarcadas(f.marcado ?? f.texto)) {
+  for (const segs of palavrasMarcadas(marcadoDoQuadro ?? f.texto)) {
     let t = '';
     let r = '';
     const fechar = () => {
@@ -251,8 +264,23 @@ function falaDoQuadro(f: FalaQuadro, origem: string): Fala {
   return { texto: f.texto, voz: VOZ_PADRAO, tts: juntar(partes), partes, origem };
 }
 
+/**
+ * Lições da Jornada: o quadro (e as palavras de exemplo do kanji), o japonês que a
+ * pergunta mostra e o que toca depois da resposta.
+ */
 function jornada(): Fala[] {
-  return LICOES.flatMap((l) => l.passos.flatMap((p) => (p.tipo === 'quadro' && p.fala ? [falaDoQuadro(p.fala, 'jornada/' + l.id)] : [])));
+  return LICOES.flatMap((l) =>
+    l.passos.flatMap((p) => {
+      const falas =
+        p.tipo === 'quadro' ? [p.fala, ...(p.falasExemplos ?? [])] : p.tipo === 'pergunta' ? [p.fala, p.falaResposta] : [p.falaResposta];
+      return falas.filter((f): f is FalaQuadro => !!f).map((f) => falaDoQuadro(f, 'jornada/' + l.id));
+    }),
+  );
+}
+
+/** O japonês das aulas do modo Ouvir (quase tudo já é dos jogos; o resto é novo). */
+function aulas(): Fala[] {
+  return AULAS.flatMap((a) => a.trechos.flatMap((t) => (t.tipo === 'jp' ? [falaDoQuadro(t.fala, 'ouvir/' + a.id)] : [])));
 }
 
 /**
@@ -350,6 +378,7 @@ export function listarFalas(): Fala[] {
     ...kumitate(),
     ...conversa(),
     ...jornada(),
+    ...aulas(),
     ...pecas(),
     // Memória e Cena Viva: o nome de cada figura, na voz de palavra (chave no kana).
     ...FIGURAS.map((f) => palavra(f.word, 'imagens/figura')),

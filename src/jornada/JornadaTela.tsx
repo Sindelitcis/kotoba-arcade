@@ -195,6 +195,9 @@ export function JornadaTela() {
           </h1>
           <p class="muted">Do zero até trabalhar no Japão. Nada fica trancado: veja tudo, comece por onde quiser.</p>
         </div>
+        <button class="ghost jn-ouvir" onClick={() => go('ouvir')} data-testid="jn-ouvir">
+          Ouvir as aulas, sem olhar a tela
+        </button>
       </header>
 
       {proxima && (

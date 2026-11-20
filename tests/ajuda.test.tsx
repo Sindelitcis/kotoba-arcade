@@ -27,6 +27,7 @@ const FONTE: Record<TelaAjuda, string> = {
   kanaimagens: 'games/kanaimagens/KanaImagensGame.tsx',
   memoria: 'games/memoria/MemoriaGame.tsx',
   cena: 'games/cena/CenaGame.tsx',
+  ouvir: 'ouvir/OuvirTela.tsx',
 };
 
 const NOMES: Record<string, string> = { Esc: 'Escape', Espaço: ' ', '↑': 'ArrowUp', '↓': 'ArrowDown', '←': 'ArrowLeft', '→': 'ArrowRight' };

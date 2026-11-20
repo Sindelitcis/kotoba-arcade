@@ -8,7 +8,9 @@ import { sfx, speak } from '../../core/audio';
 import { onomato } from '../../core/fx';
 import { masteryLevel } from '../../core/srs';
 import { foco } from '../../core/foco';
+import { tocarSequencia, type Tocador } from '../../core/sequencia';
 import { teclaDe } from '../../core/teclas';
+import { licaoFalada } from './falado';
 import { cardOf, exampleView, fits, GramaticaRound, openPoints, plainSentence, ROUND_SIZE, slotWritten, WINS_TO_UNLOCK, type RoundEvent, type RoundSummary, type Written } from './engine';
 import { COURSE, POINTS } from './pontos';
 
@@ -96,10 +98,17 @@ export function GramaticaGame() {
     if (r) react(r.placeAt(i));
   };
 
+  // A lição falada (português e o exemplo): para quando a montagem começa.
+  const licaoTocando = useRef<Tocador | null>(null);
+  const falarLicao = (r: GramaticaRound) => {
+    licaoTocando.current = tocarSequencia(licaoFalada(COURSE, r.puzzle.point));
+  };
+
   const proceed = () => {
     const r = roundRef.current;
     if (!r) return;
     if (r.phase === 'lesson') {
+      licaoTocando.current?.parar();
       r.begin();
       redraw();
     } else if (r.phase === 'solved') {
@@ -111,8 +120,9 @@ export function GramaticaGame() {
   const phase = mode === 'round' && round ? round.phase : '';
   const index = round?.index ?? -1;
   useEffect(() => {
-    if (phase === 'lesson' && round) speak(exampleView(COURSE, round.puzzle.point).map((w) => w.text + w.tail).join(''));
+    if (phase === 'lesson' && round) falarLicao(round);
   }, [phase, index]);
+  useEffect(() => () => licaoTocando.current?.parar(), []);
 
   // Ouvinte ligado junto com o desenho da tela: tecla apertada logo que a tela aparece não se perde.
   useLayoutEffect(() => {
@@ -132,7 +142,10 @@ export function GramaticaGame() {
         const r = roundRef.current;
         if (!r) return;
         if (tecla === 'Escape') setMode('menu');
-        else if (tecla.toLowerCase() === 'r') speak(r.phase === 'lesson' ? exampleView(COURSE, r.puzzle.point).map((w) => w.text + w.tail).join('') : plainSentence(r.puzzle));
+        else if (tecla.toLowerCase() === 'r') {
+          if (r.phase === 'lesson') falarLicao(r);
+          else speak(plainSentence(r.puzzle));
+        }
         else if (r.phase === 'build') {
           if (digit) place(digit - 1);
         } else if (confirm) proceed();

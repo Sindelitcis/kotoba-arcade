@@ -209,7 +209,7 @@ export interface Manifesto {
   falas: Record<string, Partial<Record<VozId, string>>>;
 }
 
-const VOZES_URL = `${import.meta.env.BASE_URL}vozes/`;
+export const VOZES_URL = `${import.meta.env.BASE_URL}vozes/`;
 let manifesto: Promise<Manifesto | null> | null = null;
 let gravadas = false;
 
@@ -234,11 +234,31 @@ export function recordedFile(m: Manifesto, text: string, voz: VozId = VOZ_PADRAO
 
 let playing: HTMLAudioElement | null = null;
 let request = 0;
+/** Quem mais está falando (uma sequência de `sequencia.ts`): para junto quando outra fala começa. */
+let outraFala: (() => void) | null = null;
 
 function silence(): void {
   playing?.pause();
   playing = null;
   if (typeof speechSynthesis !== 'undefined') speechSynthesis.cancel();
+  const parar = outraFala;
+  outraFala = null;
+  parar?.();
+}
+
+/**
+ * Cala tudo (fala solta e sequência) e registra `parar`, chamado quando a próxima fala
+ * começar. Uma sequência chama isto antes de tocar.
+ */
+export function assumirFala(parar: () => void): void {
+  ++request;
+  silence();
+  outraFala = parar;
+}
+
+/** Larga a vez sem calar nada (a sequência terminou sozinha). */
+export function largarFala(parar: () => void): void {
+  if (outraFala === parar) outraFala = null;
 }
 
 /** Palavra solta ou kana: o áudio é achado pelo kana, na voz de palavra (mais clara em palavra curta). */

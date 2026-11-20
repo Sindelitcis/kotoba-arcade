@@ -19,6 +19,7 @@ import { RoguelikeGame } from './games/roguelike/RoguelikeGame';
 import { Hub } from './hub/Hub';
 import { JornadaTela } from './jornada/JornadaTela';
 import { LicaoTela } from './jornada/LicaoTela';
+import { OuvirTela } from './ouvir/OuvirTela';
 import './styles.css';
 
 // O manifesto das vozes gravadas já vem antes da primeira fala.
@@ -54,6 +55,8 @@ function App() {
       return <PecasGame />;
     case 'kanaimagens':
       return <KanaImagensGame />;
+    case 'ouvir':
+      return <OuvirTela />;
     default:
       return <Hub />;
   }

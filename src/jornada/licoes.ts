@@ -12,20 +12,21 @@
  *   como erradas uma da outra.
  */
 import { cardKey, KANJI } from '../content';
+import { hasKanji } from '../core/kana';
 import { LEITURAS } from '../content/leituras';
 import { EXPRESSOES, FUNDAMENTOS, GRAMATICA, KANJI_ESCOLA, LEITURAS_NOVAS, SITUACOES, palavrasDoTema, TEMAS, type PalavraTema } from '../content/escola';
 import { SONS_LONGOS } from '../content/escola/fundamentos';
 import { LACUNA } from '../content/escola/gramatica';
 import { leituraContinua, textoSimples } from '../content/escola/ruby';
 import type { ExercicioEscrito, Expressao, Kanji as KanjiEscola, Marcado, Pagina, Registro } from '../content/escola/tipos';
+import type { FalaJp } from '../core/sequencia';
 
-/** O que a tecla R fala no quadro. `texto` é a chave da gravação (ver scripts/falas.ts). */
-export interface FalaQuadro {
-  texto: string;
-  /** palavra: voz clara de palavra solta; frase: voz padrão. */
-  voz: 'palavra' | 'frase';
-  /** Leitura em kana, para a voz do navegador quando faltar a gravação. */
-  kana: string;
+/**
+ * O que a tecla R fala no quadro. `texto` é a chave da gravação (ver scripts/falas.ts);
+ * `voz` palavra é a voz clara de palavra solta, frase é a voz padrão; `kana` é a leitura
+ * para a voz do navegador quando faltar a gravação.
+ */
+export interface FalaQuadro extends FalaJp {
   /** Frase: o texto marcado, para o gravador saber a leitura de cada palavra com kanji. */
   marcado?: Marcado;
   /** Palavra solta (ou kanji sozinho): como se escreve e como se lê, igual aos jogos. */
@@ -49,6 +50,8 @@ export interface Quadro {
   /** Exemplos curtos, em japonês marcado, com tradução. */
   exemplos?: readonly { jp: Marcado; pt: string }[];
   fala?: FalaQuadro;
+  /** Os exemplos falados, depois da `fala` (palavras com o kanji do quadro). */
+  falasExemplos?: readonly FalaQuadro[];
 }
 
 export interface Pergunta {
@@ -66,6 +69,10 @@ export interface Pergunta {
   explicacao?: string;
   /** Carta da memória (palavra ou kanji do arcade) que a resposta move. */
   carta?: string;
+  /** O japonês que a pergunta mostra, falado quando ela aparece. */
+  fala?: FalaQuadro;
+  /** Falado depois da resposta: a frase completa ou a alternativa certa em japonês. */
+  falaResposta?: FalaQuadro;
 }
 
 export interface Ordem {
@@ -75,6 +82,8 @@ export interface Ordem {
   /** Blocos na ordem certa. A tela embaralha. */
   blocos: readonly Marcado[];
   explicacao?: string;
+  /** A frase montada, falada quando fica pronta. */
+  falaResposta?: FalaQuadro;
 }
 
 export type Passo = Quadro | Pergunta | Ordem;
@@ -107,27 +116,52 @@ export function falaPalavra(jp: string, kana: string, pronuncia?: string): FalaQ
   return { texto: kana, voz: 'palavra', kana: pronuncia ?? kana, palavra: { jp, kana } };
 }
 
+/**
+ * Palavra com kanji gravada no próprio texto, como o kanji sozinho e as palavras do Kanji
+ * em peças: o kana se repete entre palavras diferentes (着る e 切る são きる).
+ */
+export function falaComKanji(jp: Marcado): FalaQuadro {
+  const texto = textoSimples(jp);
+  const kana = leituraContinua(jp);
+  if (!hasKanji(texto)) return falaPalavra(texto, kana);
+  return { texto, voz: 'palavra', kana, palavra: { jp: texto, kana } };
+}
+
 /** Exercício da escola-japones como passo da lição. */
 export function passoDe(ex: ExercicioEscrito): Pergunta | Ordem {
   switch (ex.tipo) {
-    case 'lacuna':
+    case 'lacuna': {
+      const fraseCompleta = ex.frase.replace(LACUNA, ` ${ex.resposta} `).replace(/\s+/g, ' ').trim();
       return {
         tipo: 'pergunta',
         id: ex.id,
         enunciado: ex.pt,
         frase: ex.frase,
-        fraseCompleta: ex.frase.replace(LACUNA, ` ${ex.resposta} `).replace(/\s+/g, ' ').trim(),
+        fraseCompleta,
         correta: ex.resposta,
         erradas: ex.erradas,
         japones: true,
         explicacao: ex.explicacao,
+        falaResposta: falaFrase(fraseCompleta),
       };
-    case 'escolha':
-      return { tipo: 'pergunta', id: ex.id, enunciado: ex.pergunta, correta: ex.correta, erradas: ex.erradas, japones: temJapones(ex.correta), explicacao: ex.explicacao };
+    }
+    case 'escolha': {
+      const japones = temJapones(ex.correta);
+      return {
+        tipo: 'pergunta',
+        id: ex.id,
+        enunciado: ex.pergunta,
+        correta: ex.correta,
+        erradas: ex.erradas,
+        japones,
+        explicacao: ex.explicacao,
+        ...(japones ? { falaResposta: falaFrase(ex.correta) } : {}),
+      };
+    }
     case 'significado':
-      return { tipo: 'pergunta', id: ex.id, enunciado: 'O que quer dizer?', frase: ex.frase, correta: ex.correta, erradas: ex.erradas, japones: false, explicacao: ex.explicacao };
+      return { tipo: 'pergunta', id: ex.id, enunciado: 'O que quer dizer?', frase: ex.frase, correta: ex.correta, erradas: ex.erradas, japones: false, explicacao: ex.explicacao, fala: falaFrase(ex.frase) };
     case 'ordem':
-      return { tipo: 'ordem', id: ex.id, enunciado: ex.pt, blocos: ex.blocos, explicacao: ex.explicacao };
+      return { tipo: 'ordem', id: ex.id, enunciado: ex.pt, blocos: ex.blocos, explicacao: ex.explicacao, falaResposta: falaFrase(ex.blocos.join(' ')) };
   }
 }
 
@@ -169,7 +203,7 @@ export const MAX_QUADROS_SEGUIDOS = 3;
  */
 function perguntaDaFrase(id: string, jp: Marcado, pt: string, outras: readonly string[]): Pergunta {
   const erradas = outras.filter((o) => o !== pt).filter((o, i, a) => a.indexOf(o) === i).slice(0, 2);
-  return { tipo: 'pergunta', id, enunciado: 'O que quer dizer?', frase: jp, correta: pt, erradas, japones: false };
+  return { tipo: 'pergunta', id, enunciado: 'O que quer dizer?', frase: jp, correta: pt, erradas, japones: false, fala: falaFrase(jp) };
 }
 
 /** Partes de no máximo `n` itens. */
@@ -276,6 +310,7 @@ function perguntaExpressao(e: Expressao): Pergunta {
     erradas: erradasDaExpressao(e).map((o) => o.jp),
     japones: true,
     explicacao: `${textoSimples(e.jp)}: ${e.pt}. Registro ${NOME_CURTO[e.registro].toLowerCase()}.`,
+    falaResposta: falaFrase(e.jp),
   };
 }
 
@@ -332,7 +367,7 @@ const porOrigem = new Map<string, PalavraTema>();
  * Verbo fala na forma ます, que é a que o quadro mostra. O resto fala como nos jogos
  * (子ども usa a gravação de 子供, que é a mesma palavra).
  */
-function falaDaPalavra(p: PalavraTema): FalaQuadro {
+export function falaDaPalavra(p: PalavraTema): FalaQuadro {
   const { palavra, word } = p;
   if (!palavra.dicionario && word) return falaPalavra(word.jp, word.kana, palavra.pronuncia);
   return falaPalavra(textoSimples(palavra.jp), leituraContinua(palavra.jp), palavra.pronuncia);
@@ -365,8 +400,12 @@ function perguntaPalavra(p: PalavraTema, vizinhas: readonly PalavraTema[]): Perg
     erradas,
     japones: false,
     carta: p.word ? cardKey(p.word.id, 'meaning') : undefined,
+    fala: falaDaPalavra(p),
   };
 }
+
+/** As palavras de cada lição de vocabulário, na ordem dos quadros (o modo Ouvir usa a mesma divisão). */
+export const PALAVRAS_DA_LICAO = new Map<string, readonly PalavraTema[]>();
 
 function licoesDoTema(tema: string): Licao[] {
   const todas = palavrasDoTema(tema);
@@ -385,6 +424,7 @@ function licoesDoTema(tema: string): Licao[] {
     };
     // Vogal longa e っ: cada palavra já com a pergunta, porque a lição abre com uma página de texto.
     const porVez = tema === 'sons' ? 1 : TRIO;
+    PALAVRAS_DA_LICAO.set(`vocab:${tema}:${n}`, grupo);
     out.push(licao(`vocab:${tema}:${n}`, titulo, emTrios(grupo, quadroPalavra, (p) => perguntaPalavra(p, vizinhas(p)), porVez)));
   }
   return out;
@@ -413,6 +453,12 @@ export function leituraDoKanji(char: string): { sozinho: string; outras: readonl
 
 const doKanjiMon = new Set(KANJI.map((k) => k.kanji));
 
+/** O kanji sozinho, gravado no próprio kanji (日 e 火 são os dois ひ). */
+export function falaDoKanji(k: KanjiEscola): FalaQuadro {
+  const l = leituraDoKanji(k.char);
+  return { texto: k.char, voz: 'palavra', kana: l.sozinho, palavra: { jp: k.char, kana: l.sozinho } };
+}
+
 function quadroKanji(k: KanjiEscola): Quadro {
   const l = leituraDoKanji(k.char);
   return {
@@ -422,7 +468,8 @@ function quadroKanji(k: KanjiEscola): Quadro {
     pt: k.significado,
     linhas: [k.associacao, ...(l.outras.length > 0 ? [`Dentro de palavras também: ${l.outras.join(', ')}.`] : [])],
     exemplos: k.exemplos,
-    fala: { texto: k.char, voz: 'palavra', kana: l.sozinho, palavra: { jp: k.char, kana: l.sozinho } },
+    fala: falaDoKanji(k),
+    falasExemplos: k.exemplos.map((ex) => falaComKanji(ex.jp)),
   };
 }
 
@@ -437,6 +484,7 @@ function perguntaKanji(k: KanjiEscola, grupo: readonly KanjiEscola[]): Pergunta 
     erradas,
     japones: false,
     carta: doKanjiMon.has(k.char) ? cardKey(`k:${k.char}`, 'meaning') : undefined,
+    fala: falaDoKanji(k),
   };
 }
 

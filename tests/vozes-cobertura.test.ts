@@ -34,10 +34,11 @@ function arquivos(dir: string): string[] {
  * Toda chamada de fala do código, e de onde vem o texto dela. Chamada nova faz este teste
  * falhar: ponha a fonte do texto em `scripts/falas.ts`, rode `npm run vozes` e acrescente aqui.
  */
+// Fora daqui: core/sequencia.ts, que toca o que as aulas, a Jornada e o Kumitate montam em trechos. O
+// japonês desses trechos está em scripts/falas.ts (aulas(), jornada(), kumitate()), e vozes.test.ts confere.
 const CHAMADAS: Record<string, string[]> = {
   'src/games/aventura/AventuraGame.tsx': [
-    'speak(play.shown.plain, vozDaAventura(play.shown.who))', // falas das cenas
-    'speak(p.shown.plain, vozDaAventura(p.shown.who))',
+    'speak(shown.plain, vozDaAventura(shown.who))', // falas das cenas (a narração vai em português, por tocarSequencia)
     'speak(entry.plain, vozDaAventura(entry.who))', // diário: as mesmas falas
     'speak(entry.plain, vozDaAventura(entry.who))',
     'speakWord(w.kana)', // glossário do resumo: palavras do conteúdo
@@ -56,8 +57,7 @@ const CHAMADAS: Record<string, string[]> = {
   ],
   'src/games/gramatica/GramaticaGame.tsx': [
     'speak(e.plain)', // frase montada
-    "speak(exampleView(COURSE, round.puzzle.point).map((w) => w.text + w.tail).join(''))", // exemplo da lição
-    "speak(r.phase === 'lesson' ? exampleView(COURSE, r.puzzle.point).map((w) => w.text + w.tail).join('') : plainSentence(r.puzzle))", // tecla R, inclusive pela metade
+    'speak(plainSentence(r.puzzle))', // tecla R com a frase pela metade (a lição vai por licaoFalada e tocarSequencia)
   ],
   'src/games/kanabeat/KanaBeatGame.tsx': ['speakWord(e.note.kana)', 'speakWord(n.kana)'],
   // Letras, exemplos e palavras do Kana em imagens: tudo passa por ouvir() (tests/kanaimagens.test.ts confere).
@@ -76,7 +76,6 @@ const CHAMADAS: Record<string, string[]> = {
   ],
   'src/games/roguelike/RoguelikeGame.tsx': ['speak(q.speak, VOZ_PALAVRA, q.speakKana)'],
   'src/hub/Hub.tsx': ['speak(sentence.jp)'],
-  'src/jornada/LicaoTela.tsx': ["speak(f.texto, f.voz === 'palavra' ? VOZ_PALAVRA : VOZ_PADRAO, f.kana)"], // quadros das lições: jornada() em scripts/falas.ts
 };
 
 /** Pega `speak(...)`, `speakWord(...)` e `speakKanji(...)` com os parênteses balanceados. */
@@ -97,7 +96,7 @@ function chamadas(fonte: string): string[] {
 describe('cobertura das vozes a partir dos jogos', () => {
   it('toda chamada de speak() no código tem a fonte do texto gravada', () => {
     const achadas: Record<string, string[]> = {};
-    for (const f of arquivos(join(RAIZ, 'src')).filter((f) => /\.tsx?$/.test(f) && !f.endsWith(join('core', 'audio.ts')))) {
+    for (const f of arquivos(join(RAIZ, 'src')).filter((f) => /\.tsx?$/.test(f) && !f.endsWith(join('core', 'audio.ts')) && !f.endsWith(join('core', 'sequencia.ts')))) {
       const c = chamadas(readFileSync(f, 'utf8'));
       if (c.length) achadas[relative(RAIZ, f).replaceAll('\\', '/')] = c.sort();
     }

@@ -91,7 +91,7 @@ export const estacao: Scene = {
       next: 'trem',
     },
     cuidado: { kind: 'fala', who: 'atendente', jp: 'はい。お[気をつけて|きをつけて|=]。', pt: 'Certo. Vá com cuidado.', next: 'plataforma' },
-    plataforma: { kind: 'narra', pt: 'Plataforma 1. Um aviso toca nos alto-falantes.', next: 'aviso' },
+    plataforma: { kind: 'narra', pt: 'Na plataforma um, um aviso toca nos alto-falantes.', next: 'aviso' },
     aviso: {
       kind: 'fala',
       who: 'aviso',

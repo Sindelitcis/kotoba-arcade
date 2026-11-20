@@ -10,12 +10,13 @@ import { ensureKanjimonSave, type KanjimonSave } from '../games/kanjimon/engine'
 import { ensurePecasSave, type PecasSave } from '../games/pecas/engine';
 import { ensureMemoriaSave, type MemoriaSave } from '../games/memoria/engine';
 import { ensureRoguelikeSave, type RoguelikeSave } from '../games/roguelike/engine';
+import { ensureOuvirSave, type OuvirSave } from '../ouvir/save';
 import { ensureJornadaSave, registrarMissao, type JornadaSave } from '../jornada/etapas';
 import { foco } from './foco';
 import { markPlayed } from './progress';
 import { importSave, loadSave, writeSave, type SaveData } from './save';
 
-export type Screen = 'hub' | 'kanjimon' | 'kanjidex' | 'booster' | 'kanabeat' | 'roguelike' | 'aventura' | 'conversa' | 'gramatica' | 'jornada' | 'licao' | 'pecas' | 'kanaimagens' | 'memoria' | 'cena';
+export type Screen = 'hub' | 'kanjimon' | 'kanjidex' | 'booster' | 'kanabeat' | 'roguelike' | 'aventura' | 'conversa' | 'gramatica' | 'jornada' | 'licao' | 'pecas' | 'kanaimagens' | 'memoria' | 'cena' | 'ouvir';
 
 export const app: { data: SaveData } = { data: loadSave(localStorage, Date.now()) };
 
@@ -43,7 +44,7 @@ export function go(next: Screen): void {
     next = 'jornada';
   }
   if (next !== 'hub' && next !== 'jornada') {
-    if (next !== 'licao') app.data.profile.lastGame = next === 'kanjidex' || next === 'booster' ? 'kanjimon' : next;
+    if (next !== 'licao' && next !== 'ouvir') app.data.profile.lastGame = next === 'kanjidex' || next === 'booster' ? 'kanjimon' : next;
     markPlayed(app.data, Date.now());
     commit();
   } else if (next === 'jornada') commit();
@@ -93,6 +94,10 @@ export function pecasSave(): PecasSave {
 
 export function memoriaSave(): MemoriaSave {
   return ensureMemoriaSave(app.data.games);
+}
+
+export function ouvirSave(): OuvirSave {
+  return ensureOuvirSave(app.data.games);
 }
 
 export function cenaSave(): CenaSave {

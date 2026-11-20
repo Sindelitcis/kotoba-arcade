@@ -144,6 +144,13 @@ describe('quem usa a placa passa pela trava', () => {
     expect(pkg.scripts.vozes).toMatch(/^python -I scripts\/placa\.py .*-- node scripts\/gravar-vozes\.mjs$/);
   });
 
+  it('as duas gravações das aulas prendem a placa; o servidor das aulas não usa placa', () => {
+    const pkg = JSON.parse(readFileSync(join(__dirname, '..', 'package.json'), 'utf8'));
+    expect(pkg.scripts['aulas:local']).toMatch(/^python -I scripts\/placa\.py .*-- node scripts\/gravar-aulas\.mjs --local$/);
+    expect(pkg.scripts['aulas:livre']).toMatch(/^python -I scripts\/placa\.py .*-- node scripts\/gravar-aulas\.mjs --livre$/);
+    expect(pkg.scripts.aulas).toBe('node local/iniciar.mjs --aulas');
+  });
+
   it('o estúdio usa a mesma trava, e não a implementação antiga', () => {
     const estudio = readFileSync(join(SCRIPTS, 'estudio.py'), 'utf8');
     expect(estudio).toContain('from placa import Placa');

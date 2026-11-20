@@ -13,7 +13,10 @@
     "e2e": "playwright test",
     "check": "npm run typecheck && npm run test && npm run build && npm run e2e",
     "local": "node local/iniciar.mjs",
-    "vozes": "python -I scripts/placa.py --nome vozes --vram 4 -- node scripts/gravar-vozes.mjs"
+    "vozes": "python -I scripts/placa.py --nome vozes --vram 4 -- node scripts/gravar-vozes.mjs",
+    "aulas": "node local/iniciar.mjs --aulas",
+    "aulas:livre": "python -I scripts/placa.py --nome aulas-livre --vram 3 -- node scripts/gravar-aulas.mjs --livre",
+    "aulas:local": "python -I scripts/placa.py --nome aulas-pt --vram 11 -- node scripts/gravar-aulas.mjs --local"
   },
   "dependencies": {
     "@preact/signals": "^2.11.4",

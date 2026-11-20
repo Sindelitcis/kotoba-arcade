@@ -1,6 +1,6 @@
 # Vozes
 
-Tudo que os jogos falam vem de arquivos gravados em `public/vozes/`: palavras, frases dos kanji, kana, falas da Aventura, frases do Kumitate (prontas e pela metade, na tecla R), abertura, respostas prontas e palavras novas da Conversa. A única fala montada na hora é a resposta do modelo na Conversa, e quem fala é o servidor local, com o AivisSpeech. A voz do navegador só aparece se um arquivo não tocar ou se o servidor perder a voz no meio.
+O japonês que os jogos falam vem de arquivos gravados em `public/vozes/`: palavras, frases dos kanji, kana, falas da Aventura, frases do Kumitate (prontas e pela metade, na tecla R), abertura, respostas prontas e palavras novas da Conversa. A única fala montada na hora é a resposta do modelo na Conversa, e quem fala é o servidor local, com o AivisSpeech. A voz do navegador só aparece se um arquivo não tocar ou se o servidor perder a voz no meio.
 
 ## Como funciona
 
@@ -115,3 +115,55 @@ Não entraram nas amostras:
 - **Irodori-TTS v4.1 (MIT):** instalado em `D:\KotobaArcade-Voz\irodori`, mas a geração foi bloqueada pela permissão da sessão. Não tem como mandar acento, só texto.
 - **Fish Speech S2 Pro, GPT-SoVITS, CosyVoice:** clonam voz a partir de uma gravação de referência, então precisariam de uma voz com licença para isso. O Fish Speech tem licença só para pesquisa, sem uso comercial. Nenhum deixa marcar o acento.
 - **Áudio humano do Tatoeba:** das nossas 286 frases, só 24 têm gravação lá. A maioria dessas gravações é CC BY-NC-ND ou CC BY-NC, e cada uma tem um falante diferente. Ficaria uma colcha de vozes cobrindo 8% das frases.
+
+## Português falado
+
+As aulas do modo Ouvir (tecla `O` no fliperama), a lição de cada peça nova do Kumitate, a narração da Aventura e a frase curta de quando você erra na Jornada são faladas em português. O português vem antes; o exemplo em japonês vem depois, na gravação de sempre de `public/vozes/`.
+
+- `src/aulas/` tem as aulas: uma por lição da Jornada, de 30 segundos a 3 minutos. Cada uma explica em português, toca o japonês, faz uma pausa para você repetir em voz alta e toca o japonês de novo. No fim, uma revisão: você ouve em português e responde antes de ouvir a resposta.
+- `src/core/sequencia.ts` toca uma lista de trechos (português, japonês, pausa). A pausa tem o tamanho da última fala em japonês, entre 2 e 8 segundos.
+- `scripts/falas-pt.ts` lista todo o português falado. Os textos não têm número, romaji nem japonês: a voz em português leria "masu" como "mazu". Partícula e palavra japonesa vão sempre pela gravação em japonês (`tests/aulas.test.ts` confere).
+
+Há duas vozes em português, com o mesmo texto como chave:
+
+| Voz | Onde fica | Quem ouve |
+| --- | --- | --- |
+| Voz livre (Kokoro) | `public/vozes-pt/` | todo mundo, no site |
+| Voz do PC | fora do repositório, no PC do Rafael | só quem abre o site nesse PC com o servidor das aulas ligado |
+
+Texto sem gravação em nenhuma das duas cai na voz do navegador.
+
+### Voz livre: Kokoro-82M, voz pf_dora
+
+Comparamos seis vozes que podem ser publicadas, todas na CPU, com 12 frases das aulas. O Whisper (large-v3-turbo) transcreveu cada uma, e o UTMOS22 deu uma nota de naturalidade de 1 a 5.
+
+| Voz | Licença | Erro do Whisper | Naturalidade |
+| --- | --- | --- | --- |
+| Kokoro pf_dora | Apache-2.0 | 2% | 3,79 |
+| Kokoro pm_alex | Apache-2.0 | 2% | 3,53 |
+| Kokoro pm_santa | Apache-2.0 | 4% | 3,07 |
+| Piper faber | CC0 (dados) | 2% | 3,56 |
+| Piper cadu | CC0 (dados) | 6% | 3,95 |
+| Piper jeff | CC0 (dados) | 9% | 2,36 |
+
+O resto do erro da dora, da faber e do alex era número escrito em algarismo e "quê" sem acento: nenhuma palavra trocada. A cadu soa melhor, mas engoliu "Trezentos ienes" e falou "Isso" de um jeito que o Whisper ouviu "Ivo". Ficou a dora: lê certo e soa natural. Velocidade 0,95.
+
+Não entraram: XTTS-v2 (licença CPML, sem uso comercial), F5-TTS em português (pesos não comerciais), Fish Speech (só pesquisa) e Chatterbox (precisa de uma voz de referência com licença).
+
+```bash
+npm run aulas:livre
+```
+
+Passa pela trava da placa: o Kokoro roda na CPU e o Whisper que confere roda na placa (na CPU, cada fala levava mais de um minuto de processador). O Python fica em `D:\KotobaArcade-Voz\pt-livreenv` (kokoro, faster-whisper, num2words). Para cada texto: gera, o Whisper ouve, e se ele ouvir duas palavras ou mais diferentes, gera de novo a 0,9 e a 1,0 e fica a melhor. Corta o silêncio, deixa em -18 LUFS, grava mp3 mono de 48 kbps com o comentário `kotoba-voz-livre` e atualiza `public/vozes-pt/manifesto.json`. O que o Whisper ouviu de cada fala fica em `trabalho/conferidas-pt-livre.json`, e uma gravação interrompida continua dali. As dúvidas vão para `trabalho/duvidas-pt-livre.json`. `tests/vozes-pt.test.ts` falha se algum texto ficar sem gravação.
+
+### Voz do PC
+
+O Rafael tem um modelo do Fish Speech afinado com a voz de um amigo. Essa voz não pode sair do PC: nem a gravação de referência, nem os pesos, nem áudio feito com ela vai para o Git ou para o site.
+
+- `npm run aulas:local` grava, pela trava da placa, com o motor dos audiobooks (`D:\Estudioudiobooks\motor`, só leitura): pesos em int8, duas falas por vez (com o autoteste do lote), e o Whisper conferindo cada fala e refazendo até três vezes. Grava em `D:\KotobaArcade-Vozulas-pt`, com o comentário `kotoba-voz-local` em cada mp3. O gravador se recusa a gravar dentro do repositório.
+- Os caminhos ficam em `local/config.local.json`, seção `aulas` (o arquivo não vai para o Git; `local/config.exemplo.json` mostra os campos vazios).
+- `npm run aulas` sobe só o servidor local (`local/servidor.py --aulas`, porta 8791), sem carregar nenhum modelo. Ele entrega `/aulas/manifesto.json` e cada mp3 listado ali. Só responde a páginas abertas no próprio PC e ao site do fliperama (`origens` no config), e avisa o Chrome que aceita ser chamado de um site público (Private Network Access).
+- No site, ligue "Voz do PC" em Ajustes ou no modo Ouvir. Aberto em `localhost`, o jogo já procura o servidor sozinho. No site publicado ele só procura com o ajuste ligado, para nenhum visitante ver o navegador pedindo licença para acessar a rede local.
+
+`tests/voz-local.test.ts` falha se aparecer em `public/` ou no Git algum arquivo com a marca `kotoba-voz-local`, uma voz de referência, pesos de modelo ou o `config.local.json`, e confere que o gravador recusa pasta dentro do repositório.
+

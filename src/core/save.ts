@@ -12,6 +12,12 @@ export interface Settings {
   voice: boolean;
   /** Reduz tremor de tela e partículas. */
   calm: boolean;
+  /**
+   * Português das aulas pela voz do servidor local (`npm run aulas`), quando ele estiver no ar.
+   * Desligado, o site nem procura o servidor e usa a voz livre gravada em `public/vozes-pt`.
+   * Numa página aberta no próprio PC (localhost), ele é procurado sempre.
+   */
+  vozLocal: boolean;
 }
 
 export interface Profile {
@@ -44,7 +50,7 @@ export function emptySave(now: number): SaveData {
     createdAt: now,
     updatedAt: now,
     profile: { xp: 0, coins: 0, daysPlayed: [] },
-    settings: { sound: true, voice: true, calm: false },
+    settings: { sound: true, voice: true, calm: false, vozLocal: false },
     cards: {},
     games: {},
   };
@@ -97,6 +103,7 @@ export function normalizeSave(input: unknown, now: number): SaveData {
       sound: typeof settings.sound === 'boolean' ? settings.sound : base.settings.sound,
       voice: typeof settings.voice === 'boolean' ? settings.voice : base.settings.voice,
       calm: typeof settings.calm === 'boolean' ? settings.calm : base.settings.calm,
+      vozLocal: typeof settings.vozLocal === 'boolean' ? settings.vozLocal : base.settings.vozLocal,
     },
     cards: cleanCards(input.cards),
     games: isObject(input.games) ? input.games : {},

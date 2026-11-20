@@ -1,20 +1,28 @@
 import { useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { app, commit, go, jornadaSave, licaoAberta, screen } from '../core/app';
 import { cenaStyle } from '../core/arte';
-import { sfx, speak } from '../core/audio';
+import { sfx } from '../core/audio';
 import { acertou, cor, corStyle, errou } from '../core/cor';
 import { onomato } from '../core/fx';
 import { Pintura } from '../core/Pintura';
+import { tocarSequencia, type Trecho } from '../core/sequencia';
 import { teclaDe } from '../core/teclas';
-import { VOZ_PADRAO, VOZ_PALAVRA } from '../core/vozes';
 import { NOME_REGISTRO } from '../content/escola/tipos';
 import { Andamento, MOEDAS_LICAO, XP_ACERTO, XP_LICAO } from './andamento';
 import { etapaDa, registrarMissao } from './etapas';
-import { acharLicao, temJapones, type FalaQuadro, type Quadro } from './licoes';
+import { acharLicao, temJapones, type Passo, type Quadro } from './licoes';
 import { Marcado } from './Marcado';
+import { falaDaPergunta, falaDoQuadro, retornoFalado } from './retorno';
 
-function falar(f: FalaQuadro | undefined): void {
-  if (f) void speak(f.texto, f.voz === 'palavra' ? VOZ_PALAVRA : VOZ_PADRAO, f.kana);
+function falar(trechos: readonly Trecho[]): void {
+  if (trechos.length > 0) tocarSequencia(trechos);
+}
+
+/** O que o passo fala quando aparece (e na tecla R). */
+function falaDoPasso(p: Passo | undefined): Trecho[] {
+  if (p?.tipo === 'quadro') return falaDoQuadro(p);
+  if (p?.tipo === 'pergunta') return falaDaPergunta(p);
+  return [];
 }
 
 function QuadroView({ q }: { q: Quadro }) {
@@ -87,13 +95,15 @@ export function LicaoTela() {
     if (!a.avancar()) return;
     sfx.page();
     redraw();
-    if (a.passo?.tipo === 'quadro') falar(a.passo.fala);
+    falar(falaDoPasso(a.passo));
   };
 
   const responder = (opcao: string) => {
     if (!a) return;
+    const p = a.passo;
     const r = a.responder(opcao);
     if (!r) return;
+    if (p?.tipo === 'pergunta') falar(retornoFalado(p, r.certa));
     if (r.certa) {
       sfx.hit(a.combo);
       acertou(a.combo);
@@ -114,6 +124,8 @@ export function LicaoTela() {
       onomato('erro', quadroEl.current, 'tinta', 0.7);
     } else if (r === 'certo') sfx.click();
     else if (r === 'pronta') {
+      const p = a.passo;
+      if (p?.tipo === 'ordem') falar(retornoFalado(p, true));
       sfx.hit(a.combo);
       acertou(a.combo);
       onomato('encaixe', quadroEl.current, 'shu', 0.9);
@@ -123,7 +135,7 @@ export function LicaoTela() {
 
   // O primeiro quadro também fala, se tiver voz.
   useLayoutEffect(() => {
-    if (a?.passo?.tipo === 'quadro') falar(a.passo.fala);
+    falar(falaDoPasso(a?.passo));
   }, [licao]);
 
   // Ligado junto com o desenho: tecla apertada logo que a tela aparece não se perde.
@@ -141,7 +153,9 @@ export function LicaoTela() {
       }
       if (tecla.toLowerCase() === 'r') {
         const p = x.passo;
-        if (p?.tipo === 'quadro') falar(p.fala);
+        if (p?.tipo === 'ordem') falar(x.montagemPronta ? retornoFalado(p, true) : []);
+        else if (p?.tipo === 'pergunta' && x.resposta) falar([...falaDaPergunta(p), ...retornoFalado(p, true)]);
+        else falar(falaDoPasso(p));
         return;
       }
       if (/^[1-9]$/.test(tecla)) {
@@ -251,8 +265,8 @@ export function LicaoTela() {
       </div>
 
       <div class="actions center">
-        {p?.tipo === 'quadro' && p.fala && (
-          <button onClick={() => falar(p.fala)}>
+        {falaDoPasso(p).length > 0 && (
+          <button onClick={() => falar(falaDoPasso(p))}>
             Ouvir <kbd>R</kbd>
           </button>
         )}

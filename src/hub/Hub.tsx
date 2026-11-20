@@ -8,6 +8,7 @@ import { corStyle, visitados, type Saves } from '../core/cor';
 import { Pintura } from '../core/Pintura';
 import { useSubtelaAjuda } from '../core/help/ajuda';
 import { levelInfo, readingMeter, recentDays } from '../core/progress';
+import { esquecerPt } from '../core/fala-pt';
 import { exportSave } from '../core/save';
 import { teclaDe } from '../core/teclas';
 import { BOOSTER_COST, canOpenBooster } from '../games/kanjimon/engine';
@@ -107,6 +108,7 @@ export function Hub() {
       else if (tecla.toLowerCase() === 'm') go('memoria');
       else if (tecla.toLowerCase() === 'l') go('cena');
       else if (tecla.toLowerCase() === 'j') go('jornada');
+      else if (tecla.toLowerCase() === 'o') go('ouvir');
       else if (tecla.toLowerCase() === 'p') go('pecas');
       else if (tecla.toLowerCase() === 'i') go('kanaimagens');
     };
@@ -119,8 +121,10 @@ export function Hub() {
     if (showSettings) settingsRef.current?.querySelector<HTMLElement>('input, button')?.focus();
   }, [showSettings]);
 
-  const toggle = (key: 'sound' | 'voice' | 'calm') => {
-    settings[key] = !settings[key];
+  const toggle = (opcao: 'sound' | 'voice' | 'calm' | 'vozLocal') => {
+    settings[opcao] = !settings[opcao];
+    // Voz do PC ligada ou desligada: a próxima fala procura o servidor de novo.
+    if (opcao === 'vozLocal') esquecerPt();
     commit();
     sfx.click();
   };
@@ -195,6 +199,16 @@ export function Hub() {
               Próxima: {proxima.titulo} · {proxima.minutos} min
             </span>
           )}
+        </span>
+      </button>
+
+      <button class="koma ouvir-faixa" onClick={() => go('ouvir')} data-testid="hub-ouvir">
+        <span class="jornada-faixa-jp">聞</span>
+        <span class="jornada-faixa-txt">
+          <b>
+            Ouvir <kbd>O</kbd>
+          </b>
+          <span>Aulas de um a três minutos para aprender sem olhar a tela.</span>
         </span>
       </button>
 
@@ -294,6 +308,10 @@ export function Hub() {
             <label class="check">
               <input type="checkbox" checked={settings.voice} onChange={() => toggle('voice')} /> Voz em japonês
               {!hasJapaneseVoice() && <small class="muted"> (este navegador não tem voz japonesa instalada)</small>}
+            </label>
+            <label class="check">
+              <input type="checkbox" checked={settings.vozLocal} onChange={() => toggle('vozLocal')} /> Voz do PC nas aulas
+              <small class="muted"> (usa as aulas gravadas neste computador, com o servidor aberto: npm run aulas)</small>
             </label>
             <label class="check">
               <input type="checkbox" checked={settings.calm} onChange={() => toggle('calm')} /> Modo calmo (menos tremor e partículas)

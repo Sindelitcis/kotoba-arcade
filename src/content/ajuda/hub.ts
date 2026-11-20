@@ -16,6 +16,7 @@ export const HUB: Ajuda = {
   teclas: [
     { teclas: ['Enter', 'Espaço'], faz: 'Jogar agora: abre o último jogo' },
     { teclas: ['J'], faz: 'Jornada: o mapa do zero ao trabalho no Japão' },
+    { teclas: ['O'], faz: 'Ouvir: aulas para aprender sem olhar a tela' },
     { teclas: ['C'], faz: 'KanjiMon (caçada)' },
     { teclas: ['K'], faz: 'Kana Beat' },
     { teclas: ['R'], faz: 'Kotodama' },
@@ -34,6 +35,7 @@ export const HUB: Ajuda = {
     { nome: 'Moedas (●)', texto: 'Ganhas jogando. Servem para abrir booster de cartas do KanjiMon.' },
     { nome: 'Sete quadradinhos', texto: 'Os últimos sete dias. Preenchido é dia em que você jogou. Faltar um dia não apaga nada.' },
     { nome: 'Jornada', texto: 'O mapa em quadros do caminho inteiro, com a próxima missão sugerida. Nada fica trancado.' },
+    { nome: 'Ouvir', texto: 'Aulas curtas de cada lição da Jornada para ouvir sem olhar a tela, com pausa para você repetir.' },
     { nome: 'Jogar agora', texto: 'Leva direto ao último jogo, já no ponto de começar.' },
     { nome: 'O que você já lê', texto: 'Kanji e palavras que você já encontrou (barra clara) e os que já estão firmes na memória (barra escura). Firme é o que você lembraria mesmo depois de uma semana sem ver.' },
     { nome: 'Frase da vez', texto: 'Uma frase que você já consegue ler com os kanji que encontrou. Clique para ouvir. Ex.: 山に行きます (やまに いきます, vou à montanha).' },
@@ -67,6 +69,7 @@ export const AJUSTES: Ajuda = {
   elementos: [
     { nome: 'Efeitos sonoros', texto: 'Os sons de acerto, erro, combo e baú.' },
     { nome: 'Voz em japonês', texto: 'A voz que lê palavras e frases. Usa a voz japonesa do navegador. Se o navegador não tiver uma, aparece um aviso do lado.' },
+    { nome: 'Voz do PC nas aulas', texto: 'Faz as aulas do modo Ouvir usarem a voz gravada no seu computador. Precisa do servidor das aulas aberto no PC (npm run aulas). Desligado, vale a voz livre do site.' },
     { nome: 'Modo calmo', texto: 'Tira o tremor das linhas, diminui os efeitos e as onomatopeias. Bom para dias de cabeça cheia. Toda a informação continua na tela.' },
     { nome: 'Exportar backup', texto: 'Baixa um arquivo .json com todo o seu progresso.' },
     { nome: 'Importar backup', texto: 'Troca o progresso deste navegador pelo do arquivo. O progresso atual é substituído.' },

@@ -9,9 +9,16 @@ import { vozDaAventura } from '../../core/vozes';
 import { onomato } from '../../core/fx';
 import { hasKanji } from '../../core/kana';
 import { foco } from '../../core/foco';
+import { tocarSequencia } from '../../core/sequencia';
 import { teclaDe } from '../../core/teclas';
 import { SCENES, SPEAKERS } from './cenas';
-import { diaryEntries, isUnlocked, PLAYER, ScenePlay, suggestScene, type PlayEvent, type Scene, type SceneSummary, type TokenView } from './engine';
+import { diaryEntries, isUnlocked, PLAYER, ScenePlay, suggestScene, type PlayEvent, type Scene, type SceneSummary, type Shown, type TokenView } from './engine';
+
+/** A narração vai na voz em português; as falas, na voz de quem fala. */
+function falarQuadro(shown: Shown): void {
+  if (shown.kind === 'narra') tocarSequencia([{ tipo: 'pt', texto: shown.pt }]);
+  else if (shown.plain) speak(shown.plain, vozDaAventura(shown.who));
+}
 
 type Mode = 'menu' | 'play' | 'summary' | 'diary';
 
@@ -150,7 +157,7 @@ export function AventuraGame() {
   // A voz acompanha o que entra na tela.
   const seq = mode === 'play' && play ? play.seq : -1;
   useEffect(() => {
-    if (mode === 'play' && play && play.shown.plain) speak(play.shown.plain, vozDaAventura(play.shown.who));
+    if (mode === 'play' && play) falarQuadro(play.shown);
   }, [mode, play, seq]);
 
   useEffect(() => {
@@ -188,7 +195,7 @@ export function AventuraGame() {
           p.askMeaning();
           redraw();
         } else if (key === 'r') {
-          if (p.shown.plain) speak(p.shown.plain, vozDaAventura(p.shown.who));
+          falarQuadro(p.shown);
         } else if (p.awaitingChoice) {
           if (digit) choose(digit - 1);
         } else if (confirm) advance();

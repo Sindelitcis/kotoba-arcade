@@ -12,6 +12,7 @@ import { KANA_IMAGENS } from './kanaimagens';
 import { KUMITATE } from './kumitate';
 import { PECAS } from './pecas';
 import { MEMORIA } from './memoria';
+import { OUVIR } from './ouvir';
 import type { Ajuda } from './tipos';
 
 export type { Ajuda, Item, LinhaTecla, Pergunta } from './tipos';
@@ -34,6 +35,7 @@ export const AJUDA: Record<TelaAjuda, Ajuda> = {
   kanaimagens: KANA_IMAGENS,
   memoria: MEMORIA,
   cena: CENA,
+  ouvir: OUVIR,
 };
 
 /** A tela usa a F1 para outra coisa (a Conversa traduz com ela). Ali a F1 não abre a ajuda. */

@@ -2,6 +2,17 @@
   "porta": 8791,
   "python": "",
   "cache_modelos": "",
+  "origens": [
+    "https://sindelitcis.github.io"
+  ],
+  "aulas": {
+    "pasta": "",
+    "python": "",
+    "motor": "",
+    "voz": "amigo",
+    "hf_home": "",
+    "torch_home": ""
+  },
   "conversa": {
     "ollama": "http://127.0.0.1:11434",
     "modelo": "gemma4:12b"
