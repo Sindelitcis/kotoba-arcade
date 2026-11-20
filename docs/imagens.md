@@ -9,10 +9,10 @@ O que fica no repositório são só as imagens finais: a versão de mangá em `s
 
 ## Gerar de novo
 
-Os scripts e o modelo ficam fora do repositório, em `D:\KotobaArcade-Arte`:
+Os scripts e o modelo ficam fora do repositório, em `D:\KotobaArcade\\arte`:
 
 ```
-D:\KotobaArcade-Arte
+D:\KotobaArcade\\arte
   modelos\animagine-xl-4.0-opt.safetensors   (6,9 GB; apagado em novembro de 2026, baixe de novo para refazer)
   venv\                                       Python 3.11 + PyTorch (CUDA 12.8) + diffusers
   scripts\gerar.py                            prompts de cada cenário e personagem
@@ -26,8 +26,8 @@ D:\KotobaArcade-Arte
 Antes de gerar, feche o Ollama e o servidor da Conversa: os dois disputam a mesma placa.
 
 ```bash
-cd D:/KotobaArcade-Arte
-HF_HOME=D:/KotobaArcade-Arte/hf venv/Scripts/python -I scripts/gerar.py
+cd D:/KotobaArcade/arte
+HF_HOME=D:/KotobaArcade/arte/hf venv/Scripts/python -I scripts/gerar.py
 python -I scripts/otimizar.py D:/Rafael/Documents/GitHub/kotoba-arcade
 ```
 
@@ -40,7 +40,7 @@ Os prompts seguem o guia de estilo: mangá em preto e branco, retícula, nanquim
 A versão colorida não é gerada do zero: `colorir.py` parte do PNG de mangá escolhido e pinta por cima (img2img, força 0,80, mesma seed). Assim o lugar, o enquadramento e a pessoa são os mesmos nas duas versões. Com força 0,55 e 0,70 a imagem continuava quase cinza.
 
 ```bash
-HF_HOME=D:/KotobaArcade-Arte/hf venv/Scripts/python -I scripts/colorir.py 0.80
+HF_HOME=D:/KotobaArcade/arte/hf venv/Scripts/python -I scripts/colorir.py 0.80
 python -I scripts/otimizar_cor.py D:/Rafael/Documents/GitHub/kotoba-arcade
 ```
 
@@ -70,7 +70,7 @@ O modelo não copia o lugar ao pé da letra: é a impressão do lugar, como num 
 
 Os jogos de imagem (Memória, Cena Viva e os de kana e kanji com imagem) usam o estúdio: `scripts/estudio.py`. Ele gera tudo de novo a partir de uma lista de prompts versionada em `scripts/imagens/<lote>.json`, confere cada imagem com o CLIP e exporta só o resultado final para o repositório.
 
-O que ele usa, tudo fora do repositório em `D:\KotobaArcade-Arte`:
+O que ele usa, tudo fora do repositório em `D:\KotobaArcade\\arte`:
 
 | Modelo | Para quê | Tamanho | Licença |
 | --- | --- | --- | --- |
@@ -88,14 +88,14 @@ O Anima Turbo roda com 10 passos e cfg 1. Com cfg 1 o prompt negativo não faz e
 
 ```bash
 cd D:/Rafael/Documents/GitHub/kotoba-arcade
-export HF_HOME=D:/KotobaArcade-Arte/hf KOTOBA_SESSAO=nome-da-sua-sessao
-PY=D:/KotobaArcade-Arte/venv/Scripts/python
+export HF_HOME=D:/KotobaArcade/arte/hf KOTOBA_SESSAO=nome-da-sua-sessao
+PY=D:/KotobaArcade/arte/venv/Scripts/python
 $PY -I scripts/estudio.py tudo scripts/imagens/objetos.json
 ```
 
 `tudo` faz, em ordem:
 
-1. **gerar**: cada item sai em várias seeds (`seeds` da lista), em PNG, em `D:\KotobaArcade-Arte\estudio\<lote>\`. O que já existe não é gerado de novo.
+1. **gerar**: cada item sai em várias seeds (`seeds` da lista), em PNG, em `D:\KotobaArcade\arte\estudio\<lote>\`. O que já existe não é gerado de novo.
 2. **conferir**: o CLIP compara cada candidata com o rótulo do próprio item, com os rótulos de todos os outros itens do lote, com os `distratores` da lista e com alguns gerais (forma abstrata, objeto deformado, texto escrito). A imagem só passa se o próprio rótulo ganhar com chance de pelo menos 45% e 15 pontos de folga sobre o segundo. O relatório fica em `conferencia.json`. A nota guardada só é reaproveitada para o mesmo arquivo com a mesma lista de rótulos: imagem refeita com a mesma seed é conferida de novo.
 3. **revisar**: o CLIP vê que é um gato, mas não vê que o rabo virou uma mancha solta. Por isso a candidata escolhida passa ainda por um modelo de visão local (`gemma4:12b`, no Ollama), que responde o que a figura mostra e se tem membro solto, parte faltando, pedaço solto ou se está ambígua (um bicho só de costas, por exemplo). Com qualquer defeito, ela sai e a próxima aprovada pelo CLIP é revista. O resultado fica em `revisao.json` e só é refeito para arquivo novo ou outro modelo. Roda com o modelo de imagem e o CLIP já fora da placa, sob a mesma trava, e o modelo de visão é descarregado no fim (`keep_alive: 0`). Troque o modelo com `KOTOBA_VISAO`.
 4. **refazer**: item sem nenhuma candidata aprovada ganha outra leva de seeds, até duas vezes.
@@ -108,12 +108,12 @@ O CLIP pega muita coisa (um "comendo" que parece só um hashi, uma chave deforma
 
 ### A placa é dividida
 
-Tudo que usa a placa de vídeo passa por `scripts/placa.py`: o estúdio, a gravação de vozes e qualquer teste de modelo. Ela prende `D:\KotobaArcade-Arte\gpu.lock` com uma trava do sistema, num arquivo mantido aberto. Se o processo morre, o sistema solta a trava sozinho; enquanto ela está presa, o arquivo não pode ser apagado. O texto dentro do arquivo (sessão, hora, pid) é só para gente ler. Um lock do jeito antigo (só o arquivo) com o processo já morto não prende ninguém.
+Tudo que usa a placa de vídeo passa por `scripts/placa.py`: o estúdio, a gravação de vozes e qualquer teste de modelo. Ela prende `D:\KotobaArcade\arte\gpu.lock` com uma trava do sistema, num arquivo mantido aberto. Se o processo morre, o sistema solta a trava sozinho; enquanto ela está presa, o arquivo não pode ser apagado. O texto dentro do arquivo (sessão, hora, pid) é só para gente ler. Um lock do jeito antigo (só o arquivo) com o processo já morto não prende ninguém.
 
 Antes de prender, ela espera o Ollama não ter modelo carregado, os motores de voz de outra pessoa saírem do ar e sobrar memória livre na placa (o Rafael pode estar jogando). Para envolver qualquer comando:
 
 ```bash
-python -I scripts/placa.py --nome teste-flux --vram 12 -- D:/KotobaArcade-Arte/venv/Scripts/python -I meu-teste.py
+python -I scripts/placa.py --nome teste-flux --vram 12 -- D:/KotobaArcade/arte/venv/Scripts/python -I meu-teste.py
 python -I scripts/placa.py status
 ```
 
@@ -125,7 +125,7 @@ Só um modelo fica na placa por vez: no `tudo`, o modelo de imagem sai antes de 
 
 ### Motores
 
-O modelo de imagem vem de `scripts/imagens/motores.json`. Cada motor diz o tipo (`anima`, a base do Anima com os pesos de uma variante por cima; `sdxl-arquivo`, um `.safetensors` em `D:\KotobaArcade-Arte`; ou `diffusers`, uma pasta ou repositório), os passos, o cfg, o offload (`nenhum`, `modelo` ou `sequencial`), a memória que precisa livre (`vram`, em GB) as palavras que o modelo espera no começo (`prefixo`) e no fim (`qualidade`) do prompt, onde nasce a seed (`gerador`), quantas imagens por chamada (`lote`) e um deslocamento de seed (`seed`). O deslocamento dá outro nome de arquivo à candidata de um modelo novo: sem ele, o estúdio acharia que `neko-1` já foi gerada. Para trocar, use `"motor": "nome"` na lista ou `KOTOBA_MOTOR=nome`. Uma lista pode ajustar um motor em `"por_motor": {"nome": {"passos": 24}}`. Trocar de motor não refaz o que já foi aprovado: só gera as candidatas que faltam.
+O modelo de imagem vem de `scripts/imagens/motores.json`. Cada motor diz o tipo (`anima`, a base do Anima com os pesos de uma variante por cima; `sdxl-arquivo`, um `.safetensors` em `D:\KotobaArcade\\arte`; ou `diffusers`, uma pasta ou repositório), os passos, o cfg, o offload (`nenhum`, `modelo` ou `sequencial`), a memória que precisa livre (`vram`, em GB) as palavras que o modelo espera no começo (`prefixo`) e no fim (`qualidade`) do prompt, onde nasce a seed (`gerador`), quantas imagens por chamada (`lote`) e um deslocamento de seed (`seed`). O deslocamento dá outro nome de arquivo à candidata de um modelo novo: sem ele, o estúdio acharia que `neko-1` já foi gerada. Para trocar, use `"motor": "nome"` na lista ou `KOTOBA_MOTOR=nome`. Uma lista pode ajustar um motor em `"por_motor": {"nome": {"passos": 24}}`. Trocar de motor não refaz o que já foi aprovado: só gera as candidatas que faltam.
 
 ### Formato da lista
 

@@ -1,7 +1,7 @@
 """Gera o recorte de dados abertos do jogo Kanji em peças e confere o conteúdo escrito à mão.
 
 Uso: python -I -X utf8 scripts/pecas-dados.py [PASTA_DOS_DADOS]
-A pasta (padrão D:/KotobaArcade-Dados/brutos) precisa ter, baixados da fonte original:
+A pasta (padrão D:/KotobaArcade/dados/brutos) precisa ter, baixados da fonte original:
 - kanjidic2.xml        (EDRDG, CC BY-SA 4.0)  http://ftp.edrdg.org/pub/Nihongo/kanjidic2.xml.gz
 - JMdict_e             (EDRDG, CC BY-SA 4.0)  http://ftp.edrdg.org/pub/Nihongo/JMdict_e.gz
 - ../krad/kradfile     (EDRDG, CC BY-SA 4.0)  http://ftp.edrdg.org/pub/Nihongo/kradzip.zip
@@ -54,7 +54,7 @@ def conteudo() -> list[dict]:
 
 
 def main() -> None:
-    dados = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else "D:/KotobaArcade-Dados/brutos")
+    dados = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else "D:/KotobaArcade/dados/brutos")
     itens = conteudo()
     nosso = {i["k"] for i in itens}
 

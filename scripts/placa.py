@@ -2,7 +2,7 @@
 
 Quem usa a placa (estúdio de imagens, motores de voz, testes de modelo) passa por aqui. A trava é do
 sistema operacional, presa num arquivo mantido aberto: se o processo morre, o sistema solta sozinho.
-O texto dentro de D:\\KotobaArcade-Arte\\gpu.lock só diz quem está usando, para gente ler. Enquanto a
+O texto dentro de D:\\KotobaArcade\\arte\\gpu.lock só diz quem está usando, para gente ler. Enquanto a
 trava está presa, o arquivo não pode ser apagado (no Windows).
 
 Uso:
@@ -30,7 +30,7 @@ import sys
 import time
 import urllib.request
 
-ARTE = pathlib.Path(os.environ.get("KOTOBA_ARTE", "D:/KotobaArcade-Arte"))
+ARTE = pathlib.Path(os.environ.get("KOTOBA_ARTE", "D:/KotobaArcade/arte"))
 TRAVA = ARTE / "gpu.lock"
 # Marca do texto escrito por esta versão. Arquivo sem ela é do lock antigo (só o arquivo, sem trava).
 MARCA = "placa.py"

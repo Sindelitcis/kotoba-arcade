@@ -6,7 +6,7 @@
  *   npm run aulas:local   voz do PC (Fish Speech), pela trava da placa, numa pasta FORA do repositório
  *
  * A voz do PC lê os caminhos de local/config.local.json ("aulas"), que não vai para o Git. Ver docs/vozes.md.
- * Variáveis: VOZ_DIR (padrão D:/KotobaArcade-Voz), PT_LIVRE_PYTHON.
+ * Variáveis: VOZ_DIR (padrão D:/KotobaArcade/voz), PT_LIVRE_PYTHON.
  */
 import { spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
@@ -15,7 +15,7 @@ import { fileURLToPath } from 'node:url';
 import { createServer } from 'vite';
 
 const raiz = resolve(fileURLToPath(import.meta.url), '../..');
-const vozDir = process.env.VOZ_DIR ?? 'D:/KotobaArcade-Voz';
+const vozDir = process.env.VOZ_DIR ?? 'D:/KotobaArcade/voz';
 const local = process.argv.includes('--local');
 if (!local && !process.argv.includes('--livre')) {
   console.error('use --livre (voz livre, para o site) ou --local (voz do PC, fica só no PC)');
@@ -82,7 +82,7 @@ if (local) {
     python,
     ['-I', '-B', join(raiz, 'scripts/gravar_pt_livre.py'), '--falas', entrada, '--saida', join(raiz, 'public/vozes-pt'), '--duvidas', join(trabalho, 'duvidas-pt-livre.json'), '--conferidas', join(trabalho, 'conferidas-pt-livre.json')],
     // HF_HOME: o Whisper turbo e o Kokoro ficam no D:, junto dos outros modelos de voz.
-    { stdio: 'inherit', env: { HF_HOME: 'D:/KotobaArcade-IA/hf', ...process.env, PYTHONUTF8: '1', PYTHONDONTWRITEBYTECODE: '1' } },
+    { stdio: 'inherit', env: { HF_HOME: 'D:/KotobaArcade/ia/hf', ...process.env, PYTHONUTF8: '1', PYTHONDONTWRITEBYTECODE: '1' } },
   );
 }
 process.exit(r.status ?? 1);

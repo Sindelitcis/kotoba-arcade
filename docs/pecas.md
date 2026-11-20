@@ -23,7 +23,7 @@ Os arquivos gerados a partir desses dados (`src/games/pecas/recorte.json` e `src
 
 ## Como regenerar
 
-Os arquivos brutos não entram no repositório. Baixe para uma pasta fora dele (aqui usamos `D:\KotobaArcade-Dados`):
+Os arquivos brutos não entram no repositório. Baixe para uma pasta fora dele (aqui usamos `D:\KotobaArcade\\dados`):
 
 - `brutos/kanjivg-AAAAMMDD.xml` (o arquivo único do KanjiVG);
 - `brutos/kanjidic2.xml`, `brutos/JMdict_e` e `brutos/kanji.json` (kanji-data);
@@ -32,7 +32,7 @@ Os arquivos brutos não entram no repositório. Baixe para uma pasta fora dele (
 Depois:
 
 ```bash
-python -I -X utf8 scripts/pecas-dados.py D:/KotobaArcade-Dados
+python -I -X utf8 scripts/pecas-dados.py D:/KotobaArcade/dados
 ```
 
 O script lê as linhas de `src/games/pecas/dados/` e confere cada uma: toda peça tem que ser uma parte do kanji no KanjiVG, a leitura tem que estar no KANJIDIC2, a palavra tem que estar no JMdict com aquela leitura, ser comum e conter o kanji. Qualquer problema aparece na tela e nada é gravado.

@@ -2,7 +2,7 @@
  * As músicas do Kana Beat: trechos de ~1 minuto de faixas livres, cortados em loop limpo.
  * Como foram cortadas e medidas: docs/musica.md. Créditos: README e a tela de créditos do jogo.
  *
- * `bpm` e `offsetMs` foram medidos no arquivo final (scripts em D:\KotobaArcade-Musica).
+ * `bpm` e `offsetMs` foram medidos no arquivo final (scripts em D:\KotobaArcade\\musica).
  * `offsetMs` é onde cai o primeiro tempo forte; o trecho tem `beats` tempos inteiros, então o loop
  * volta no tempo certo.
  */

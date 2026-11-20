@@ -23,13 +23,13 @@ import { fileURLToPath } from 'node:url';
 import { createServer } from 'vite';
 
 const raiz = resolve(fileURLToPath(import.meta.url), '../..');
-const vozDir = process.env.VOZ_DIR ?? 'D:/KotobaArcade-Voz';
+const vozDir = process.env.VOZ_DIR ?? 'D:/KotobaArcade/voz';
 const python = process.env.VOZ_PYTHON ?? join(vozDir, 'venv/Scripts/python.exe');
 const aivis = process.env.AIVIS_URL ?? 'http://127.0.0.1:10101';
 const voicevox = process.env.VOICEVOX_URL ?? 'http://127.0.0.1:50021';
 const motores = [
   { nome: 'AivisSpeech', url: aivis, exe: process.env.AIVIS_EXE ?? join(vozDir, 'aivis/Windows-x64/run.exe'), args: ['--use_gpu'] },
-  { nome: 'VOICEVOX', url: voicevox, exe: process.env.VOICEVOX_EXE ?? 'D:/KotobaArcade-IA/voicevox/run.exe', args: [] },
+  { nome: 'VOICEVOX', url: voicevox, exe: process.env.VOICEVOX_EXE ?? 'D:/KotobaArcade/ia/voicevox/run.exe', args: [] },
 ];
 
 async function noAr(url) {
@@ -102,7 +102,7 @@ try {
       ...process.argv.slice(2),
     ],
     // HF_HOME: onde o Whisper large-v3-turbo já está baixado (o mesmo da Conversa por voz).
-    { stdio: 'inherit', env: { HF_HOME: 'D:/KotobaArcade-IA/hf', ...process.env, PYTHONUTF8: '1' } },
+    { stdio: 'inherit', env: { HF_HOME: 'D:/KotobaArcade/ia/hf', ...process.env, PYTHONUTF8: '1' } },
   );
 } finally {
   derrubar(subidos);

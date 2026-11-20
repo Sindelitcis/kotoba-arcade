@@ -14,7 +14,7 @@ A frase pela metade do Kumitate tem 200 formas possíveis, então todas foram gr
 
 ## Gravar de novo
 
-O motor e os modelos ficam fora do repositório, em `D:\KotobaArcade-Voz`:
+O motor e os modelos ficam fora do repositório, em `D:\KotobaArcade\\voz`:
 
 | Pasta | O que é |
 | --- | --- |
@@ -23,7 +23,7 @@ O motor e os modelos ficam fora do repositório, em `D:\KotobaArcade-Voz`:
 | `dados\kanjium-accents.txt` | base de acento da Kanjium |
 | `trabalho` | lista de falas e relatório da última gravação |
 
-Os modelos de voz ficam onde o AivisSpeech guarda (`%APPDATA%\AivisSpeech-Engine\Models`). O VOICEVOX (palavras e kana) e o Whisper são os mesmos da Conversa por voz, em `D:\KotobaArcade-IA`.
+Os modelos de voz ficam onde o AivisSpeech guarda (`%APPDATA%\AivisSpeech-Engine\Models`). O VOICEVOX (palavras e kana) e o Whisper são os mesmos da Conversa por voz, em `D:\KotobaArcade\\ia`.
 
 ```bash
 npm run vozes
@@ -31,7 +31,7 @@ npm run vozes
 
 O `npm run vozes` passa pela trava da placa (`scripts/placa.py`, explicada em `docs/imagens.md`): espera a placa ficar livre, sobe o AivisSpeech (`--use_gpu`, porta 10101) e o VOICEVOX (porta 50021), grava e derruba os dois no fim. O log de cada motor fica em `trabalho/`. Se outra pessoa estiver com um motor de voz no ar, ele espera. Os executáveis podem ser trocados com `AIVIS_EXE` e `VOICEVOX_EXE`.
 
-Na primeira vez o motor baixa o modelo de texto (deberta, 650 MB). Se a pasta de cache dele quebrar no Windows, apague `%APPDATA%\AivisSpeech-Engine\BertModelCaches` e rode com `HF_HUB_OFFLINE=1` depois de copiar os arquivos de `D:\KotobaArcade-Voz\bert-onnx` para a pasta do snapshot.
+Na primeira vez o motor baixa o modelo de texto (deberta, 650 MB). Se a pasta de cache dele quebrar no Windows, apague `%APPDATA%\AivisSpeech-Engine\BertModelCaches` e rode com `HF_HUB_OFFLINE=1` depois de copiar os arquivos de `D:\KotobaArcade\voz\bert-onnx` para a pasta do snapshot.
 
 Variáveis: `VOZ_DIR`, `VOZ_PYTHON`, `AIVIS_URL`, `VOICEVOX_URL`, `AIVIS_EXE`, `VOICEVOX_EXE`. `node scripts/gravar-vozes.mjs --listar` só escreve a lista de falas, sem prender a placa. `-- --refazer` grava tudo de novo.
 
@@ -112,7 +112,7 @@ Estas gravações o Whisper não confirmou, em nenhuma versão:
 
 Não entraram nas amostras:
 
-- **Irodori-TTS v4.1 (MIT):** instalado em `D:\KotobaArcade-Voz\irodori`, mas a geração foi bloqueada pela permissão da sessão. Não tem como mandar acento, só texto.
+- **Irodori-TTS v4.1 (MIT):** instalado em `D:\KotobaArcade\voz\irodori`, mas a geração foi bloqueada pela permissão da sessão. Não tem como mandar acento, só texto.
 - **Fish Speech S2 Pro, GPT-SoVITS, CosyVoice:** clonam voz a partir de uma gravação de referência, então precisariam de uma voz com licença para isso. O Fish Speech tem licença só para pesquisa, sem uso comercial. Nenhum deixa marcar o acento.
 - **Áudio humano do Tatoeba:** das nossas 286 frases, só 24 têm gravação lá. A maioria dessas gravações é CC BY-NC-ND ou CC BY-NC, e cada uma tem um falante diferente. Ficaria uma colcha de vozes cobrindo 8% das frases.
 
@@ -154,13 +154,13 @@ Não entraram: XTTS-v2 (licença CPML, sem uso comercial), F5-TTS em português 
 npm run aulas:livre
 ```
 
-Passa pela trava da placa: o Kokoro roda na CPU e o Whisper que confere roda na placa (na CPU, cada fala levava mais de um minuto de processador). O Python fica em `D:\KotobaArcade-Voz\pt-livreenv` (kokoro, faster-whisper, num2words). Para cada texto: gera, o Whisper ouve, e se ele ouvir duas palavras ou mais diferentes, gera de novo a 0,9 e a 1,0 e fica a melhor. Corta o silêncio, deixa em -18 LUFS, grava mp3 mono de 48 kbps com o comentário `kotoba-voz-livre` e atualiza `public/vozes-pt/manifesto.json`. O que o Whisper ouviu de cada fala fica em `trabalho/conferidas-pt-livre.json`, e uma gravação interrompida continua dali. As dúvidas vão para `trabalho/duvidas-pt-livre.json`. `tests/vozes-pt.test.ts` falha se algum texto ficar sem gravação.
+Passa pela trava da placa: o Kokoro roda na CPU e o Whisper que confere roda na placa (na CPU, cada fala levava mais de um minuto de processador). O Python fica em `D:\KotobaArcade\voz\pt-livreenv` (kokoro, faster-whisper, num2words). Para cada texto: gera, o Whisper ouve, e se ele ouvir duas palavras ou mais diferentes, gera de novo a 0,9 e a 1,0 e fica a melhor. Corta o silêncio, deixa em -18 LUFS, grava mp3 mono de 48 kbps com o comentário `kotoba-voz-livre` e atualiza `public/vozes-pt/manifesto.json`. O que o Whisper ouviu de cada fala fica em `trabalho/conferidas-pt-livre.json`, e uma gravação interrompida continua dali. As dúvidas vão para `trabalho/duvidas-pt-livre.json`. `tests/vozes-pt.test.ts` falha se algum texto ficar sem gravação.
 
 ### Voz do PC
 
 O Rafael tem um modelo do Fish Speech afinado com a voz de um amigo. Essa voz não pode sair do PC: nem a gravação de referência, nem os pesos, nem áudio feito com ela vai para o Git ou para o site.
 
-- `npm run aulas:local` grava, pela trava da placa, com o motor dos audiobooks (`D:\Estudioudiobooks\motor`, só leitura): pesos em int8, duas falas por vez (com o autoteste do lote), e o Whisper conferindo cada fala e refazendo até três vezes. Grava em `D:\KotobaArcade-Vozulas-pt`, com o comentário `kotoba-voz-local` em cada mp3. O gravador se recusa a gravar dentro do repositório.
+- `npm run aulas:local` grava, pela trava da placa, com o motor dos audiobooks (`D:\Estudioudiobooks\motor`, só leitura): pesos em int8, duas falas por vez (com o autoteste do lote), e o Whisper conferindo cada fala e refazendo até três vezes. Grava em `D:\KotobaArcade\\vozulas-pt`, com o comentário `kotoba-voz-local` em cada mp3. O gravador se recusa a gravar dentro do repositório.
 - Os caminhos ficam em `local/config.local.json`, seção `aulas` (o arquivo não vai para o Git; `local/config.exemplo.json` mostra os campos vazios).
 - `npm run aulas` sobe só o servidor local (`local/servidor.py --aulas`, porta 8791), sem carregar nenhum modelo. Ele entrega `/aulas/manifesto.json` e cada mp3 listado ali. Só responde a páginas abertas no próprio PC e ao site do fliperama (`origens` no config), e avisa o Chrome que aceita ser chamado de um site público (Private Network Access).
 - No site, ligue "Voz do PC" em Ajustes ou no modo Ouvir. Aberto em `localhost`, o jogo já procura o servidor sozinho. No site publicado ele só procura com o ajuste ligado, para nenhum visitante ver o navegador pedindo licença para acessar a rede local.

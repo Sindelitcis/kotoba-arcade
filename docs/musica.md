@@ -16,7 +16,7 @@ O tempo 0 da fase cai no primeiro tempo forte da faixa, e as notas caem nos temp
 
 ## Como os trechos foram feitos
 
-Os arquivos originais e os scripts ficam fora do repositório, em `D:\KotobaArcade-Musica`:
+Os arquivos originais e os scripts ficam fora do repositório, em `D:\KotobaArcade\\musica`:
 
 - `baixadas/`: as faixas originais do OpenGameArt;
 - `scripts/oga.py`: lê título, autor, licença e arquivos de uma página do OpenGameArt;

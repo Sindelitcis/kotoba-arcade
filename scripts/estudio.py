@@ -1,11 +1,11 @@
 """Estúdio de imagens do Kotoba Arcade: gera, confere e exporta ilustrações a partir de uma lista de prompts.
 
-Roda no PC, na placa de vídeo, com o Python de D:\\KotobaArcade-Arte\\venv (veja docs/imagens.md).
+Roda no PC, na placa de vídeo, com o Python de D:\\KotobaArcade\\arte\\venv (veja docs/imagens.md).
 Cada lista fica em scripts/imagens/<lote>.json e diz o estilo, o destino e os itens.
 
 Uso (de dentro da pasta do repositório):
 
-    PY=D:/KotobaArcade-Arte/venv/Scripts/python
+    PY=D:/KotobaArcade/arte/venv/Scripts/python
     $PY -I scripts/estudio.py gerar    scripts/imagens/objetos.json [id ...]   # candidatas, várias seeds
     $PY -I scripts/estudio.py conferir scripts/imagens/objetos.json            # CLIP: a imagem mostra a ideia certa?
     $PY -I scripts/estudio.py revisar  scripts/imagens/objetos.json [id ...]   # modelo de visão: tem defeito?
@@ -13,7 +13,7 @@ Uso (de dentro da pasta do repositório):
     $PY -I scripts/estudio.py exportar scripts/imagens/objetos.json            # WebP cor + tinta no repositório
     $PY -I scripts/estudio.py tudo     scripts/imagens/objetos.json            # todos acima, refazendo as reprovadas
 
-As candidatas e os relatórios ficam fora do repositório, em D:\\KotobaArcade-Arte\\estudio\\<lote>\\.
+As candidatas e os relatórios ficam fora do repositório, em D:\\KotobaArcade\\arte\\estudio\\<lote>\\.
 Só a imagem final (WebP) entra no repositório.
 
 A placa é dividida com outras sessões. Antes de carregar qualquer modelo o estúdio prende a placa com
@@ -63,7 +63,7 @@ from collections import deque
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))  # -I tira a pasta do script do caminho
 from placa import Placa  # noqa: E402
 
-ARTE = pathlib.Path(os.environ.get("KOTOBA_ARTE", "D:/KotobaArcade-Arte"))
+ARTE = pathlib.Path(os.environ.get("KOTOBA_ARTE", "D:/KotobaArcade/arte"))
 MOTORES = pathlib.Path(__file__).resolve().parent / "imagens" / "motores.json"
 CLIP = "laion/CLIP-ViT-H-14-laion2B-s32B-b79K"
 CLIP_VRAM_GB = 4

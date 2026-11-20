@@ -1,6 +1,6 @@
 /**
  * Trava da placa de vídeo (scripts/placa.py). Cada teste usa uma pasta própria no lugar de
- * D:\KotobaArcade-Arte e desliga as sondas do Ollama, dos motores de voz e do nvidia-smi.
+ * D:\KotobaArcade\\arte e desliga as sondas do Ollama, dos motores de voz e do nvidia-smi.
  *
  * Bug que estes testes cobrem: o lock antigo era só um arquivo. Outra sessão apagava o arquivo ou o dono
  * morria sem apagar, e o estúdio rodou horas com a placa sem lock nenhum.
