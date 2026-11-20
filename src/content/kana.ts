@@ -154,7 +154,7 @@ const KATAKANA: Base[] = [
   ['ヘ', 'morrinho', 'Igual a へ: o morrinho. "He... he..."', 'nuvem 24 26 .8; sol 102 22 .8', ['ヘルメット', 'ヘルメット', 'capacete'], 'he, com o h soprado'],
   ['ホ', 'árvore de Natal', 'Uma árvore de Natal com dois enfeites: "Ho ho ho!".', 'estrela 60 8 .8; presente 102 102 .8', ['ホテル', 'ホテル', 'hotel'], 'ho, com o h soprado'],
   ['マ', 'fatia de pizza', 'Uma fatia de pizza de ponta para baixo. "Ma" de massa.', 'pizza 102 98 .8; fumaca 24 24 .6', ['マスク', 'マスク', 'máscara']],
-  ['ミ', 'minhocas', 'Três minhocas subindo da terra. "Mi" de minhoca.', 'grama 60 112; sol 102 22 .7', ['ミルク', 'ミルク', 'leite']],
+  ['ミ', 'minhocas', 'Minhocas subindo da terra. "Mi" de minhoca.', 'grama 60 112; sol 102 22 .7', ['ミルク', 'ミルク', 'leite']],
   ['ム', 'vaca', 'O focinho de uma vaca de perfil: "Muu".', 'grama 60 112; som 104 40 .7', ['ゲーム', 'ゲーム', 'jogo, videogame']],
   ['メ', 'tapa-olho', 'Um X tapando o olho, como um tapa-olho de pirata. め é olho.', 'tapaolho 102 26 .8; barco 102 100 .7', ['メール', 'メール', 'e-mail']],
   ['モ', 'isca', 'Igual a も com o traço de baixo reto: o anzol com as minhocas. "Mo" de molhado.', 'gota 24 92 .7; peixe 100 100 .8', ['メモ', 'メモ', 'anotação']],

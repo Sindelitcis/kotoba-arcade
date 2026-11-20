@@ -32,7 +32,7 @@ test('o traço dos quadros fica dentro do quadro, mesmo quando o quadro corta o 
 
 test('os cartões do fliperama mostram o cenário de cada jogo', async ({ page }) => {
   const backgrounds = await page.locator('.tiles .tile').evaluateAll((els) => els.map((el) => getComputedStyle(el).backgroundImage));
-  expect(backgrounds).toHaveLength(7);
+  expect(backgrounds).toHaveLength(8);
   for (const bg of backgrounds) expect(bg).toMatch(/url\(/);
 });
 
@@ -62,7 +62,7 @@ test('o fliperama começa no traço e pinta o jogo que você já jogou', async (
       cor: (el.querySelector('.pinta') as HTMLElement | null)?.style.getPropertyValue('--cena-cor') ?? '',
     })),
   );
-  expect(camadas).toHaveLength(7);
+  expect(camadas).toHaveLength(8);
   for (const c of camadas) {
     expect(c.cor).toMatch(/url\(/);
     expect(c.cor).not.toBe(c.tinta);
@@ -84,9 +84,9 @@ test('o fliperama começa no traço e pinta o jogo que você já jogou', async (
   await expect(page.getByTestId('tile-kanjimon')).toHaveClass(/pintado/);
   expect(await corDe(page, 'tile-kanjimon')).toBe(1);
   expect(await corDe(page, 'tile-kanabeat')).toBe(0);
-  // Um jogo de todos: a capa pinta só a fração dele.
+  // Um jogo de todos: a capa pinta só a fração dele (a cor vai para o estilo com duas casas).
   const jogos = await page.locator('.tiles .tile').count();
-  expect(await corDe(page, 'play-now')).toBeCloseTo(1 / jogos, 2);
+  expect(await corDe(page, 'play-now')).toBeCloseTo(Math.round(100 / jogos) / 100, 2);
 });
 
 test('na caçada a cor sobe com os acertos seguidos e cai no erro', async ({ page }) => {

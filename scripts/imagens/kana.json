@@ -148,8 +148,14 @@
   {
    "id": "tabuas",
    "objeto": "tábuas",
-   "rotulo": "wooden planks",
-   "prompt": "stack of wooden planks with a hammer lying next to them, no humans"
+   "rotulo": "two wooden planks",
+   "prompt": "two long wooden planks stacked on top of each other, lumber boards, wood grain, no humans",
+   "seeds": [
+    41,
+    42,
+    43,
+    44
+   ]
   },
   {
    "id": "mergulho",
@@ -310,8 +316,14 @@
   {
    "id": "isca",
    "objeto": "isca",
-   "rotulo": "worms on a fishing hook",
-   "prompt": "fishing hook with two earthworms as bait, water drops, fish, no humans"
+   "rotulo": "a fishing hook with worms",
+   "prompt": "a metal fishing hook with two pink earthworms hanging from it, wet, water drops, no humans",
+   "seeds": [
+    41,
+    42,
+    43,
+    44
+   ]
   },
   {
    "id": "iate",
@@ -328,8 +340,14 @@
   {
    "id": "peixe-no-anzol",
    "objeto": "peixe no anzol",
-   "rotulo": "a fish leaping out of water",
-   "prompt": "a happy fish leaping out of water and curling around, splash, no humans"
+   "rotulo": "a fish around a fishing hook",
+   "prompt": "a happy orange fish curled around a big fishing hook on a line, smiling, no humans",
+   "seeds": [
+    41,
+    42,
+    43,
+    44
+   ]
   },
   {
    "id": "ioio",
@@ -431,12 +449,12 @@
    "id": "pessoa-encostada",
    "objeto": "pessoa encostada",
    "rotulo": "a person leaning on a lamp post",
-   "prompt": "1man, solo, full body, man in brown coat leaning against a street lamp post, tilted body, arms crossed",
+   "prompt": "1man, solo, full body, man in brown coat leaning his shoulder against a street lamp post, whole body tilted diagonally, legs crossed, relaxed",
    "seeds": [
-    21,
-    22,
-    23,
-    24
+    41,
+    42,
+    43,
+    44
    ]
   },
   {
@@ -544,8 +562,14 @@
   {
    "id": "bandeira-ao-vento",
    "objeto": "bandeira ao vento",
-   "rotulo": "a flag waving in the wind",
-   "prompt": "a flag on a pole waving strongly in the wind, wind lines, no humans"
+   "rotulo": "a flag blowing in the wind",
+   "prompt": "a big red flag on a tall pole, cloth folded and waving in strong wind, wind lines, no humans",
+   "seeds": [
+    41,
+    42,
+    43,
+    44
+   ]
   },
   {
    "id": "arvore-de-natal",
@@ -618,7 +642,6 @@
   "mergulho": 23,
   "nadador": 22,
   "risada": 24,
-  "pessoa-encostada": 21,
   "estrada-comprida": 23,
   "cobra-enrolada": 23,
   "ilha": 34,
@@ -626,6 +649,35 @@
   "fantasma-de-capuz": 33,
   "minhocas": 32,
   "raio-na-nuvem": 31,
-  "martelo": 2031
- }
+  "martelo": 2031,
+  "orelha": 14,
+  "ema": 14,
+  "tropeco": 1001,
+  "tsunami": 2,
+  "machado": 1,
+  "anzol": 12,
+  "gato": 14,
+  "nota-musical": 3,
+  "numero-dois": 14,
+  "nuvem-enrolada": 1,
+  "colher-pingando": 3
+ },
+ "vetadas": [
+  "bandeira-ao-vento-1",
+  "bandeira-ao-vento-2",
+  "bandeira-ao-vento-3",
+  "isca-1",
+  "isca-2",
+  "isca-3",
+  "peixe-no-anzol-1",
+  "peixe-no-anzol-2",
+  "peixe-no-anzol-3",
+  "pessoa-encostada-21",
+  "pessoa-encostada-22",
+  "pessoa-encostada-23",
+  "pessoa-encostada-24",
+  "tabuas-1",
+  "tabuas-2",
+  "tabuas-3"
+ ]
 }
