@@ -146,6 +146,23 @@ describe('conteúdo do kana', () => {
     for (const w of ['コンビニ', 'アルバイト', 'パスポート']) expect(PALAVRAS_KATAKANA.some((p) => p.kana === w), w).toBe(true);
     expect(kanaDaPalavra('ティッシュ').map((k) => k.char)).toEqual(['ティ', 'ッ', 'シュ']);
   });
+
+  // O primeiro commit deste jogo saiu com CRLF e o rebase virou conflito no arquivo inteiro.
+  it('os arquivos do jogo usam fim de linha LF', () => {
+    const arquivos = [
+      'src/content/kana.ts',
+      'src/content/ajuda/kanaimagens.ts',
+      'src/games/kanaimagens/engine.ts',
+      'src/games/kanaimagens/Imagem.tsx',
+      'src/games/kanaimagens/KanaImagensGame.tsx',
+      'src/games/kanaimagens/kanaimagens.css',
+      'scripts/imagens/kana.json',
+      'tests/kanaimagens.test.ts',
+      'e2e/kanaimagens.spec.ts',
+      'docs/kana.md',
+    ];
+    expect(arquivos.filter((f) => readFileSync(join(RAIZ, f), 'utf8').includes('\r'))).toEqual([]);
+  });
 });
 
 /* ───────── Regras ───────── */

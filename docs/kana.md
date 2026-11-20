@@ -31,6 +31,8 @@ Os ids são os do Kana Beat (`a:あ`, `ak:ア`) e a carta é a mesma (`#reading`
 
 Vários da escola descreviam traços ("lembra as letras n e i juntas", "parece K torta"). Isso não dá desenho. Viraram objetos: に é um ninho, け é um espeto de queijo coalho, せ é uma cerca, た são tábuas, エ é um poço de elevador, サ é uma sacola, ユ é uma banheira (お湯 é água quente), ヨ é a geladeira de iogurte.
 
+Dois mudaram depois de ver as ilustrações. い eram dois ímãs, mas nenhuma das 16 tentativas saiu com cara de ímã; virou uma ilha com dois coqueiros ("i" de ilha). こ eram duas cobras, e o desenho sempre saía com uma só; virou uma cobra enrolada, com as duas voltas do corpo fazendo os dois traços.
+
 ### Ligação mais forte entre hiragana e katakana
 
 Quando a letra katakana vem da mesma origem, a imagem é a mesma: カ é o mosquito de か sem a asa, キ é a chave, ケ o espeto, セ a cerca, モ a isca, ヤ o iate, リ o siri, ル o canguru, レ o chute, ロ o garoto de ろ com a boca quadrada.

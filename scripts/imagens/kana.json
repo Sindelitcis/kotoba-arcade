@@ -26,15 +26,15 @@
    "prompt": "1person, solo, chibi, cute person sitting in dentist chair with mouth wide open, dentist mirror"
   },
   {
-   "id": "dois-imas",
+   "id": "ilha",
    "objeto": "dois ímãs",
-   "rotulo": "two horseshoe magnets",
-   "prompt": "two red horseshoe magnets with silver tips facing each other, magnetic field lines between them, no humans",
+   "rotulo": "a small island with two palm trees",
+   "prompt": "a tiny round sand island in the blue sea with two coconut palm trees, one taller than the other, no humans",
    "seeds": [
-    11,
-    12,
-    13,
-    14
+    31,
+    32,
+    33,
+    34
    ]
   },
   {
@@ -92,15 +92,15 @@
    "prompt": "two wooden skewers with grilled cheese cubes over small barbecue flames, no humans"
   },
   {
-   "id": "duas-cobras",
+   "id": "cobra-enrolada",
    "objeto": "duas cobras",
-   "rotulo": "two snakes",
-   "prompt": "two green snakes lying stretched out side by side on grass, sunbathing, no humans",
+   "rotulo": "a coiled snake",
+   "prompt": "two cute cartoon green snakes coiled next to each other, smiling, no humans",
    "seeds": [
-    11,
-    12,
-    13,
-    14
+    21,
+    22,
+    23,
+    24
    ]
   },
   {
@@ -154,13 +154,13 @@
   {
    "id": "mergulho",
    "objeto": "mergulho",
-   "rotulo": "a person jumping into a pool",
-   "prompt": "1boy, solo, chibi, full body, large in frame, cannonball jump into a swimming pool, big water splash, swimming pool tiles",
+   "rotulo": "a diving board and a water splash",
+   "prompt": "a diving board over a blue swimming pool, huge water splash below it, no humans",
    "seeds": [
-    11,
-    12,
-    13,
-    14
+    21,
+    22,
+    23,
+    24
    ]
   },
   {
@@ -182,27 +182,27 @@
    ]
   },
   {
-   "id": "prego",
+   "id": "martelo",
    "objeto": "prego",
-   "rotulo": "a hammer and a nail",
-   "prompt": "a hammer hitting a steel nail into a wooden plank, close-up, no humans",
+   "rotulo": "a hammer",
+   "prompt": "a big steel nail half hammered into a wooden block, a hammer about to hit it, no humans",
    "seeds": [
-    11,
-    12,
-    13,
-    14
+    31,
+    32,
+    33,
+    34
    ]
   },
   {
    "id": "nadador",
    "objeto": "nadador",
    "rotulo": "a person swimming",
-   "prompt": "1boy, solo, chibi, full body, large in frame, swimming in the sea, freestyle stroke, swimming goggles, splash",
+   "prompt": "1boy, solo, swimmer in a blue swimming pool, swimming cap, goggles, one arm out of the water, splash, upper body",
    "seeds": [
-    11,
-    12,
-    13,
-    14
+    21,
+    22,
+    23,
+    24
    ]
   },
   {
@@ -238,31 +238,37 @@
   {
    "id": "risada",
    "objeto": "risada",
-   "rotulo": "a person laughing out loud",
-   "prompt": "1boy, solo, chibi, full body, large in frame, laughing hard, mouth wide open, holding belly, tears of joy, eyes closed",
+   "rotulo": "a person laughing",
+   "prompt": "1boy, solo, upper body, laughing out loud, mouth wide open, eyes closed, tears of joy, holding belly, green t-shirt",
    "seeds": [
-    11,
-    12,
-    13,
-    14
+    21,
+    22,
+    23,
+    24
    ]
   },
   {
    "id": "sorriso",
    "objeto": "sorriso",
    "rotulo": "a big smiling face",
-   "prompt": "a big wide smiling face, eyes closed happily, simple round face, no body"
+   "prompt": "1boy, solo, portrait, huge happy grin showing teeth, eyes closed, blushing cheeks, giggling, orange shirt",
+   "seeds": [
+    31,
+    32,
+    33,
+    34
+   ]
   },
   {
    "id": "sopro",
    "objeto": "sopro",
-   "rotulo": "a person blowing out birthday candles",
-   "prompt": "1girl, solo, chibi, full body, large in frame, blowing out candles on a birthday cake, puffed cheeks, wind lines",
+   "rotulo": "a birthday cake with candles",
+   "prompt": "a birthday cake with three lit candles, small flames bending sideways, wind puffs blowing at them from the left, no humans",
    "seeds": [
-    11,
-    12,
-    13,
-    14
+    21,
+    22,
+    23,
+    24
    ]
   },
   {
@@ -358,13 +364,13 @@
   {
    "id": "chute",
    "objeto": "chute",
-   "rotulo": "a person kicking a ball",
-   "prompt": "1boy, solo, chibi, full body, large in frame, kicking a soccer ball hard, dynamic pose, leg raised, effort face",
+   "rotulo": "a soccer player kicking a ball",
+   "prompt": "1boy, solo, soccer player in red jersey and blue shorts kicking a soccer ball, leg swinging, side view, full body, ball flying",
    "seeds": [
-    11,
-    12,
-    13,
-    14
+    21,
+    22,
+    23,
+    24
    ]
   },
   {
@@ -407,12 +413,12 @@
    "id": "pensando",
    "objeto": "pensando",
    "rotulo": "a person thinking",
-   "prompt": "1girl, solo, chibi, full body, large in frame, sitting on the floor with one leg stretched, hand on chin, thinking, thought bubble above",
+   "prompt": "1girl, solo, upper body, hand on chin, thinking, looking up, thought bubble with question mark above head, yellow sweater",
    "seeds": [
-    11,
-    12,
-    13,
-    14
+    21,
+    22,
+    23,
+    24
    ]
   },
   {
@@ -425,19 +431,25 @@
    "id": "pessoa-encostada",
    "objeto": "pessoa encostada",
    "rotulo": "a person leaning on a lamp post",
-   "prompt": "1boy, solo, chibi, full body, large in frame, leaning against a street lamp post, arms crossed, relaxed, night",
+   "prompt": "1man, solo, full body, man in brown coat leaning against a street lamp post, tilted body, arms crossed",
    "seeds": [
-    11,
-    12,
-    13,
-    14
+    21,
+    22,
+    23,
+    24
    ]
   },
   {
    "id": "fantasma-de-capuz",
    "objeto": "fantasma de capuz",
-   "rotulo": "a hooded ghost",
-   "prompt": "a cute white ghost wearing a hood, floating, moon, no humans"
+   "rotulo": "a ghost wearing a hood",
+   "prompt": "a cute cartoon ghost wearing a purple hooded cloak, light blue ghost body, floating, spooky, no humans",
+   "seeds": [
+    31,
+    32,
+    33,
+    34
+   ]
   },
   {
    "id": "elevador",
@@ -448,13 +460,13 @@
   {
    "id": "susto",
    "objeto": "susto",
-   "rotulo": "a startled person",
-   "prompt": "1boy, solo, chibi, full body, large in frame, shocked, surprised, falling backwards, arms flailing, sweat drops",
+   "rotulo": "a scared surprised face",
+   "prompt": "1boy, solo, upper body, very surprised face, wide eyes, mouth wide open, hands up, exclamation mark above head, colorful hoodie",
    "seeds": [
-    11,
-    12,
-    13,
-    14
+    21,
+    22,
+    23,
+    24
    ]
   },
   {
@@ -472,13 +484,13 @@
   {
    "id": "vento-com-chuva",
    "objeto": "vento com chuva",
-   "rotulo": "rain blown by strong wind",
-   "prompt": "dark rain cloud with heavy rain falling diagonally, strong wind lines, an umbrella blowing away, no humans",
+   "rotulo": "an umbrella in wind and rain",
+   "prompt": "a red umbrella turned inside out by strong wind, heavy diagonal rain, dark cloud above, no humans",
    "seeds": [
-    11,
-    12,
-    13,
-    14
+    21,
+    22,
+    23,
+    24
    ]
   },
   {
@@ -520,8 +532,14 @@
   {
    "id": "raio-na-nuvem",
    "objeto": "raio na nuvem",
-   "rotulo": "lightning from a cloud",
-   "prompt": "a lightning bolt striking through a dark cloud, rain, no humans"
+   "rotulo": "a storm cloud with lightning",
+   "prompt": "a dark gray storm cloud with a big bright yellow lightning bolt coming out of it, no humans",
+   "seeds": [
+    31,
+    32,
+    33,
+    34
+   ]
   },
   {
    "id": "bandeira-ao-vento",
@@ -544,19 +562,25 @@
   {
    "id": "minhocas",
    "objeto": "minhocas",
-   "rotulo": "earthworms coming out of the soil",
-   "prompt": "three earthworms coming out of the ground, soil, grass, no humans"
+   "rotulo": "three earthworms coming out of the soil",
+   "prompt": "three pink earthworms with cute faces sticking out of brown soil, small plants, no humans",
+   "seeds": [
+    31,
+    32,
+    33,
+    34
+   ]
   },
   {
    "id": "tapa-olho",
    "objeto": "tapa-olho",
-   "rotulo": "a pirate eye patch",
-   "prompt": "a black pirate eyepatch with a thin strap, single object, simple, no humans",
+   "rotulo": "a pirate with an eye patch",
+   "prompt": "1boy, solo, portrait, young pirate wearing a black eye patch over one eye, red bandana, grin",
    "seeds": [
-    11,
-    12,
-    13,
-    14
+    21,
+    22,
+    23,
+    24
    ]
   },
   {
@@ -575,13 +599,33 @@
    "id": "estrada-comprida",
    "objeto": "estrada comprida",
    "rotulo": "a long straight road",
-   "prompt": "a long straight asphalt road with a white dashed center line stretching to the horizon, one point perspective, flat green fields, no humans",
+   "prompt": "a long straight empty highway seen from the side, flat horizon, road stretching left to right, blue sky, no humans",
    "seeds": [
-    11,
-    12,
-    13,
-    14
+    21,
+    22,
+    23,
+    24
    ]
   }
- ]
+ ],
+ "escolha": {
+  "chute": 23,
+  "sopro": 24,
+  "susto": 1021,
+  "pensando": 23,
+  "tapa-olho": 24,
+  "vento-com-chuva": 23,
+  "mergulho": 23,
+  "nadador": 22,
+  "risada": 24,
+  "pessoa-encostada": 21,
+  "estrada-comprida": 23,
+  "cobra-enrolada": 23,
+  "ilha": 34,
+  "sorriso": 31,
+  "fantasma-de-capuz": 33,
+  "minhocas": 32,
+  "raio-na-nuvem": 31,
+  "martelo": 2031
+ }
 }
