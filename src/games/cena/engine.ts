@@ -77,8 +77,8 @@ export function daCoisa(c: Coisa): { figura: Figura; cor?: CorId } {
 
 export const palavraDe = (c: Coisa): Word => daCoisa(c).figura.word;
 const ehPessoa = (c: Coisa) => daCoisa(c).figura.tipo === 'acao';
-/** Gente e bicho "います"; coisa "あります". */
-export const vive = (c: Coisa) => ehPessoa(c) || ['hiki'].includes(daCoisa(c).figura.contador) || palavraDe(c).id === 'w:鳥';
+/** Gente e bicho "います"; coisa "あります". Gente parada (o médico, a avó) também vive, mas fica no lugar como as coisas. */
+export const vive = (c: Coisa) => ehPessoa(c) || ['hiki', 'nin'].includes(daCoisa(c).figura.contador) || palavraDe(c).id === 'w:鳥';
 
 // ───────── Texto da instrução ─────────
 

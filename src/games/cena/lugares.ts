@@ -153,7 +153,11 @@ export const LUGARES: readonly Lugar[] = [
       .dentro('kasa2', 'kasa-ao', 'kago1', 0.6, 3)
       .chao('kago2', 'kago', 66, 96, 7)
       .lado('kasa3', 'kasa-aka', 'tana2', 1, 3)
-      .chao('yomu1', 'yomu', 6, 98, 10);
+      .chao('yomu1', 'yomu', 6, 98, 10)
+      .sobre('oden1', 'oden', 'teburu1', 0.4, 4)
+      .dentro('choko1', 'choko', 'kago2', 0.5, 4)
+      .chao('tenin1', 'tenin', 90, 80, 8, { z: 1 })
+      .chao('baketsu1', 'baketsu', 62, 99, 4);
   }),
 
   lugar('eki', '駅', 'えき', 'estação de trem', (m) => {
@@ -179,7 +183,9 @@ export const LUGARES: readonly Lugar[] = [
       .chao('kasa3', 'kasa-ao', 93, 99, 3)
       .chao('tori1', 'tori', 70, 22, 4)
       .chao('tori2', 'tori', 76, 22, 2.5)
-      .chao('chizu1', 'chizu', 71, 52, 6);
+      .chao('chizu1', 'chizu', 71, 52, 6)
+      .chao('ekiin1', 'ekiin', 44, 88, 8)
+      .chao('ojiisan1', 'ojiisan', 63, 99, 8);
   }),
 
   lugar('heya', '部屋', 'へや', 'quarto', (m) => {
@@ -214,7 +220,9 @@ export const LUGARES: readonly Lugar[] = [
       .chao('boushi2', 'boushi-kuro', 8, 99, 5)
       .chao('kutsu1', 'kutsu-shiro', 13, 99, 6)
       .chao('kutsu4', 'kutsu-aka', 19, 99, 6)
-      .chao('kiku1', 'kiku', 38, 99, 9);
+      .chao('kiku1', 'kiku', 38, 99, 9)
+      .sobre('mezamashi1', 'mezamashi', 'hondana1', 0.5, 4)
+      .chao('surippa1', 'surippa', 29, 99, 5);
   }),
 
   lugar('jimusho', '事務所', 'じむしょ', 'escritório', (m) => {
@@ -246,7 +254,8 @@ export const LUGARES: readonly Lugar[] = [
       .chao('denwasuru1', 'denwasuru', 34, 99, 9)
       .chao('kasa1', 'kasa-kuro', 4, 99, 3)
       .chao('kasa2', 'kasa-ao', 7, 99, 3)
-      .sobre('nekutai1', 'nekutai', 'kopiki1', 0.85, 3);
+      .sobre('nekutai1', 'nekutai', 'kopiki1', 0.85, 3)
+      .chao('kaishain1', 'kaishain', 46, 99, 8);
   }),
 
   lugar('daidokoro', '台所', 'だいどころ', 'cozinha', (m) => {
@@ -316,7 +325,9 @@ export const LUGARES: readonly Lugar[] = [
       .dentro('masuku3', 'masuku', 'kago1', 0.68, 3.5)
       .chao('naku1', 'naku', 6, 98, 9)
       .chao('kasa1', 'kasa-ao', 70, 99, 3)
-      .chao('kasa2', 'kasa-aka', 73, 99, 3);
+      .chao('kasa2', 'kasa-aka', 73, 99, 3)
+      .chao('obaasan1', 'obaasan', 62, 99, 8)
+      .sobre('doraiya1', 'doraiya', 'tana2', 0.75, 4);
   }),
 
   lugar('resutoran', 'レストラン', 'レストラン', 'restaurante', (m) => {
@@ -372,6 +383,9 @@ export const LUGARES: readonly Lugar[] = [
       .chao('benchi1', 'benchi', 22, 98, 14)
       .sobre('kasa1', 'kasa-ao', 'benchi1', 0.3, 3)
       .sobre('boushi1', 'boushi-shiro', 'benchi1', 0.7, 4)
-      .chao('kumo1', 'kumo', 36, 16, 12, { z: 0 });
+      .chao('kumo1', 'kumo', 36, 16, 12, { z: 0 })
+      .chao('hikouki1', 'hikouki', 72, 13, 11, { z: 0 })
+      .chao('keisatsukan1', 'keisatsukan', 39, 99, 7)
+      .chao('asobu1', 'asobu', 31, 99, 7);
   }),
 ];

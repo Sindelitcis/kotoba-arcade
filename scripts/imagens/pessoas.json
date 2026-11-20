@@ -1,0 +1,107 @@
+{
+ "lote": "pessoas",
+ "destino": "src/assets/gente",
+ "largura": 832,
+ "altura": 1216,
+ "saida": 512,
+ "recorte": true,
+ "estilo": "full body, standing, white background, simple background, black outline, clean lineart, flat color, anime coloring, cel shading, bright colors",
+ "negativo": "crowd, frame, border, photo, realistic, 3d, scenery, gradient background, drop shadow, cropped feet, text, letters, logo, name tag",
+ "seeds": [
+  1,
+  2,
+  3
+ ],
+ "distratores": [
+  "an object",
+  "a room",
+  "an animal"
+ ],
+ "itens": [
+  {
+   "id": "otokonoko",
+   "rotulo": "a boy",
+   "prompt": "solo, 1boy, young boy, about eight years old, t-shirt and shorts"
+  },
+  {
+   "id": "onnanoko",
+   "rotulo": "a girl",
+   "prompt": "solo, 1girl, young girl, about eight years old, dress"
+  },
+  {
+   "id": "otokonohito",
+   "rotulo": "a man",
+   "prompt": "solo, 1man, adult man, about thirty, casual clothes"
+  },
+  {
+   "id": "onnanohito",
+   "rotulo": "a woman",
+   "prompt": "solo, 1woman, adult woman, about thirty, casual clothes"
+  },
+  {
+   "id": "akachan",
+   "rotulo": "a baby",
+   "prompt": "solo, baby, sitting, diaper, chubby, smiling"
+  },
+  {
+   "id": "ojiisan",
+   "rotulo": "an old man",
+   "prompt": "solo, old man, grey hair, glasses, cardigan, walking cane"
+  },
+  {
+   "id": "obaasan",
+   "rotulo": "an old woman",
+   "prompt": "solo, old woman, grey hair in a bun, apron, gentle smile"
+  },
+  {
+   "id": "kazoku",
+   "rotulo": "a family",
+   "prompt": "family of four standing together, father, mother, son and daughter, smiling"
+  },
+  {
+   "id": "gakusei",
+   "rotulo": "a student",
+   "prompt": "solo, 1boy, japanese high school student, school uniform, school bag"
+  },
+  {
+   "id": "sensei",
+   "rotulo": "a teacher",
+   "prompt": "solo, 1woman, teacher, holding a textbook, pointing stick, cardigan"
+  },
+  {
+   "id": "isha",
+   "rotulo": "a doctor",
+   "prompt": "solo, 1man, doctor, white coat, stethoscope around neck"
+  },
+  {
+   "id": "kangoshi",
+   "rotulo": "a nurse",
+   "prompt": "solo, 1woman, nurse, light pink nurse uniform, clipboard"
+  },
+  {
+   "id": "keisatsukan",
+   "rotulo": "a police officer",
+   "prompt": "solo, 1man, japanese police officer, dark blue uniform, police cap"
+  },
+  {
+   "id": "tenin",
+   "rotulo": "a shop clerk",
+   "prompt": "solo, 1girl, convenience store clerk, striped uniform shirt, apron"
+  },
+  {
+   "id": "ekiin",
+   "rotulo": "a station attendant",
+   "prompt": "solo, 1man, japanese train station attendant, navy blue uniform, cap, white gloves"
+  },
+  {
+   "id": "kaishain",
+   "rotulo": "an office worker",
+   "prompt": "solo, 1man, office worker, business suit, necktie, briefcase"
+  }
+ ],
+ "escolha": {
+  "obaasan": 11003,
+  "gakusei": 10001,
+  "tenin": 10001
+ }
+}

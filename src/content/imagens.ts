@@ -17,9 +17,10 @@ export type Nivel = 5 | 4 | 3;
 export type Contador = 'tsu' | 'hon' | 'mai' | 'hiki' | 'dai' | 'satsu' | 'ko' | 'nin';
 
 export interface Figura {
-  /** Arquivo da imagem (src/assets/imagens ou src/assets/acoes). */
+  /** Arquivo da imagem (src/assets/imagens, acoes ou gente). */
   img: string;
-  tipo: 'objeto' | 'acao';
+  /** Pessoa é gente parada (médico, avó): na Cena Viva fica como as coisas, mas "está" (います). */
+  tipo: 'objeto' | 'acao' | 'pessoa';
   word: Word;
   nivel: Nivel;
   contador: Contador;
@@ -180,6 +181,127 @@ const OBJETOS: readonly Linha[] = [
   ['tsuki', '月', 'つき', 'lua', 5, 'tsu', 'tempo'],
   ['yama', '山', 'やま', 'montanha', 5, 'tsu', 'natureza'],
   ['umi', '海', 'うみ', 'mar', 5, 'tsu', 'natureza'],
+  // segunda leva: bichos
+  ['usagi', 'うさぎ', 'うさぎ', 'coelho', 5, 'hiki', 'animal'],
+  ['kingyo', '金魚', 'きんぎょ', 'peixinho dourado', 4, 'hiki', 'animal'],
+  ['kame', '亀', 'かめ', 'tartaruga', 4, 'hiki', 'animal'],
+  ['nezumi', 'ねずみ', 'ねずみ', 'rato', 4, 'hiki', 'animal'],
+  ['saru', '猿', 'さる', 'macaco', 4, 'hiki', 'animal'],
+  ['chou', '蝶', 'ちょう', 'borboleta', 3, 'hiki', 'animal'],
+  ['niwatori', '鶏', 'にわとり', 'galinha', 4, 'hiki', 'animal'],
+  // comida
+  ['yasai', '野菜', 'やさい', 'verduras e legumes', 5, 'tsu', 'legume'],
+  ['kudamono', '果物', 'くだもの', 'fruta', 5, 'tsu', 'fruta'],
+  ['chiizu', 'チーズ', 'チーズ', 'queijo', 5, 'ko', 'comida'],
+  ['teishoku', '定食', 'ていしょく', 'prato feito', 4, 'tsu', 'prato'],
+  ['remon', 'レモン', 'レモン', 'limão', 4, 'ko', 'fruta'],
+  ['momo', '桃', 'もも', 'pêssego', 4, 'ko', 'fruta'],
+  ['meron', 'メロン', 'メロン', 'melão', 4, 'ko', 'fruta'],
+  ['kyuri', 'きゅうり', 'きゅうり', 'pepino', 4, 'hon', 'legume'],
+  ['nasu', 'なす', 'なす', 'berinjela', 4, 'hon', 'legume'],
+  ['daikon', '大根', 'だいこん', 'nabo japonês (daikon)', 4, 'hon', 'legume'],
+  ['toumorokoshi', 'とうもろこし', 'とうもろこし', 'milho', 4, 'hon', 'legume'],
+  ['kabocha', 'かぼちゃ', 'かぼちゃ', 'abóbora', 4, 'ko', 'legume'],
+  ['toufu', '豆腐', 'とうふ', 'tofu', 4, 'tsu', 'comida'],
+  ['natto', '納豆', 'なっとう', 'natô (soja fermentada)', 3, 'tsu', 'comida'],
+  ['hanbaga', 'ハンバーガー', 'ハンバーガー', 'hambúrguer', 5, 'ko', 'comida'],
+  ['piza', 'ピザ', 'ピザ', 'pizza', 5, 'mai', 'comida'],
+  ['supagetti', 'スパゲッティ', 'スパゲッティ', 'espaguete', 5, 'tsu', 'prato'],
+  ['oden', 'おでん', 'おでん', 'oden (cozido da konbini)', 4, 'tsu', 'prato'],
+  ['karaage', '唐揚げ', 'からあげ', 'frango frito (karaage)', 4, 'ko', 'prato'],
+  ['nikuman', '肉まん', 'にくまん', 'pãozinho de carne no vapor', 4, 'ko', 'comida'],
+  ['soba', 'そば', 'そば', 'sobá', 4, 'tsu', 'prato'],
+  ['takoyaki', 'たこ焼き', 'たこやき', 'takoyaki', 4, 'ko', 'prato'],
+  ['okonomiyaki', 'お好み焼き', 'おこのみやき', 'okonomiyaki', 4, 'mai', 'prato'],
+  ['sashimi', '刺身', 'さしみ', 'sashimi', 4, 'tsu', 'prato'],
+  ['dango', '団子', 'だんご', 'dango (bolinho no espeto)', 4, 'hon', 'doce'],
+  ['choko', 'チョコレート', 'チョコレート', 'chocolate', 5, 'mai', 'doce'],
+  ['kukki', 'クッキー', 'クッキー', 'biscoito (cookie)', 5, 'mai', 'doce'],
+  ['donatsu', 'ドーナツ', 'ドーナツ', 'rosquinha (donut)', 5, 'ko', 'doce'],
+  ['purin', 'プリン', 'プリン', 'pudim', 4, 'ko', 'doce'],
+  ['wain', 'ワイン', 'ワイン', 'vinho', 4, 'tsu', 'bebida'],
+  ['sake', 'お酒', 'おさけ', 'saquê, bebida alcoólica', 5, 'hon', 'bebida'],
+  ['suitou', '水筒', 'すいとう', 'garrafinha térmica', 3, 'hon', 'viagem'],
+  // casa e roupa
+  ['mado', '窓', 'まど', 'janela', 5, 'tsu', 'casa'],
+  ['doa', 'ドア', 'ドア', 'porta', 5, 'tsu', 'casa'],
+  ['sentakuki', '洗濯機', 'せんたくき', 'máquina de lavar', 4, 'dai', 'eletro'],
+  ['soujiki', '掃除機', 'そうじき', 'aspirador de pó', 4, 'dai', 'eletro'],
+  ['senpuki', '扇風機', 'せんぷうき', 'ventilador', 4, 'dai', 'eletro'],
+  ['hanga', 'ハンガー', 'ハンガー', 'cabide', 4, 'hon', 'casa'],
+  ['futon', '布団', 'ふとん', 'futon', 4, 'mai', 'moveis'],
+  ['kaaten', 'カーテン', 'カーテン', 'cortina', 4, 'mai', 'casa'],
+  ['surippa', 'スリッパ', 'スリッパ', 'chinelo de casa', 4, 'tsu', 'roupa'],
+  ['kimono', '着物', 'きもの', 'quimono', 4, 'mai', 'roupa'],
+  ['tebukuro', '手袋', 'てぶくろ', 'luvas', 4, 'tsu', 'roupa'],
+  ['mafura', 'マフラー', 'マフラー', 'cachecol', 4, 'hon', 'roupa'],
+  ['seta', 'セーター', 'セーター', 'suéter', 5, 'mai', 'roupa'],
+  ['sukato', 'スカート', 'スカート', 'saia', 5, 'mai', 'roupa'],
+  ['suutsu', 'スーツ', 'スーツ', 'terno', 4, 'mai', 'roupa'],
+  ['epuron', 'エプロン', 'エプロン', 'avental', 4, 'mai', 'roupa'],
+  ['mezamashi', '目覚まし時計', 'めざましどけい', 'despertador', 4, 'tsu', 'casa'],
+  ['doraiya', 'ドライヤー', 'ドライヤー', 'secador de cabelo', 4, 'tsu', 'banho'],
+  ['jougi', '定規', 'じょうぎ', 'régua', 3, 'hon', 'escrita'],
+  ['heddohon', 'ヘッドホン', 'ヘッドホン', 'headphone', 4, 'tsu', 'eletro'],
+  ['houki', 'ほうき', 'ほうき', 'vassoura', 4, 'hon', 'limpeza'],
+  ['baketsu', 'バケツ', 'バケツ', 'balde', 4, 'tsu', 'limpeza'],
+  ['moppu', 'モップ', 'モップ', 'esfregão (mop)', 3, 'hon', 'limpeza'],
+  ['zoukin', '雑巾', 'ぞうきん', 'pano de chão', 3, 'mai', 'limpeza'],
+  // trabalho
+  ['herumetto', 'ヘルメット', 'ヘルメット', 'capacete', 4, 'tsu', 'trabalho'],
+  ['gunte', '軍手', 'ぐんて', 'luva de trabalho', 3, 'tsu', 'trabalho'],
+  ['daisha', '台車', 'だいしゃ', 'carrinho de carga', 3, 'dai', 'trabalho'],
+  // rua, estação, prédios e natureza
+  ['hikouki', '飛行機', 'ひこうき', 'avião', 5, 'dai', 'veiculo'],
+  ['shinkansen', '新幹線', 'しんかんせん', 'trem-bala', 4, 'dai', 'veiculo'],
+  ['fune', '船', 'ふね', 'barco, navio', 4, 'tsu', 'veiculo'],
+  ['kaisatsu', '改札', 'かいさつ', 'catraca da estação', 3, 'tsu', 'rua'],
+  ['esukareta', 'エスカレーター', 'エスカレーター', 'escada rolante', 4, 'tsu', 'rua'],
+  ['erebeta', 'エレベーター', 'エレベーター', 'elevador', 4, 'tsu', 'rua'],
+  ['birudingu', 'ビル', 'ビル', 'prédio', 5, 'tsu', 'predio'],
+  ['byouin', '病院', 'びょういん', 'hospital', 5, 'tsu', 'predio'],
+  ['gakkou', '学校', 'がっこう', 'escola', 5, 'tsu', 'predio'],
+  ['jinja', '神社', 'じんじゃ', 'santuário xintoísta', 4, 'tsu', 'predio'],
+  ['otera', 'お寺', 'おてら', 'templo budista', 4, 'tsu', 'predio'],
+  ['hanabi', '花火', 'はなび', 'fogos de artifício', 4, 'tsu', 'tempo'],
+  ['yuki', '雪', 'ゆき', 'neve', 5, 'tsu', 'tempo'],
+  ['niji', '虹', 'にじ', 'arco-íris', 4, 'tsu', 'tempo'],
+  ['kaminari', '雷', 'かみなり', 'trovão, raio', 4, 'tsu', 'tempo'],
+  ['hoshi', '星', 'ほし', 'estrela', 5, 'tsu', 'tempo'],
+  ['kawa', '川', 'かわ', 'rio', 5, 'hon', 'natureza'],
+  ['shima', '島', 'しま', 'ilha', 4, 'tsu', 'natureza'],
+  ['sakura', '桜', 'さくら', 'cerejeira (flor)', 4, 'hon', 'natureza'],
+  ['ishi', '石', 'いし', 'pedra', 5, 'ko', 'natureza'],
+  ['happa', '葉っぱ', 'はっぱ', 'folha', 4, 'mai', 'natureza'],
+  ['take', '竹', 'たけ', 'bambu', 3, 'hon', 'natureza'],
+  // corpo
+  ['te', '手', 'て', 'mão', 5, 'tsu', 'corpo'],
+  ['ashi', '足', 'あし', 'pé, perna', 5, 'tsu', 'corpo'],
+  ['me', '目', 'め', 'olho', 5, 'tsu', 'corpo'],
+  ['mimi', '耳', 'みみ', 'orelha, ouvido', 5, 'tsu', 'corpo'],
+  ['kuchi', '口', 'くち', 'boca', 5, 'tsu', 'corpo'],
+  ['ha', '歯', 'は', 'dente', 5, 'hon', 'corpo'],
+  ['kao', '顔', 'かお', 'rosto', 5, 'tsu', 'corpo'],
+];
+
+/** Pessoas paradas (src/assets/gente): contam com 人 e, na Cena Viva, "estão" (います). [imagem, como se escreve, kana, significado, nível] */
+const PESSOAS: readonly (readonly [string, string, string, string, Nivel])[] = [
+  ['otokonoko', '男の子', 'おとこのこ', 'menino', 5],
+  ['onnanoko', '女の子', 'おんなのこ', 'menina', 5],
+  ['otokonohito', '男の人', 'おとこのひと', 'homem', 5],
+  ['onnanohito', '女の人', 'おんなのひと', 'mulher', 5],
+  ['akachan', '赤ちゃん', 'あかちゃん', 'bebê', 4],
+  ['ojiisan', 'おじいさん', 'おじいさん', 'avô, senhor idoso', 5],
+  ['obaasan', 'おばあさん', 'おばあさん', 'avó, senhora idosa', 5],
+  ['kazoku', '家族', 'かぞく', 'família', 5],
+  ['gakusei', '学生', 'がくせい', 'estudante', 5],
+  ['sensei', '先生', 'せんせい', 'professor', 5],
+  ['isha', '医者', 'いしゃ', 'médico', 5],
+  ['kangoshi', '看護師', 'かんごし', 'enfermeiro, enfermeira', 4],
+  ['keisatsukan', '警察官', 'けいさつかん', 'policial', 4],
+  ['tenin', '店員', 'てんいん', 'funcionário da loja', 4],
+  ['ekiin', '駅員', 'えきいん', 'funcionário da estação', 4],
+  ['kaishain', '会社員', 'かいしゃいん', 'funcionário de empresa', 4],
 ];
 
 /** Objetos desenhados em quatro cores. A imagem "neutra" (Memória) é a primeira cor. */
@@ -225,6 +347,26 @@ const ACOES: readonly (readonly [string, string, string, string, Nivel, string, 
   ['toru', '撮る', 'とる', 'tirar (foto)', 4, '撮って', 'とって'],
   ['kau', '払う', 'はらう', 'pagar', 4, '払って', 'はらって'],
   ['benkyou', '勉強する', 'べんきょうする', 'estudar', 5, '勉強して', 'べんきょうして'],
+  // segunda leva
+  ['okiru', '起きる', 'おきる', 'acordar', 5, '起きて', 'おきて'],
+  ['miru', '見る', 'みる', 'ver, assistir', 5, '見て', 'みて'],
+  ['hataraku', '働く', 'はたらく', 'trabalhar', 5, '働いて', 'はたらいて'],
+  ['yasumu', '休む', 'やすむ', 'descansar', 5, '休んで', 'やすんで'],
+  ['noru', '乗る', 'のる', 'andar em (veículo), embarcar', 5, '乗って', 'のって'],
+  ['akeru', '開ける', 'あける', 'abrir', 5, '開けて', 'あけて'],
+  ['asobu', '遊ぶ', 'あそぶ', 'brincar', 5, '遊んで', 'あそんで'],
+  ['sentaku', '洗濯する', 'せんたくする', 'lavar roupa', 4, '洗濯して', 'せんたくして'],
+  ['unten', '運転する', 'うんてんする', 'dirigir', 4, '運転して', 'うんてんして'],
+  ['kiru', '着る', 'きる', 'vestir', 5, '着て', 'きて'],
+  ['migaku', '磨く', 'みがく', 'escovar (os dentes), polir', 4, '磨いて', 'みがいて'],
+  ['hiku', '弾く', 'ひく', 'tocar (instrumento)', 4, '弾いて', 'ひいて'],
+  ['osu', '押す', 'おす', 'empurrar', 4, '押して', 'おして'],
+  ['nageru', '投げる', 'なげる', 'arremessar', 4, '投げて', 'なげて'],
+  ['noboru', '上る', 'のぼる', 'subir', 4, '上って', 'のぼって'],
+  ['ayamaru', '謝る', 'あやまる', 'pedir desculpas', 4, '謝って', 'あやまって'],
+  ['kangaeru', '考える', 'かんがえる', 'pensar', 4, '考えて', 'かんがえて'],
+  ['okoru', '怒る', 'おこる', 'ficar bravo', 4, '怒って', 'おこって'],
+  ['tsukareru', '疲れる', 'つかれる', 'cansar-se', 4, '疲れて', 'つかれて'],
 ];
 
 const conhecidos = new Set(KANJI.map((k) => k.kanji));
@@ -252,6 +394,7 @@ export const FIGURAS: readonly Figura[] = [
     te: { jp: te, kana: teKana },
     grupo: 'acao',
   })),
+  ...PESSOAS.map(([img, jp, kana, pt, nivel]): Figura => ({ img, tipo: 'pessoa', word: palavra(jp, kana, pt), nivel, contador: 'nin', grupo: 'pessoa' })),
 ];
 
 /** Palavras das cores (赤い...), também cartas compartilhadas. */

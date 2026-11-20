@@ -153,14 +153,19 @@ Uma imagem precisa mostrar uma ideia só e não pode ter texto escrito. Por isso
 
 ### Os lotes do vocabulário
 
-Os prompts ficam em `scripts/imagens/gerar-listas.py`, que escreve as três listas. Os ajustes feitos depois de olhar as folhas (`vetadas`, `escolha`) ficam no fim dele, em `AJUSTES`, com o motivo.
+Os prompts ficam em `scripts/imagens/gerar-listas.py`, que escreve as quatro listas. Os ajustes feitos depois de olhar as folhas (`vetadas`, `escolha`) ficam no fim dele, em `AJUSTES`, com o motivo.
 
 | Lote | O que tem | Gerado em | Sai em |
 | --- | --- | --- | --- |
-| `objetos.json` | 163 imagens: coisas do dia a dia, uma por imagem, mais seis objetos (guarda-chuva, bolsa, carro, chapéu, sapato, camiseta) em vermelho, azul, preto e branco. O guarda-chuva branco não tem imagem (`SEM_IMAGEM`): no fundo recortado ele some | 896×896, fundo recortado | `src/assets/imagens` (384 px) |
-| `acoes.json` | 23 imagens de uma pessoa fazendo uma coisa (ler, comer, beber, correr, dormir...), para 読んでいる人 | 832×1216, fundo recortado | `src/assets/acoes` (512 px) |
+| `objetos.json` | 258 imagens: coisas do dia a dia, comida, bichos, prédios, tempo e partes do corpo, uma por imagem, mais seis objetos (guarda-chuva, bolsa, carro, chapéu, sapato, camiseta) em vermelho, azul, preto e branco. O guarda-chuva branco não tem imagem (`SEM_IMAGEM`): no fundo recortado ele some | 896×896, fundo recortado | `src/assets/imagens` (384 px) |
+| `acoes.json` | 42 imagens de uma pessoa fazendo uma coisa (ler, comer, dirigir, pedir desculpas...), para 読んでいる人 | 832×1216, fundo recortado | `src/assets/acoes` (512 px) |
+| `pessoas.json` | 17 imagens de gente parada: menino, avó, médico, funcionário da estação... Contam com 人 e, na Cena Viva, ficam no lugar como as coisas, mas com います | 832×1216, fundo recortado | `src/assets/gente` (512 px) |
 | `lugares.json` | os oito fundos da Cena Viva, sem gente e sem objeto solto no meio | 1216×832 | `src/assets/lugares` (960 px) |
 
-Saíram da lista as palavras que o modelo não desenhou de forma reconhecível em três rodadas de prompt: cartão, boneco de neve, bilhete, cartão de visita, revista, jornal, papel, colírio, curativo, pasta de dente, bala, sol e o verbo esperar. Quase todas dependem de texto escrito ou são uma folha lisa, que vira só um retângulo. Elas continuam nos outros jogos, só não têm imagem.
+Saíram da lista as palavras que o modelo não desenhou de forma reconhecível em três rodadas de prompt: cartão, boneco de neve, bilhete, cartão de visita, revista, jornal, papel, colírio, curativo, pasta de dente, bala, sol e o verbo esperar. Quase todas dependem de texto escrito ou são uma folha lisa, que vira só um retângulo. Elas continuam nos outros jogos, só não têm imagem. Na segunda leva, já no Anima, saíram também せんべい, イヤホン e 横断歩道 pelo mesmo motivo.
+
+As partes do corpo (mão, olho, boca...) usam um estilo próprio (`estilo` no item), porque o dos objetos pede "no humans" e apagava a mão. O modelo de visão reprova toda boca em close dizendo que falta a cabeça; a boca foi escolhida à mão.
+
+Quando a lista ganha palavras novas, as notas do CLIP dos itens antigos mudam: "a house" passa a disputar com "a school", a toalha com o pano de chão. Por isso a candidata já aprovada pelo modelo de visão continua a escolhida, mesmo que o CLIP prefira outra ou reprove todas. Sem isso, o `exportar` trocava imagens boas por candidatas que ninguém revisou.
 
 O conteúdo de cada imagem (palavra, kana, significado, nível, contador) fica em `src/content/imagens.ts`, que aponta para o id. A Cena Viva monta cada lugar por cima do fundo em `src/games/cena/lugares.ts`: as coisas são postas umas em relação às outras (em cima, embaixo, ao lado, na frente, dentro) usando a medida real de cada imagem, guardada em `medidas.json` pelo `exportar`. As frases dos pedidos saem desses dados; nenhuma é escrita à mão.

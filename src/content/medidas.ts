@@ -4,9 +4,10 @@
  */
 import objetos from '../assets/imagens/medidas.json';
 import acoes from '../assets/acoes/medidas.json';
+import gente from '../assets/gente/medidas.json';
 import lugares from '../assets/lugares/medidas.json';
 
-const TODAS: Readonly<Record<string, number[]>> = { ...objetos, ...acoes, ...lugares };
+const TODAS: Readonly<Record<string, number[]>> = { ...objetos, ...acoes, ...gente, ...lugares };
 
 export function medida(id: string): { w: number; h: number } {
   const m = TODAS[id];

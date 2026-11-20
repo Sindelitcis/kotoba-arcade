@@ -157,6 +157,13 @@ describe('Cena Viva: instruções geradas', () => {
     }
   });
 
+  it('descrever: gente parada (o médico) "está" (います), como bicho, e fica no lugar como as coisas', () => {
+    const l: Lugar = { ...SALA, coisas: [...SALA.coisas, { id: 'medico', img: 'isha', x: 62, y: 90, w: 8, rel: 'yoko', de: 'mesa' }] };
+    const ds = tarefas(l, 'descrever').map((t) => textoDe(t.segs));
+    expect(ds).toContain('テーブルの横に医者がいます');
+    expect(ds.some((t) => t.includes('医者があります'))).toBe(false);
+  });
+
   it('palavra com kanji leva leitura; a frase sem leitura não tem kanji', () => {
     for (const l of LUGARES)
       for (const e of ETAPAS)

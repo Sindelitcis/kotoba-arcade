@@ -20,9 +20,18 @@ OBJ_NEG = (
     "text, letters, english text, japanese text, kanji, numbers, logo, label, brand name, watermark, signature"
 )
 
+# Partes do corpo: o estilo dos objetos diz "no humans", que apaga a mão ou o rosto. Elas usam este.
+CORPO_ESTILO = (
+    "body part focus, close-up, centered, white background, simple background, "
+    "black outline, clean lineart, flat color, anime coloring, cel shading, bright colors"
+)
+CORPO = {"te", "ashi", "me", "mimi", "kuchi", "ha", "kao"}
+
 # id, rótulo do CLIP, prompt
 # Saíram depois de três rodadas sem nenhuma imagem que se reconheça sem texto escrito:
 # 雑誌, 新聞, カード, 切符, 名刺, 紙, 目薬, 絆創膏, 歯磨き粉, 雨, 太陽, 雪だるま e o guarda-chuva branco.
+# Na segunda leva (Anima) saíram せんべい (virava biscoito ou pão), イヤホン (um rolo de fio) e
+# 横断歩道 (a faixa vinha com um carro ou um poste no meio), sem candidata que se reconheça.
 OBJETOS = [
     # quarto
     ("hon", "a book", "one closed hardcover book"),
@@ -173,6 +182,108 @@ OBJETOS = [
     ("tsuki", "the moon", "one yellow crescent moon, simple shape"),
     ("yama", "a mountain", "mount fuji, mountain"),
     ("umi", "the sea", "small square view of the blue sea, horizon line, calm waves, light blue sky above"),
+    # Segunda leva (Anima Turbo): palavras do arcade e da Jornada que dá para desenhar sem texto.
+    # bichos
+    ("usagi", "a rabbit", "one white rabbit sitting, full body, side view, long ears"),
+    ("kingyo", "a goldfish", "one orange goldfish, side view, fins and tail"),
+    ("kame", "a turtle", "one green turtle walking, full body, side view, shell"),
+    ("nezumi", "a mouse", "one small grey mouse, full body, side view, long thin tail"),
+    ("saru", "a monkey", "one japanese macaque monkey sitting, full body, red face"),
+    ("chou", "a butterfly", "one yellow butterfly, wings open, top view"),
+    ("niwatori", "a chicken", "one white hen chicken standing, full body, side view, red comb"),
+    # comida
+    ("yasai", "vegetables", "small basket full of assorted vegetables, carrot, cabbage, tomato, eggplant, green pepper"),
+    ("kudamono", "fruits", "small basket full of assorted fruits, apple, banana, grapes, orange"),
+    ("chiizu", "a piece of cheese", "one yellow wedge of cheese with round holes"),
+    ("teishoku", "a japanese set meal", "japanese set meal on a wooden tray, bowl of rice, bowl of miso soup, grilled fish on a plate, small side dish, view from above at an angle"),
+    ("remon", "a lemon", "one yellow lemon"),
+    ("momo", "a peach", "one pink peach with a green leaf"),
+    ("meron", "a melon", "one round green melon with net pattern skin"),
+    ("kyuri", "a cucumber", "one long green cucumber"),
+    ("nasu", "an eggplant", "one purple japanese eggplant with green stem"),
+    ("daikon", "a daikon radish", "one long white daikon radish with green leaves"),
+    ("toumorokoshi", "an ear of corn", "one ear of yellow corn, green husk partly open"),
+    ("kabocha", "a pumpkin", "one dark green japanese kabocha squash"),
+    ("toufu", "a block of tofu", "one white block of tofu on a small plate"),
+    ("natto", "natto", "small white styrofoam pack of natto, lid open, sticky brown fermented soybeans"),
+    ("hanbaga", "a hamburger", "one hamburger, bun, beef patty, lettuce, cheese"),
+    ("piza", "a pizza", "one whole round pizza, view from above, tomato sauce, cheese, slices"),
+    ("supagetti", "spaghetti", "plate of spaghetti with tomato sauce, fork"),
+    ("oden", "oden", "oden in a paper cup, daikon slice, boiled egg, fishcake on a skewer, broth"),
+    ("karaage", "fried chicken", "plate of japanese fried chicken karaage pieces with a lemon wedge"),
+    ("nikuman", "a steamed meat bun", "one white steamed meat bun, nikuman, round, twisted top"),
+    ("soba", "soba noodles", "cold soba noodles on a bamboo tray, small cup of dipping sauce beside"),
+    ("takoyaki", "takoyaki", "six takoyaki balls in a boat-shaped tray, brown sauce, mayonnaise, bonito flakes"),
+    ("okonomiyaki", "okonomiyaki", "one okonomiyaki pancake on a plate, brown sauce, mayonnaise lines, green seaweed flakes"),
+    ("sashimi", "sashimi", "plate of sliced raw tuna and salmon sashimi, green shiso leaf"),
+    ("dango", "dango", "three round dango on one wooden skewer, pink, white and green"),
+    ("choko", "a chocolate bar", "one chocolate bar, partly unwrapped, plain red wrapper, squares of chocolate"),
+    ("kukki", "cookies", "three round brown cookies with chocolate chips"),
+    ("donatsu", "a donut", "one donut with pink frosting and sprinkles"),
+    ("purin", "a custard pudding", "one japanese custard pudding with brown caramel on top, on a small plate"),
+    ("wain", "a glass of red wine", "one wine glass with red wine"),
+    ("sake", "a sake set", "white ceramic sake flask tokkuri and one small sake cup, blank"),
+    ("suitou", "a water bottle", "one tall metal thermos water bottle with cap, plain"),
+    # casa e roupa
+    ("mado", "a window", "one closed window with wooden frame and glass panes, front view, no curtains"),
+    ("doa", "a door", "one closed wooden door with a round doorknob, front view"),
+    ("sentakuki", "a washing machine", "white front-loading washing machine, round glass door, front view"),
+    ("soujiki", "a vacuum cleaner", "one upright vacuum cleaner"),
+    ("senpuki", "an electric fan", "white electric fan on a stand, round blade guard"),
+    ("hanga", "a clothes hanger", "one empty wooden clothes hanger"),
+    ("futon", "a futon", "folded japanese futon mattress and blanket, stacked, pillow on top"),
+    ("kaaten", "curtains", "pair of blue window curtains hanging from a rod"),
+    ("surippa", "slippers", "pair of indoor slippers"),
+    ("kimono", "a kimono", "red japanese kimono with floral pattern, displayed spread on a stand, front view"),
+    ("tebukuro", "gloves", "pair of knitted winter gloves"),
+    ("mafura", "a scarf", "red knitted winter scarf, loosely coiled"),
+    ("seta", "a sweater", "knitted sweater laid flat, front view"),
+    ("sukato", "a skirt", "pleated skirt laid flat, front view"),
+    ("suutsu", "a business suit", "dark navy business suit jacket and trousers on a hanger, white shirt"),
+    ("epuron", "an apron", "one green apron laid flat"),
+    ("mezamashi", "an alarm clock", "red twin bell alarm clock, round face, no numbers"),
+    ("doraiya", "a hair dryer", "one hair dryer, side view"),
+    ("jougi", "a ruler", "one long transparent plastic ruler, straight, diagonal, tick marks, no numbers"),
+    ("heddohon", "headphones", "black over-ear headphones"),
+    ("houki", "a broom", "one long broom, whole broom visible, diagonal"),
+    ("baketsu", "a bucket", "one blue plastic bucket with a handle"),
+    ("moppu", "a mop", "one mop, long handle, whole mop visible, diagonal"),
+    ("zoukin", "a cleaning cloth", "one folded white cleaning cloth, zokin, stitched pattern"),
+    # trabalho
+    ("herumetto", "a hard hat", "one yellow construction hard hat"),
+    ("gunte", "work gloves", "pair of white cotton work gloves"),
+    ("daisha", "a hand cart", "flat platform hand cart with a handle and four wheels, empty, side view"),
+    # rua, estação, prédios e natureza
+    ("hikouki", "an airplane", "white passenger airplane flying, side view"),
+    ("shinkansen", "a bullet train", "white japanese bullet train shinkansen with long pointed nose, blue stripe, side view"),
+    ("fune", "a ship", "small white ship on the water, side view"),
+    ("kaisatsu", "a ticket gate", "japanese train station automatic ticket gate, two gate machines, front view, no text"),
+    ("esukareta", "an escalator", "one escalator, side view, steps, handrails"),
+    ("erebeta", "an elevator", "elevator with closed silver metal doors, call buttons beside, front view"),
+    ("birudingu", "an office building", "one tall office building, glass windows, front view"),
+    ("byouin", "a hospital", "hospital building with a red cross on the front, front view, no text"),
+    ("gakkou", "a school", "japanese school building with a clock at the top, front view, no text"),
+    ("jinja", "a shinto shrine", "small shinto shrine with a red torii gate in front"),
+    ("otera", "a buddhist temple", "japanese five-story pagoda, temple"),
+    ("hanabi", "fireworks", "colorful fireworks bursting, dark blue night sky square"),
+    ("yuki", "snow", "one white snowflake crystal, light blue outline"),
+    ("niji", "a rainbow", "rainbow arc with small white clouds at both ends"),
+    ("kaminari", "lightning", "dark grey cloud with a yellow lightning bolt"),
+    ("hoshi", "a star", "one yellow five-pointed star"),
+    ("kawa", "a river", "small square view of a blue river flowing between green grassy banks, view from above"),
+    ("shima", "an island", "small round island with one palm tree, blue sea around"),
+    ("sakura", "cherry blossoms", "branch of cherry blossoms, pink flowers"),
+    ("ishi", "a stone", "one grey stone"),
+    ("happa", "a leaf", "one green leaf"),
+    ("take", "bamboo", "three green bamboo stalks with leaves"),
+    # corpo
+    ("te", "a hand", "one open hand, palm facing viewer, five fingers"),
+    ("ashi", "a foot", "one bare foot, side view"),
+    ("me", "an eye", "one eye, close-up, eyelashes, brown iris"),
+    ("mimi", "an ear", "one human ear, side view, close-up"),
+    ("kuchi", "a mouth", "smiling mouth, lips, close-up"),
+    ("ha", "a tooth", "one white tooth, cute cartoon molar"),
+    ("kao", "a face", "face of a smiling boy, front view, close-up, head only"),
 ]
 
 # Objetos em quatro cores, para "あかいかさ" e afins na Cena Viva.
@@ -228,6 +339,52 @@ ACOES = [
     # 待つ saiu: em três rodadas nenhuma imagem mostrou, sem dúvida, alguém esperando.
     ("kau", "a person shopping with a basket", "1girl, standing, holding a shopping basket full of vegetables and bread in one hand and a wallet in the other"),
     ("benkyou", "a person studying", "1boy, studying at desk, textbook, notebook, pencil, thinking"),
+    # Segunda leva (Anima Turbo).
+    ("okiru", "a person waking up", "1boy, waking up in bed, sitting up on futon, stretching both arms up, yawning, blanket"),
+    ("miru", "a person watching television", "1girl, sitting on the floor, watching a television in front of her, side view, television visible"),
+    ("hataraku", "a person working at a computer", "1man, business suit, necktie, sitting at office desk, typing on laptop computer, side view"),
+    ("yasumu", "a person resting on a sofa", "1girl, resting on a sofa, relaxed, eyes closed, leaning back"),
+    ("noru", "a person riding a bicycle", "1boy, riding a bicycle, side view, whole bicycle visible, both wheels"),
+    ("akeru", "a person opening a door", "1girl, opening a door, hand on doorknob, door half open, side view"),
+    ("asobu", "a child playing with a ball", "1boy, child, playing with a red ball, kicking the ball, happy"),
+    ("sentaku", "a person hanging laundry", "1girl, hanging laundry on a clothesline, shirt and towel on the line"),
+    ("unten", "a person driving a car", "1man, driving a small car, sitting inside, hands on steering wheel, side view, whole car visible"),
+    ("kiru", "a person putting on a jacket", "1boy, putting on a jacket, one arm in the sleeve"),
+    ("migaku", "a person brushing teeth", "1girl, brushing teeth with a toothbrush, white foam"),
+    ("hiku", "a person playing the guitar", "1boy, sitting on a chair, playing an acoustic guitar"),
+    ("osu", "a person pushing a hand cart", "1man, work clothes, pushing a flat hand cart loaded with cardboard boxes, side view"),
+    ("nageru", "a person throwing a ball", "1boy, throwing a baseball, pitching pose, one arm forward"),
+    ("noboru", "a person going up stairs", "1girl, walking up a staircase, side view, stairs visible"),
+    ("ayamaru", "a person bowing to apologize", "1man, business suit, bowing deeply, apologizing, side view"),
+    ("kangaeru", "a person thinking", "1girl, thinking, hand on chin, looking up"),
+    ("okoru", "an angry person", "1boy, angry, frowning, clenched fists, red face"),
+    ("tsukareru", "a tired person", "1man, office worker, very tired, slumped shoulders, sweat, exhausted, dark circles under eyes"),
+]
+
+PESSOA_ESTILO = (
+    "full body, standing, white background, simple background, black outline, clean lineart, flat color, anime coloring, "
+    "cel shading, bright colors"
+)
+PESSOA_NEG = "crowd, frame, border, photo, realistic, 3d, scenery, gradient background, drop shadow, cropped feet, text, letters, logo, name tag"
+
+# Pessoas e profissões: a figura parada, sem ação. Na Cena Viva contam com 人 e "estão" (います).
+PESSOAS = [
+    ("otokonoko", "a boy", "solo, 1boy, young boy, about eight years old, t-shirt and shorts"),
+    ("onnanoko", "a girl", "solo, 1girl, young girl, about eight years old, dress"),
+    ("otokonohito", "a man", "solo, 1man, adult man, about thirty, casual clothes"),
+    ("onnanohito", "a woman", "solo, 1woman, adult woman, about thirty, casual clothes"),
+    ("akachan", "a baby", "solo, baby, sitting, diaper, chubby, smiling"),
+    ("ojiisan", "an old man", "solo, old man, grey hair, glasses, cardigan, walking cane"),
+    ("obaasan", "an old woman", "solo, old woman, grey hair in a bun, apron, gentle smile"),
+    ("kazoku", "a family", "family of four standing together, father, mother, son and daughter, smiling"),
+    ("gakusei", "a student", "solo, 1boy, japanese high school student, school uniform, school bag"),
+    ("sensei", "a teacher", "solo, 1woman, teacher, holding a textbook, pointing stick, cardigan"),
+    ("isha", "a doctor", "solo, 1man, doctor, white coat, stethoscope around neck"),
+    ("kangoshi", "a nurse", "solo, 1woman, nurse, light pink nurse uniform, clipboard"),
+    ("keisatsukan", "a police officer", "solo, 1man, japanese police officer, dark blue uniform, police cap"),
+    ("tenin", "a shop clerk", "solo, 1girl, convenience store clerk, striped uniform shirt, apron"),
+    ("ekiin", "a station attendant", "solo, 1man, japanese train station attendant, navy blue uniform, cap, white gloves"),
+    ("kaishain", "an office worker", "solo, 1man, office worker, business suit, necktie, briefcase"),
 ]
 
 LUGAR_ESTILO = (
@@ -252,12 +409,20 @@ AJUSTES: dict[str, dict] = {
     # teburu: a mesa larga (seed 3) cabe as coisas da cena; a quadradinha que o CLIP preferiu, não.
     # neko: no Anima, a seed 10003 é o gato inteiro de lado com o rabo ligado; a 10002 tem uma assinatura falsa no canto.
     # tsuki: a 10001 é a lua crescente limpa. gita: as de antes saíam com o braço cortado ou deformadas.
-    "objetos": {"escolha": {"teburu": 3, "neko": 10003, "tsuki": 10001},
+    # okonomiyaki: a 10002 parece panqueca com manteiga. houki: a 10003 são duas vassouras cruzadas.
+    # kaisatsu: a 10003 tem letreiro na tela. te: a 10001 é uma luva rosa. kuchi: o modelo de visão
+    # reprova toda boca em close ("falta a cabeça"), mas é o que a palavra pede.
+    "objetos": {"escolha": {"teburu": 3, "neko": 10003, "tsuki": 10001, "okonomiyaki": 10001, "houki": 10002,
+                            "kaisatsu": 10001, "te": 10002, "kuchi": 10001},
                 "vetadas": ["gita-2", "gita-10001", "gita-10002", "gita-10003"]},
     # warau: o CLIP achava "dançando", mas a seed 2 é uma pessoa rindo de olho fechado, sem dúvida a olho.
     # oyogu: as seis primeiras do Anima mostram um menino parado na borda da piscina, não nadando.
-    "acoes": {"escolha": {"warau": 2}, "vetadas": [f"oyogu-{s}" for s in (10001, 10002, 10003, 11001, 11002, 11003)]},
+    # kiru, kangaeru, tsukareru: o CLIP achou outra ação em todas, mas estas mostram a certa sem dúvida a olho.
+    "acoes": {"escolha": {"warau": 2, "kiru": 10003, "kangaeru": 10002, "tsukareru": 10001}, "vetadas": [f"oyogu-{s}" for s in (10001, 10002, 10003, 11001, 11002, 11003)]},
     "lugares": {},
+    # O CLIP confunde avó com mulher e estudante com menino; estas foram escolhidas a olho.
+    # 運転手 saiu: toda candidata de motorista parecia policial.
+    "pessoas": {"escolha": {"obaasan": 11003, "gakusei": 10001, "tenin": 10001}},
 }
 
 
@@ -270,7 +435,7 @@ escrever("objetos", {
     "lote": "objetos", "destino": "src/assets/imagens", "largura": 896, "altura": 896,
     "saida": 384, "recorte": True, "estilo": OBJ_ESTILO, "negativo": OBJ_NEG, "seeds": [1, 2, 3],
     "distratores": ["a person", "a room", "a toy"],
-    "itens": [{"id": i, "rotulo": r, "prompt": p} for i, r, p in OBJETOS],
+    "itens": [{"id": i, "rotulo": r, "prompt": p, **({"estilo": CORPO_ESTILO} if i in CORPO else {})} for i, r, p in OBJETOS],
 })
 escrever("acoes", {
     "lote": "acoes", "destino": "src/assets/acoes", "largura": 832, "altura": 1216,
@@ -278,10 +443,16 @@ escrever("acoes", {
     "distratores": ["a person posing", "a group of people", "an object"],
     "itens": [{"id": i, "rotulo": r, "prompt": p} for i, r, p in ACOES],
 })
+escrever("pessoas", {
+    "lote": "pessoas", "destino": "src/assets/gente", "largura": 832, "altura": 1216,
+    "saida": 512, "recorte": True, "estilo": PESSOA_ESTILO, "negativo": PESSOA_NEG, "seeds": [1, 2, 3],
+    "distratores": ["an object", "a room", "an animal"],
+    "itens": [{"id": i, "rotulo": r, "prompt": p} for i, r, p in PESSOAS],
+})
 escrever("lugares", {
     "lote": "lugares", "destino": "src/assets/lugares", "largura": 1216, "altura": 832,
     "saida": 960, "recorte": False, "estilo": LUGAR_ESTILO, "negativo": LUGAR_NEG, "seeds": [1, 2, 3],
     "distratores": ["a crowded room full of people", "a forest", "a shrine"],
     "itens": [{"id": i, "rotulo": r, "prompt": p} for i, r, p in LUGARES],
 })
-print(len(OBJETOS), "objetos,", len(ACOES), "ações,", len(LUGARES), "lugares")
+print(len(OBJETOS), "objetos,", len(ACOES), "ações,", len(PESSOAS), "pessoas,", len(LUGARES), "lugares")

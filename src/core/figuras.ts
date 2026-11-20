@@ -7,14 +7,14 @@ import { temMedida } from '../content/medidas';
 
 export { medida } from '../content/medidas';
 
-const COR = import.meta.glob<string>(['../assets/imagens/*.webp', '../assets/acoes/*.webp', '../assets/lugares/*.webp'], { eager: true, query: '?url', import: 'default' });
-const TINTA = import.meta.glob<string>(['../assets/imagens-tinta/*.webp', '../assets/acoes-tinta/*.webp', '../assets/lugares-tinta/*.webp'], {
+const COR = import.meta.glob<string>(['../assets/imagens/*.webp', '../assets/acoes/*.webp', '../assets/gente/*.webp', '../assets/lugares/*.webp'], { eager: true, query: '?url', import: 'default' });
+const TINTA = import.meta.glob<string>(['../assets/imagens-tinta/*.webp', '../assets/acoes-tinta/*.webp', '../assets/gente-tinta/*.webp', '../assets/lugares-tinta/*.webp'], {
   eager: true,
   query: '?url',
   import: 'default',
 });
 
-const PASTAS = ['imagens', 'acoes', 'lugares'] as const;
+const PASTAS = ['imagens', 'acoes', 'gente', 'lugares'] as const;
 
 function achar(tabela: Record<string, string>, sufixo: string, id: string): string | undefined {
   for (const p of PASTAS) {

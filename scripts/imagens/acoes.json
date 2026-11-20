@@ -132,10 +132,108 @@
    "id": "benkyou",
    "rotulo": "a person studying",
    "prompt": "1boy, studying at desk, textbook, notebook, pencil, thinking"
+  },
+  {
+   "id": "okiru",
+   "rotulo": "a person waking up",
+   "prompt": "1boy, waking up in bed, sitting up on futon, stretching both arms up, yawning, blanket"
+  },
+  {
+   "id": "miru",
+   "rotulo": "a person watching television",
+   "prompt": "1girl, sitting on the floor, watching a television in front of her, side view, television visible"
+  },
+  {
+   "id": "hataraku",
+   "rotulo": "a person working at a computer",
+   "prompt": "1man, business suit, necktie, sitting at office desk, typing on laptop computer, side view"
+  },
+  {
+   "id": "yasumu",
+   "rotulo": "a person resting on a sofa",
+   "prompt": "1girl, resting on a sofa, relaxed, eyes closed, leaning back"
+  },
+  {
+   "id": "noru",
+   "rotulo": "a person riding a bicycle",
+   "prompt": "1boy, riding a bicycle, side view, whole bicycle visible, both wheels"
+  },
+  {
+   "id": "akeru",
+   "rotulo": "a person opening a door",
+   "prompt": "1girl, opening a door, hand on doorknob, door half open, side view"
+  },
+  {
+   "id": "asobu",
+   "rotulo": "a child playing with a ball",
+   "prompt": "1boy, child, playing with a red ball, kicking the ball, happy"
+  },
+  {
+   "id": "sentaku",
+   "rotulo": "a person hanging laundry",
+   "prompt": "1girl, hanging laundry on a clothesline, shirt and towel on the line"
+  },
+  {
+   "id": "unten",
+   "rotulo": "a person driving a car",
+   "prompt": "1man, driving a small car, sitting inside, hands on steering wheel, side view, whole car visible"
+  },
+  {
+   "id": "kiru",
+   "rotulo": "a person putting on a jacket",
+   "prompt": "1boy, putting on a jacket, one arm in the sleeve"
+  },
+  {
+   "id": "migaku",
+   "rotulo": "a person brushing teeth",
+   "prompt": "1girl, brushing teeth with a toothbrush, white foam"
+  },
+  {
+   "id": "hiku",
+   "rotulo": "a person playing the guitar",
+   "prompt": "1boy, sitting on a chair, playing an acoustic guitar"
+  },
+  {
+   "id": "osu",
+   "rotulo": "a person pushing a hand cart",
+   "prompt": "1man, work clothes, pushing a flat hand cart loaded with cardboard boxes, side view"
+  },
+  {
+   "id": "nageru",
+   "rotulo": "a person throwing a ball",
+   "prompt": "1boy, throwing a baseball, pitching pose, one arm forward"
+  },
+  {
+   "id": "noboru",
+   "rotulo": "a person going up stairs",
+   "prompt": "1girl, walking up a staircase, side view, stairs visible"
+  },
+  {
+   "id": "ayamaru",
+   "rotulo": "a person bowing to apologize",
+   "prompt": "1man, business suit, bowing deeply, apologizing, side view"
+  },
+  {
+   "id": "kangaeru",
+   "rotulo": "a person thinking",
+   "prompt": "1girl, thinking, hand on chin, looking up"
+  },
+  {
+   "id": "okoru",
+   "rotulo": "an angry person",
+   "prompt": "1boy, angry, frowning, clenched fists, red face"
+  },
+  {
+   "id": "tsukareru",
+   "rotulo": "a tired person",
+   "prompt": "1man, office worker, very tired, slumped shoulders, sweat, exhausted, dark circles under eyes"
   }
  ],
  "escolha": {
-  "warau": 2
+  "warau": 2,
+  "kiru": 10003,
+  "kangaeru": 10002,
+  "tsukareru": 10001
  },
  "vetadas": [
   "oyogu-10001",

@@ -71,6 +71,54 @@ print(json.dumps([estudio.ainda_vale(e, "a dog", ["a dog", "a fox"], "1-1"), est
   });
 });
 
+const TEM_PIL = !!PY && (() => {
+  try {
+    execFileSync(PY, ['-c', 'import PIL'], { stdio: 'ignore' });
+    return true;
+  } catch {
+    return false;
+  }
+})();
+
+describe.runIf(PY)('estúdio: regerar o que é de um modelo antigo', () => {
+  it('desde_seed deixa de fora as candidatas do Animagine (seed abaixo de 10000), mesmo aprovadas', () => {
+    const r = py(`
+lista = {"itens": [{"id": "inu"}, {"id": "neko"}], "desde_seed": 10000}
+rel = {"inu-1": {"id": "inu", "ok": True, "p": 1.0}, "inu-10002": {"id": "inu", "ok": True, "p": 0.6},
+       "neko-2": {"id": "neko", "ok": True, "p": 1.0, "revista": True}}
+print(json.dumps([estudio.escolhidas(lista, rel), estudio.escolhidas({**lista, "desde_seed": 0}, rel), estudio.pode(lista, "kasa-aka-10001")]))`);
+    expect(r).toEqual([{ inu: 'inu-10002', neko: null }, { inu: 'inu-1', neko: 'neko-2' }, true]);
+  });
+});
+
+describe.runIf(TEM_PIL)('estúdio: exportar cenários e retratos', () => {
+  it('a versão mangá vai para destino_tinta e o retrato é cortado na cintura', () => {
+    const r = py(`
+from PIL import Image
+base = pathlib.Path(${JSON.stringify(pasta)}) / "exp"
+out = base / "lote"
+out.mkdir(parents=True, exist_ok=True)
+estudio.pasta = lambda lista: out
+Image.new("RGB", (100, 200), (200, 50, 50)).save(out / "yui-10001.png")
+lista = {"itens": [{"id": "yui"}], "destino": "cor", "destino_tinta": "manga", "saida": 1000, "corte_altura": 0.5}
+falta = estudio.exportar(lista, base, {"yui-10001": {"id": "yui", "ok": True, "p": 1.0}})
+cor, manga = Image.open(base / "cor" / "yui.webp"), Image.open(base / "manga" / "yui.webp")
+r, g, b = manga.convert("RGB").getpixel((50, 50))
+print(json.dumps([falta, cor.size, manga.size, r == g == b, (base / "cor-tinta").exists()]))`);
+    expect(r).toEqual([[], [100, 100], [100, 100], true, false]);
+  });
+});
+
+describe.runIf(PY)('estúdio: prompt de cada item', () => {
+  it('usa o estilo do lote, ou o do próprio item quando ele tem um (mão não leva "no humans")', () => {
+    const r = py(`
+m = {"prefixo": "best, ", "qualidade": "clean"}
+lista = {"estilo": "no humans, white background"}
+print(json.dumps([estudio.prompt_de(m, lista, {"prompt": "one cup"}), estudio.prompt_de(m, lista, {"prompt": "one hand", "estilo": "white background"})]))`);
+    expect(r).toEqual(['best, one cup, no humans, white background, clean', 'best, one hand, white background, clean']);
+  });
+});
+
 describe.runIf(PY)('estúdio: revisão de defeitos com o modelo de visão', () => {
   // Bug: o gato de costas com o rabo virado mancha solta passou, porque o CLIP não vê anatomia.
   const PREPARO = `
@@ -108,7 +156,7 @@ print(json.dumps([perguntas, sem_boa, esc]))`);
     expect(r).toEqual([['neko-1', 'neko-2', 'inu-1'], [], { neko: 'neko-2', inu: 'inu-1' }]);
   });
 
-  it('a revisão guardada não é refeita; arquivo refeito é revisto', () => {
+  it('a revisão guardada não é refeita; com a aprovada vetada, o arquivo refeito é revisto', () => {
     const r = py(`${PREPARO}
 estudio.revisar(lista, perguntar=visao({"neko-1"}))
 perguntas.clear()
@@ -118,8 +166,27 @@ time.sleep(0.02)
 (out / "neko-1.png").write_bytes(b"refeita")
 perguntas.clear()
 estudio.revisar(lista, perguntar=visao(set()))
-print(json.dumps([antes, perguntas, estudio.escolhidas(lista, estudio.ler_relatorio(out))["neko"]]))`);
-    expect(r).toEqual([[], ['neko-1'], 'neko-1']);
+fica = (list(perguntas), estudio.escolhidas(lista, estudio.ler_relatorio(out))["neko"])
+vetada = {**lista, "vetadas": ["neko-2"]}
+perguntas.clear()
+estudio.revisar(vetada, perguntar=visao(set()))
+print(json.dumps([antes, *fica, perguntas, estudio.escolhidas(vetada, estudio.ler_relatorio(out))["neko"]]))`);
+    expect(r).toEqual([[], [], 'neko-2', ['neko-1'], 'neko-1']);
+  });
+
+  it('lista que cresce: a imagem já aprovada fica, mesmo com o CLIP preferindo outra ou reprovando todas', () => {
+    // Bug: com 98 rótulos novos, "a house" perdeu para "a school" e a toalha para o pano de chão;
+    // o exportar trocou dez imagens antigas por candidatas sem revisão e tirou três do jogo.
+    const r = py(`${PREPARO}
+estudio.revisar(lista, perguntar=visao({"neko-1"}))
+rel = json.loads((out / "conferencia.json").read_text(encoding="utf-8"))
+rel["neko-3"]["p"] = 1.0
+rel["inu-1"]["ok"] = False
+(out / "conferencia.json").write_text(json.dumps(rel), encoding="utf-8")
+perguntas.clear()
+sem_boa = estudio.revisar(lista, perguntar=visao(set()))
+print(json.dumps([perguntas, sem_boa, estudio.escolhidas(lista, estudio.ler_relatorio(out))]))`);
+    expect(r).toEqual([[], [], { neko: 'neko-2', inu: 'inu-1' }]);
   });
 
   it('sem nenhuma candidata boa, o item volta para ser refeito; escolha fixada à mão fica', () => {

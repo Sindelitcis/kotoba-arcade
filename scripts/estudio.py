@@ -276,6 +276,13 @@ def lotes(seeds: list[int], tamanho: int) -> list[list[int]]:
     return [seeds[i:i + tamanho] for i in range(0, len(seeds), tamanho)]
 
 
+def prompt_de(m: dict, lista: dict, item: dict) -> str:
+    """Prompt de um item: o dele, o estilo do lote (ou o próprio, quando o item tem um) e a qualidade do motor.
+    Uma mão ou um rosto não podem levar o "no humans" do estilo dos objetos."""
+    estilo = item.get("estilo", lista.get("estilo", ""))
+    return m["prefixo"] + ", ".join(x for x in (item["prompt"], estilo, m["qualidade"]) if x)
+
+
 def gerar(lista: dict, so: set[str] | None = None, rodada: int = 0, pipe=None):
     import torch
 
@@ -296,7 +303,7 @@ def gerar(lista: dict, so: set[str] | None = None, rodada: int = 0, pipe=None):
     t0 = time.time()
     lote = min(m.get("lote", 99), len(seeds_de(lista, pendentes[0][0])))
     for n, (item, seeds) in enumerate(pendentes, 1):
-        prompt = m["prefixo"] + ", ".join(x for x in (item["prompt"], lista.get("estilo", ""), m["qualidade"]) if x)
+        prompt = prompt_de(m, lista, item)
         negativo = f"{item.get('negativo', '')}, {neg}".strip(", ")
         for grupo in lotes(seeds, lote):
             try:
@@ -372,7 +379,9 @@ def ainda_vale(entrada: dict | None, rotulo: str, rotulos: list[str], arquivo: s
 def ler_relatorio(out: pathlib.Path, com_revisao: bool = True) -> dict:
     """Lê `conferencia.json` sem as candidatas cujo arquivo não existe mais (apagada ou movida
     para refazer com outro prompt). Antes elas ficavam e a folha quebrava ao abrir a imagem.
-    Com a revisão, a candidata que o modelo de visão reprovou conta como reprovada."""
+    Com a revisão, a candidata que o modelo de visão reprovou conta como reprovada, e a que ele aprovou
+    conta como aprovada e "revista", mesmo que a nota do CLIP tenha caído depois. A nota cai quando a lista
+    ganha rótulos parecidos (a casa perto da escola, a toalha perto do pano de chão)."""
     caminho = out / "conferencia.json"
     rel = json.loads(caminho.read_text(encoding="utf-8")) if caminho.exists() else {}
     rel = {k: v for k, v in rel.items() if (out / f"{k}.png").exists()}
@@ -380,8 +389,8 @@ def ler_relatorio(out: pathlib.Path, com_revisao: bool = True) -> dict:
         rev = ler_revisao(out)
         for k, v in rel.items():
             r = rev.get(k)
-            if r and revisao_vale(r, assinatura(out / f"{k}.png")) and not r["ok"]:
-                rel[k] = {**v, "ok": False, "defeitos": r["defeitos"]}
+            if r and revisao_vale(r, assinatura(out / f"{k}.png")):
+                rel[k] = {**v, "ok": True, "revista": True} if r["ok"] else {**v, "ok": False, "defeitos": r["defeitos"]}
     return rel
 
 
@@ -432,8 +441,17 @@ def conferir(lista: dict, clip=None) -> dict:
     return relatorio
 
 
+def pode(lista: dict, chave: str) -> bool:
+    """A candidata pode ser escolhida: não foi vetada e não é de um modelo antigo. `desde_seed` deixa
+    de fora as seeds abaixo dele (as do Animagine vão de 1 a 9999; as do Anima começam em 10000)."""
+    seed = chave.rsplit("-", 1)[1]
+    return chave not in lista.get("vetadas", []) and (not seed.isdigit() or int(seed) >= lista.get("desde_seed", 0))
+
+
 def escolhidas(lista: dict, relatorio: dict) -> dict[str, str | None]:
-    """Melhor candidata aprovada de cada item (ou a fixada à mão em "escolha"), ou None se nenhuma passou."""
+    """Melhor candidata aprovada de cada item (ou a fixada à mão em "escolha"), ou None se nenhuma passou.
+    A já aprovada pelo modelo de visão vem antes de qualquer outra: senão uma lista que cresce troca
+    a imagem boa de um item antigo por uma candidata que ninguém revisou."""
     fixas = lista.get("escolha", {})
     res: dict[str, str | None] = {}
     for item in lista["itens"]:
@@ -441,8 +459,8 @@ def escolhidas(lista: dict, relatorio: dict) -> dict[str, str | None]:
             res[item["id"]] = f"{item['id']}-{fixas[item['id']]}"
             continue
         # Desempate pela semelhança com o rótulo: o CLIP satura a chance em 1,00 com facilidade.
-        boas = [(round(v["p"], 2), v.get("sim", 0), k) for k, v in relatorio.items() if v["id"] == item["id"] and v["ok"] and k not in lista.get("vetadas", [])]
-        res[item["id"]] = max(boas)[2] if boas else None
+        boas = [(v.get("revista", False), round(v["p"], 2), v.get("sim", 0), k) for k, v in relatorio.items() if v["id"] == item["id"] and v["ok"] and pode(lista, k)]
+        res[item["id"]] = max(boas)[-1] if boas else None
     return res
 
 
@@ -530,7 +548,7 @@ def ordem_de_revisao(lista: dict, relatorio: dict, iid: str) -> list[str]:
     fixa = lista.get("escolha", {}).get(iid)
     if fixa is not None:
         return [f"{iid}-{fixa}"]
-    boas = [(round(v["p"], 2), v.get("sim", 0), k) for k, v in relatorio.items() if v["id"] == iid and v["ok"] and k not in lista.get("vetadas", [])]
+    boas = [(round(v["p"], 2), v.get("sim", 0), k) for k, v in relatorio.items() if v["id"] == iid and v["ok"] and pode(lista, k)]
     return [k for *_, k in sorted(boas, reverse=True)]
 
 
@@ -544,8 +562,13 @@ def revisar(lista: dict, so: set[str] | None = None, perguntar=perguntar_visao) 
     for item in lista["itens"]:
         if so and item["id"] not in so:
             continue
-        achou = False
-        for k in ordem_de_revisao(lista, rel, item["id"]):
+        fixa = item["id"] in lista.get("escolha", {})
+        # Já tem candidata aprovada na revisão: não pergunta de novo nem manda refazer.
+        achou = not fixa and any(
+            v["id"] == item["id"] and pode(lista, k) and k in rev and rev[k]["ok"] and revisao_vale(rev[k], assinatura(out / f"{k}.png"))
+            for k, v in rel.items()
+        )
+        for k in [] if achou else ordem_de_revisao(lista, rel, item["id"]):
             png = out / f"{k}.png"
             if not png.exists():
                 continue
@@ -626,7 +649,8 @@ def exportar(lista: dict, repo: pathlib.Path, relatorio: dict) -> list[str]:
 
     out = pasta(lista)
     destino = repo / lista["destino"]
-    destino_tinta = repo / f"{lista['destino']}-tinta"
+    # Cenários e retratos guardam a versão mangá numa pasta própria (cenas, pessoas); o resto em <destino>-tinta.
+    destino_tinta = repo / lista.get("destino_tinta", f"{lista['destino']}-tinta")
     destino.mkdir(parents=True, exist_ok=True)
     destino_tinta.mkdir(parents=True, exist_ok=True)
     lado = lista.get("saida", 384)
@@ -638,6 +662,9 @@ def exportar(lista: dict, repo: pathlib.Path, relatorio: dict) -> list[str]:
             continue
         img = Image.open(out / f"{chave}.png")
         img = recortar(img) if lista.get("recorte") else img.convert("RGB")
+        if lista.get("corte_altura"):
+            # Retrato: só da cintura para cima.
+            img = img.crop((0, 0, img.width, int(img.height * lista["corte_altura"])))
         img.thumbnail((lado, lado), Image.LANCZOS)
         img.save(destino / f"{iid}.webp", "WEBP", quality=lista.get("qualidade", 72), method=6)
         tinta(img).save(destino_tinta / f"{iid}.webp", "WEBP", quality=lista.get("qualidade", 72), method=6)

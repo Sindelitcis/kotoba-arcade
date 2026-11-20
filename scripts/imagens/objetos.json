@@ -719,6 +719,488 @@
    "prompt": "small square view of the blue sea, horizon line, calm waves, light blue sky above"
   },
   {
+   "id": "usagi",
+   "rotulo": "a rabbit",
+   "prompt": "one white rabbit sitting, full body, side view, long ears"
+  },
+  {
+   "id": "kingyo",
+   "rotulo": "a goldfish",
+   "prompt": "one orange goldfish, side view, fins and tail"
+  },
+  {
+   "id": "kame",
+   "rotulo": "a turtle",
+   "prompt": "one green turtle walking, full body, side view, shell"
+  },
+  {
+   "id": "nezumi",
+   "rotulo": "a mouse",
+   "prompt": "one small grey mouse, full body, side view, long thin tail"
+  },
+  {
+   "id": "saru",
+   "rotulo": "a monkey",
+   "prompt": "one japanese macaque monkey sitting, full body, red face"
+  },
+  {
+   "id": "chou",
+   "rotulo": "a butterfly",
+   "prompt": "one yellow butterfly, wings open, top view"
+  },
+  {
+   "id": "niwatori",
+   "rotulo": "a chicken",
+   "prompt": "one white hen chicken standing, full body, side view, red comb"
+  },
+  {
+   "id": "yasai",
+   "rotulo": "vegetables",
+   "prompt": "small basket full of assorted vegetables, carrot, cabbage, tomato, eggplant, green pepper"
+  },
+  {
+   "id": "kudamono",
+   "rotulo": "fruits",
+   "prompt": "small basket full of assorted fruits, apple, banana, grapes, orange"
+  },
+  {
+   "id": "chiizu",
+   "rotulo": "a piece of cheese",
+   "prompt": "one yellow wedge of cheese with round holes"
+  },
+  {
+   "id": "teishoku",
+   "rotulo": "a japanese set meal",
+   "prompt": "japanese set meal on a wooden tray, bowl of rice, bowl of miso soup, grilled fish on a plate, small side dish, view from above at an angle"
+  },
+  {
+   "id": "remon",
+   "rotulo": "a lemon",
+   "prompt": "one yellow lemon"
+  },
+  {
+   "id": "momo",
+   "rotulo": "a peach",
+   "prompt": "one pink peach with a green leaf"
+  },
+  {
+   "id": "meron",
+   "rotulo": "a melon",
+   "prompt": "one round green melon with net pattern skin"
+  },
+  {
+   "id": "kyuri",
+   "rotulo": "a cucumber",
+   "prompt": "one long green cucumber"
+  },
+  {
+   "id": "nasu",
+   "rotulo": "an eggplant",
+   "prompt": "one purple japanese eggplant with green stem"
+  },
+  {
+   "id": "daikon",
+   "rotulo": "a daikon radish",
+   "prompt": "one long white daikon radish with green leaves"
+  },
+  {
+   "id": "toumorokoshi",
+   "rotulo": "an ear of corn",
+   "prompt": "one ear of yellow corn, green husk partly open"
+  },
+  {
+   "id": "kabocha",
+   "rotulo": "a pumpkin",
+   "prompt": "one dark green japanese kabocha squash"
+  },
+  {
+   "id": "toufu",
+   "rotulo": "a block of tofu",
+   "prompt": "one white block of tofu on a small plate"
+  },
+  {
+   "id": "natto",
+   "rotulo": "natto",
+   "prompt": "small white styrofoam pack of natto, lid open, sticky brown fermented soybeans"
+  },
+  {
+   "id": "hanbaga",
+   "rotulo": "a hamburger",
+   "prompt": "one hamburger, bun, beef patty, lettuce, cheese"
+  },
+  {
+   "id": "piza",
+   "rotulo": "a pizza",
+   "prompt": "one whole round pizza, view from above, tomato sauce, cheese, slices"
+  },
+  {
+   "id": "supagetti",
+   "rotulo": "spaghetti",
+   "prompt": "plate of spaghetti with tomato sauce, fork"
+  },
+  {
+   "id": "oden",
+   "rotulo": "oden",
+   "prompt": "oden in a paper cup, daikon slice, boiled egg, fishcake on a skewer, broth"
+  },
+  {
+   "id": "karaage",
+   "rotulo": "fried chicken",
+   "prompt": "plate of japanese fried chicken karaage pieces with a lemon wedge"
+  },
+  {
+   "id": "nikuman",
+   "rotulo": "a steamed meat bun",
+   "prompt": "one white steamed meat bun, nikuman, round, twisted top"
+  },
+  {
+   "id": "soba",
+   "rotulo": "soba noodles",
+   "prompt": "cold soba noodles on a bamboo tray, small cup of dipping sauce beside"
+  },
+  {
+   "id": "takoyaki",
+   "rotulo": "takoyaki",
+   "prompt": "six takoyaki balls in a boat-shaped tray, brown sauce, mayonnaise, bonito flakes"
+  },
+  {
+   "id": "okonomiyaki",
+   "rotulo": "okonomiyaki",
+   "prompt": "one okonomiyaki pancake on a plate, brown sauce, mayonnaise lines, green seaweed flakes"
+  },
+  {
+   "id": "sashimi",
+   "rotulo": "sashimi",
+   "prompt": "plate of sliced raw tuna and salmon sashimi, green shiso leaf"
+  },
+  {
+   "id": "dango",
+   "rotulo": "dango",
+   "prompt": "three round dango on one wooden skewer, pink, white and green"
+  },
+  {
+   "id": "choko",
+   "rotulo": "a chocolate bar",
+   "prompt": "one chocolate bar, partly unwrapped, plain red wrapper, squares of chocolate"
+  },
+  {
+   "id": "kukki",
+   "rotulo": "cookies",
+   "prompt": "three round brown cookies with chocolate chips"
+  },
+  {
+   "id": "donatsu",
+   "rotulo": "a donut",
+   "prompt": "one donut with pink frosting and sprinkles"
+  },
+  {
+   "id": "purin",
+   "rotulo": "a custard pudding",
+   "prompt": "one japanese custard pudding with brown caramel on top, on a small plate"
+  },
+  {
+   "id": "wain",
+   "rotulo": "a glass of red wine",
+   "prompt": "one wine glass with red wine"
+  },
+  {
+   "id": "sake",
+   "rotulo": "a sake set",
+   "prompt": "white ceramic sake flask tokkuri and one small sake cup, blank"
+  },
+  {
+   "id": "suitou",
+   "rotulo": "a water bottle",
+   "prompt": "one tall metal thermos water bottle with cap, plain"
+  },
+  {
+   "id": "mado",
+   "rotulo": "a window",
+   "prompt": "one closed window with wooden frame and glass panes, front view, no curtains"
+  },
+  {
+   "id": "doa",
+   "rotulo": "a door",
+   "prompt": "one closed wooden door with a round doorknob, front view"
+  },
+  {
+   "id": "sentakuki",
+   "rotulo": "a washing machine",
+   "prompt": "white front-loading washing machine, round glass door, front view"
+  },
+  {
+   "id": "soujiki",
+   "rotulo": "a vacuum cleaner",
+   "prompt": "one upright vacuum cleaner"
+  },
+  {
+   "id": "senpuki",
+   "rotulo": "an electric fan",
+   "prompt": "white electric fan on a stand, round blade guard"
+  },
+  {
+   "id": "hanga",
+   "rotulo": "a clothes hanger",
+   "prompt": "one empty wooden clothes hanger"
+  },
+  {
+   "id": "futon",
+   "rotulo": "a futon",
+   "prompt": "folded japanese futon mattress and blanket, stacked, pillow on top"
+  },
+  {
+   "id": "kaaten",
+   "rotulo": "curtains",
+   "prompt": "pair of blue window curtains hanging from a rod"
+  },
+  {
+   "id": "surippa",
+   "rotulo": "slippers",
+   "prompt": "pair of indoor slippers"
+  },
+  {
+   "id": "kimono",
+   "rotulo": "a kimono",
+   "prompt": "red japanese kimono with floral pattern, displayed spread on a stand, front view"
+  },
+  {
+   "id": "tebukuro",
+   "rotulo": "gloves",
+   "prompt": "pair of knitted winter gloves"
+  },
+  {
+   "id": "mafura",
+   "rotulo": "a scarf",
+   "prompt": "red knitted winter scarf, loosely coiled"
+  },
+  {
+   "id": "seta",
+   "rotulo": "a sweater",
+   "prompt": "knitted sweater laid flat, front view"
+  },
+  {
+   "id": "sukato",
+   "rotulo": "a skirt",
+   "prompt": "pleated skirt laid flat, front view"
+  },
+  {
+   "id": "suutsu",
+   "rotulo": "a business suit",
+   "prompt": "dark navy business suit jacket and trousers on a hanger, white shirt"
+  },
+  {
+   "id": "epuron",
+   "rotulo": "an apron",
+   "prompt": "one green apron laid flat"
+  },
+  {
+   "id": "mezamashi",
+   "rotulo": "an alarm clock",
+   "prompt": "red twin bell alarm clock, round face, no numbers"
+  },
+  {
+   "id": "doraiya",
+   "rotulo": "a hair dryer",
+   "prompt": "one hair dryer, side view"
+  },
+  {
+   "id": "jougi",
+   "rotulo": "a ruler",
+   "prompt": "one long transparent plastic ruler, straight, diagonal, tick marks, no numbers"
+  },
+  {
+   "id": "heddohon",
+   "rotulo": "headphones",
+   "prompt": "black over-ear headphones"
+  },
+  {
+   "id": "houki",
+   "rotulo": "a broom",
+   "prompt": "one long broom, whole broom visible, diagonal"
+  },
+  {
+   "id": "baketsu",
+   "rotulo": "a bucket",
+   "prompt": "one blue plastic bucket with a handle"
+  },
+  {
+   "id": "moppu",
+   "rotulo": "a mop",
+   "prompt": "one mop, long handle, whole mop visible, diagonal"
+  },
+  {
+   "id": "zoukin",
+   "rotulo": "a cleaning cloth",
+   "prompt": "one folded white cleaning cloth, zokin, stitched pattern"
+  },
+  {
+   "id": "herumetto",
+   "rotulo": "a hard hat",
+   "prompt": "one yellow construction hard hat"
+  },
+  {
+   "id": "gunte",
+   "rotulo": "work gloves",
+   "prompt": "pair of white cotton work gloves"
+  },
+  {
+   "id": "daisha",
+   "rotulo": "a hand cart",
+   "prompt": "flat platform hand cart with a handle and four wheels, empty, side view"
+  },
+  {
+   "id": "hikouki",
+   "rotulo": "an airplane",
+   "prompt": "white passenger airplane flying, side view"
+  },
+  {
+   "id": "shinkansen",
+   "rotulo": "a bullet train",
+   "prompt": "white japanese bullet train shinkansen with long pointed nose, blue stripe, side view"
+  },
+  {
+   "id": "fune",
+   "rotulo": "a ship",
+   "prompt": "small white ship on the water, side view"
+  },
+  {
+   "id": "kaisatsu",
+   "rotulo": "a ticket gate",
+   "prompt": "japanese train station automatic ticket gate, two gate machines, front view, no text"
+  },
+  {
+   "id": "esukareta",
+   "rotulo": "an escalator",
+   "prompt": "one escalator, side view, steps, handrails"
+  },
+  {
+   "id": "erebeta",
+   "rotulo": "an elevator",
+   "prompt": "elevator with closed silver metal doors, call buttons beside, front view"
+  },
+  {
+   "id": "birudingu",
+   "rotulo": "an office building",
+   "prompt": "one tall office building, glass windows, front view"
+  },
+  {
+   "id": "byouin",
+   "rotulo": "a hospital",
+   "prompt": "hospital building with a red cross on the front, front view, no text"
+  },
+  {
+   "id": "gakkou",
+   "rotulo": "a school",
+   "prompt": "japanese school building with a clock at the top, front view, no text"
+  },
+  {
+   "id": "jinja",
+   "rotulo": "a shinto shrine",
+   "prompt": "small shinto shrine with a red torii gate in front"
+  },
+  {
+   "id": "otera",
+   "rotulo": "a buddhist temple",
+   "prompt": "japanese five-story pagoda, temple"
+  },
+  {
+   "id": "hanabi",
+   "rotulo": "fireworks",
+   "prompt": "colorful fireworks bursting, dark blue night sky square"
+  },
+  {
+   "id": "yuki",
+   "rotulo": "snow",
+   "prompt": "one white snowflake crystal, light blue outline"
+  },
+  {
+   "id": "niji",
+   "rotulo": "a rainbow",
+   "prompt": "rainbow arc with small white clouds at both ends"
+  },
+  {
+   "id": "kaminari",
+   "rotulo": "lightning",
+   "prompt": "dark grey cloud with a yellow lightning bolt"
+  },
+  {
+   "id": "hoshi",
+   "rotulo": "a star",
+   "prompt": "one yellow five-pointed star"
+  },
+  {
+   "id": "kawa",
+   "rotulo": "a river",
+   "prompt": "small square view of a blue river flowing between green grassy banks, view from above"
+  },
+  {
+   "id": "shima",
+   "rotulo": "an island",
+   "prompt": "small round island with one palm tree, blue sea around"
+  },
+  {
+   "id": "sakura",
+   "rotulo": "cherry blossoms",
+   "prompt": "branch of cherry blossoms, pink flowers"
+  },
+  {
+   "id": "ishi",
+   "rotulo": "a stone",
+   "prompt": "one grey stone"
+  },
+  {
+   "id": "happa",
+   "rotulo": "a leaf",
+   "prompt": "one green leaf"
+  },
+  {
+   "id": "take",
+   "rotulo": "bamboo",
+   "prompt": "three green bamboo stalks with leaves"
+  },
+  {
+   "id": "te",
+   "rotulo": "a hand",
+   "prompt": "one open hand, palm facing viewer, five fingers",
+   "estilo": "body part focus, close-up, centered, white background, simple background, black outline, clean lineart, flat color, anime coloring, cel shading, bright colors"
+  },
+  {
+   "id": "ashi",
+   "rotulo": "a foot",
+   "prompt": "one bare foot, side view",
+   "estilo": "body part focus, close-up, centered, white background, simple background, black outline, clean lineart, flat color, anime coloring, cel shading, bright colors"
+  },
+  {
+   "id": "me",
+   "rotulo": "an eye",
+   "prompt": "one eye, close-up, eyelashes, brown iris",
+   "estilo": "body part focus, close-up, centered, white background, simple background, black outline, clean lineart, flat color, anime coloring, cel shading, bright colors"
+  },
+  {
+   "id": "mimi",
+   "rotulo": "an ear",
+   "prompt": "one human ear, side view, close-up",
+   "estilo": "body part focus, close-up, centered, white background, simple background, black outline, clean lineart, flat color, anime coloring, cel shading, bright colors"
+  },
+  {
+   "id": "kuchi",
+   "rotulo": "a mouth",
+   "prompt": "smiling mouth, lips, close-up",
+   "estilo": "body part focus, close-up, centered, white background, simple background, black outline, clean lineart, flat color, anime coloring, cel shading, bright colors"
+  },
+  {
+   "id": "ha",
+   "rotulo": "a tooth",
+   "prompt": "one white tooth, cute cartoon molar",
+   "estilo": "body part focus, close-up, centered, white background, simple background, black outline, clean lineart, flat color, anime coloring, cel shading, bright colors"
+  },
+  {
+   "id": "kao",
+   "rotulo": "a face",
+   "prompt": "face of a smiling boy, front view, close-up, head only",
+   "estilo": "body part focus, close-up, centered, white background, simple background, black outline, clean lineart, flat color, anime coloring, cel shading, bright colors"
+  },
+  {
    "id": "kasa-aka",
    "rotulo": "a red umbrella",
    "prompt": "red open umbrella seen from the side, dome canopy, curved J handle, entirely red"
@@ -837,7 +1319,12 @@
  "escolha": {
   "teburu": 3,
   "neko": 10003,
-  "tsuki": 10001
+  "tsuki": 10001,
+  "okonomiyaki": 10001,
+  "houki": 10002,
+  "kaisatsu": 10001,
+  "te": 10002,
+  "kuchi": 10001
  },
  "vetadas": [
   "gita-2",
