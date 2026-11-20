@@ -68,7 +68,7 @@ describe('a voz do PC fica no PC', () => {
       const falas = join(tmp, 'falas.json');
       writeFileSync(falas, JSON.stringify({ falas: [{ texto: 'Oi.', origem: 'teste' }] }));
       for (const saida of [join(RAIZ, 'public', 'vozes-pt'), RAIZ, join(RAIZ, 'qualquer')]) {
-        const r = spawnSync(PY, ['-I', '-B', join(RAIZ, 'local', 'gravar_aulas.py'), '--falas', falas, '--saida', saida, '--duvidas', join(tmp, 'd.json'), '--motor', tmp], {
+        const r = spawnSync(PY, ['-I', '-B', join(RAIZ, 'local', 'gravar_aulas.py'), '--falas', falas, '--saida', saida, '--duvidas', join(tmp, 'd.json'), '--conferidas', join(tmp, 'c.json'), '--motor', tmp], {
           encoding: 'utf8',
           env: { ...process.env, PYTHONIOENCODING: 'utf-8' },
         });
@@ -78,5 +78,6 @@ describe('a voz do PC fica no PC', () => {
     } finally {
       rmSync(tmp, { recursive: true, force: true });
     }
-  });
+    // Três Pythons em seguida: com a máquina ocupada, passa dos 5 s padrão.
+  }, 30_000);
 });

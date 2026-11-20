@@ -64,7 +64,7 @@ if (local) {
   }
   r = spawnSync(
     a.python,
-    ['-I', '-B', join(raiz, 'local/gravar_aulas.py'), '--falas', entrada, '--saida', a.pasta, '--duvidas', join(trabalho, 'duvidas-pt-local.json'), '--motor', a.motor, '--voz', a.voz || 'amigo'],
+    ['-I', '-B', join(raiz, 'local/gravar_aulas.py'), '--falas', entrada, '--saida', a.pasta, '--duvidas', join(trabalho, 'duvidas-pt-local.json'), '--conferidas', join(trabalho, 'conferidas-pt-local.json'), '--motor', a.motor, '--voz', a.voz || 'amigo'],
     {
       stdio: 'inherit',
       env: {
