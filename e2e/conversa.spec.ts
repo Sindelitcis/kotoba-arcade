@@ -69,12 +69,13 @@ async function dizer(page: Page, texto: string) {
   await expect(page.getByTestId('cv')).toHaveAttribute('data-turn', /vez|fim/);
 }
 
-test('sem o servidor local, a tela explica em uma frase como ligar e não trava', async ({ page }) => {
-  // No GitHub Actions não há servidor; aqui a rota é derrubada para o teste não depender da máquina.
+test('sem o servidor local e sem a nuvem, a tela explica em uma frase e não trava', async ({ page }) => {
+  // No GitHub Actions não há servidor; aqui as rotas são derrubadas para o teste não depender da máquina.
   await page.route(`${SERVIDOR}/**`, (r) => r.abort('connectionrefused'));
+  await page.route('**/api/**', (r) => r.abort('connectionrefused'));
   await abrir(page);
   await expect(page.getByTestId('cv')).toHaveAttribute('data-phase', 'desligado');
-  await expect(page.getByTestId('cv-off')).toContainText('Este jogo roda só no seu PC');
+  await expect(page.getByTestId('cv-off')).toContainText('Não consegui falar com a IA da Conversa');
   await expect(page.getByTestId('cv-off')).toContainText('npm run local');
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/conversa-desligado.png` });
   // Procurar de novo também não quebra.

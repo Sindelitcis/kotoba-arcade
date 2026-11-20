@@ -38,7 +38,7 @@ const TILES: Tile[] = [
   { id: 'pecas', title: 'Kanji em peças', jp: '漢字パズル', blurb: 'Veja o kanji como desenho feito de peças. Monte, ache e adivinhe.', screen: 'pecas', tecla: 'P', cena: 'pecas-ryoanji' },
   { id: 'memoria', title: 'Memória', jp: '絵合わせ', blurb: 'Ligue imagem e palavra. Do kana ao kanji, e depois só pelo som.', screen: 'memoria', tecla: 'M', figura: 'heya' },
   { id: 'cena', title: 'Cena Viva', jp: '生きた場面', blurb: 'Lugares do Japão cheios de coisas. Ache o que a frase pede.', screen: 'cena', tecla: 'L', figura: 'konbini' },
-  { id: 'conversa', title: 'Conversa por voz', jp: '会話', blurb: 'Fale japonês com personagens. A IA roda no seu PC.', screen: 'conversa', tecla: 'V', cena: 'conversa-cafe' },
+  { id: 'conversa', title: 'Conversa por voz', jp: '会話', blurb: 'Fale japonês com personagens. A IA fica na nuvem, com senha.', screen: 'conversa', tecla: 'V', cena: 'conversa-cafe' },
 ];
 
 /** Frases cujo kanji o jogador já encontrou: prova concreta de que dá para ler mais que ontem. */

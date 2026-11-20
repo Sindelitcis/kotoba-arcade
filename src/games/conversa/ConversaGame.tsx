@@ -6,11 +6,22 @@ import { VOZ_CONVERSA } from '../../core/vozes';
 import { onomato } from '../../core/fx';
 import { foco } from '../../core/foco';
 import { teclaDe } from '../../core/teclas';
-import { criarCliente, procurarServidor, type Cliente, type Saude } from './cliente';
+import {
+  avisoDaFalha,
+  criarCliente,
+  criarClienteNuvem,
+  entrar,
+  podeProcurar,
+  procurarNuvem,
+  procurarServidor,
+  type Cliente,
+  type ClienteNuvem,
+  type Saude,
+} from './cliente';
 import { CENAS, Conversa, proximaCena, type Cena, type Dica, type Evento, type Linha, type Resumo, type Ruby } from './engine';
 import { gravar, type Gravacao } from './microfone';
 
-type Fase = 'procurando' | 'desligado' | 'menu' | 'conversa' | 'resumo';
+type Fase = 'procurando' | 'senha' | 'desligado' | 'menu' | 'conversa' | 'resumo';
 
 function RubyText({ ruby }: { ruby: readonly Ruby[] }) {
   return (
@@ -41,6 +52,9 @@ export function ConversaGame() {
   const redraw = () => setFrame((n) => n + 1);
   const conversa = useRef<Conversa | null>(null);
   const cliente = useRef<Cliente>(criarCliente());
+  const [senha, setSenha] = useState('');
+  const [senhaAviso, setSenhaAviso] = useState('');
+  const [entrando, setEntrando] = useState(false);
   const [texto, setTexto] = useState('');
   const [dica, setDica] = useState<Dica | null>(null);
   const [aviso, setAviso] = useState('');
@@ -52,17 +66,56 @@ export function ConversaGame() {
   const listaEl = useRef<HTMLOListElement>(null);
   const audioEl = useRef<HTMLAudioElement | null>(null);
 
+  /** No PC, o servidor local vem primeiro (se estiver ligado). Fora dele, ou sem ele, a nuvem. */
   const procurar = async () => {
     setFase('procurando');
+    if (podeProcurar(location.hostname) && (await procurarLocal())) return;
+    const n = await procurarNuvem();
+    if (n.tipo === 'pronto') {
+      cliente.current = criarClienteNuvem();
+      setSaude(n.saude);
+      setFase('menu');
+    } else {
+      setSaude(null);
+      setFase(n.tipo === 'senha' ? 'senha' : 'desligado');
+    }
+  };
+
+  const mandarSenha = async () => {
+    if (entrando || !senha) return;
+    setEntrando(true);
+    setSenhaAviso('');
+    const r = await entrar(senha);
+    setEntrando(false);
+    if (r.ok) {
+      setSenha('');
+      void procurar();
+      return;
+    }
+    if (r.erro === 'senha') setSenhaAviso(r.restam > 0 ? `Senha errada. Mais ${r.restam} ${r.restam === 1 ? 'tentativa' : 'tentativas'} antes de uma pausa.` : 'Senha errada.');
+    else if (r.erro === 'tentativas') setSenhaAviso(`Muitas tentativas. Espere ${Math.max(1, Math.ceil(r.esperar / 60))} min e tente de novo.`);
+    else setSenhaAviso('Não consegui falar com o servidor. Confira a internet.');
+  };
+
+  const avisoDeFalha = () => {
+    const c = cliente.current as Partial<ClienteNuvem>;
+    return 'ultimaFalha' in c ? avisoDaFalha(c.ultimaFalha ?? null) : 'O servidor local não respondeu. Sua fala não se perdeu: mande de novo.';
+  };
+
+  /** Servidor do PC. Devolve false se ele não está ligado. */
+  const procurarLocal = async (): Promise<boolean> => {
     let s = await procurarServidor(location.hostname);
+    if (!s) return false;
     // Servidor ligado mas o modelo ainda abrindo na placa: espera até 3 minutos em vez de dizer que está desligado.
     for (let i = 0; i < 90 && s && !s.conversa.ok && !s.conversa.erro && screen.value === 'conversa'; i++) {
       setSaude(s);
       await new Promise((r) => setTimeout(r, 2000));
       s = await procurarServidor(location.hostname);
     }
+    cliente.current = criarCliente();
     setSaude(s);
     setFase(s && s.conversa.ok ? 'menu' : 'desligado');
+    return true;
   };
 
   // Saiu da tela: para a voz e desliga o microfone, mesmo no meio de uma gravação.
@@ -113,7 +166,7 @@ export function ConversaGame() {
       else if (e.t === 'levelup') {
         sfx.levelup();
         setAviso(`Nível ${e.level}!`);
-      } else if (e.t === 'falha') setAviso('O servidor local não respondeu. Sua fala não se perdeu: mande de novo.');
+      } else if (e.t === 'falha') setAviso(avisoDeFalha());
       else if (e.t === 'fim') {
         if (e.resumo.concluida) sfx.chest();
         setResumo(e.resumo);
@@ -197,7 +250,8 @@ export function ConversaGame() {
       await enviar(dito);
     } catch {
       setOuvindo('nao');
-      setAviso('O reconhecimento de fala não respondeu. Dá para digitar.');
+      const c = cliente.current as Partial<ClienteNuvem>;
+      setAviso(c.ultimaFalha === 'limite' || c.ultimaFalha === 'sessao' ? avisoDaFalha(c.ultimaFalha) : 'O reconhecimento de fala não respondeu. Dá para digitar.');
     }
   };
 
@@ -230,6 +284,14 @@ export function ConversaGame() {
     const tecla = teclaDe(e);
     if (tecla === null) return;
     if (screen.value !== 'conversa') return;
+    // Na senha, Enter é do formulário.
+    if (fase === 'senha') {
+      if (tecla === 'Escape') {
+        e.preventDefault();
+        go('hub');
+      }
+      return;
+    }
     const noCampo = e.target === inputEl.current;
     if (fase === 'conversa') {
       if (tecla === 'Escape') {
@@ -284,8 +346,49 @@ export function ConversaGame() {
       <main class="cv" data-testid="cv" data-phase="procurando">
         <header class="km-top">{voltar}</header>
         <p class="muted cv-center" data-testid="cv-wait">
-          {saude ? `Abrindo o modelo de conversa (${saude.conversa.modelo})...` : 'Procurando a IA no seu PC...'}
+          {saude ? `Abrindo o modelo de conversa (${saude.conversa.modelo})...` : 'Ligando a IA da Conversa...'}
         </p>
+      </main>
+    );
+  }
+
+  if (fase === 'senha') {
+    return (
+      <main class="cv" data-testid="cv" data-phase="senha">
+        <header class="km-top">{voltar}</header>
+        <section class="av-panel" data-testid="cv-senha">
+          <span class="tile-jp" lang="ja">
+            会話
+          </span>
+          <h2 class="big">Conversa por voz</h2>
+          <p class="cv-off-text">A IA da Conversa fica na nuvem e é só sua. Digite a senha uma vez: este navegador lembra por 30 dias.</p>
+          <form
+            class="cv-form"
+            onSubmit={(e) => {
+              e.preventDefault();
+              void mandarSenha();
+            }}
+          >
+            <input
+              type="password"
+              value={senha}
+              onInput={(e) => setSenha((e.target as HTMLInputElement).value)}
+              placeholder="Senha"
+              autocomplete="current-password"
+              aria-label="Senha da Conversa"
+              data-testid="cv-senha-campo"
+              ref={(el) => el?.focus()}
+            />
+            <button type="submit" class="primary" disabled={entrando || !senha} data-testid="cv-senha-entrar">
+              {entrando ? 'Entrando...' : 'Entrar'} <kbd>Enter</kbd>
+            </button>
+          </form>
+          {senhaAviso && (
+            <p class="notice" data-testid="cv-senha-aviso" role="alert">
+              {senhaAviso}
+            </p>
+          )}
+        </section>
       </main>
     );
   }
@@ -299,9 +402,12 @@ export function ConversaGame() {
             会話
           </span>
           <h2 class="big">Conversa por voz</h2>
-          <p class="cv-off-text">
-            Este jogo roda só no seu PC: abra a pasta do Kotoba Arcade, rode <code>npm run local</code> e jogue em <code>http://localhost:5173</code>.
-          </p>
+          <p class="cv-off-text">Não consegui falar com a IA da Conversa agora. Confira a internet e tente de novo.</p>
+          {podeProcurar(location.hostname) && (
+            <p class="muted">
+              Jogando no PC? Também dá para usar a IA do próprio PC: rode <code>npm run local</code>.
+            </p>
+          )}
           {saude && !saude.conversa.ok && (
             <p class="muted" data-testid="cv-model-off">
               O servidor local respondeu, mas o modelo de conversa não abriu

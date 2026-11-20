@@ -1,3 +1,4 @@
+import './core/mudanca';
 import { effect } from '@preact/signals';
 import { render } from 'preact';
 import { screen } from './core/app';

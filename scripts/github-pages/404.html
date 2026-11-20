@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Kotoba Arcade mudou de endereço</title>
+<link rel="canonical" href="https://kotoba-arcade.pages.dev/">
+<style>
+  body { font-family: system-ui, sans-serif; background: #fffaf0; color: #222; display: grid; place-items: center; min-height: 100vh; margin: 0; padding: 16px; text-align: center; }
+  a { color: #b4232a; font-weight: 700; }
+</style>
+</head>
+<body>
+<main>
+  <h1>O Kotoba Arcade mudou de endereço</h1>
+  <p>Levando você e o seu progresso para <a id="ir" href="https://kotoba-arcade.pages.dev/">kotoba-arcade.pages.dev</a>...</p>
+  <p><small>Se nada acontecer, clique no link acima.</small></p>
+</main>
+<script>
+  // O navegador guarda o save por endereço. Este endereço antigo ainda tem o save de quem jogava aqui:
+  // ele vai no fim do link (depois do #, que não é enviado a servidor nenhum) e o site novo importa.
+  (function () {
+    var destino = 'https://kotoba-arcade.pages.dev/';
+    try {
+      var save = localStorage.getItem('kotoba-arcade:save');
+      if (save) {
+        var bytes = new TextEncoder().encode(save);
+        var bin = '';
+        for (var i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+        var b64 = btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+        // Links muito longos podem falhar; aí vai sem o save (ainda dá para exportar e importar à mão).
+        if (b64.length < 1500000) destino += '#migrar=' + b64;
+      }
+    } catch (e) {}
+    document.getElementById('ir').href = destino;
+    location.replace(destino);
+  })();
+</script>
+</body>
+</html>

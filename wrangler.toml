@@ -1,0 +1,13 @@
+# Kotoba Arcade na Cloudflare Pages: o site estático (dist/) e as rotas /api da Conversa (functions/).
+# Os segredos SENHA e SESSAO_CHAVE não ficam aqui: `wrangler pages secret put ... --project-name kotoba-arcade`.
+name = "kotoba-arcade"
+pages_build_output_dir = "dist"
+compatibility_date = "2026-11-01"
+
+[ai]
+binding = "AI"
+
+# Contagem de senhas erradas (limite de tentativas).
+[[kv_namespaces]]
+binding = "TENTATIVAS"
+id = "fcd51bdb49b2424388902bfc231bba49"

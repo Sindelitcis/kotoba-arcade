@@ -172,7 +172,7 @@ test('na Conversa, F1 continua sendo do jogo e ? abre a ajuda', async ({ page })
   await expect(painel(page)).toBeHidden();
   await page.keyboard.press('?');
   await expect(painel(page)).toBeVisible();
-  await expect(painel(page)).toContainText('npm run local');
+  await expect(painel(page)).toContainText('protegida por senha');
 });
 
 test('nada da ajuda aparece sozinho', async ({ page }) => {
