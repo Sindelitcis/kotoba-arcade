@@ -61,3 +61,63 @@ O prompt é o mesmo do mangá, trocando o estilo por anime atual: cor viva, cel 
 | `conversa-restaurante` | restaurante pequeno (izakaya) |
 
 O modelo não copia o lugar ao pé da letra: é a impressão do lugar, como num mangá.
+
+## Estúdio de imagens (ilustrações de vocabulário)
+
+Os jogos de imagem (Memória, Cena Viva e os de kana e kanji com imagem) usam o estúdio: `scripts/estudio.py`. Ele gera tudo de novo a partir de uma lista de prompts versionada em `scripts/imagens/<lote>.json`, confere cada imagem com o CLIP e exporta só o resultado final para o repositório.
+
+O que ele usa, tudo fora do repositório em `D:\KotobaArcade-Arte`:
+
+| Modelo | Para quê | Tamanho | Licença |
+| --- | --- | --- | --- |
+| [Animagine XL 4.0](https://huggingface.co/cagliostrolab/animagine-xl-4.0) (`modelos\animagine-xl-4.0-opt.safetensors`) | gerar | 6,9 GB | CreativeML Open RAIL++-M (permite uso e publicação das imagens) |
+| [CLIP ViT-H-14 da LAION](https://huggingface.co/laion/CLIP-ViT-H-14-laion2B-s32B-b79K) (`hf\hub\models--laion--CLIP-ViT-H-14-laion2B-s32B-b79K`) | conferir | 3,9 GB | MIT |
+
+### Como rodar
+
+```bash
+cd D:/Rafael/Documents/GitHub/kotoba-arcade
+export HF_HOME=D:/KotobaArcade-Arte/hf KOTOBA_SESSAO=nome-da-sua-sessao
+PY=D:/KotobaArcade-Arte/venv/Scripts/python
+$PY -I scripts/estudio.py tudo scripts/imagens/objetos.json
+```
+
+`tudo` faz, em ordem:
+
+1. **gerar**: cada item sai em várias seeds (`seeds` da lista), em PNG, em `D:\KotobaArcade-Arte\estudio\<lote>\`. O que já existe não é gerado de novo.
+2. **conferir**: o CLIP compara cada candidata com o rótulo do próprio item, com os rótulos de todos os outros itens do lote, com os `distratores` da lista e com alguns gerais (forma abstrata, objeto deformado, texto escrito). A imagem só passa se o próprio rótulo ganhar com chance de pelo menos 45% e 15 pontos de folga sobre o segundo. O relatório fica em `conferencia.json`.
+3. **refazer**: item sem nenhuma candidata aprovada ganha outra leva de seeds, até duas vezes.
+4. **exportar**: a melhor candidata aprovada vira WebP no `destino` da lista (cor) e em `<destino>-tinta` (versão mangá, em cinza). Com `"recorte": true` o fundo some (fica transparente).
+5. **folha**: folhas de contato em JPG para olhar tudo de uma vez.
+
+Cada passo também roda sozinho: `gerar`, `conferir`, `exportar`, `folha` (e `folha ... x` para ver só as reprovadas). `gerar` aceita ids para gerar só alguns.
+
+O CLIP pega muita coisa (um "comendo" que parece só um hashi, uma chave deformada), mas não tudo. Depois de cada lote, olhe as folhas. Para vetar uma candidata, ponha a chave dela em `"vetadas"`. Para fixar uma à mão, use `"escolha": {"id": seed}`. Se nenhuma serve, mude o prompt e rode de novo.
+
+### A placa é dividida
+
+Antes de carregar qualquer modelo, o estúdio cria `D:\KotobaArcade-Arte\gpu.lock` com o nome da sessão (`KOTOBA_SESSAO`). Se o arquivo já existir, se o Ollama tiver um modelo carregado ou se um motor de voz (AivisSpeech ou VOICEVOX) estiver no ar, ele espera e confere de novo a cada 30 segundos. O lock é apagado ao terminar, mesmo se der erro.
+
+### Formato da lista
+
+```json
+{
+  "lote": "objetos",
+  "destino": "src/assets/imagens",
+  "largura": 896, "altura": 896, "passos": 24, "saida": 384,
+  "recorte": true,
+  "estilo": "no humans, object focus, single object, ...",
+  "negativo": "multiple objects, photo, ...",
+  "distratores": ["a person", "a room"],
+  "seeds": [1, 2, 3],
+  "itens": [
+    { "id": "kasa", "rotulo": "an umbrella", "prompt": "closed umbrella standing upright", "evitar": ["a cane"] }
+  ]
+}
+```
+
+- `id`: nome do arquivo (a-z, 0-9 e hífen).
+- `rotulo`: o que o CLIP precisa reconhecer, em inglês, curto. Dois itens do mesmo lote com rótulos quase iguais vão se reprovar um ao outro: isso é bom, porque na tela eles também se confundiriam.
+- `evitar`: rótulos extras só daquele item (o que ele não pode parecer).
+
+Uma imagem precisa mostrar uma ideia só e não pode ter texto escrito. Por isso o estilo de objeto pede um objeto centralizado, sem pessoas, e o negativo tira letras, logotipos e etiquetas.
