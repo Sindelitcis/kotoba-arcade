@@ -305,9 +305,9 @@ export function listarFalas(): Fala[] {
     // e as palavras da leitura relâmpago. っ e ー não soam sozinhos: a fala deles é o exemplo.
     ...KANA_IMAGENS.flatMap((k): Fala[] => [
       ...(k.fala === k.char ? [{ texto: k.char, voz: VOZ_PALAVRA, tts: k.char, partes: [{ t: k.char }], origem: 'kana/letra' }] : []),
-      palavra(k.exemplo, 'kana/exemplo'),
+      palavra(k.exemplo, 'kanaimagens/exemplo'),
     ]),
-    ...PALAVRAS_KATAKANA.map((p) => palavra({ jp: p.kana, kana: p.kana }, 'kana/palavra')),
+    ...PALAVRAS_KATAKANA.map((p) => palavra({ jp: p.kana, kana: p.kana }, 'kanaimagens/palavra')),
     ...aventura(SCENES),
     ...kumitate(),
     ...conversa(),

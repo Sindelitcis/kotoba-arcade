@@ -12,6 +12,7 @@ import {
   kanaItem,
   kanaPorChar,
 } from '../src/content/kana';
+import { listarFalas } from '../scripts/falas';
 import type { Manifesto } from '../src/core/audio';
 import { kataToHira } from '../src/core/kana';
 import { seededRng } from '../src/core/rng';
@@ -129,6 +130,15 @@ describe('conteúdo do kana', () => {
     const gravada = (t: string) => !!manifesto.falas[t]?.[VOZ_PALAVRA];
     const textos = [...KANA_IMAGENS.flatMap((k) => [k.fala, k.exemplo.kana]), ...PALAVRAS_KATAKANA.map((p) => p.kana)];
     expect([...new Set(textos)].filter((t) => !gravada(t))).toEqual([]);
+  });
+
+  // A gravação pula o Whisper em toda origem "kana/" (ele não reconhece uma mora sozinha).
+  // Os exemplos e as palavras tinham entrado como "kana/..." e saíram sem conferência.
+  it('só a letra solta vai para a gravação sem conferência do Whisper', () => {
+    const semConferir = listarFalas().filter((f) => f.origem.startsWith('kana/') && f.origem !== 'kana/hiragana' && f.origem !== 'kana/katakana');
+    expect(semConferir.every((f) => f.origem === 'kana/letra')).toBe(true);
+    const letras = new Set(KANA_IMAGENS.map((k) => k.char));
+    expect(semConferir.filter((f) => !letras.has(f.texto)).map((f) => f.texto)).toEqual([]);
   });
 
   it('lotes cobrem cada kana uma vez, na ordem do básico ao denso', () => {
