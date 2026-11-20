@@ -4,10 +4,9 @@ import { sfx, speakWord } from '../../core/audio';
 import { cenaStyle } from '../../core/arte';
 import { acertou, cor, corStyle, errou, zerar } from '../../core/cor';
 import { foco } from '../../core/foco';
-import { Pintura } from '../../core/Pintura';
 import { ajudaAberta, useAoAbrirAjuda } from '../../core/help/ajuda';
 import { teclaDe } from '../../core/teclas';
-import { burst, INK, onomato, pulse } from '../../core/fx';
+import { burst, FX_COR, onomato, pulse } from '../../core/fx';
 import { kanaToRomaji } from '../../core/kana';
 import { MODE_NAMES, modeForPlay, Stage, type BeatEvent, type Judge, type Mode, type StageResult } from './engine';
 import { startMusic, type Music } from './music';
@@ -19,9 +18,9 @@ const START_DELAY = 150;
 const RESUME_DELAY = 60;
 const JUDGE_TEXT: Record<Judge | 'miss', string> = { perfect: 'Perfeito!', good: 'Bom!', ok: 'Valeu', miss: 'Passou' };
 const JUDGE_COLORS: Record<Judge, string[]> = {
-  perfect: [INK.shu, INK.shu, INK.tinta],
-  good: [INK.tinta],
-  ok: [INK.tinta],
+  perfect: [FX_COR.festa, FX_COR.bom, FX_COR.marca],
+  good: [FX_COR.bom, FX_COR.marca],
+  ok: [FX_COR.marca],
 };
 
 interface Run {
@@ -79,7 +78,7 @@ export function KanaBeatGame() {
         const r = lineEl.current?.getBoundingClientRect();
         if (r) burst(r.left + r.width / 2, r.top + r.height / 2, JUDGE_COLORS[e.judge], e.judge === 'perfect' ? 30 : 16, 380);
         pulse(lineEl.current, 'line-hit');
-        if (e.judge === 'perfect') onomato('captura', lineEl.current, 'shu', 0.8);
+        if (e.judge === 'perfect') onomato('captura', lineEl.current, 'festa', 0.8);
         setJudge((j) => ({ text: JUDGE_TEXT[e.judge], cls: e.judge, n: j.n + 1 }));
         if (e.note.pt) speakWord(e.note.kana);
       } else if (e.t === 'miss') {
@@ -95,7 +94,7 @@ export function KanaBeatGame() {
         setResult(e.result);
         if (e.result.grade === 'S' || e.result.record) {
           sfx.levelup();
-          requestAnimationFrame(() => onomato('nivel', document.querySelector('.kb-grade'), 'shu', 1.3));
+          requestAnimationFrame(() => onomato('nivel', document.querySelector('.kb-grade'), 'festa', 1.3));
         } else sfx.chest();
       }
     }
@@ -290,7 +289,6 @@ export function KanaBeatGame() {
 
       <section class="kb-stage">
         <div class="kb-track" ref={trackEl} style={{ ...cenaStyle('kanabeat-dotonbori'), ...corStyle(cor.value) }} data-testid="kb-track">
-          <Pintura cena="kanabeat-dotonbori" />
           <div class="kb-line" ref={lineEl} style={{ left: `${HIT_X}%`, opacity: 0.55 + 0.45 * (1 - beatPhase) }} />
           {visible.map((n) => {
             const x = HIT_X + ((n.time - t) / stage.leadMs) * (100 - HIT_X);

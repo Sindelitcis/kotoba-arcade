@@ -30,7 +30,7 @@ export const KANA_IMAGENS: Ajuda = {
     { nome: 'Imagem', texto: 'O desenho do kana. A letra fica por cima, no meio. Sem a letra, é a pergunta.' },
     { nome: 'Soa', texto: 'Como o kana soa para quem fala português, quando o romaji engana. Ex.: ふ é um sopro, não o f de "faca".' },
     { nome: 'Não confunda com', texto: 'Kana parecidos. Eles aparecem lado a lado no modo de pares.' },
-    { nome: 'Cor', texto: 'A tela começa no traço de mangá e ganha cor a cada acerto seguido.' },
+    { nome: 'Brilho', texto: 'A borda do quadro brilha mais a cada acerto seguido.' },
     { nome: 'Caminho', texto: 'No menu: quanto de cada parte você já viu (barra clara) e quanto já está firme (barra escura).' },
     { nome: 'Modos', texto: '1 aprender, 2 imagem → letra, 3 letra → imagem, 4 pares que confundem, 5 só pelo som, 6 leitura relâmpago de palavras. Os que ainda não têm o que perguntar ficam apagados.' },
   ],

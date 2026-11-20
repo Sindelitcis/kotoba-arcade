@@ -1,9 +1,8 @@
 /**
- * Cor como recompensa (docs/estilo.md): a tela começa no traço de mangá e ganha cor de anime
- * conforme o jogador vai bem. Errar ou pausar devolve a tela devagar para a tinta.
+ * Brilho do combo (docs/estilo.md): o cartão do jogo ganha um aro sakura e um brilho que crescem
+ * com os acertos seguidos. Errar baixa o brilho sem apagar de vez; pausar ou sair apaga.
  *
- * `cor` vai de 0 (só tinta) a 1 (cor cheia). O CSS lê o valor em `--cor` e revela a versão
- * colorida do cenário como um borrão de tinta que cresce.
+ * `cor` vai de 0 (sem brilho) a 1 (combo cheio). O CSS lê o valor em `--cor`.
  */
 import { signal } from '@preact/signals';
 import type { AventuraSave } from '../games/aventura/engine';
@@ -38,7 +37,7 @@ export function errou(): void {
   cor.value = Math.round(cor.value * SOBRA_NO_ERRO * 100) / 100;
 }
 
-/** Pausa, troca de tela, fim da caçada: volta para a tinta. */
+/** Pausa, troca de tela, fim da caçada: o brilho apaga. */
 export function zerar(): void {
   cor.value = 0;
 }
@@ -67,7 +66,7 @@ export interface Saves {
   cena: CenaSave;
 }
 
-/** Jogos que o jogador já jogou de verdade: no fliperama eles aparecem pintados, como um mapa. */
+/** Jogos que o jogador já jogou de verdade: no fliperama o cartão ganha o sinal de jogado. */
 export function visitados(s: Saves): Record<keyof Saves, boolean> {
   return {
     kanjimon: s.kanjimon.captures > 0,

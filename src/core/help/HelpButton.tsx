@@ -5,6 +5,7 @@
  * própria (os Ajustes) usa `useSubtelaAjuda`. Nada abre sozinho.
  */
 import { useEffect, useLayoutEffect } from 'preact/hooks';
+import { Icone } from '../Icone';
 import { SECOES, telaUsaF1 } from '../../content/ajuda';
 import { abrirAjuda, ajudaAberta, fecharAjuda, secaoAjuda, teclaDeAjuda, telaAjuda, telaAtual, type TelaAjuda } from './ajuda';
 import { teclaDe } from '../teclas';
@@ -65,7 +66,7 @@ export function HelpButton({ tela }: { tela: TelaAjuda }) {
     <>
       {/* O clique do mouse não leva o foco para o botão: ao fechar, o Enter volta a ser "jogar agora", não "abrir a ajuda de novo". */}
       <button class="ajuda-botao" onMouseDown={(e) => e.preventDefault()} onClick={() => abrirAjuda()} aria-label="Ajuda: como funciona esta tela" title="Ajuda (?)" data-testid="ajuda-botao">
-        ?
+        <Icone nome="circle-question-mark" />
       </button>
       {ajudaAberta.value && <HelpPanel />}
     </>

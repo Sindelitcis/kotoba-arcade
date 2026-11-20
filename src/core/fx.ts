@@ -1,16 +1,17 @@
 /**
- * Efeitos de tela no estilo mangá: respingos de tinta, onomatopeias desenhadas e tremor de quadro.
- * Um canvas só, por cima de tudo, que dorme quando não há nada. O modo calmo corta tremor e respingos.
+ * Efeitos de tela (docs/estilo.md): faíscas coloridas, palavras de efeito em japonês e tremor curto.
+ * Um canvas só, por cima de tudo, que dorme quando não há nada. O modo calmo corta tremor e faíscas.
  */
 import { effect } from '@preact/signals';
 import { app, tick } from './app';
 
-/** Tinta, vermelho dos acertos e o segundo tom das recompensas raras. Iguais aos tokens de `styles.css`. */
-export const INK = {
-  tinta: '#151313',
-  shu: '#d7261e',
-  kin: '#e0a526',
-  papel: '#f4f0e6',
+/** Cores das faíscas, iguais aos tokens de `styles.css`: acerto, raro, festa, neutro e a marca. */
+export const FX_COR = {
+  bom: '#12a46b',
+  raro: '#f2a516',
+  festa: '#e9468f',
+  neutro: '#8a93a8',
+  marca: '#2f62e6',
 } as const;
 
 interface Drop {
@@ -34,7 +35,7 @@ function calm(): boolean {
   return app.data.settings.calm || (typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches);
 }
 
-// O CSS lê o modo calmo pelo atributo na raiz: some o tremor das linhas e as animações longas.
+// O CSS lê o modo calmo pelo atributo na raiz: param as animações longas e os efeitos de fundo.
 if (typeof document !== 'undefined') {
   effect(() => {
     void tick.value;
@@ -73,7 +74,7 @@ function frame(t: number): void {
     const k = Math.max(0, p.life / p.max);
     g.globalAlpha = Math.min(1, k * 1.6);
     g.fillStyle = p.color;
-    // Gota de tinta: um borrão alongado na direção do voo, que encolhe ao secar.
+    // Faísca: um traço alongado na direção do voo, que encolhe ao sumir.
     const angle = Math.atan2(p.vy, p.vx);
     g.beginPath();
     g.ellipse(p.x, p.y, p.size * (0.6 + k), p.size * 0.5 * (0.4 + k), angle, 0, Math.PI * 2);
@@ -84,7 +85,7 @@ function frame(t: number): void {
   else running = false;
 }
 
-/** Respingo de tinta saindo de um ponto. */
+/** Faíscas saindo de um ponto. */
 export function burst(x: number, y: number, colors: readonly string[], count = 24, power = 420): void {
   if (!ensureCanvas()) return;
   const n = calm() ? Math.ceil(count / 4) : count;
@@ -126,7 +127,7 @@ export function pulse(el: Element | null, cls: string): void {
 }
 
 /**
- * Onomatopeias do jogo. Vermelho só para acerto e recompensa; o resto sai em tinta.
+ * Palavras de efeito (擬音) do jogo. Verde para acerto, rosa para festa, dourado para raro; o resto em cinza.
  * Cada uma tem um som parecido em `audio.ts`, para olho e ouvido dizerem a mesma coisa.
  */
 export const SFX_WORDS = {
@@ -156,11 +157,13 @@ function ensureLayer(): HTMLDivElement {
   return layer;
 }
 
+export type CorFx = 'bom' | 'festa' | 'raro' | 'neutro';
+
 /**
- * Carimba uma onomatopeia desenhada perto de um elemento.
- * `cor`: 'shu' (vermelho, acerto), 'kin' (dourado, raro) ou 'tinta' (preto, o resto).
+ * Mostra uma palavra de efeito perto de um elemento.
+ * `cor`: 'bom' (verde, acerto), 'festa' (rosa, captura e nível), 'raro' (dourado) ou 'neutro' (cinza, o resto).
  */
-export function onomato(word: SfxWord, el: Element | null, cor: 'shu' | 'kin' | 'tinta' = 'tinta', size = 1): HTMLElement | null {
+export function onomato(word: SfxWord, el: Element | null, cor: CorFx = 'neutro', size = 1): HTMLElement | null {
   if (!el || typeof document === 'undefined') return null;
   const r = el.getBoundingClientRect();
   const quiet = calm();
@@ -168,7 +171,7 @@ export function onomato(word: SfxWord, el: Element | null, cor: 'shu' | 'kin' | 
   span.className = `onomato c-${cor}${quiet ? ' quiet' : ''}`;
   span.dataset.word = word;
   span.textContent = SFX_WORDS[word];
-  // Cada carimbo cai num lugar e num ângulo um pouco diferentes, como letra à mão.
+  // Cada palavra cai num lugar e num ângulo um pouco diferentes, para não parecer carimbo repetido.
   const side = Math.random() < 0.5 ? -1 : 1;
   const x = r.left + r.width / 2 + side * r.width * (0.18 + Math.random() * 0.2);
   // Em elemento baixo (um título, uma frase) a palavra vai por cima dele, para não tapar o texto.

@@ -4,6 +4,7 @@ import { screen } from './core/app';
 import { loadVoices, sfx } from './core/audio';
 import { zerar } from './core/cor';
 import { HelpButton } from './core/help/HelpButton';
+import './core/tema';
 import { AventuraGame } from './games/aventura/AventuraGame';
 import { CenaGame } from './games/cena/CenaGame';
 import { ConversaGame } from './games/conversa/ConversaGame';
@@ -62,7 +63,7 @@ function App() {
   }
 }
 
-// Trocar de tela é virar a página, e a página nova começa no traço (sem cor).
+// Trocar de tela zera o brilho do combo e toca o som de página.
 let firstScreen = true;
 effect(() => {
   void screen.value;

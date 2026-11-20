@@ -4,7 +4,7 @@ import { FIGURAS, type Figura } from '../../content/imagens';
 import { app, commit, go, memoriaSave, screen } from '../../core/app';
 import { sfx, speakWord } from '../../core/audio';
 import { acertou, cor, corStyle, errou, zerar } from '../../core/cor';
-import { figuraTintaUrl, figuraUrl } from '../../core/figuras';
+import { figuraUrl } from '../../core/figuras';
 import { onomato } from '../../core/fx';
 import { teclaDe } from '../../core/teclas';
 import { MemoriaRound, QUADROS, type Carta, type Evento, type Resumo } from './engine';
@@ -50,8 +50,7 @@ function CartaView({ c, i, onClick, brilha, escolhida }: { c: Carta; i: number; 
         </span>
       ) : c.lado === 'img' ? (
         <span class="me-fig">
-          <img src={figuraTintaUrl(f.img)} alt="" draggable={false} />
-          <img class="cor" src={figuraUrl(f.img)} alt="" draggable={false} />
+          <img src={figuraUrl(f.img)} alt="" draggable={false} />
         </span>
       ) : c.mostra === 'audio' && !c.feita ? (
         <span class="me-palavra audio">
@@ -133,17 +132,17 @@ export function MemoriaGame() {
         sfx.hit(e.combo);
         if (e.rapido) sfx.fast();
         const el = document.querySelector(`[data-carta="${e.cartas[1]}"]`);
-        onomato(e.rapido ? 'rapido' : 'acerto', el, 'shu', 0.8);
+        onomato(e.rapido ? 'rapido' : 'acerto', el, 'bom', 0.8);
         ultimaFala.current = e.figura.word.kana;
         void speakWord(e.figura.word.kana);
       } else if (e.t === 'confusao') {
         errou();
         sfx.miss();
-        onomato('erro', document.querySelector(`[data-carta="${e.cartas[1]}"]`), 'tinta', 0.7);
+        onomato('erro', document.querySelector(`[data-carta="${e.cartas[1]}"]`), 'neutro', 0.7);
       } else if (e.t === 'sobe') setNota(`${e.figura.word.kana}: ${e.nivel === 1 ? 'agora em kanji' : 'agora só no som'}`);
       else if (e.t === 'quadro') {
         sfx.chest();
-        onomato('captura', document.querySelector('.me-quadro'), 'shu');
+        onomato('captura', document.querySelector('.me-quadro'), 'festa');
       } else if (e.t === 'nivel') {
         sfx.levelup();
         setNota(`Nível ${e.level}!`);
@@ -239,7 +238,7 @@ export function MemoriaGame() {
     return () => removeEventListener('keydown', onKey);
   });
 
-  const fundo = { '--cena': `url("${figuraTintaUrl(FUNDO)}")` };
+  const fundo = { '--cena': `url("${figuraUrl(FUNDO)}")` };
 
   if (modo === 'rodada' && r) {
     const q = r.quadro;
@@ -261,7 +260,6 @@ export function MemoriaGame() {
           <Licao novas={q.novas} onGo={seguir} />
         ) : (
           <section class="me-quadro" data-testid="me-quadro" style={{ ...fundo, ...corStyle(cor.value) }}>
-            <span class="pinta" aria-hidden="true" style={{ '--cena-cor': `url("${figuraUrl(FUNDO)}")` }} />
             <p class="me-dica">
               {q.parecidas
                 ? 'Palavras que soam parecido. Ouça com calma.'

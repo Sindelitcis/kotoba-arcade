@@ -156,7 +156,8 @@ test('a caixa de digitar já abre com o foco e mostra cada letra digitada', asyn
 test('clicar em qualquer lugar da tela não tira o teclado do jogo', async ({ page }) => {
   await open(page);
   await page.getByTestId('song').click();
-  await page.getByTestId('kb-track').click({ position: { x: 5, y: 5 } });
+  // Perto do canto, mas dentro da curva da borda arredondada.
+  await page.getByTestId('kb-track').click({ position: { x: 30, y: 30 } });
   await expect(page.getByTestId('entrada')).toBeFocused();
   await hitTarget(page);
   await expect(page.getByTestId('score')).not.toHaveText('0');

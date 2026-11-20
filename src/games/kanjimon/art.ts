@@ -1,5 +1,5 @@
 import type { Kanji } from '../../content';
-import { INK } from '../../core/fx';
+import { FX_COR } from '../../core/fx';
 import type { Rarity } from './engine';
 
 /** As artes das cartas continuam hospedadas junto do KanjiMon original. */
@@ -9,10 +9,10 @@ export function artUrl(k: Kanji, rarity: Rarity): string {
   return `${ART_BASE}${k.n}_${rarity}.jpg`;
 }
 
-/** Respingo de tinta de cada raridade: preto nas comuns, vermelho e dourado nas raras. */
+/** Faíscas de cada raridade: azul nas comuns, rosa e dourado nas raras. */
 export const RARITY_COLORS: Record<Rarity, string[]> = {
-  c: [INK.tinta],
-  r: [INK.tinta, INK.tinta, INK.shu],
-  sr: [INK.shu, INK.tinta],
-  ur: [INK.shu, INK.kin, INK.tinta],
+  c: [FX_COR.marca, FX_COR.neutro],
+  r: [FX_COR.marca, FX_COR.marca, FX_COR.bom],
+  sr: [FX_COR.festa, FX_COR.marca],
+  ur: [FX_COR.raro, FX_COR.festa, FX_COR.marca],
 };

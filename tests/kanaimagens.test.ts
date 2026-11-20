@@ -115,13 +115,12 @@ describe('conteúdo do kana', () => {
     }
   });
 
-  it('cada objeto tem prompt no estúdio e ilustração exportada, nas duas versões', () => {
+  it('cada objeto tem prompt no estúdio e ilustração exportada', () => {
     const lista = JSON.parse(readFileSync(join(RAIZ, 'scripts/imagens/kana.json'), 'utf8')) as { itens: { id: string }[] };
     const objetos = new Set(KANA_IMAGENS.map((k) => imagemDoObjeto(k.cena.objeto)));
     expect(new Set(lista.itens.map((i) => i.id))).toEqual(objetos);
     for (const id of objetos) {
       expect(existsSync(join(RAIZ, 'src/assets/kana', `${id}.webp`)), id).toBe(true);
-      expect(existsSync(join(RAIZ, 'src/assets/kana-tinta', `${id}.webp`)), id).toBe(true);
     }
   });
 

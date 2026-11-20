@@ -36,7 +36,7 @@ export function Booster() {
     setRevealed(revealed + 1);
     requestAnimationFrame(() => {
       const el = row.current?.children[revealed] ?? null;
-      onomato(tier >= 2 ? 'raro' : 'revela', el, tier >= 2 ? 'kin' : 'tinta');
+      onomato(tier >= 2 ? 'raro' : 'revela', el, tier >= 2 ? 'raro' : 'neutro');
       burstFrom(el, RARITY_COLORS[card.rarity], 24 + tier * 18, 480);
     });
   };

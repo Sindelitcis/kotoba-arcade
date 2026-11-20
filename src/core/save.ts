@@ -18,7 +18,12 @@ export interface Settings {
    * Numa página aberta no próprio PC (localhost), ele é procurado sempre.
    */
   vozLocal: boolean;
+  /** Tema da tela: o do sistema, claro ou escuro (docs/estilo.md). */
+  tema: Tema;
 }
+
+export type Tema = 'auto' | 'claro' | 'escuro';
+const TEMAS: readonly Tema[] = ['auto', 'claro', 'escuro'];
 
 export interface Profile {
   xp: number;
@@ -50,7 +55,7 @@ export function emptySave(now: number): SaveData {
     createdAt: now,
     updatedAt: now,
     profile: { xp: 0, coins: 0, daysPlayed: [] },
-    settings: { sound: true, voice: true, calm: false, vozLocal: false },
+    settings: { sound: true, voice: true, calm: false, vozLocal: false, tema: 'auto' },
     cards: {},
     games: {},
   };
@@ -104,6 +109,7 @@ export function normalizeSave(input: unknown, now: number): SaveData {
       voice: typeof settings.voice === 'boolean' ? settings.voice : base.settings.voice,
       calm: typeof settings.calm === 'boolean' ? settings.calm : base.settings.calm,
       vozLocal: typeof settings.vozLocal === 'boolean' ? settings.vozLocal : base.settings.vozLocal,
+      tema: TEMAS.includes(settings.tema as Tema) ? (settings.tema as Tema) : base.settings.tema,
     },
     cards: cleanCards(input.cards),
     games: isObject(input.games) ? input.games : {},

@@ -1,8 +1,7 @@
 /**
  * As peças (componentes) dos kanji: nome curto em português e uma imagem para lembrar.
  * Uma linha por peça: peça | nome | imagem
- * O nome é o mesmo que as historinhas usam entre parênteses. A imagem é um emoji, que
- * aparece em cinza no traço de mangá e ganha cor com o combo.
+ * O nome é o mesmo que as historinhas usam entre parênteses. A imagem é um emoji.
  */
 export const PECAS = `
 亻|pessoa de lado|🧍

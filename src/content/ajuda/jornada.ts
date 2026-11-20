@@ -13,7 +13,7 @@ export const JORNADA: Ajuda = {
     'Aperte Enter para começar a missão sugerida (o quadro grande no alto).',
     'Quer ver outra parte? Aperte o número da etapa (1 a 7) ou clique no quadro dela.',
     'Dentro da etapa, escolha a missão com ↑ e ↓ e aperte Enter.',
-    'Terminou a missão, você volta para cá. A missão ganha a marca 済 e a etapa ganha cor.',
+    'Terminou a missão, você volta para cá. A missão ganha a marca 済 e a etapa mostra quanto já foi feito.',
   ],
   teclas: [
     { teclas: ['Enter', 'Espaço'], faz: 'Começar a missão sugerida (ou a escolhida, dentro da etapa)' },
@@ -66,7 +66,7 @@ export const LICAO: Ajuda = {
     { nome: 'Quadro X de Y', texto: 'Onde você está e quanto falta. A lição inteira leva de 3 a 10 minutos.' },
     { nome: 'Furigana', texto: 'A leitura em hiragana pequena em cima de todo kanji.' },
     { nome: 'Registro', texto: 'Nas expressões: casual (amigos e família), polido (o padrão com adultos) ou formal (clientes e superiores).' },
-    { nome: 'Cor', texto: 'O quadro ganha cor de anime conforme você acerta em sequência.' },
+    { nome: 'Brilho', texto: 'A borda do quadro brilha mais conforme você acerta em sequência.' },
   ],
   ensina: [
     'Ver, depois lembrar: a pergunta vem logo depois do quadro que ensina, e a resposta mostra a forma certa na hora.',

@@ -2,9 +2,7 @@ import { useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { commit, go, jornadaSave, licaoAberta, screen, tick } from '../core/app';
 import { cenaStyle } from '../core/arte';
 import { sfx } from '../core/audio';
-import { corStyle } from '../core/cor';
 import { foco } from '../core/foco';
-import { Pintura } from '../core/Pintura';
 import { teclaDe } from '../core/teclas';
 import { andamento, ETAPAS, etapaDa, missoesDa, NOME_JOGO, proximaMissao, type Etapa, type Missao } from './etapas';
 
@@ -38,8 +36,7 @@ function EtapaQuadro({ e, n, onAbrir }: { e: Etapa; n: number; onAbrir: () => vo
   const v = andamento(e, save);
   const feitas = Math.round(v * total);
   return (
-    <button class={`koma jn-etapa${total === 0 ? ' depois' : ''}`} style={{ ...cenaStyle(e.cena), ...corStyle(v) }} onClick={onAbrir} data-testid={`jn-etapa-${e.id}`}>
-      <Pintura cena={e.cena} />
+    <button class={`koma jn-etapa${total === 0 ? ' depois' : ''}`} style={cenaStyle(e.cena)} onClick={onAbrir} data-testid={`jn-etapa-${e.id}`}>
       <span class="jn-etapa-jp">{e.jp}</span>
       <span class="jn-etapa-titulo">
         {e.titulo} <kbd>{n}</kbd>
@@ -203,11 +200,11 @@ export function JornadaTela() {
       {proxima && (
         <button
           class="play-now jn-proxima"
-          style={{ ...cenaStyle(etapaProx?.cena), ...corStyle(etapaProx ? andamento(etapaProx, save) : 0) }}
+          style={cenaStyle(etapaProx?.cena)}
           onClick={() => iniciarMissao(proxima)}
           data-testid="jn-proxima"
         >
-          <Pintura cena={etapaProx?.cena} />
+          <span class="hub-rotulo">Próxima missão</span>
           <span class="play-now-main">{proxima.titulo}</span>
           <span class="play-now-sub">
             {etapaProx?.titulo} · {tipoDa(proxima)} · {proxima.minutos} min <kbd>Enter</kbd>

@@ -30,7 +30,7 @@ export const PECAS: Ajuda = {
     { nome: '3 Intruso', texto: 'Seis kanji, um diferente. Treina os parecidos: 未 e 末, 土 e 士, 待 e 持.' },
     { nome: '4 Adivinhar', texto: 'Um kanji que você nunca viu, com o nome das peças na tela. Pelas peças, chute o significado.' },
     { nome: '5 Palavras', texto: 'Uma palavra de dois kanji. Escolha a leitura. Dentro da palavra ela pode mudar (電 でん + 車 くるま = でんしゃ).' },
-    { nome: 'Cor', texto: 'O quadro começa no traço e ganha cor com os acertos seguidos. Errar tira um pouco da cor, devagar.' },
+    { nome: 'Brilho', texto: 'A borda do quadro brilha mais com os acertos seguidos. Errar baixa um pouco o brilho, devagar.' },
     { nome: 'Pontos', texto: '10 por acerto, mais 5 se foi rápido (menos de 3 segundos). Kanji montado depois de erro vale 5.' },
   ],
   ensina: [

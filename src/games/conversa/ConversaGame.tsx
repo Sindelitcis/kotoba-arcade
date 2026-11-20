@@ -1,8 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { app, commit, conversaSave, go, screen } from '../../core/app';
-import { CENA_CONVERSA, cenaStyle, pessoaCorUrl, pessoaUrl } from '../../core/arte';
-import { corStyle } from '../../core/cor';
-import { Pintura } from '../../core/Pintura';
+import { CENA_CONVERSA, cenaStyle, pessoaUrl } from '../../core/arte';
 import { sfx, speak, speakWord } from '../../core/audio';
 import { VOZ_CONVERSA } from '../../core/vozes';
 import { onomato } from '../../core/fx';
@@ -108,7 +106,7 @@ export function ConversaGame() {
       if (e.t === 'linha' && e.linha.quem === 'personagem') void tocar(e.linha, c.cena);
       else if (e.t === 'passo') {
         sfx.capture(1);
-        onomato('captura', document.querySelector('[data-testid="cv-goals"]'), 'shu', 0.9);
+        onomato('captura', document.querySelector('[data-testid="cv-goals"]'), 'festa', 0.9);
         setAviso(`Objetivo: ${e.passo.pt}`);
       } else if (e.t === 'nova') sfx.click();
       else if (e.t === 'dica') setDica(e.dica);
@@ -343,12 +341,11 @@ export function ConversaGame() {
             {CENAS.map((c, i) => (
               <button
                 key={c.id}
-                class={save.cenas[c.id] ? 'tile done pintado' : 'tile'}
-                style={{ ...cenaStyle(CENA_CONVERSA[c.id]?.cena), ...corStyle(save.cenas[c.id] ? 1 : 0) }}
+                class={save.cenas[c.id] ? 'tile done' : 'tile'}
+                style={cenaStyle(CENA_CONVERSA[c.id]?.cena)}
                 onClick={() => comecar(c)}
                 data-scene={c.id}
               >
-                <Pintura cena={CENA_CONVERSA[c.id]?.cena} />
                 <span class="tile-jp" lang="ja">
                   {c.jp}
                 </span>
@@ -481,13 +478,10 @@ export function ConversaGame() {
       </header>
 
       <section class="cv-chat">
-        {/* Conversar é viver a cena: lugar e personagem em cor de anime. */}
-        <div class="cv-cena" style={{ ...cenaStyle(CENA_CONVERSA[c.cena.id]?.cena), ...corStyle(1) }} data-testid="cv-cena">
-          <Pintura cena={CENA_CONVERSA[c.cena.id]?.cena} />
+        <div class="cv-cena" style={cenaStyle(CENA_CONVERSA[c.cena.id]?.cena)} data-testid="cv-cena">
           {pessoaUrl(CENA_CONVERSA[c.cena.id]?.pessoa) && (
             <img
-              class={pessoaCorUrl(CENA_CONVERSA[c.cena.id]?.pessoa) ? 'cor' : undefined}
-              src={pessoaCorUrl(CENA_CONVERSA[c.cena.id]?.pessoa) ?? pessoaUrl(CENA_CONVERSA[c.cena.id]?.pessoa)}
+              src={pessoaUrl(CENA_CONVERSA[c.cena.id]?.pessoa)}
               alt={c.cena.personagem.nome}
             />
           )}

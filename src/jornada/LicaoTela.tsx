@@ -4,7 +4,6 @@ import { cenaStyle } from '../core/arte';
 import { sfx } from '../core/audio';
 import { acertou, cor, corStyle, errou } from '../core/cor';
 import { onomato } from '../core/fx';
-import { Pintura } from '../core/Pintura';
 import { tocarSequencia, type Trecho } from '../core/sequencia';
 import { teclaDe } from '../core/teclas';
 import { NOME_REGISTRO } from '../content/escola/tipos';
@@ -107,7 +106,7 @@ export function LicaoTela() {
     if (r.certa) {
       sfx.hit(a.combo);
       acertou(a.combo);
-      onomato('acerto', quadroEl.current, 'shu', 0.9);
+      onomato('acerto', quadroEl.current, 'bom', 0.9);
     } else {
       sfx.miss();
       errou();
@@ -121,14 +120,14 @@ export function LicaoTela() {
     const r = a.colocar(indice);
     if (r === 'volta') {
       sfx.miss();
-      onomato('erro', quadroEl.current, 'tinta', 0.7);
+      onomato('erro', quadroEl.current, 'neutro', 0.7);
     } else if (r === 'certo') sfx.click();
     else if (r === 'pronta') {
       const p = a.passo;
       if (p?.tipo === 'ordem') falar(retornoFalado(p, true));
       sfx.hit(a.combo);
       acertou(a.combo);
-      onomato('encaixe', quadroEl.current, 'shu', 0.9);
+      onomato('encaixe', quadroEl.current, 'bom', 0.9);
     }
     redraw();
   };
@@ -206,7 +205,6 @@ export function LicaoTela() {
       </div>
 
       <div key={a.i} ref={quadroEl} class={`koma lc-quadro${p ? ` ${p.tipo}` : ''}`} style={{ ...cenaStyle(etapa?.cena), ...corStyle(cor.value) }} data-testid="lc-quadro">
-        <Pintura cena={etapa?.cena} />
         {p?.tipo === 'quadro' && <QuadroView q={p} />}
 
         {p?.tipo === 'pergunta' && (

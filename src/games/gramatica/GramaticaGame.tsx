@@ -3,7 +3,6 @@ import { findWord } from '../../content/vida';
 import { app, commit, go, gramaticaSave, screen } from '../../core/app';
 import { cenaStyle } from '../../core/arte';
 import { corStyle, progresso } from '../../core/cor';
-import { Pintura } from '../../core/Pintura';
 import { sfx, speak } from '../../core/audio';
 import { onomato } from '../../core/fx';
 import { masteryLevel } from '../../core/srs';
@@ -71,13 +70,13 @@ export function GramaticaGame() {
         sfx.hit(e.combo);
         if (e.fast) sfx.fast();
         // A última peça fecha a frase: aí quem fala é o ピカッ, uma onomatopeia por vez.
-        if (!events.some((x) => x.t === 'solved')) onomato('encaixe', document.querySelector('.gr-slot.active'), 'shu', 0.9);
+        if (!events.some((x) => x.t === 'solved')) onomato('encaixe', document.querySelector('.gr-slot.active'), 'bom', 0.9);
       } else if (e.t === 'bounce') {
         sfx.click();
-        onomato('erro', document.querySelector('.gr-tray'), 'tinta', 0.8);
+        onomato('erro', document.querySelector('.gr-tray'), 'neutro', 0.8);
       } else if (e.t === 'solved') {
         sfx.capture(1);
-        onomato('captura', document.querySelector('.gr-sentence'), 'shu');
+        onomato('captura', document.querySelector('.gr-sentence'), 'festa');
         speak(e.plain);
       } else if (e.t === 'unlock') setNote(`Peça nova a caminho: ${e.point.blocks.join(' ')}`);
       else if (e.t === 'levelup') {
@@ -195,10 +194,9 @@ export function GramaticaGame() {
           <section
             class="gr-board"
             data-testid="gr-board"
-            // Kumitate é leitura: segue mangá, e só o fundo de Gion ganha um acento de cor a cada frase montada (no máximo metade).
+            // Kumitate é leitura, sem combo: o brilho sobe um pouco a cada frase montada (no máximo metade).
             style={{ ...cenaStyle('kumitate-gion'), ...corStyle(0.5 * progresso(round.index + (round.phase === 'solved' ? 1 : 0), ROUND_SIZE)) }}
           >
-            <Pintura cena="kumitate-gion" />
             <p class="gr-goal" data-testid="gr-goal">{pz.pt}</p>
             <div class="gr-sentence" lang="ja" data-testid="gr-sentence">
               {pz.pieces.map((p, i) => {

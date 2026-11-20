@@ -4,7 +4,6 @@ import { cenaStyle } from '../../core/arte';
 import { sfx, speak, speakKanji } from '../../core/audio';
 import { acertou, cor, corStyle, errou, zerar } from '../../core/cor';
 import { onomato } from '../../core/fx';
-import { Pintura } from '../../core/Pintura';
 import { teclaDe } from '../../core/teclas';
 import { VOZ_PALAVRA } from '../../core/vozes';
 import { KANJI_PECAS, peca, type KanjiPeca, type Palavra } from './dados';
@@ -165,22 +164,22 @@ export function PecasGame() {
         sfx.hit(e.combo);
         if (e.rapido) sfx.fast();
         acertou(e.combo);
-        onomato(e.rapido ? 'rapido' : 'acerto', apertada, 'shu', 0.9);
+        onomato(e.rapido ? 'rapido' : 'acerto', apertada, 'bom', 0.9);
       } else if (e.t === 'erro') {
         sfx.miss();
         errou();
-        onomato('erro', document.querySelector('.pc-perguntas'), 'tinta', 0.8);
+        onomato('erro', document.querySelector('.pc-perguntas'), 'neutro', 0.8);
       } else if (e.t === 'encaixe') {
         sfx.hit(Math.max(1, e.combo));
-        onomato('encaixe', document.querySelector('.pc-montagem'), 'shu', 0.8);
+        onomato('encaixe', document.querySelector('.pc-montagem'), 'bom', 0.8);
       } else if (e.t === 'volta') {
         sfx.click();
-        onomato('erro', document.querySelector('.pc-bandeja'), 'tinta', 0.7);
+        onomato('erro', document.querySelector('.pc-bandeja'), 'neutro', 0.7);
         setAviso(`${peca(e.peca).nome} não está neste kanji.`);
       } else if (e.t === 'pronto') {
         sfx.capture(1);
         if (e.combo > 0) acertou(e.combo);
-        onomato('captura', document.querySelector('.pc-montagem'), 'shu');
+        onomato('captura', document.querySelector('.pc-montagem'), 'festa');
       } else if (e.t === 'levelup') {
         sfx.levelup();
         setAviso(`Nível ${e.level}!`);
@@ -285,7 +284,6 @@ export function PecasGame() {
         </header>
 
         <section class="pc-quadro" style={{ ...cenaStyle('pecas-ryoanji'), ...corStyle(cor.value) }} data-testid="pc-quadro" data-modo={p.modo} data-fase={rodada.fase}>
-          <Pintura cena="pecas-ryoanji" />
           {rodada.fase === 'licao' ? <Licao p={p} onSeguir={seguir} /> : <PerguntaView p={p} rodada={rodada} onResponder={responder} />}
           {revelada && (
             <div class="pc-revela" data-testid="pc-revela">

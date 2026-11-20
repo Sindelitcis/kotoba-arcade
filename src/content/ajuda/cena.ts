@@ -28,7 +28,7 @@ export const CENA: Ajuda = {
     { nome: 'Pedido', texto: 'A frase em japonês, com a leitura em cima dos kanji.' },
     { nome: 'Coisa brilhando', texto: 'É a resposta. Aparece em palavra nova, em etapa nova e depois de dois enganos.' },
     { nome: 'Nome em cima de uma coisa', texto: 'Você clicou nela por engano. O nome fica ali para você aprender essa também.' },
-    { nome: 'Fundo', texto: 'Começa em traço de mangá e ganha cor com o combo.' },
+    { nome: 'Brilho', texto: 'A borda do quadro brilha mais a cada acerto seguido. Errar baixa um pouco.' },
     { nome: 'Pontos', texto: '10 por acerto de primeira, mais 5 se foi rápido, mais o combo. Acerto depois de engano vale 5.' },
   ],
   ensina: [

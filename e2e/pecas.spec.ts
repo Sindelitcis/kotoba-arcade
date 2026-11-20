@@ -86,7 +86,7 @@ test('uma rodada inteira termina no resumo e o progresso fica salvo', async ({ p
 
   await page.reload();
   await expect(page.getByTestId('play-now')).toContainText('Kanji em peças');
-  await expect(page.getByTestId('tile-pecas')).toHaveClass(/pintado/);
+  await expect(page.getByTestId('tile-pecas')).toHaveClass(/jogado/);
   await abrir(page);
   await expect(page.getByTestId('pc-comecar')).toContainText('kanji vistos');
 });

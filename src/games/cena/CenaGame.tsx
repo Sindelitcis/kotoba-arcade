@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { app, cenaSave, commit, go, screen } from '../../core/app';
 import { sfx, speak, speakWord } from '../../core/audio';
 import { acertou, cor, corStyle, errou, zerar } from '../../core/cor';
-import { figuraTintaUrl, figuraUrl, medida } from '../../core/figuras';
+import { figuraUrl, medida } from '../../core/figuras';
 import { onomato } from '../../core/fx';
 import { teclaDe } from '../../core/teclas';
 import {
@@ -75,8 +75,7 @@ function Cena({ r, cursor, onClick, mostrados }: { r: CenaRound; cursor: string 
   const prop = proporcao(l);
   const alvoDescrever = r.tarefa.pecas ? r.tarefa.alvo[0] : null;
   return (
-    <div class="cn-cena" data-testid="cn-cena" style={{ aspectRatio: String(prop), '--cena': `url("${figuraTintaUrl(l.fundo)}")`, ...corStyle(cor.value) }}>
-      <span class="pinta" aria-hidden="true" style={{ '--cena-cor': `url("${figuraUrl(l.fundo)}")` }} />
+    <div class="cn-cena" data-testid="cn-cena" style={{ aspectRatio: String(prop), '--cena': `url("${figuraUrl(l.fundo)}")`, ...corStyle(cor.value) }}>
       {l.coisas.map((c) => {
         const h = alturaDe(c, prop);
         const cls = [
@@ -149,22 +148,22 @@ export function CenaGame() {
         acertou(e.combo);
         sfx.hit(e.combo);
         if (e.rapido) sfx.fast();
-        onomato(e.rapido ? 'rapido' : 'acerto', document.querySelector(`[data-coisa="${e.coisa}"]`), 'shu', 0.9);
+        onomato(e.rapido ? 'rapido' : 'acerto', document.querySelector(`[data-coisa="${e.coisa}"]`), 'bom', 0.9);
         const t = rodadaRef.current?.tarefa;
         if (t?.pecas) void speak(textoDe(t.pecas.certas));
       } else if (e.t === 'outra') {
         errou();
         sfx.miss();
-        onomato('erro', document.querySelector(`[data-coisa="${e.coisa}"]`), 'tinta', 0.7);
+        onomato('erro', document.querySelector(`[data-coisa="${e.coisa}"]`), 'neutro', 0.7);
         setMostrados((m) => ({ ...m, [e.coisa]: e.nome }));
         falarNome(e.nome);
       } else if (e.t === 'peca') {
         sfx.hit(1);
-        if (!e.completa) onomato('encaixe', document.querySelector('.cn-montada'), 'shu', 0.7);
+        if (!e.completa) onomato('encaixe', document.querySelector('.cn-montada'), 'bom', 0.7);
       } else if (e.t === 'volta') {
         errou();
         sfx.miss();
-        onomato('erro', document.querySelector('.cn-bandeja'), 'tinta', 0.7);
+        onomato('erro', document.querySelector('.cn-bandeja'), 'neutro', 0.7);
       } else if (e.t === 'abre') setNota(`Etapa nova: ${ETAPA_INFO[e.etapa].titulo}`);
       else if (e.t === 'nivel') {
         sfx.levelup();
@@ -428,7 +427,7 @@ export function CenaGame() {
       </header>
       <section class="av-panel" data-testid="cn-menu">
         <p class="muted">Lugares de verdade, cheios de coisas. Ache o que a frase pede e clique. Começa com uma palavra só e cresce até frases longas com lugar, cor, número e ação.</p>
-        <button class="play-now" style={{ '--cena': `url("${figuraTintaUrl(sugerido.fundo)}")` }} onClick={() => comecar(sugerido)} data-testid="cn-start">
+        <button class="play-now" style={{ '--cena': `url("${figuraUrl(sugerido.fundo)}")` }} onClick={() => comecar(sugerido)} data-testid="cn-start">
           <span class="play-now-main">{save.rounds > 0 ? 'Nova rodada' : 'Começar'}</span>
           <span class="play-now-sub">
             <span lang="ja">{sugerido.jp}</span> · {sugerido.pt} · {TAREFAS_POR_RODADA} pedidos <kbd>Enter</kbd>

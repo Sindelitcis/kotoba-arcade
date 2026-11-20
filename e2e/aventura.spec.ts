@@ -142,21 +142,21 @@ test('sair no meio da cena volta para a lista de cenas sem perder o que foi vist
   await expect(page.getByRole('button', { name: /Diário \(1\)/ })).toBeEnabled();
 });
 
-test('a cena é em cor de anime e a narração volta ao traço de mangá; cena feita fica pintada no menu', async ({ page }) => {
+test('a cena tem cenário e retrato coloridos, a narração também; cena feita ganha o sinal no menu', async ({ page }) => {
   await openGame(page);
-  await expect(page.locator('.av-scenes .tile.pintado')).toHaveCount(0);
+  await expect(page.locator('.av-scenes .tile.done')).toHaveCount(0);
   await startScene(page);
   const vistos = new Set<string>();
   for (let i = 0; i < 300 && !(await page.getByTestId('av-summary').isVisible()); i++) {
     const palco = page.getByTestId('av-stage');
     if (await palco.isVisible()) {
-      const { kind, cor, retrato } = await palco.evaluate((el) => ({
+      const { kind, cena, retrato } = await palco.evaluate((el) => ({
         kind: el.getAttribute('data-kind') ?? '',
-        cor: (el as HTMLElement).style.getPropertyValue('--cor'),
-        retrato: el.querySelector('.av-portrait')?.className ?? '',
+        cena: (el as HTMLElement).style.getPropertyValue('--cena'),
+        retrato: el.querySelector<HTMLImageElement>('.av-portrait')?.getAttribute('src') ?? '',
       }));
-      expect(cor, kind).toBe(kind === 'narra' ? '0' : '1');
-      if (retrato) expect(retrato.includes('cor'), kind).toBe(kind !== 'narra');
+      expect(cena, kind).toMatch(/aventura-narita/);
+      if (retrato) expect(retrato, kind).not.toBe('');
       vistos.add(kind === 'narra' ? 'narra' : 'cena');
     }
     const ok = page.locator('.av-option[data-result="ok"]:not(.tried)').first();
@@ -167,5 +167,5 @@ test('a cena é em cor de anime e a narração volta ao traço de mangá; cena f
   expect([...vistos].sort()).toEqual(['cena', 'narra']);
   await page.keyboard.press('Escape');
   await expect(page.getByTestId('av-menu')).toBeVisible();
-  await expect(page.locator('.av-scenes .tile.pintado')).toHaveCount(1);
+  await expect(page.locator('.av-scenes .tile.done')).toHaveCount(1);
 });

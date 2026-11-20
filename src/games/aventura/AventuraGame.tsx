@@ -1,9 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { findWord } from '../../content/vida';
 import { app, aventuraSave, commit, go, screen } from '../../core/app';
-import { CENA_AVENTURA, cenaStyle, pessoaCorUrl, pessoaUrl } from '../../core/arte';
-import { corStyle } from '../../core/cor';
-import { Pintura } from '../../core/Pintura';
+import { CENA_AVENTURA, cenaStyle, pessoaUrl } from '../../core/arte';
 import { sfx, speak, speakWord } from '../../core/audio';
 import { vozDaAventura } from '../../core/vozes';
 import { onomato } from '../../core/fx';
@@ -126,7 +124,7 @@ export function AventuraGame() {
         setNote(`Nível ${e.level}!`);
       } else if (e.t === 'end') {
         sfx.chest();
-        requestAnimationFrame(() => onomato('captura', document.querySelector('.av-panel h2'), 'shu', 1.2));
+        requestAnimationFrame(() => onomato('captura', document.querySelector('.av-panel h2'), 'festa', 1.2));
         setSummary(e.summary);
         setMode('summary');
       }
@@ -242,15 +240,13 @@ export function AventuraGame() {
           class={`av-stage ${s.kind}${mine ? ' mine' : ''}`}
           data-testid="av-stage"
           data-kind={s.kind}
-          // Viver a cena é em cor de anime; a narração é o quadro de mangá que faz a passagem.
-          style={{ ...cenaStyle(CENA_AVENTURA[play.scene.id]), ...corStyle(s.kind === 'narra' ? 0 : 1) }}
+          style={cenaStyle(CENA_AVENTURA[play.scene.id])}
         >
-          <Pintura cena={CENA_AVENTURA[play.scene.id]} />
           {!mine && pessoaUrl(s.who) && (
             <img
-              key={`${s.who}-${s.kind === 'narra' ? 'tinta' : 'cor'}`}
-              class={s.kind === 'narra' ? 'av-portrait' : 'av-portrait cor'}
-              src={(s.kind !== 'narra' && pessoaCorUrl(s.who)) || pessoaUrl(s.who)}
+              key={s.who}
+              class="av-portrait"
+              src={pessoaUrl(s.who)}
               alt={whoName(s.who)}
             />
           )}
@@ -456,13 +452,12 @@ export function AventuraGame() {
             return (
               <button
                 key={scene.id}
-                class={done ? 'tile done pintado' : open ? 'tile' : 'tile soon'}
-                style={{ ...cenaStyle(CENA_AVENTURA[scene.id]), ...corStyle(done ? 1 : 0) }}
+                class={done ? 'tile done' : open ? 'tile' : 'tile soon'}
+                style={cenaStyle(CENA_AVENTURA[scene.id])}
                 disabled={!open}
                 onClick={() => start(scene)}
                 data-scene={scene.id}
               >
-                <Pintura cena={CENA_AVENTURA[scene.id]} />
                 <span class="tile-jp" lang="ja">{scene.jp}</span>
                 <span class="tile-title">
                   {scene.title}

@@ -1,170 +1,146 @@
-# Guia de estilo
+# Guia de estilo: Sora (空)
 
-O Kotoba Arcade mistura duas coisas: mangá em preto e branco (tinta sobre papel, retícula, quadros de HQ, onomatopeia desenhada) e anime colorido atual. A tela começa no traço. A cor de anime chega quando você vai bem e vai embora devagar quando você erra ou para. Veja "Mangá e anime" mais abaixo.
+O visual se chama Sora, "céu". É uma interface de jogo de anime atual: fundo claro e limpo, cartões arredondados, um azul só de marca e as ilustrações de anime sempre coloridas. Tem tema claro e escuro.
 
-Fica de fora qualquer coisa com cara de anos 80 ou 90: city pop, neon, VHS, tela de tubo, pixel art, degradê roxo. A referência é mangá atual impresso e anime atual: cor limpa, luz clara, céu azul.
+Fica de fora qualquer coisa retrô: anos 80 e 90, city pop, neon, VHS, tela de tubo, pixel art nostálgica.
+
+## Por que mudou
+
+Até novembro de 2026 o jogo era mangá em preto e branco, com a cor de anime chegando como recompensa. Na prática não funcionou:
+
+- As ilustrações ficavam cinzas e lavadas a maior parte do tempo. A arte do Anima Turbo é colorida e perdia a graça.
+- Borda grossa de tinta, retícula, canto cortado e linha tremendo em todo lugar faziam barulho. Para quem tem TDAH isso disputa atenção com a pergunta.
+- O fliperama tinha três blocos grandes brigando pelo primeiro lugar, e atalho de teclado escrito em tudo.
+- Duas fontes pesadas (Dela Gothic e pincel) cansavam a leitura. Não havia tema escuro.
+- No celular o topo ficava apertado e algumas telas sobravam vazias.
+
+O Sora resolve com uma regra: **um foco por tela**. O que o jogador tem que olhar agora é o maior e o mais forte; o resto fica calmo.
 
 ## Cores
 
-Todas ficam em `:root` no `src/styles.css`. Não use cor solta no CSS: use o token.
+Toda cor sai dos tokens em `:root` no `src/styles.css`. Não use cor solta no CSS (as únicas exceções são os degradês da marca e o texto branco em cima de cor cheia). O tema escuro só troca os valores dos tokens (um teste confere que ele redefine todos).
 
-| Token | Valor | Para quê |
-| --- | --- | --- |
-| `--papel` | `#f4f0e6` | fundo de tudo |
-| `--papel-2` | `#e8e2d4` | papel mais escuro, campos de texto |
-| `--tinta` | `#151313` | traço, texto, quadro |
-| `--tinta-2` | `#4a4642` | texto secundário |
-| `--cinza` | `#8b857b` | texto apagado, peça bloqueada |
-| `--shu` | `#d7261e` | o vermelho: acerto, recompensa, combo, recorde |
-| `--kin` | `#e0a526` | o segundo tom: só raridade alta (SR e UR) e baú |
+| Token | Claro | Escuro | Para quê |
+| --- | --- | --- | --- |
+| `--bg` | `#f3f6fb` | `#0d1220` | fundo da página |
+| `--surface` | `#ffffff` | `#161e31` | cartões e painéis |
+| `--surface-2`, `-3` | `#f2f5fa`, `#e6ebf3` | `#1d2740`, `#27324f` | campos, hover, peça bloqueada |
+| `--line`, `-2` | `#dfe5ef`, `#c3cddd` | `#2a3554`, `#3b4970` | bordas finas |
+| `--text` | `#141c2e` | `#edf1fa` | texto |
+| `--text-2`, `-3` | `#475069`, `#636c84` | `#b9c2d9`, `#949eb9` | texto secundário e apagado |
+| `--brand` | `#2f62e6` | `#6f97ff` | azul de céu: botão principal, foco, seleção |
+| `--ok` | `#12a46b` | `#34d399` | acerto, progresso, feito |
+| `--erro` | `#e2484f` | `#ff6b72` | erro (sempre com a resposta certa junto) |
+| `--raro` | `#f2a516` | `#ffc24b` | só raridade alta (UR), baú, recorde |
+| `--sakura` | `#e9468f` | `#ff6fae` | festa: combo, captura, nível, SR |
 
-Erro nunca é vermelho. Erro é tinta: risco, tremor, retícula escura. Vermelho é sempre coisa boa.
+Cada sinal tem `-soft` (fundo) e `-text` (texto em cima do fundo). Todos os pares de texto passam do contraste AA (4,5:1) nos dois temas; `e2e/estilo.spec.ts` mede.
 
-`--shu` e `--kin` são cores de destaque. Se uma tela tiver mais de dois ou três pontos vermelhos ao mesmo tempo, algum está sobrando.
+Duas ou três cores fortes por tela, no máximo. Se azul, verde, dourado e rosa aparecem juntos, alguma está sobrando.
 
-A paleta de anime só entra junto com a cor de recompensa (o `--cor` subindo), nunca no traço de mangá parado:
+## Tema claro e escuro
 
-| Token | Valor | Para quê |
-| --- | --- | --- |
-| `--sora` | `#2f9be8` | azul de céu: linha do Kana Beat, raios de vitória |
-| `--sakura` | `#ff6f9f` | rosa: combo cheio, chefe do Kotodama, captura |
-| `--midori` | `#2fbf71` | verde: relíquias |
-| `--yuuhi` | `#ff9f2e` | laranja de fim de tarde: relíquias, brilho do chefe |
+Ajustes > Tema: **Do sistema** (padrão), **Claro** ou **Escuro**. A escolha fica no save (`settings.tema`). `src/core/tema.ts` põe `data-theme` no `<html>` e troca a cor da barra do navegador (`theme-color`). Sem escolha, vale o `prefers-color-scheme` do sistema.
 
 ## Fontes
 
-As duas fontes desenhadas são livres (SIL Open Font License 1.1) e vêm recortadas só com os caracteres que o jogo usa, em `src/assets/fontes/`.
+Três fontes livres (SIL Open Font License 1.1), recortadas só com os caracteres que o jogo usa, em `src/assets/fontes/`.
 
 | Token | Fonte | Para quê |
 | --- | --- | --- |
-| `--f-titulo` | [Dela Gothic One](https://github.com/syakuzen/DelaGothic) | títulos, botões grandes, onomatopeias, números de placar |
-| `--f-pincel` | [Yuji Syuku](https://github.com/Kinutafontfactory/Yuji) | kanji grande: carta, inimigo, prompt de pergunta |
-| `--jp` | fonte do sistema (Yu Gothic, Hiragino, Noto Sans JP) | japonês corrido, furigana, frases |
-| `--f-texto` | fonte do sistema | português |
+| `--f-texto` | [Plus Jakarta Sans](https://github.com/tokotype/PlusJakartaSans) | português, números, títulos |
+| `--f-jp` | [Zen Maru Gothic](https://github.com/googlefonts/zen-marugothic) 500 e 700 | japonês corrido, kana, furigana |
+| `--f-kanji` | [Klee One](https://github.com/fontworks-fonts/Klee) SemiBold | o kanji grande que se estuda: carta, pergunta, peça |
 
-Texto corrido nunca vai em pincel ou em Dela Gothic: cansa a leitura. Pincel é para um a quatro caracteres bem grandes.
+A Klee One tem traço de livro escolar: dá para ver como o kanji é escrito à mão. É só para um a quatro caracteres grandes; texto corrido vai na Zen Maru Gothic.
 
-Quando entrar kanji novo no conteúdo, rode o recorte de novo (veja abaixo). Um teste (`tests/estilo.test.ts`) falha se algum kanji do conteúdo ficar sem desenho na fonte de pincel.
+Quando entrar kanji novo no conteúdo, rode o recorte de novo. Um teste falha se algum caractere ficar sem desenho.
 
 ```bash
-python scripts/recortar-fontes.py CAMINHO_DAS_FONTES_ORIGINAIS
+python scripts/recortar-fontes.py D:/KotobaArcade/arte/site-novo/fontes-originais
 ```
 
-## Quadros (コマ)
+Os kanji que só o Kanji em peças usa ficam em arquivos à parte (`*-Pecas.woff2`, ligados por `unicode-range` em `pecas.css`). Eles têm que ter o mesmo `font-weight` da fonte principal, senão o navegador escolhe a face errada e o resto do texto cai na fonte do sistema (um teste confere).
 
-Cada tela é uma página de mangá: blocos são quadros com borda de tinta grossa e um vão branco entre eles.
+## Forma
 
-- `--quadro`: borda de 3px em `--tinta`. Botão usa 2px.
-- Vão entre quadros (`--vao`): 14px.
-- Quadro principal da tela (`.koma` ou os painéis de cada jogo) pode ter um canto cortado com `clip-path`, para não ficar tudo retangular igual planilha.
-- Sombra só a dura, deslocada e sem desfoque (`--sombra`), como um segundo traço. Nada de brilho ou sombra difusa.
-- Cantos retos. No máximo 2px de arredondamento.
+- Cantos: `--r-s` 10px (botão, campo), `--r-m` 16px (cartão), `--r-l` 24px (painel grande, quadro de jogo), `--r-pill` para etiquetas.
+- Vão entre blocos (`--vao`): 16px.
+- Sombra macia em três níveis (`--sh-1` a `--sh-3`). Borda de 1px em `--line`.
+- A ilustração de fundo se dissolve no cartão por um véu (`--veu-baixo`, `--veu-forte`, `--veu-lado`), para o texto ler bem em cima de qualquer imagem.
+- Ícones: [Lucide](https://lucide.dev) (ISC), em `src/assets/icones/`, pelo componente `<Icone nome="..." />`.
 
-## Retícula (スクリーントーン)
+## Componentes
 
-Retícula é o cinza do mangá. Feita com `radial-gradient` em pontos, nunca com cinza chapado.
+- **Botão**: `.primary` é azul cheio, e tem um por tela. Os outros são de superfície. `.ghost` para voltar e ações pequenas.
+- **Cartão de jogo** (`.tile`): ilustração colorida em cima, nome e uma linha embaixo. Jogo já jogado ganha o sinal ✓ (`.jogado`).
+- **Etiqueta** (`.hub-rotulo`, raridade, `済`): pílula pequena com fundo `-soft`.
+- **Segmento** (`.segmento`): botões com `aria-pressed` para escolhas curtas, como o tema.
+- **Atalho** (`kbd`): só aparece com mouse e teclado. Em tela de toque (`pointer: coarse`) some.
 
-- `--tom-leve`: pontos pequenos e espaçados. Fundo de painel secundário, hover.
-- `--tom-medio`: pontos médios. Fundo de cenário atrás do texto, carta virada.
-- `--tom-forte`: pontos grandes. Erro, coisa bloqueada, sombra de impacto.
+## Fliperama
 
-As fotos de cenário e os personagens passam por um filtro que deixa tudo em tons de cinza. A retícula vai por cima.
+Um bloco principal: a faixa da Jornada ("Do zero até trabalhar no Japão") com a próxima missão. Ao lado, menores, o "Jogar agora" (último jogo, Enter) e o Ouvir. Embaixo, a grade dos dez jogos com "N de 10 já jogados". Ajustes fica num botão de ícone no topo.
 
-## Linhas de velocidade
+## Brilho do combo
 
-- Linhas de concentração (集中線, `.speed`): raios saindo do centro, para o momento importante: captura, chefe, nota perfeita, botão de jogar.
-- Linhas paralelas (`.speed-h`): movimento, no Kana Beat e na troca de quadro.
+O cartão do jogo ganha um aro sakura e um brilho em volta que crescem com os acertos seguidos. A variável CSS é `--cor`, de 0 a 1, e sai de `src/core/cor.ts`:
 
-## Onomatopeia (擬音)
+- Acerto: sobe até o nível do combo. Seis acertos seguidos enchem (no Kana Beat, dez notas). Acerto nunca baixa.
+- Erro: sobra 35%. Cai devagar (0,9 s), não some de uma vez.
+- Pausa, recomeço e troca de tela: apaga.
+- Progresso que só cresce (frases do Kumitate): `progresso()`, no máximo metade.
 
-Feedback de acerto e erro é uma onomatopeia carimbada na tela, perto de onde aconteceu. Chame `onomato(palavra, elemento, cor)` de `src/core/fx.ts`.
+No Kana Beat a linha de acerto passa do azul para o rosa com o combo.
 
-| Palavra | Quando | Cor |
-| --- | --- | --- |
-| ドン | acerto | `shu` |
-| ズバッ | acerto rápido | `shu` |
-| カチッ | peça encaixada (Kumitate) | `shu` |
-| ピカッ | captura, nota perfeita, objetivo cumprido | `shu` |
-| ドドン | subir de nível | `shu` |
-| パカッ | baú | `kin` |
-| ゴゴゴ | carta ou inimigo raro aparecendo | `kin` |
-| バッ | carta virada no booster | `tinta` |
-| ガキン | escudo segurou o golpe | `tinta` |
-| バキッ | inimigo acertou você | `tinta` |
-| スカッ | erro | `tinta` |
+## Feedback (onomatopeia)
 
-Regras:
+Acerto e erro continuam com uma palavra curta em katakana carimbada perto de onde aconteceu: `onomato(palavra, elemento, cor)` em `src/core/fx.ts`.
 
-- Uma onomatopeia por evento. Duas ao mesmo tempo viram ruído.
-- Some em menos de um segundo e nunca cobre a pergunta seguinte (`pointer-events: none`).
-- Contorno de papel em volta da letra, para ler em cima de qualquer fundo.
-- Cada onomatopeia tem um som parecido em `src/core/audio.ts`.
+| Cor | Quando |
+| --- | --- |
+| `bom` (verde) | acerto, acerto rápido, peça encaixada |
+| `festa` (sakura) | captura, nota perfeita, frase montada, subir de nível |
+| `raro` (dourado) | carta rara aparecendo, baú |
+| `neutro` (cinza) | erro, carta virada, golpe e defesa |
+
+Erro não é castigo: cinza, curto e sempre com a resposta certa na tela. Uma onomatopeia por evento; some em menos de um segundo e nunca cobre a pergunta seguinte.
 
 ## Movimento
 
-- Traço que se desenha: título e sublinhado de pincel entram com `stroke` animado.
-- Tremor de quadro: as bordas dos quadros principais tremem de leve, trocando entre três filtros de deslocamento (o "line boil" de animação à mão). É para a tela não parecer parada.
-- Impacto: acerto dá um tranco curto no quadro; erro dá um tremor de lado.
+Animação curta e com motivo: `--d-1` 120 ms (hover), `--d-2` 220 ms (troca de estado), `--d-3` 360 ms (entrada de tela). `--mola` só para o que comemora.
 
-O modo calmo (`Ajustes`) e o `prefers-reduced-motion` do sistema desligam o tremor de quadro, encurtam os trancos, deixam a onomatopeia menor e sem giro e cortam a maior parte dos respingos. A informação continua toda na tela.
+- Pergunta nova: sobe e aparece.
+- Acerto: o botão certo fica verde com um pulo curto.
+- Erro: o botão fica vermelho claro e riscado, a certa aparece, o quadro treme de lado.
+- Vitória: raios lentos girando atrás do quadro.
 
-## Mangá e anime
+O **modo calmo** (Ajustes) e o `prefers-reduced-motion` do sistema param toda animação que se repete, deixam o brilho mais lento (1,6 s), deixam a onomatopeia menor e sem giro e cortam a maior parte das faíscas. Um teste confere que toda animação sem fim tem a regra do modo calmo. A informação continua toda na tela.
 
-### A cor é recompensa
+## Acessibilidade
 
-Cada quadro com cenário tem duas camadas: o desenho de mangá e, por cima, a mesma imagem pintada em anime (`<Pintura>` em `src/core/Pintura.tsx`). A camada colorida aparece por um borrão de tinta que cresce do meio do quadro, controlado pela variável CSS `--cor`, de 0 (só tinta) a 1 (cor cheia). O valor sai de `src/core/cor.ts`:
-
-- Acerto: a cor sobe até o nível do combo. Seis acertos seguidos enchem (no Kana Beat, dez notas). Um acerto nunca tira cor.
-- Erro: sobra 35% da cor. Ela cai devagar (a transição leva 0,9 s), não some de uma vez.
-- Pausa, recomeço e troca de tela: volta para o traço.
-- Progresso que só cresce (frases da rodada do Kumitate): usa `progresso()`.
-
-### Onde é mangá
-
-A leitura pede foco, então nessas telas o traço manda e a cor é só acento:
-
-- Kumitate: o tabuleiro ganha no máximo metade da cor, aos poucos, a cada frase montada. A lição fica toda em mangá.
-- Perguntas do KanjiMon: a arena pinta com o combo, mas a carta e as respostas continuam no traço.
-- KanjiDex e painel de ajuda: só mangá, com o vermelho e o dourado de sempre.
-- Quadros de passagem e onomatopeia: a narração da Aventura é um quadro de mangá, mesmo no meio de uma cena colorida.
-
-### Onde é anime
-
-Onde a graça é viver ou comemorar, a cor entra cheia:
-
-- Aventura e Conversa: lugar e personagem em cor de anime durante a cena. A narração volta ao mangá. Os retratos coloridos são as mesmas pessoas do mangá.
-- Captura e booster do KanjiMon: a arte da carta sai do cinza para a cor e estoura para fora do quadro com aros rosa e azul. A arte continua a original de `kanjimon.online`; só o efeito muda.
-- Chefe e elite do Kotodama entram em cor cheia; relíquias têm fundo colorido. No combate comum o santuário pinta com os acertos.
-- Kana Beat: a rua de Dotonbori acende com o combo, e a linha de acerto passa de tinta para azul.
-- Vitória (nível, baú, fim de rodada): raios azuis e rosa atrás do quadro.
-
-### O fliperama mistura os dois
-
-A capa é mangá. Cada jogo que você já jogou de verdade (capturou, terminou uma música, uma run, uma cena, uma rodada, uma conversa) aparece pintado, como um mapa que vai ganhando cor. A capa "Jogar agora" pinta na mesma proporção: com os seis jogos jogados, Shibuya fica toda colorida. Nos menus da Aventura e da Conversa, cena concluída também fica pintada.
-
-### Como uma passa para a outra
-
-Sem corte seco nem esmaecido genérico. A passagem é sempre de tinta:
-
-- Borrão de tinta que vira cor: a máscara cresce do centro, com respingos em volta.
-- Pincelada: ao abrir uma cena da Aventura ou uma conversa, o borrão cresce do zero até cheio (animação `pintar`).
-- Corte de quadro: a narração volta ao mangá dentro do mesmo quadro.
-
-No modo calmo a cor ainda chega, mas mais devagar (1,6 s), um pouco menos saturada e sem as animações de pintar e de colorir carta.
+- Foco do teclado sempre visível: contorno de 3px em `--brand`.
+- Contraste AA em todo texto, nos dois temas.
+- Nada de rolagem para o lado no celular (360px).
+- Tudo funciona só no teclado, com o IME japonês ligado também.
 
 ## Cenários e personagens
 
-Lugares reais do Japão (cruzamento de Shibuya, Fushimi Inari, Dotonbori, aeroporto de Narita, estação de Shinjuku), cada um em duas versões com a mesma composição: mangá em `src/assets/cenas/` e `src/assets/pessoas/` (WebP cinza) e anime em `src/assets/cenas-cor/` e `src/assets/pessoas-cor/` (WebP colorido). Todas com no máximo 960px de largura e menos de 160 KB. Um teste falha se uma imagem de mangá ficar sem a versão colorida.
-
-Foram gerados no PC com um modelo aberto (veja os créditos no README). Para gerar de novo, siga `docs/imagens.md`.
+Lugares reais do Japão (Shibuya, Fushimi Inari, Dotonbori, Narita, Shinjuku) em `src/assets/cenas-cor/`, retratos em `src/assets/pessoas-cor/` e vocabulário em `imagens/`, `acoes/`, `gente/`, `lugares/` e `kana/`. Sempre coloridos, em WebP, até 960px e menos de 160 KB. Como gerar: `docs/imagens.md`.
 
 ## Cartas do KanjiMon
 
-A arte de cada carta continua a original, vinda de `kanjimon.online`. O que muda é a moldura:
+A arte de cada carta é a original, de `kanjimon.online`. A raridade fica na moldura:
 
-- C: quadro de tinta simples.
-- R: quadro duplo, com fio branco por dentro.
-- SR: quadro vermelho (`--shu`).
-- UR: quadro vermelho com fio dourado (`--kin`) e linhas de concentração atrás.
+- C: borda neutra.
+- R: borda azul clara.
+- SR: borda sakura com aro.
+- UR: borda dourada com brilho e raios girando atrás.
 
-O kanji da carta fica num balão de legenda branco, em pincel, no canto de cima.
+## Ajuda
+
+Toda tela tem um botão redondo de interrogação no canto de baixo. Ele, a tecla `?` ou a F1 abrem a explicação daquela tela: objetivo, como jogar, todas as teclas, o que cada coisa quer dizer, como aquilo ensina e as perguntas mais comuns. Nada abre sozinho. Na Conversa por voz a F1 continua traduzindo a fala; lá a ajuda abre com `?`.
+
+Com a ajuda aberta, o jogo não recebe tecla nenhuma e o Kana Beat pausa. Esc ou um clique fora fecha.
+
+O texto fica em `src/content/ajuda/`, um arquivo por jogo. Um teste confere que toda tela tem ajuda e que toda tecla citada existe de verdade no código da tela, e o contrário também.

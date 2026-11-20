@@ -53,7 +53,7 @@ describe('cor como recompensa', () => {
     expect(cor.value).toBeLessThan(0.05);
   });
 
-  it('zerar volta para a tinta', () => {
+  it('zerar apaga o brilho', () => {
     acertou(3);
     zerar();
     expect(cor.value).toBe(0);
@@ -74,12 +74,12 @@ describe('cor como recompensa', () => {
   });
 });
 
-describe('mapa sendo pintado', () => {
-  it('save novo: nenhum jogo pintado', () => {
+describe('jogos já jogados no fliperama', () => {
+  it('save novo: nenhum jogo marcado', () => {
     expect(Object.values(visitados(saves())).some(Boolean)).toBe(false);
   });
 
-  it('cada jogo jogado de verdade ganha cor, e só ele', () => {
+  it('cada jogo jogado de verdade ganha o sinal, e só ele', () => {
     const s = saves();
     s.kanjimon.captures = 1;
     s.aventura.done = ['aeroporto'];

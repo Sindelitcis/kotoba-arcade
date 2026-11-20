@@ -4,8 +4,7 @@ import { sfx, speak } from '../../core/audio';
 import { VOZ_PALAVRA } from '../../core/vozes';
 import { cenaStyle } from '../../core/arte';
 import { acertou, cor, corStyle, errou, zerar } from '../../core/cor';
-import { Pintura } from '../../core/Pintura';
-import { burstFrom, INK, onomato, pulse } from '../../core/fx';
+import { burstFrom, FX_COR, onomato, pulse } from '../../core/fx';
 import type { Question } from '../../core/questions';
 import { teclaDe } from '../../core/teclas';
 import { EFFECTS, effectText, faceOf, NODES, RELICS, REST_HEAL, Run, SHARPEN, type Intent, type RunCard, type RunEvent } from './engine';
@@ -19,10 +18,10 @@ interface Asking {
 const HIT_DELAY = 520;
 const MISS_DELAY = 1800;
 const COLORS: Record<string, string[]> = {
-  attack: [INK.shu, INK.tinta],
-  block: [INK.tinta],
-  heal: [INK.shu, INK.tinta],
-  draw: [INK.tinta],
+  attack: [FX_COR.festa, FX_COR.raro],
+  block: [FX_COR.marca],
+  heal: [FX_COR.bom],
+  draw: [FX_COR.raro],
 };
 
 function newRun(): Run {
@@ -83,7 +82,7 @@ export function RoguelikeGame() {
       } else if (e.t === 'win') {
         sfx.capture(e.kind === 'combat' ? 0 : e.kind === 'elite' ? 2 : 3);
         burstFrom(enemyEl.current, COLORS.attack as string[], 50, 520);
-        onomato('acerto', enemyEl.current, 'shu', 1.5);
+        onomato('acerto', enemyEl.current, 'bom', 1.5);
       } else if (e.t === 'levelup') {
         sfx.levelup();
         setNote(`Nível ${e.level}!`);
@@ -128,7 +127,7 @@ export function RoguelikeGame() {
       acertou(played.combo);
       sfx.hit(played.combo);
       if (played.fast) sfx.fast();
-      onomato(played.fast ? 'rapido' : 'acerto', document.querySelector('.rg-ask .prompt'), 'shu');
+      onomato(played.fast ? 'rapido' : 'acerto', document.querySelector('.rg-ask .prompt'), 'bom');
       const target = effect === 'attack' ? enemyEl.current : playerEl.current;
       burstFrom(target, COLORS[effect] as string[], played.fast ? 34 : 20);
       pulse(target, effect === 'attack' ? 'hurt' : 'pop');
@@ -284,7 +283,6 @@ export function RoguelikeGame() {
               style={{ ...cenaStyle('kotodama-inari'), ...corStyle(enemy.kind === 'combat' ? cor.value : 1) }}
               data-testid="rg-enemy"
             >
-              <Pintura cena="kotodama-inari" />
               <span class="rg-glyph">{enemy.jp}</span>
               <b>{enemy.name}</b>
               <div class="bar">

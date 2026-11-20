@@ -120,9 +120,9 @@ test('uma conversa digitada completa, do pedido ao resumo', async ({ page }) => 
   await page.keyboard.press('Enter');
   await expect(page.getByTestId('cv')).toHaveAttribute('data-phase', 'conversa');
   await expect(page.getByTestId('cv-npc').first()).toContainText('いらっしゃいませ');
-  // Conversar é viver a cena: café e atendente em cor de anime.
-  await expect(page.getByTestId('cv-cena')).toHaveAttribute('style', /--cor:\s*1/);
-  await expect(page.getByTestId('cv-cena').locator('img')).toHaveClass('cor');
+  // Conversar é viver a cena: o café e a atendente, em cor de anime.
+  await expect(page.getByTestId('cv-cena')).toHaveAttribute('style', /--cena:\s*url\(.*conversa-cafe/);
+  await expect(page.getByTestId('cv-cena').locator('img')).toHaveAttribute('src', /sakura/);
   await page.waitForTimeout(1400);
   if (SHOTS) await page.getByTestId('cv-cena').screenshot({ path: `${SHOTS}/conversa-cena.png` });
   // Furigana na fala fixa de abertura.

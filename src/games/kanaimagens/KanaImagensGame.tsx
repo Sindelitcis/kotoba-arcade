@@ -194,11 +194,11 @@ export function KanaImagensGame() {
         sfx.hit(e.combo);
         if (e.rapido) sfx.fast();
         acertou(e.combo);
-        onomato(e.rapido ? 'rapido' : 'acerto', document.querySelector('.ki-opcao.certa'), 'shu', 0.9);
+        onomato(e.rapido ? 'rapido' : 'acerto', document.querySelector('.ki-opcao.certa'), 'bom', 0.9);
       } else if (e.t === 'erro') {
         sfx.miss();
         errou();
-        onomato('erro', document.querySelector('.ki-opcao.errada'), 'tinta', 0.8);
+        onomato('erro', document.querySelector('.ki-opcao.errada'), 'neutro', 0.8);
       } else if (e.t === 'lote') {
         setAviso(`Abriu: ${e.titulo}`);
       } else if (e.t === 'nivel') {

@@ -1,13 +1,10 @@
 /**
- * Cenários e personagens em duas versões: traço de mangá em preto e branco e anime colorido,
- * com o mesmo desenho (docs/estilo.md e docs/imagens.md). Os arquivos ficam em src/assets;
- * o Vite cuida dos nomes com hash na versão publicada.
+ * Cenários e personagens em anime colorido (docs/estilo.md e docs/imagens.md). Os arquivos ficam
+ * em src/assets/cenas-cor e src/assets/pessoas-cor; o Vite cuida dos nomes com hash na versão publicada.
  */
 
-const CENAS = import.meta.glob<string>('../assets/cenas/*.webp', { eager: true, query: '?url', import: 'default' });
-const PESSOAS = import.meta.glob<string>('../assets/pessoas/*.webp', { eager: true, query: '?url', import: 'default' });
-const CENAS_COR = import.meta.glob<string>('../assets/cenas-cor/*.webp', { eager: true, query: '?url', import: 'default' });
-const PESSOAS_COR = import.meta.glob<string>('../assets/pessoas-cor/*.webp', { eager: true, query: '?url', import: 'default' });
+const CENAS = import.meta.glob<string>('../assets/cenas-cor/*.webp', { eager: true, query: '?url', import: 'default' });
+const PESSOAS = import.meta.glob<string>('../assets/pessoas-cor/*.webp', { eager: true, query: '?url', import: 'default' });
 
 export const NOMES_CENAS = [
   'hub-shibuya',
@@ -31,24 +28,14 @@ export type Cena = (typeof NOMES_CENAS)[number];
 export type Pessoa = (typeof NOMES_PESSOAS)[number];
 
 export function cenaUrl(nome: Cena): string | undefined {
-  return CENAS[`../assets/cenas/${nome}.webp`];
+  return CENAS[`../assets/cenas-cor/${nome}.webp`];
 }
 
 export function pessoaUrl(nome: string | undefined): string | undefined {
-  return nome ? PESSOAS[`../assets/pessoas/${nome}.webp`] : undefined;
+  return nome ? PESSOAS[`../assets/pessoas-cor/${nome}.webp`] : undefined;
 }
 
-/** Versão anime colorida do cenário. */
-export function cenaCorUrl(nome: Cena): string | undefined {
-  return CENAS_COR[`../assets/cenas-cor/${nome}.webp`];
-}
-
-/** Versão anime colorida do personagem: o mesmo desenho do mangá, pintado. */
-export function pessoaCorUrl(nome: string | undefined): string | undefined {
-  return nome ? PESSOAS_COR[`../assets/pessoas-cor/${nome}.webp`] : undefined;
-}
-
-/** Estilo inline que o CSS usa como fundo do quadro (`--cena`). Vazio se a imagem não existir. */
+/** Estilo inline que o CSS usa como fundo do cartão (`--cena`). Vazio se a imagem não existir. */
 export function cenaStyle(nome: Cena | undefined): Record<string, string> {
   const url = nome && cenaUrl(nome);
   return url ? { '--cena': `url("${url}")` } : {};

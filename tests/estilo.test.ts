@@ -1,8 +1,9 @@
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { app, commit } from '../src/core/app';
-import { CENA_AVENTURA, CENA_CONVERSA, NOMES_CENAS, NOMES_PESSOAS, cenaCorUrl, cenaStyle, pessoaCorUrl, pessoaUrl } from '../src/core/arte';
+import { CENA_AVENTURA, CENA_CONVERSA, NOMES_CENAS, NOMES_PESSOAS, cenaStyle, cenaUrl, pessoaUrl } from '../src/core/arte';
+import { aplicarTema, atributoDoTema } from '../src/core/tema';
 import { yo } from '../src/core/audio';
 import { onomato, SFX_WORDS } from '../src/core/fx';
 import { SCENES, SPEAKERS } from '../src/games/aventura/cenas';
@@ -25,6 +26,20 @@ describe('fontes recortadas', () => {
     expect([...faltando].join('')).toBe('');
   });
 
+  it('as fontes extras do Kanji em peças têm o mesmo peso da fonte principal', () => {
+    // Com peso diferente o navegador escolhia a face das peças pelo peso, via que 言葉 não estava no
+    // unicode-range dela e desenhava o kanji do fliperama na fonte do sistema.
+    const faces = (css: string) =>
+      [...css.matchAll(/@font-face\s*{([^}]*)}/g)].map((m) => ({
+        familia: /font-family:\s*'([^']+)'/.exec(m[1]!)![1],
+        peso: /font-weight:\s*([^;]+);/.exec(m[1]!)![1]!.trim(),
+      }));
+    const principais = faces(readFileSync(join(SRC, 'styles.css'), 'utf8'));
+    const pecas = faces(readFileSync(join(SRC, 'assets', 'fontes', 'pecas.css'), 'utf8'));
+    expect(pecas.length).toBeGreaterThan(0);
+    for (const f of pecas) expect(principais, `${f.familia} ${f.peso}`).toContainEqual(f);
+  });
+
   it('as onomatopeias usam só katakana que está no recorte', () => {
     const recorte = new Set(readFileSync(join(SRC, 'assets/fontes/caracteres.txt'), 'utf-8'));
     for (const w of Object.values(SFX_WORDS)) for (const c of w) expect(recorte.has(c), `${w}: ${c}`).toBe(true);
@@ -32,23 +47,17 @@ describe('fontes recortadas', () => {
 });
 
 describe('cenários e personagens', () => {
-  it('toda imagem nomeada existe em src/assets', () => {
-    for (const n of NOMES_CENAS) expect(existsSync(join(SRC, 'assets/cenas', `${n}.webp`)), n).toBe(true);
-    for (const n of NOMES_PESSOAS) expect(existsSync(join(SRC, 'assets/pessoas', `${n}.webp`)), n).toBe(true);
-  });
-
-  it('toda imagem de mangá tem a versão anime colorida com o mesmo nome', () => {
-    // Sem a versão colorida, a recompensa de cor não aparece naquele cenário ou personagem.
-    for (const n of NOMES_CENAS) expect(cenaCorUrl(n), n).toBeDefined();
-    for (const n of NOMES_PESSOAS) expect(pessoaCorUrl(n), n).toBeDefined();
-    const cenasCor = readdirSync(join(SRC, 'assets/cenas-cor')).map((f) => f.replace('.webp', ''));
-    const pessoasCor = readdirSync(join(SRC, 'assets/pessoas-cor')).map((f) => f.replace('.webp', ''));
-    expect(cenasCor.sort()).toEqual([...NOMES_CENAS].sort());
-    expect(pessoasCor.sort()).toEqual([...NOMES_PESSOAS].sort());
+  it('toda imagem nomeada existe em src/assets, e nenhuma sobra sem nome', () => {
+    for (const n of NOMES_CENAS) expect(cenaUrl(n), n).toBeDefined();
+    for (const n of NOMES_PESSOAS) expect(pessoaUrl(n), n).toBeDefined();
+    const cenas = readdirSync(join(SRC, 'assets/cenas-cor')).map((f) => f.replace('.webp', ''));
+    const pessoas = readdirSync(join(SRC, 'assets/pessoas-cor')).map((f) => f.replace('.webp', ''));
+    expect(cenas.sort()).toEqual([...NOMES_CENAS].sort());
+    expect(pessoas.sort()).toEqual([...NOMES_PESSOAS].sort());
   });
 
   it('nenhuma imagem passa de 160 KB', () => {
-    for (const dir of ['cenas', 'pessoas', 'cenas-cor', 'pessoas-cor']) {
+    for (const dir of ['cenas-cor', 'pessoas-cor']) {
       for (const f of arquivos(join(SRC, 'assets', dir))) expect(readFileSync(f).length, f).toBeLessThan(160 * 1024);
     }
   });
@@ -95,9 +104,9 @@ describe('onomatopeia e modo calmo', () => {
     vi.useFakeTimers();
     const alvo = document.createElement('div');
     document.body.appendChild(alvo);
-    const el = onomato('acerto', alvo, 'shu');
+    const el = onomato('acerto', alvo, 'bom');
     expect(el?.textContent).toBe('ドン');
-    expect(el?.classList.contains('c-shu')).toBe(true);
+    expect(el?.classList.contains('c-bom')).toBe(true);
     expect(document.querySelectorAll('.onomato')).toHaveLength(1);
     vi.advanceTimersByTime(1000);
     expect(document.querySelectorAll('.onomato')).toHaveLength(0);
@@ -119,6 +128,52 @@ describe('onomatopeia e modo calmo', () => {
     app.data.settings.calm = false;
     commit();
     expect(document.documentElement.hasAttribute('data-calma')).toBe(false);
+  });
+});
+
+describe('tema claro e escuro', () => {
+  afterEach(() => {
+    app.data.settings.tema = 'auto';
+    commit();
+  });
+
+  it('automático deixa o sistema decidir; claro e escuro fixam o atributo na raiz', () => {
+    expect(atributoDoTema('auto')).toBeNull();
+    app.data.settings.tema = 'escuro';
+    commit();
+    expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
+    app.data.settings.tema = 'claro';
+    commit();
+    expect(document.documentElement.getAttribute('data-theme')).toBe('light');
+    app.data.settings.tema = 'auto';
+    commit();
+    expect(document.documentElement.hasAttribute('data-theme')).toBe(false);
+  });
+
+  it('a barra do navegador acompanha o tema', () => {
+    const meta = document.createElement('meta');
+    meta.name = 'theme-color';
+    document.head.appendChild(meta);
+    aplicarTema('escuro');
+    expect(meta.content).toBe('#0d1220');
+    aplicarTema('claro');
+    expect(meta.content).toBe('#f3f6fb');
+    meta.remove();
+  });
+
+  it('o tema escuro redefine todos os tokens de cor do claro', () => {
+    // Token esquecido no escuro deixaria texto claro sobre fundo claro.
+    const css = readFileSync(join(SRC, 'styles.css'), 'utf-8');
+    const bloco = (inicio: string) => {
+      const i = css.indexOf(inicio);
+      return css.slice(i, css.indexOf('}', i));
+    };
+    const cores = (b: string) => new Set([...b.matchAll(/(--[a-z0-9-]+):\s*#/g)].map((m) => m[1]));
+    const claro = cores(bloco(':root {'));
+    const escuro = cores(bloco(":root[data-theme='dark'] {"));
+    const sistema = cores(bloco(":root:not([data-theme='light']) {"));
+    expect([...claro].filter((t) => !escuro.has(t))).toEqual([]);
+    expect([...escuro].sort()).toEqual([...sistema].sort());
   });
 });
 

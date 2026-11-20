@@ -2,17 +2,18 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { KANJI, type Sentence } from '../content';
 import { app, aventuraSave, cenaSave, commit, conversaSave, go, gramaticaSave, jornadaSave, pecasSave, kanaBeatSave, kanaImagensSave, kanjimonSave, memoriaSave, replaceSave, roguelikeSave, saved, screen, tick, type Screen } from '../core/app';
 import { cenaStyle, type Cena } from '../core/arte';
-import { figuraTintaUrl, figuraUrl } from '../core/figuras';
+import { figuraUrl } from '../core/figuras';
 import { hasJapaneseVoice, sfx, speak } from '../core/audio';
-import { corStyle, visitados, type Saves } from '../core/cor';
-import { Pintura } from '../core/Pintura';
+import { visitados, type Saves } from '../core/cor';
+import { Icone } from '../core/Icone';
+import type { Tema } from '../core/save';
 import { useSubtelaAjuda } from '../core/help/ajuda';
 import { levelInfo, readingMeter, recentDays } from '../core/progress';
 import { esquecerPt } from '../core/fala-pt';
 import { exportSave } from '../core/save';
 import { teclaDe } from '../core/teclas';
 import { BOOSTER_COST, canOpenBooster } from '../games/kanjimon/engine';
-import { andamento, ETAPAS, etapaDa, proximaMissao } from '../jornada/etapas';
+import { etapaDa, proximaMissao } from '../jornada/etapas';
 
 interface Tile {
   id: string;
@@ -20,22 +21,24 @@ interface Tile {
   jp: string;
   blurb: string;
   screen?: Screen;
+  /** Atalho de teclado no fliperama. */
+  tecla: string;
   cena?: Cena;
   /** Fundo desenhado no estúdio (src/assets/lugares), para os jogos de imagem. */
   figura?: string;
 }
 
 const TILES: Tile[] = [
-  { id: 'kanjimon', title: 'KanjiMon', jp: '漢字モン', blurb: 'Cace kanji, quebre os selos, complete a coleção.', screen: 'kanjimon', cena: 'kanjimon-takao' },
-  { id: 'kanaimagens', title: 'Kana em imagens', jp: 'かなの絵', blurb: 'Cada kana é um desenho. Do あ às palavras em katakana.', screen: 'kanaimagens', cena: 'aventura-konbini' },
-  { id: 'kanabeat', title: 'Kana Beat', jp: 'かなビート', blurb: 'Digite no ritmo. Kana e palavras no tempo da batida.', screen: 'kanabeat', cena: 'kanabeat-dotonbori' },
-  { id: 'roguelike', title: 'Kotodama', jp: '言霊', blurb: 'Roguelike de cartas. Runs curtas, relíquias e um chefe no topo.', screen: 'roguelike', cena: 'kotodama-inari' },
-  { id: 'aventura', title: 'Aventura', jp: '冒険', blurb: 'Você chegou ao Japão. Cenas curtas com japonês de verdade.', screen: 'aventura', cena: 'aventura-narita' },
-  { id: 'gramatica', title: 'Kumitate', jp: '組み立て', blurb: 'Monte frases encaixando partículas e pontas de verbo.', screen: 'gramatica', cena: 'kumitate-gion' },
-  { id: 'pecas', title: 'Kanji em peças', jp: '漢字パズル', blurb: 'Veja o kanji como desenho feito de peças. Monte, ache e adivinhe.', screen: 'pecas', cena: 'pecas-ryoanji' },
-  { id: 'memoria', title: 'Memória', jp: '絵合わせ', blurb: 'Ligue imagem e palavra. Do kana ao kanji, e depois só pelo som.', screen: 'memoria', figura: 'heya' },
-  { id: 'cena', title: 'Cena Viva', jp: '生きた場面', blurb: 'Lugares do Japão cheios de coisas. Ache o que a frase pede.', screen: 'cena', figura: 'konbini' },
-  { id: 'conversa', title: 'Conversa por voz', jp: '会話', blurb: 'Fale japonês com personagens. A IA roda no seu PC.', screen: 'conversa', cena: 'conversa-cafe' },
+  { id: 'kanjimon', title: 'KanjiMon', jp: '漢字モン', blurb: 'Cace kanji, quebre os selos, complete a coleção.', screen: 'kanjimon', tecla: 'C', cena: 'kanjimon-takao' },
+  { id: 'kanaimagens', title: 'Kana em imagens', jp: 'かなの絵', blurb: 'Cada kana é um desenho. Do あ às palavras em katakana.', screen: 'kanaimagens', tecla: 'I', cena: 'aventura-konbini' },
+  { id: 'kanabeat', title: 'Kana Beat', jp: 'かなビート', blurb: 'Digite no ritmo. Kana e palavras no tempo da batida.', screen: 'kanabeat', tecla: 'K', cena: 'kanabeat-dotonbori' },
+  { id: 'roguelike', title: 'Kotodama', jp: '言霊', blurb: 'Roguelike de cartas. Runs curtas, relíquias e um chefe no topo.', screen: 'roguelike', tecla: 'R', cena: 'kotodama-inari' },
+  { id: 'aventura', title: 'Aventura', jp: '冒険', blurb: 'Você chegou ao Japão. Cenas curtas com japonês de verdade.', screen: 'aventura', tecla: 'A', cena: 'aventura-narita' },
+  { id: 'gramatica', title: 'Kumitate', jp: '組み立て', blurb: 'Monte frases encaixando partículas e pontas de verbo.', screen: 'gramatica', tecla: 'G', cena: 'kumitate-gion' },
+  { id: 'pecas', title: 'Kanji em peças', jp: '漢字パズル', blurb: 'Veja o kanji como desenho feito de peças. Monte, ache e adivinhe.', screen: 'pecas', tecla: 'P', cena: 'pecas-ryoanji' },
+  { id: 'memoria', title: 'Memória', jp: '絵合わせ', blurb: 'Ligue imagem e palavra. Do kana ao kanji, e depois só pelo som.', screen: 'memoria', tecla: 'M', figura: 'heya' },
+  { id: 'cena', title: 'Cena Viva', jp: '生きた場面', blurb: 'Lugares do Japão cheios de coisas. Ache o que a frase pede.', screen: 'cena', tecla: 'L', figura: 'konbini' },
+  { id: 'conversa', title: 'Conversa por voz', jp: '会話', blurb: 'Fale japonês com personagens. A IA roda no seu PC.', screen: 'conversa', tecla: 'V', cena: 'conversa-cafe' },
 ];
 
 /** Frases cujo kanji o jogador já encontrou: prova concreta de que dá para ler mais que ontem. */
@@ -72,14 +75,12 @@ export function Hub() {
       : 'kanjimon';
   const nextLabel = { kanabeat: 'Kana Beat · Próxima música', roguelike: 'Kotodama · Nova run', aventura: 'Aventura · Próxima cena', gramatica: 'Kumitate · Nova rodada', pecas: 'Kanji em peças · Nova rodada', kanaimagens: 'Kana em imagens · Nova rodada', memoria: 'Memória · Nova rodada', cena: 'Cena Viva · Nova rodada', kanjimon: 'KanjiMon · Caçada' }[nextGame];
   const booster = canOpenBooster(profile, km, cards);
-  // Mapa sendo pintado: cada jogo já jogado ganha cor no fliperama, e a capa pinta junto.
-  const pintados = visitados({ kanjimon: km, kanabeat: kanaBeatSave(), roguelike: roguelikeSave(), aventura: aventuraSave(), gramatica: gramaticaSave(), conversa: conversaSave(), pecas: pecasSave(), kanaimagens: kanaImagensSave(), memoria: memoriaSave(), cena: cenaSave() });
-  const quantos = Object.values(pintados).filter(Boolean).length;
+  // Jogos que você já jogou ganham um sinal de visto no cartão.
+  const jogados = visitados({ kanjimon: km, kanabeat: kanaBeatSave(), roguelike: roguelikeSave(), aventura: aventuraSave(), gramatica: gramaticaSave(), conversa: conversaSave(), pecas: pecasSave(), kanaimagens: kanaImagensSave(), memoria: memoriaSave(), cena: cenaSave() });
   // Jornada: o caminho principal, com a próxima missão à vista.
   const jornada = jornadaSave();
   const proxima = proximaMissao(jornada);
   const etapaProx = proxima ? etapaDa(proxima.id) : undefined;
-  const feitasJornada = ETAPAS.reduce((t, e) => t + andamento(e, jornada), 0) / ETAPAS.length;
 
   // Ligado junto com o desenho da tela: tecla apertada logo que a tela aparece não se perde.
   useLayoutEffect(() => {
@@ -121,6 +122,12 @@ export function Hub() {
     if (showSettings) settingsRef.current?.querySelector<HTMLElement>('input, button')?.focus();
   }, [showSettings]);
 
+  const escolherTema = (tema: Tema) => {
+    settings.tema = tema;
+    commit();
+    sfx.click();
+  };
+
   const toggle = (opcao: 'sound' | 'voice' | 'calm' | 'vozLocal') => {
     settings[opcao] = !settings[opcao];
     // Voz do PC ligada ou desligada: a próxima fala procura o servidor de novo.
@@ -153,7 +160,7 @@ export function Hub() {
     <main class="hub">
       <header class="hub-top">
         <div class="brand">
-          <span class="brand-jp">言葉</span>
+          <span class="brand-jp" lang="ja">言葉</span>
           <div>
             <h1>Kotoba Arcade</h1>
             <p>Jogue. O japonês vem junto.</p>
@@ -174,8 +181,8 @@ export function Hub() {
               <span key={i} class={on ? 'day on' : 'day'} />
             ))}
           </div>
-          <button class="ghost" onClick={() => setShowSettings(true)} aria-label="Ajustes">
-            Ajustes
+          <button class="icon" onClick={() => setShowSettings(true)} aria-label="Ajustes" title="Ajustes">
+            <Icone nome="settings" />
           </button>
         </div>
       </header>
@@ -186,62 +193,70 @@ export function Hub() {
         </p>
       )}
 
-      <button class="koma jornada-faixa" style={{ ...cenaStyle(etapaProx?.cena ?? 'hub-shibuya'), ...corStyle(feitasJornada) }} onClick={() => go('jornada')} data-testid="hub-jornada">
-        <Pintura cena={etapaProx?.cena ?? 'hub-shibuya'} />
-        <span class="jornada-faixa-jp">旅</span>
-        <span class="jornada-faixa-txt">
-          <b>
-            Jornada <kbd>J</kbd>
-          </b>
-          <span>Do zero até trabalhar no Japão, em missões de 3 a 10 minutos.</span>
-          {proxima && (
-            <span class="jornada-faixa-prox">
-              Próxima: {proxima.titulo} · {proxima.minutos} min
+      <section class="hub-hero">
+        <button class="koma jornada-faixa" style={cenaStyle(etapaProx?.cena ?? 'hub-shibuya')} onClick={() => go('jornada')} data-testid="hub-jornada">
+          <span class="hub-rotulo">
+            <Icone nome="map" /> Jornada <kbd>J</kbd>
+          </span>
+          <span class="jornada-faixa-txt">
+            <b>Do zero até trabalhar no Japão</b>
+            <span>Missões de 3 a 10 minutos. Nada fica trancado.</span>
+            {proxima && (
+              <span class="jornada-faixa-prox">
+                <Icone nome="play" /> {proxima.titulo} · {proxima.minutos} min
+              </span>
+            )}
+          </span>
+        </button>
+
+        <div class="hub-lado">
+          <button class="play-now" style={cenaStyle('hub-shibuya')} onClick={() => go(nextGame)} data-testid="play-now">
+            <span class="hub-rotulo">
+              <Icone nome="sparkles" /> Jogar agora
             </span>
-          )}
-        </span>
-      </button>
+            <span class="play-now-main">{nextLabel.split(' · ')[0]}</span>
+            <span class="play-now-sub">
+              {nextLabel.split(' · ')[1]} <kbd>Enter</kbd>
+            </span>
+          </button>
 
-      <button class="koma ouvir-faixa" onClick={() => go('ouvir')} data-testid="hub-ouvir">
-        <span class="jornada-faixa-jp">聞</span>
-        <span class="jornada-faixa-txt">
-          <b>
-            Ouvir <kbd>O</kbd>
-          </b>
-          <span>Aulas de um a três minutos para aprender sem olhar a tela.</span>
-        </span>
-      </button>
+          <button class="koma ouvir-faixa" onClick={() => go('ouvir')} data-testid="hub-ouvir">
+            <span class="jornada-faixa-jp" lang="ja">
+              聞
+            </span>
+            <span class="jornada-faixa-txt">
+              <b>
+                Ouvir <kbd>O</kbd>
+              </b>
+              <span>Aulas de um a três minutos, sem olhar a tela.</span>
+            </span>
+          </button>
+        </div>
+      </section>
 
-      <button class="play-now" style={{ ...cenaStyle('hub-shibuya'), ...corStyle(quantos / TILES.length) }} onClick={() => go(nextGame)} data-testid="play-now">
-        <Pintura cena="hub-shibuya" />
-        <span class="play-now-main">Jogar agora</span>
-        <span class="play-now-sub">{nextLabel} <kbd>Enter</kbd></span>
-      </button>
+      <div class="secao-titulo">
+        <h2>Jogos</h2>
+        <span>
+          {Object.values(jogados).filter(Boolean).length} de {TILES.length} já jogados
+        </span>
+      </div>
 
       <section class="tiles">
         {TILES.map((t) => (
           <button
             key={t.id}
-            class={`${t.screen ? 'tile' : 'tile soon'}${pintados[t.id as keyof Saves] ? ' pintado' : ''}`}
-            style={{ ...(t.figura ? { '--cena': `url("${figuraTintaUrl(t.figura)}")` } : cenaStyle(t.cena)), ...corStyle(pintados[t.id as keyof Saves] ? 1 : 0) }}
+            class={`${t.screen ? 'tile' : 'tile soon'}${jogados[t.id as keyof Saves] ? ' jogado' : ''}`}
+            style={t.figura ? { '--cena': `url("${figuraUrl(t.figura)}")` } : cenaStyle(t.cena)}
             data-testid={`tile-${t.id}`}
             disabled={!t.screen}
             onClick={() => t.screen && go(t.screen)}
           >
-            {t.figura ? <span class="pinta" aria-hidden="true" style={{ '--cena-cor': `url("${figuraUrl(t.figura)}")` }} /> : <Pintura cena={t.cena} />}
-            <span class="tile-jp">{t.jp}</span>
+            <span class="tile-jp" lang="ja">
+              {t.jp}
+            </span>
             <span class="tile-title">
               {t.title}
-              {t.id === 'kanjimon' && <kbd>C</kbd>}
-              {t.id === 'kanabeat' && <kbd>K</kbd>}
-              {t.id === 'roguelike' && <kbd>R</kbd>}
-              {t.id === 'aventura' && <kbd>A</kbd>}
-              {t.id === 'conversa' && <kbd>V</kbd>}
-              {t.id === 'gramatica' && <kbd>G</kbd>}
-              {t.id === 'pecas' && <kbd>P</kbd>}
-              {t.id === 'kanaimagens' && <kbd>I</kbd>}
-              {t.id === 'memoria' && <kbd>M</kbd>}
-              {t.id === 'cena' && <kbd>L</kbd>}
+              <kbd>{t.tecla}</kbd>
             </span>
             <span class="tile-blurb">{t.blurb}</span>
           </button>
@@ -314,8 +329,22 @@ export function Hub() {
               <small class="muted"> (usa as aulas gravadas neste computador, com o servidor aberto: npm run aulas)</small>
             </label>
             <label class="check">
-              <input type="checkbox" checked={settings.calm} onChange={() => toggle('calm')} /> Modo calmo (menos tremor e partículas)
+              <input type="checkbox" checked={settings.calm} onChange={() => toggle('calm')} /> Modo calmo (menos movimento e faíscas)
             </label>
+            <h3 id="tema-titulo">Tema</h3>
+            <div class="segmento" role="group" aria-labelledby="tema-titulo">
+              {(
+                [
+                  ['auto', 'Do sistema', null],
+                  ['claro', 'Claro', 'sun'],
+                  ['escuro', 'Escuro', 'moon'],
+                ] as const
+              ).map(([valor, nome, icone]) => (
+                <button key={valor} aria-pressed={settings.tema === valor} onClick={() => escolherTema(valor)}>
+                  {icone && <Icone nome={icone} />} {nome}
+                </button>
+              ))}
+            </div>
             <h3>Save</h3>
             <p class="muted">O progresso fica neste navegador. Guarde um backup de vez em quando.</p>
             <div class="actions">

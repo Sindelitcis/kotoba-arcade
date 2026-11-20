@@ -11,7 +11,7 @@ export const MEMORIA: Ajuda = {
     'Palavra que você nunca viu aparece antes do quadro, com a imagem, o significado e a voz. Enter começa o quadro.',
     'Quadro rápido: as cartas estão abertas. Escolha uma imagem e depois a palavra dela (ou o contrário).',
     'Quadro de memória: as cartas estão viradas. Abra duas por vez e ache os pares.',
-    'Par certo fica colorido e diz a palavra. Par errado treme e volta, sem tela de erro.',
+    'Par certo fica verde e diz a palavra. Par errado treme e volta, sem tela de erro.',
     'Entre um quadro e outro dá para parar com Esc. O que você fez já vale.',
   ],
   teclas: [
@@ -21,7 +21,7 @@ export const MEMORIA: Ajuda = {
     { teclas: ['Esc'], faz: 'Parar a rodada (vale o que você fez); no menu, voltar ao fliperama' },
   ],
   elementos: [
-    { nome: 'Carta de imagem', texto: 'Desenho em traço de mangá. Quando o par fecha, ganha cor.' },
+    { nome: 'Carta de imagem', texto: 'Desenho colorido da palavra. Quando o par fecha, a carta fica verde.' },
     { nome: 'Carta de palavra', texto: 'Mostra a palavra em kana, depois em kanji, e por fim só um alto-falante: aí você acha pelo som.' },
     { nome: 'Carta brilhando', texto: 'Depois de duas confusões com o mesmo par, ele brilha para você não travar.' },
     { nome: 'Combo', texto: 'Pares seguidos sem confundir. O fundo vai ganhando cor com ele.' },

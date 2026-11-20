@@ -4,7 +4,6 @@ import { sfx, speak } from '../../core/audio';
 import { VOZ_PALAVRA } from '../../core/vozes';
 import { cenaStyle } from '../../core/arte';
 import { acertou, cor, corStyle, errou, zerar } from '../../core/cor';
-import { Pintura } from '../../core/Pintura';
 import { burstFrom, onomato, pulse } from '../../core/fx';
 import { teclaDe } from '../../core/teclas';
 import { artUrl, RARITY_COLORS } from './art';
@@ -80,7 +79,7 @@ export function KanjiMonGame() {
       pulse(cardEl.current, 'pop');
       if (next.enemy.rarity === 'sr' || next.enemy.rarity === 'ur') {
         sfx.rare();
-        onomato('raro', cardEl.current, 'kin');
+        onomato('raro', cardEl.current, 'raro');
         burstFrom(cardEl.current, RARITY_COLORS[next.enemy.rarity], 40);
       }
     }
@@ -105,7 +104,7 @@ export function KanjiMonGame() {
       acertou(hit.combo);
       sfx.hit(hit.combo);
       if (hit.fast) sfx.fast();
-      onomato(hit.fast ? 'rapido' : 'acerto', cardEl.current, 'shu');
+      onomato(hit.fast ? 'rapido' : 'acerto', cardEl.current, 'bom');
       burstFrom(cardEl.current, RARITY_COLORS[view.enemy.rarity], hit.fast ? 34 : 20);
       pulse(cardEl.current, 'hurt');
       setFeedback({
@@ -173,18 +172,18 @@ export function KanjiMonGame() {
     if (overlay.t === 'capture') {
       const tier = ['c', 'r', 'sr', 'ur'].indexOf(overlay.enemy.rarity);
       sfx.capture(tier);
-      onomato('captura', document.querySelector('.capture-card'), 'shu', 1.3);
+      onomato('captura', document.querySelector('.capture-card'), 'festa', 1.3);
       burstFrom(document.querySelector('.capture-card'), RARITY_COLORS[overlay.enemy.rarity], 30 + tier * 20, 520);
       const auto = window.setTimeout(dismiss, 1500);
       return () => clearTimeout(auto);
     }
     if (overlay.t === 'levelup') {
       sfx.levelup();
-      onomato('nivel', document.querySelector('.overlay h2'), 'shu', 1.4);
+      onomato('nivel', document.querySelector('.overlay h2'), 'festa', 1.4);
     }
     if (overlay.t === 'chest') {
       sfx.chest();
-      onomato('bau', document.querySelector('.overlay h2'), 'kin', 1.2);
+      onomato('bau', document.querySelector('.overlay h2'), 'raro', 1.2);
     }
     if (overlay.t === 'over') sfx.over();
     return undefined;
@@ -251,7 +250,6 @@ export function KanjiMonGame() {
       </header>
 
       <section class="arena" ref={arenaEl} style={{ ...cenaStyle('kanjimon-takao'), ...corStyle(cor.value) }} data-testid="arena">
-        <Pintura cena="kanjimon-takao" />
         <div class={`enemy-card r-${view.enemy.rarity}${hideCard ? ' hidden-face' : ''}`} ref={cardEl}>
           <img src={artUrl(view.enemy.kanji, view.enemy.rarity)} alt="" onError={(e) => ((e.target as HTMLImageElement).style.visibility = 'hidden')} />
           <div class="enemy-kanji" data-testid="enemy-kanji">

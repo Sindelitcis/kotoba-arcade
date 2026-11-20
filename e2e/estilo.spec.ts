@@ -1,73 +1,31 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 
 test.beforeEach(async ({ page }) => {
   await page.route('https://kanjimon.online/**', (route) => route.abort());
   await page.goto('/');
 });
 
-test('as fontes do mangá carregam e o título usa a de pincel', async ({ page }) => {
-  await page.evaluate(() => document.fonts.ready);
-  const families = await page.evaluate(() => [...document.fonts].filter((f) => f.status === 'loaded').map((f) => f.family.replace(/"/g, '')));
-  expect(families).toEqual(expect.arrayContaining(['Dela Gothic One', 'Yuji Syuku']));
-  await expect(page.locator('.brand-jp')).toHaveCSS('font-family', /Yuji Syuku/);
+test('as três fontes carregam: português, japonês e o kanji de estudo', async ({ page }) => {
+  // A Klee One é a maior (kanji de estudo) e pode chegar depois do fonts.ready; espera ela vir sozinha.
+  await expect
+    .poll(() => page.evaluate(() => [...document.fonts].filter((f) => f.status === 'loaded').map((f) => f.family.replace(/"/g, ''))))
+    .toEqual(expect.arrayContaining(['Plus Jakarta Sans', 'Zen Maru Gothic', 'Klee One']));
+  await expect(page.locator('.brand-jp')).toHaveCSS('font-family', /Klee One/);
+  await expect(page.locator('.tile-title').first()).toHaveCSS('font-family', /Plus Jakarta Sans/);
 });
 
-test('o traço dos quadros fica dentro do quadro, mesmo quando o quadro corta o que sobra', async ({ page }) => {
-  // Com a borda por fora e overflow: hidden, o traço de cima e da esquerda sumia nos cartões do fliperama.
-  const frames = await page.locator('.tile, .play-now, .panel').evaluateAll((els) =>
-    els.map((el) => {
-      const after = getComputedStyle(el, '::after');
-      return { overflow: getComputedStyle(el).overflow, top: parseFloat(after.top), left: parseFloat(after.left), border: after.borderTopWidth };
-    }),
-  );
-  expect(frames.length).toBeGreaterThan(6);
-  for (const f of frames) {
-    expect(f.border).toBe('3px');
-    if (f.overflow === 'hidden') {
-      expect(f.top).toBeGreaterThanOrEqual(0);
-      expect(f.left).toBeGreaterThanOrEqual(0);
-    }
-  }
-});
-
-test('os cartões do fliperama mostram o cenário de cada jogo', async ({ page }) => {
+test('os cartões do fliperama mostram a ilustração colorida de cada jogo', async ({ page }) => {
   const backgrounds = await page.locator('.tiles .tile').evaluateAll((els) => els.map((el) => getComputedStyle(el).backgroundImage));
   expect(backgrounds).toHaveLength(10);
   for (const bg of backgrounds) expect(bg).toMatch(/url\(/);
+  // Nada de versão em cinza: a imagem é a da pasta colorida.
+  const cenas = await page.locator('.tiles .tile').evaluateAll((els) => els.map((el) => (el as HTMLElement).style.getPropertyValue('--cena')));
+  for (const c of cenas) expect(c).not.toMatch(/-tinta|\/cenas\//);
 });
 
-test('modo calmo para o tremor dos quadros', async ({ page }) => {
-  const anim = () => page.locator('.play-now').evaluate((el) => getComputedStyle(el, '::after').animationName);
-  expect(await anim()).toBe('boil');
-  await page.getByRole('button', { name: 'Ajustes' }).click();
-  await page.getByLabel(/Modo calmo/).check();
-  await page.keyboard.press('Escape');
-  expect(await anim()).toBe('none');
-  await expect(page.locator('html')).toHaveAttribute('data-calma', '');
-});
-
-/** Valor de `--cor` que a tela pôs no quadro (0 = só tinta, 1 = cor cheia). */
-async function corDe(page: import('@playwright/test').Page, testid: string): Promise<number> {
-  return Number(await page.getByTestId(testid).evaluate((el) => (el as HTMLElement).style.getPropertyValue('--cor')));
-}
-
-test('o fliperama começa no traço e pinta o jogo que você já jogou', async ({ page }) => {
-  // Save novo: nenhum cartão pintado, a capa em tinta pura.
-  await expect(page.locator('.tiles .tile.pintado')).toHaveCount(0);
-  expect(await corDe(page, 'play-now')).toBe(0);
-  // Cada cartão tem por baixo a versão colorida do cenário, esperando a cor.
-  const camadas = await page.locator('.tiles .tile').evaluateAll((els) =>
-    els.map((el) => ({
-      tinta: (el as HTMLElement).style.getPropertyValue('--cena'),
-      cor: (el.querySelector('.pinta') as HTMLElement | null)?.style.getPropertyValue('--cena-cor') ?? '',
-    })),
-  );
-  expect(camadas).toHaveLength(10);
-  for (const c of camadas) {
-    expect(c.cor).toMatch(/url\(/);
-    expect(c.cor).not.toBe(c.tinta);
-  }
-
+test('jogo já jogado ganha o sinal no cartão e a contagem sobe', async ({ page }) => {
+  await expect(page.locator('.tiles .tile.jogado')).toHaveCount(0);
+  await expect(page.locator('.secao-titulo')).toContainText('0 de 10 já jogados');
   // Captura uma carta no KanjiMon e volta.
   await page.getByTestId('play-now').click();
   for (let i = 0; i < 200 && !(await page.locator('.overlay h2').isVisible()); i++) {
@@ -79,17 +37,17 @@ test('o fliperama começa no traço e pinta o jogo que você já jogou', async (
   await page.keyboard.press('Escape');
   await page.keyboard.press('Escape');
   await expect(page.getByRole('heading', { name: 'Kotoba Arcade' })).toBeVisible();
-
-  await expect(page.locator('.tiles .tile.pintado')).toHaveCount(1);
-  await expect(page.getByTestId('tile-kanjimon')).toHaveClass(/pintado/);
-  expect(await corDe(page, 'tile-kanjimon')).toBe(1);
-  expect(await corDe(page, 'tile-kanabeat')).toBe(0);
-  // Um jogo de todos: a capa pinta só a fração dele (a cor vai para o estilo com duas casas).
-  const jogos = await page.locator('.tiles .tile').count();
-  expect(await corDe(page, 'play-now')).toBeCloseTo(Math.round(100 / jogos) / 100, 2);
+  await expect(page.locator('.tiles .tile.jogado')).toHaveCount(1);
+  await expect(page.getByTestId('tile-kanjimon')).toHaveClass(/jogado/);
+  await expect(page.locator('.secao-titulo')).toContainText('1 de 10 já jogados');
 });
 
-test('na caçada a cor sobe com os acertos seguidos e cai no erro', async ({ page }) => {
+/** Valor de `--cor` (brilho do combo, 0 a 1) que a tela pôs no cartão. */
+async function corDe(page: Page, testid: string): Promise<number> {
+  return Number(await page.getByTestId(testid).evaluate((el) => (el as HTMLElement).style.getPropertyValue('--cor')));
+}
+
+test('na caçada o brilho sobe com os acertos seguidos e cai no erro', async ({ page }) => {
   await page.getByTestId('play-now').click();
   await expect(page.getByTestId('enemy-kanji')).toBeVisible();
   expect(await corDe(page, 'arena')).toBe(0);
@@ -107,49 +65,124 @@ test('na caçada a cor sobe com os acertos seguidos e cai no erro', async ({ pag
   const depois = await corDe(page, 'arena');
   expect(depois).toBeGreaterThan(0);
   expect(depois).toBeLessThan(valores[2]!);
-  // Ao sair da caçada, a próxima tela começa no traço.
+  // Ao sair da caçada, a próxima tela começa sem brilho.
   await page.keyboard.press('Escape');
   await page.getByTestId('play-now').click();
   expect(await corDe(page, 'arena')).toBe(0);
 });
 
-test('modo calmo deixa a cor chegar mais devagar e sem a animação de pintar', async ({ page }) => {
-  const duracao = () => page.getByTestId('play-now').evaluate((el) => getComputedStyle(el).transitionDuration);
-  expect(await duracao()).toBe('0.9s');
-  await page.getByRole('button', { name: 'Ajustes' }).click();
-  await page.getByLabel(/Modo calmo/).check();
-  await page.keyboard.press('Escape');
-  expect(await duracao()).toBe('1.6s');
-});
-
-test('com a cor cheia, o borrão pinta o quadro largo de ponta a ponta', async ({ page }) => {
-  // O desenho do borrão mantinha a proporção quadrada: num cartão largo, a cor cheia só cobria o meio.
-  const tile = page.getByTestId('tile-kanjimon');
-  await tile.evaluate((el) => {
-    (el as HTMLElement).style.setProperty('--veu', 'none');
+test('o aro do combo acende no cartão do jogo', async ({ page }) => {
+  await page.getByTestId('play-now').click();
+  const sombra = () => page.getByTestId('arena').evaluate((el) => getComputedStyle(el).boxShadow);
+  const antes = await sombra();
+  await page.getByTestId('arena').evaluate((el) => {
     (el as HTMLElement).style.transition = 'none';
     (el as HTMLElement).style.setProperty('--cor', '1');
   });
-  for (const t of await tile.locator(':scope > :not(.pinta)').all()) await t.evaluate((el) => ((el as HTMLElement).style.visibility = 'hidden'));
-  const png = (await tile.locator('.pinta').screenshot()).toString('base64');
-  // Saturação média de uma faixa estreita na beirada esquerda e na direita: a versão de mangá é cinza (perto de 0).
-  const sat = await page.evaluate(async (b64) => {
-    const img = new Image();
-    img.src = `data:image/png;base64,${b64}`;
-    await img.decode();
-    const c = document.createElement('canvas');
-    c.width = img.width;
-    c.height = img.height;
-    const g = c.getContext('2d')!;
-    g.drawImage(img, 0, 0);
-    const faixa = (x0: number) => {
-      const d = g.getImageData(x0, 0, Math.round(img.width * 0.06), img.height).data;
-      let s = 0;
-      for (let i = 0; i < d.length; i += 4) s += Math.max(d[i]!, d[i + 1]!, d[i + 2]!) - Math.min(d[i]!, d[i + 1]!, d[i + 2]!);
-      return s / (d.length / 4);
-    };
-    return { esquerda: faixa(2), direita: faixa(Math.round(img.width * 0.92)) };
-  }, png);
-  expect(sat.esquerda).toBeGreaterThan(25);
-  expect(sat.direita).toBeGreaterThan(25);
+  const depois = await sombra();
+  expect(depois).not.toBe(antes);
+  expect(depois).toMatch(/ 3px/);
+});
+
+test('modo calmo: brilho mais lento e faixas do Kana Beat paradas', async ({ page }) => {
+  await page.getByTestId('play-now').click();
+  const duracao = () => page.getByTestId('arena').evaluate((el) => getComputedStyle(el).transitionDuration.split(',')[0]);
+  expect(await duracao()).toBe('0.9s');
+  await page.keyboard.press('Escape');
+  await page.getByRole('button', { name: 'Ajustes' }).click();
+  await page.getByLabel(/Modo calmo/).check();
+  await page.keyboard.press('Escape');
+  await expect(page.locator('html')).toHaveAttribute('data-calma', '');
+  await page.getByTestId('play-now').click();
+  expect(await duracao()).toBe('1.6s');
+  await page.keyboard.press('Escape');
+  await page.keyboard.press('k');
+  const anim = await page.getByTestId('kb-track').evaluate((el) => getComputedStyle(el, '::before').animationName);
+  expect(anim).toBe('none');
+});
+
+test('tema escuro pelos ajustes: vale na hora e depois de recarregar', async ({ page }) => {
+  const fundo = () => page.evaluate(() => getComputedStyle(document.body).backgroundColor);
+  const claro = await fundo();
+  await page.getByRole('button', { name: 'Ajustes' }).click();
+  await page.getByRole('button', { name: 'Escuro' }).click();
+  await expect(page.getByRole('button', { name: 'Escuro' })).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+  expect(await fundo()).not.toBe(claro);
+  await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute('content', '#0d1220');
+  await page.reload();
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+  await page.getByRole('button', { name: 'Ajustes' }).click();
+  await page.getByRole('button', { name: 'Do sistema' }).click();
+  await expect(page.locator('html')).not.toHaveAttribute('data-theme', /./);
+});
+
+test('sem escolha nos ajustes, o tema segue o do sistema', async ({ browser }) => {
+  const ctx = await browser.newContext({ colorScheme: 'dark' });
+  const page = await ctx.newPage();
+  await page.goto('/');
+  const cor = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--surface').trim());
+  expect(cor).toBe('#161e31');
+  await ctx.close();
+});
+
+/** Contraste WCAG entre duas cores `#rrggbb`. */
+function contraste(a: string, b: string): number {
+  const lum = (hex: string) => {
+    const [r, g, bl] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255).map((c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4));
+    return 0.2126 * r! + 0.7152 * g! + 0.0722 * bl!;
+  };
+  const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p);
+  return (x! + 0.05) / (y! + 0.05);
+}
+
+for (const tema of ['claro', 'escuro'] as const) {
+  test(`contraste de texto em nível AA no tema ${tema}`, async ({ page }) => {
+    await page.getByRole('button', { name: 'Ajustes' }).click();
+    await page.getByRole('button', { name: tema === 'claro' ? 'Claro' : 'Escuro' }).click();
+    const t = await page.evaluate(() => {
+      const s = getComputedStyle(document.documentElement);
+      const nomes = ['bg', 'surface', 'surface-2', 'text', 'text-2', 'text-3', 'brand', 'on-brand', 'brand-soft', 'brand-text', 'ok-soft', 'ok-text', 'erro-soft', 'erro-text', 'raro-soft', 'raro-text', 'sakura-soft', 'sakura-text'];
+      return Object.fromEntries(nomes.map((n) => [n, s.getPropertyValue(`--${n}`).trim()]));
+    });
+    const pares: [string, string][] = [
+      ['text', 'surface'],
+      ['text', 'bg'],
+      ['text-2', 'surface'],
+      ['text-2', 'bg'],
+      ['text-2', 'surface-2'],
+      ['text-3', 'surface'],
+      ['text-3', 'bg'],
+      ['on-brand', 'brand'],
+      ['brand-text', 'brand-soft'],
+      ['brand-text', 'surface'],
+      ['ok-text', 'ok-soft'],
+      ['erro-text', 'erro-soft'],
+      ['raro-text', 'raro-soft'],
+      ['sakura-text', 'sakura-soft'],
+    ];
+    const fracos = pares.map(([f, b]) => ({ par: `${f} sobre ${b}`, c: contraste(t[f]!, t[b]!) })).filter((p) => p.c < 4.5);
+    expect(fracos).toEqual([]);
+  });
+}
+
+test('foco do teclado sempre visível nos cartões', async ({ page }) => {
+  await page.getByTestId('tile-kanjimon').focus();
+  const outline = await page.getByTestId('tile-kanjimon').evaluate((el) => {
+    const s = getComputedStyle(el);
+    return { estilo: s.outlineStyle, largura: s.outlineWidth };
+  });
+  expect(outline.estilo).toBe('solid');
+  expect(outline.largura).toBe('3px');
+});
+
+test('no celular o fliperama cabe na largura, sem rolagem de lado, e sem atalho de teclado', async ({ browser }) => {
+  const ctx = await browser.newContext({ viewport: { width: 360, height: 760 }, isMobile: true, hasTouch: true });
+  const page = await ctx.newPage();
+  await page.route('https://kanjimon.online/**', (route) => route.abort());
+  await page.goto('/');
+  const larga = await page.evaluate(() => document.documentElement.scrollWidth);
+  expect(larga).toBeLessThanOrEqual(360);
+  await expect(page.locator('.tile-title kbd').first()).toBeHidden();
+  await ctx.close();
 });

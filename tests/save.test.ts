@@ -50,6 +50,12 @@ describe('save', () => {
     expect(s.profile).toEqual({ xp: 0, coins: 0, daysPlayed: ['2026-11-01'], lastGame: undefined });
     expect(s.settings.sound).toBe(true);
   });
+
+  it('o tema fica entre automático, claro e escuro; valor estranho volta ao automático', () => {
+    expect(importSave(JSON.stringify({ v: 1, settings: { tema: 'escuro' } }), T0).settings.tema).toBe('escuro');
+    expect(importSave(JSON.stringify({ v: 1, settings: { tema: 'neon' } }), T0).settings.tema).toBe('auto');
+    expect(importSave(JSON.stringify({ v: 1 }), T0).settings.tema).toBe('auto');
+  });
 });
 
 describe('progresso', () => {

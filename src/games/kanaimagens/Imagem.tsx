@@ -2,42 +2,32 @@
  * A imagem de um kana: a letra no meio, como o objeto principal, e rabiscos simples em
  * volta contando a cena (o anzol de し tem a linha, o peixe e a onda).
  *
- * Traço de mangá em tinta; a cor de anime entra pelos preenchimentos conforme `--cor`
- * sobe (docs/estilo.md). Sem a letra (`letra={false}`), sobra a cena com um vazio
- * tracejado no meio: é a pergunta "que letra mora aqui?".
+ * Sem a letra (`letra={false}`), sobra a cena com um vazio tracejado no meio: é a
+ * pergunta "que letra mora aqui?".
  *
  * A ilustração vem do estúdio de imagens (scripts/imagens/kana.json, docs/imagens.md):
- * uma por objeto, em mangá (`kana-tinta`) e em cor (`kana`). Objeto sem ilustração
+ * uma por objeto, em anime colorido (`src/assets/kana`). Objeto sem ilustração
  * aprovada cai nos rabiscos em SVG deste arquivo.
  */
 import type { JSX } from 'preact';
 import { imagemDoObjeto, kanaPorChar, type KanaItem, type Peca, type Rabisco } from '../../content/kana';
 
 const COR = import.meta.glob<string>('../../assets/kana/*.webp', { eager: true, query: '?url', import: 'default' });
-const TINTA = import.meta.glob<string>('../../assets/kana-tinta/*.webp', { eager: true, query: '?url', import: 'default' });
 
-/** Ilustrações do estúdio para um objeto: mangá e cor. Nada se ainda não houver. */
-export function ilustracao(objeto: string): { tinta: string; cor: string } | undefined {
-  const id = imagemDoObjeto(objeto);
-  const tinta = TINTA[`../../assets/kana-tinta/${id}.webp`];
-  const cor = COR[`../../assets/kana/${id}.webp`];
-  return tinta && cor ? { tinta, cor } : undefined;
+/** Ilustração do estúdio para um objeto. Nada se ainda não houver. */
+export function ilustracao(objeto: string): string | undefined {
+  return COR[`../../assets/kana/${imagemDoObjeto(objeto)}.webp`];
 }
 
-/** A cena: a ilustração (o mangá por baixo, a cor aparecendo com `--cor`) ou os rabiscos. */
+/** A cena: a ilustração ou, sem ela, os rabiscos. */
 function Fundo({ objeto, pecas }: { objeto: string; pecas: readonly Peca[] }) {
   const il = ilustracao(objeto);
   if (!il) return <Pecas pecas={pecas} />;
-  return (
-    <>
-      <image href={il.tinta} x="0" y="0" width="120" height="120" />
-      <image class="ki-cor" href={il.cor} x="0" y="0" width="120" height="120" />
-    </>
-  );
+  return <image href={il} x="0" y="0" width="120" height="120" />;
 }
 
 const T = { stroke: 'currentColor', 'stroke-width': 2.4, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', fill: 'none' } as const;
-/** Preenchimentos que pegam cor de anime (sakura, sora, yuuhi, midori, kin). */
+/** Preenchimentos coloridos dos rabiscos, um tom para cada letra de a a e. */
 const F = (c: 'a' | 'b' | 'c' | 'd' | 'e') => ({ ...T, class: `ki-f ki-${c}` });
 
 /** Cada rabisco fica centrado em (0, 0), cabendo em uns 26 × 26. */

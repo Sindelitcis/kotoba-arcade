@@ -155,7 +155,7 @@ O texto fica em `src/content/ajuda/`, um arquivo por jogo. Um teste confere que 
 
 ## Visual
 
-O jogo mistura mangá em preto e branco (tinta, retícula, quadros, onomatopeia desenhada) com anime colorido. Toda tela começa no traço e ganha cor conforme você acerta: combo, sequência, cena terminada. Errou ou pausou, a cor volta para a tinta devagar. No fliperama, cada jogo que você já jogou fica pintado. As regras estão em [docs/estilo.md](docs/estilo.md). O modo calmo, em Ajustes, tira o tremor das linhas, deixa a cor chegar mais devagar e diminui os efeitos.
+O visual se chama Sora: tela limpa, cartões arredondados, um azul de marca e as ilustrações de anime sempre coloridas. Uma coisa em foco por vez. Acertos seguidos fazem o quadro do jogo brilhar; errar baixa o brilho devagar. Tem tema claro e escuro (Ajustes > Tema, ou o do sistema). O modo calmo, em Ajustes, para as animações que se repetem e diminui os efeitos. As regras e o motivo da mudança estão em [docs/estilo.md](docs/estilo.md).
 
 ## Créditos
 
@@ -163,12 +163,15 @@ As artes das cartas e o conteúdo dos 94 kanji vêm do KanjiMon original, feito 
 
 O conteúdo das lições da Jornada vem da [escola-japones](https://github.com/Sindelitcis/escola-japones), de Sindelitcis.
 
-Fontes, as duas pela SIL Open Font License 1.1 (o texto da licença está em `src/assets/fontes/`):
+Fontes, as três pela SIL Open Font License 1.1 (o texto da licença está em `src/assets/fontes/`):
 
-- [Dela Gothic One](https://github.com/syakuzen/DelaGothic), de The Dela Gothic Project Authors: títulos e onomatopeias.
-- [Yuji Syuku](https://github.com/Kinutafontfactory/Yuji), de The Yuji Project Authors (Kinuta Font Factory): kanji em pincel.
+- [Plus Jakarta Sans](https://github.com/tokotype/PlusJakartaSans), de The Plus Jakarta Sans Project Authors: português e números.
+- [Zen Maru Gothic](https://github.com/googlefonts/zen-marugothic), de The Zen Maru Gothic Project Authors: japonês corrido.
+- [Klee One](https://github.com/fontworks-fonts/Klee), de The Klee Project Authors (Fontworks): o kanji grande de estudo.
 
-Cenários e personagens, nas versões mangá e anime, e as primeiras ilustrações de vocabulário: gerados no PC com o [Animagine XL 4.0](https://huggingface.co/cagliostrolab/animagine-xl-4.0) (Cagliostro Research Lab, licença CreativeML Open RAIL++-M, que permite usar as imagens geradas). As ilustrações novas da Memória e da Cena Viva: [Anima Turbo v1.1](https://huggingface.co/circlestone-labs/Anima), da CircleStone Labs, sob licença não comercial (a imagem gerada é livre). The CircleStone Model is licensed by CircleStone Labs LLC under the CircleStone Non-Commercial License. Copyright CircleStone Labs LLC. Detalhes em [docs/imagens.md](docs/imagens.md).
+Ícones: [Lucide](https://lucide.dev), pela licença ISC (texto em `src/assets/icones/LICENSE-lucide.txt`).
+
+Cenários e personagens e as primeiras ilustrações de vocabulário: gerados no PC com o [Animagine XL 4.0](https://huggingface.co/cagliostrolab/animagine-xl-4.0) (Cagliostro Research Lab, licença CreativeML Open RAIL++-M, que permite usar as imagens geradas). As ilustrações novas da Memória e da Cena Viva: [Anima Turbo v1.1](https://huggingface.co/circlestone-labs/Anima), da CircleStone Labs, sob licença não comercial (a imagem gerada é livre). The CircleStone Model is licensed by CircleStone Labs LLC under the CircleStone Non-Commercial License. Copyright CircleStone Labs LLC. Detalhes em [docs/imagens.md](docs/imagens.md).
 
 Kanji em peças: traços e peças do [KanjiVG](https://kanjivg.tagaini.net), de Ulrich Apel (CC BY-SA 3.0); leituras, lista de peças e conferência das palavras pelo KANJIDIC2, KRADFILE e JMdict, da [EDRDG](https://www.edrdg.org) (CC BY-SA 4.0); nível do JLPT pelo [kanji-data](https://github.com/davidluzgouveia/kanji-data), de David Luz Gouveia (MIT). Os arquivos gerados desses dados seguem CC BY-SA. Nomes das peças, imagens e historinhas foram escritos para o jogo. Detalhes e como regenerar: [docs/pecas.md](docs/pecas.md).
 
