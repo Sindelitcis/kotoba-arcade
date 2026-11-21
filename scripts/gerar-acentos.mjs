@@ -6,7 +6,8 @@
  *   node scripts/gerar-acentos.mjs [caminho da kanjium-accents.txt]
  *
  * Padrão: D:/KotobaArcade/voz/dados/kanjium-accents.txt. Só muda o arquivo quando muda
- * alguma palavra; rode de novo quando entrar vocabulário novo (o teste avisa).
+ * alguma palavra. Entrou vocabulário novo, rode de novo: palavra sem acento no arquivo
+ * só fica sem o desenho do acento na ficha (a Kanjium não tem todas).
  */
 import { readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
