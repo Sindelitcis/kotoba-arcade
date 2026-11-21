@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { useClima } from '../../core/som/climas';
+import { useAprofundar } from '../../core/aprofundar/estado';
 import { app, cenaSave, commit, go, screen } from '../../core/app';
 import { sfx, speak, speakWord } from '../../core/audio';
 import { acertou, cor, corStyle, errou, zerar } from '../../core/cor';
@@ -130,6 +131,8 @@ export function CenaGame() {
   const [nota, setNota] = useState('');
   const cursorRef = useRef<string | null>(null);
   const [mostrados, setMostrados] = useState<Record<string, Seg[]>>({});
+  // Aprofundar: o lugar inteiro (vocabulário da cena e uma frase para montar).
+  useAprofundar(modo === 'menu' ? null : { t: 'cena', id: `lugar:${lugarRef.current.id}` });
   const r = rodadaRef.current;
 
   const comecar = (l: Lugar = lugarRef.current) => {

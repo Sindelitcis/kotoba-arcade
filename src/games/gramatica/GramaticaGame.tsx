@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { useClima } from '../../core/som/climas';
+import { useAprofundar } from '../../core/aprofundar/estado';
 import { findWord } from '../../content/vida';
 import { app, commit, go, gramaticaSave, screen } from '../../core/app';
 import { cenaStyle } from '../../core/arte';
@@ -48,6 +49,15 @@ export function GramaticaGame() {
   const [summary, setSummary] = useState<RoundSummary | null>(null);
   const [note, setNote] = useState('');
   const round = roundRef.current;
+  // Aprofundar: o ponto da frase (a lição já está na tela, não entrega nada) e as palavras dela.
+  const puzzle = mode === 'round' && round ? round.puzzle : null;
+  useAprofundar(
+    puzzle
+      ? [{ t: 'gramatica', id: puzzle.point.id }, ...puzzle.pieces.flatMap((p) => (p.k === 'text' ? [{ t: 'palavra', id: `w:${p.text.trim()}` } as const] : []))]
+      : mode === 'summary' && summary
+        ? summary.learned.map((p) => ({ t: 'gramatica', id: p.id }) as const)
+        : [],
+  );
 
   const start = () => {
     roundRef.current = new GramaticaRound({

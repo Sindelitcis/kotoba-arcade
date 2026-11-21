@@ -1,0 +1,179 @@
+/* Aprofundar: botão ao lado do da ajuda, painel da ficha e a oferta do ritmo de estudo. Segue docs/estilo.md. */
+
+.apr-botao {
+  position: fixed;
+  right: 68px;
+  bottom: 16px;
+  z-index: 40;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  color: var(--text-2);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: var(--sh-2);
+}
+.apr-botao .icone { width: 22px; height: 22px; }
+.apr-botao:hover:not(:disabled), .apr-botao:focus-visible { color: var(--brand-text); }
+
+.apr-oferta {
+  position: fixed;
+  right: 124px;
+  bottom: 16px;
+  z-index: 41;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  box-shadow: var(--sh-2);
+  animation: subir var(--d-2) var(--ease);
+}
+.apr-oferta button { box-shadow: none; border-color: transparent; background: transparent; border-radius: 999px; padding: 6px 12px; gap: 8px; }
+.apr-oferta button:hover:not(:disabled) { transform: none; box-shadow: none; background: var(--brand-soft); border-color: transparent; }
+.apr-oferta strong { font-family: var(--f-jp); color: var(--brand-text); }
+.apr-oferta .icone { width: 18px; height: 18px; }
+.apr-oferta-x { padding: 6px !important; color: var(--text-3); }
+
+.apr-fundo {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgb(8 12 24 / 0.5);
+  backdrop-filter: blur(4px);
+  animation: fade var(--d-2) ease;
+}
+
+.apr-painel {
+  width: min(900px, 100%);
+  height: min(720px, 94vh);
+  display: grid;
+  grid-template-columns: 190px 1fr;
+  grid-template-rows: auto 1fr;
+  overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-l);
+  box-shadow: var(--sh-3);
+  animation: subir var(--d-2) var(--ease);
+}
+
+.apr-topo {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px 12px 18px;
+  border-bottom: 1px solid var(--line);
+}
+.apr-topo h2 { margin: 0; flex: 1; min-width: 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; font: 800 1.1rem/1.2 var(--f-texto); }
+.apr-grande { font: 700 2rem/1.1 var(--f-kanji); color: var(--text); }
+.apr-leitura { font: 700 1rem/1.2 var(--f-jp); color: var(--brand-text); }
+.apr-sentido { font-weight: 600; color: var(--text-2); }
+.apr-chip { font: 700 0.8rem/1 var(--f-texto); white-space: nowrap; color: var(--brand-text); background: var(--brand-soft); padding: 5px 9px; border-radius: 999px; }
+.apr-voltar { padding: 6px; }
+.apr-ouvir-tudo { gap: 6px; }
+.apr-ouvir-tudo .icone, .apr-voltar .icone { width: 18px; height: 18px; }
+
+.apr-indice {
+  display: grid;
+  align-content: start;
+  gap: 14px;
+  padding: 12px;
+  border-right: 1px solid var(--line);
+  background: var(--surface-2);
+  overflow: auto;
+}
+.apr-grupo { display: grid; gap: 4px; }
+.apr-grupo h4 { margin: 0 0 2px; font: 800 0.75rem/1.2 var(--f-texto); color: var(--text-3); text-transform: uppercase; letter-spacing: 0.04em; }
+.apr-grupo button { justify-content: space-between; text-align: left; box-shadow: none; border-color: transparent; background: transparent; padding: 7px 10px; }
+.apr-grupo button span { font: 700 1.05rem/1.2 var(--f-jp); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.apr-grupo button small { color: var(--text-3); font-size: 0.75rem; }
+.apr-grupo button:hover:not(:disabled) { transform: none; box-shadow: none; background: var(--surface-3); border-color: transparent; }
+.apr-grupo button.on { background: var(--surface); color: var(--brand-text); box-shadow: var(--sh-1); }
+
+.apr-corpo { padding: 16px 24px 28px; overflow: auto; line-height: 1.55; outline: none; }
+.apr-corpo:focus, .apr-corpo:focus-visible { outline: none; box-shadow: none; }
+.apr-corpo p { margin: 0 0 8px; }
+.apr-vazio { color: var(--text-2); }
+.apr-secao { padding: 12px 0; border-bottom: 1px solid var(--line); }
+.apr-secao:last-child { border-bottom: 0; }
+.apr-secao h3 { margin: 0 0 10px; font: 800 0.95rem/1.2 var(--f-texto); color: var(--brand-text); }
+.apr-lista, .apr-passos { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; }
+.apr-passos li::marker { font-weight: 800; color: var(--brand-text); }
+.apr-pt { color: var(--text-2); }
+.apr-jp { font: 600 1.15rem/1.5 var(--f-jp); color: var(--text); }
+.apr-kana { font: 500 0.9rem/1.4 var(--f-jp); color: var(--text-3); }
+
+.apr-ouvir { width: 34px; height: 34px; padding: 0; flex: none; display: grid; place-items: center; border-radius: 999px; box-shadow: none; }
+.apr-ouvir .icone { width: 17px; height: 17px; }
+
+.apr-exemplos { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.apr-exemplos li { display: flex; gap: 10px; align-items: flex-start; }
+.apr-exemplos p { margin: 0; }
+
+.apr-palavras { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 8px; }
+.apr-palavras li { display: flex; gap: 6px; align-items: center; }
+.apr-palavra { flex: 1; min-width: 0; display: grid; justify-items: start; gap: 0; padding: 6px 10px; text-align: left; border-radius: var(--r-m); box-shadow: none; }
+.apr-palavra span { font: 700 1.05rem/1.3 var(--f-jp); }
+.apr-palavra small { font: 500 0.8rem/1.2 var(--f-jp); color: var(--text-3); }
+.apr-palavra em { font-style: normal; font-size: 0.85rem; color: var(--text-2); }
+span.apr-palavra { border: 1px dashed var(--line); }
+
+.apr-acento { display: grid; gap: 6px; }
+.apr-moras { display: flex; gap: 2px; align-items: stretch; height: 3.2rem; }
+.apr-moras span {
+  min-width: 1.9rem;
+  display: grid;
+  font: 700 1.25rem/1 var(--f-jp);
+  padding: 0 3px;
+  border-bottom: 3px solid transparent;
+}
+.apr-moras .alto { align-items: start; border-top: 3px solid var(--brand); }
+.apr-moras .baixo { align-items: end; border-bottom-color: var(--text-3); }
+.apr-moras .particula { color: var(--text-3); font-weight: 500; }
+
+.apr-tracos { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+.apr-tracos svg { width: 132px; height: 132px; border: 1px solid var(--line); border-radius: var(--r-m); background: var(--surface-2); }
+.apr-tracos path { fill: none; stroke: var(--text); stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1; stroke-dashoffset: 1; animation: apr-traco 0.4s ease forwards; }
+.apr-tracos.sem span { font: 400 5.5rem/1 var(--f-kanji); padding: 8px 18px; border: 1px solid var(--line); border-radius: var(--r-m); background: var(--surface-2); }
+@keyframes apr-traco { to { stroke-dashoffset: 0; } }
+
+.apr-conjugacao { border-collapse: collapse; margin: 6px 0 12px; }
+.apr-conjugacao td { padding: 5px 14px 5px 0; border-bottom: 1px solid var(--line); }
+.apr-conjugacao td:first-child, .apr-conjugacao strong { font-family: var(--f-jp); }
+.apr-conjugacao small { color: var(--text-3); font-family: var(--f-jp); }
+
+.apr-montar { display: grid; gap: 8px; }
+.apr-montada { font: 700 1.3rem/1.4 var(--f-jp); min-height: 1.8rem; }
+.apr-pecas { display: flex; flex-wrap: wrap; gap: 8px; }
+.apr-pecas button { font: 700 1.1rem/1.2 var(--f-jp); }
+.apr-pecas button.errou { border-color: var(--erro); color: var(--erro-text); background: var(--erro-soft); }
+.apr-certo { color: var(--ok-text); font-weight: 800; }
+
+@media (max-width: 640px) {
+  .apr-botao { right: 64px; bottom: 12px; }
+  .apr-oferta { right: 12px; bottom: 64px; }
+  .apr-fundo { padding: 8px; }
+  .apr-painel { grid-template-columns: 1fr; grid-template-rows: auto auto 1fr; height: 96vh; }
+  .apr-topo { flex-wrap: wrap; gap: 8px; padding: 10px; }
+  .apr-topo .ghost kbd { display: none; }
+  .apr-indice { border-right: 0; border-bottom: 1px solid var(--line); grid-auto-flow: column; grid-auto-columns: max-content; overflow-x: auto; }
+  .apr-grupo { grid-auto-flow: column; align-items: center; }
+  .apr-corpo { padding: 12px 14px 20px; }
+}
+
+[data-calma] .apr-painel, [data-calma] .apr-fundo, [data-calma] .apr-oferta { animation: none; }
+[data-calma] .apr-tracos path { animation-duration: 0s; }
+@media (prefers-reduced-motion: reduce) {
+  .apr-painel, .apr-fundo, .apr-oferta { animation: none; }
+  .apr-tracos path { animation: none; stroke-dashoffset: 0; }
+}

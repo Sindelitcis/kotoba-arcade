@@ -5,6 +5,7 @@ import { speak, speakKanji, speakWord } from '../../core/audio';
 import { kanaToRomaji } from '../../core/kana';
 import { masteryLevel } from '../../core/srs';
 import { teclaDe } from '../../core/teclas';
+import { useAprofundar } from '../../core/aprofundar/estado';
 import { artUrl } from './art';
 import { dexKey, RARITIES, RARITY, type Rarity } from './engine';
 
@@ -22,6 +23,7 @@ export function Dex() {
   void tick.value;
   const [open, setOpen] = useState<Kanji | null>(null);
   const [face, setFace] = useState<Rarity>('c');
+  useAprofundar(open ? { t: 'kanji', c: open.kanji } : null);
   const { cards } = app.data;
   const dex = kanjimonSave().dex;
   const owned = (k: Kanji) => RARITIES.filter((r) => dex[dexKey(k, r)]);

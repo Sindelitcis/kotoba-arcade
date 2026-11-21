@@ -7,7 +7,7 @@
 import { useEffect, useLayoutEffect } from 'preact/hooks';
 import { Icone } from '../Icone';
 import { SECOES, telaUsaF1 } from '../../content/ajuda';
-import { abrirAjuda, ajudaAberta, fecharAjuda, secaoAjuda, teclaDeAjuda, telaAjuda, telaAtual, type TelaAjuda } from './ajuda';
+import { abrirAjuda, ajudaAberta, aprofundarAberto, fecharAjuda, secaoAjuda, teclaDeAjuda, telaAjuda, telaAtual, type TelaAjuda } from './ajuda';
 import { teclaDe } from '../teclas';
 import { HelpPanel } from './HelpPanel';
 import './ajuda.css';
@@ -17,6 +17,8 @@ import './ajuda.css';
  * aberto, nenhuma tecla chega ao jogo: os jogos ouvem na fase de bolha.
  */
 function aoTeclar(e: KeyboardEvent): void {
+  // Com o Aprofundar aberto, quem cuida do teclado é ele.
+  if (aprofundarAberto.value) return;
   const tela = telaAtual.value;
   // Mesmo filtro dos jogos: com o IME japonês ligado, a tecla vem pela posição; ？ vira ?.
   const tecla = teclaDe(e);

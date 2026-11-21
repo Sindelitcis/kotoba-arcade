@@ -3,12 +3,14 @@ import { app, commit, go, kanjimonSave } from '../../core/app';
 import { sfx, speakKanji } from '../../core/audio';
 import { burstFrom, onomato } from '../../core/fx';
 import { teclaDe } from '../../core/teclas';
+import { useAprofundar } from '../../core/aprofundar/estado';
 import { artUrl, RARITY_COLORS } from './art';
 import { BOOSTER_COST, canOpenBooster, openBooster, RARITY, type BoosterCard } from './engine';
 
 export function Booster() {
   const [cards, setCards] = useState<BoosterCard[]>([]);
   const [revealed, setRevealed] = useState(0);
+  useAprofundar(cards.slice(0, revealed).map((c) => ({ t: 'kanji', c: c.kanji.kanji }) as const));
   const opened = useRef(false);
   const row = useRef<HTMLDivElement>(null);
 

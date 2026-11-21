@@ -22,10 +22,16 @@ export interface Settings {
   vozPt: VozPt;
   /** Tema da tela: o do sistema, claro ou escuro (docs/estilo.md). */
   tema: Tema;
+  /** Ritmo de estudo: quanto os jogos oferecem o Aprofundar sozinhos (ver `core/aprofundar`). */
+  ritmo: Ritmo;
 }
 
 export type Tema = 'auto' | 'claro' | 'escuro';
 const TEMAS: readonly Tema[] = ['auto', 'claro', 'escuro'];
+
+/** `jogo`: nunca oferece. `equilibrado`: depois de errar o mesmo item duas vezes. `estudo`: depois de cada erro e de cada item novo. */
+export type Ritmo = 'jogo' | 'equilibrado' | 'estudo';
+export const RITMOS: readonly Ritmo[] = ['jogo', 'equilibrado', 'estudo'];
 
 export interface Profile {
   xp: number;
@@ -57,7 +63,7 @@ export function emptySave(now: number): SaveData {
     createdAt: now,
     updatedAt: now,
     profile: { xp: 0, coins: 0, daysPlayed: [] },
-    settings: { sound: true, volMusica: 0.6, volEfeitos: 0.8, volVoz: 1, voice: true, calm: false, vozPt: VOZ_PT_PADRAO, tema: 'auto' },
+    settings: { sound: true, volMusica: 0.6, volEfeitos: 0.8, volVoz: 1, voice: true, calm: false, vozPt: VOZ_PT_PADRAO, tema: 'auto', ritmo: 'equilibrado' },
     cards: {},
     games: {},
   };
@@ -116,6 +122,7 @@ export function normalizeSave(input: unknown, now: number): SaveData {
       calm: typeof settings.calm === 'boolean' ? settings.calm : base.settings.calm,
       vozPt: VOZES_PT.includes(settings.vozPt as VozPt) ? (settings.vozPt as VozPt) : base.settings.vozPt,
       tema: TEMAS.includes(settings.tema as Tema) ? (settings.tema as Tema) : base.settings.tema,
+      ritmo: RITMOS.includes(settings.ritmo as Ritmo) ? (settings.ritmo as Ritmo) : base.settings.ritmo,
     },
     cards: cleanCards(input.cards),
     games: isObject(input.games) ? input.games : {},
@@ -171,3 +178,16 @@ export function memoryStore(): KeyValueStore & { data: Map<string, string> } {
     setItem: (k, v) => void data.set(k, v),
   };
 }
+
+/** Nome de cada ritmo nos Ajustes, de "mais jogo" a "mais estudo". */
+export const NOME_RITMO: Record<Ritmo, string> = {
+  jogo: 'Mais jogo',
+  equilibrado: 'Equilibrado',
+  estudo: 'Mais estudo',
+};
+
+export const EXPLICA_RITMO: Record<Ritmo, string> = {
+  jogo: 'O Aprofundar só abre quando você pedir (F4 ou o botão do livro).',
+  equilibrado: 'Errou a mesma coisa duas vezes? O jogo oferece o Aprofundar dela, num cantinho. Ignore e a oferta some.',
+  estudo: 'Depois de cada erro e de cada palavra nova, o jogo oferece o Aprofundar dela. Ignore e a oferta some.',
+};

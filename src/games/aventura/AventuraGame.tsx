@@ -1,5 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { useClima } from '../../core/som/climas';
+import { useAprofundar } from '../../core/aprofundar/estado';
+import { gramaticaDaFrase } from '../../content/aprofundar/detectar';
 import { findWord } from '../../content/vida';
 import { app, aventuraSave, commit, go, screen } from '../../core/app';
 import { CENA_AVENTURA, cenaStyle, pessoaUrl } from '../../core/arte';
@@ -94,6 +96,20 @@ export function AventuraGame() {
   const [diaryMeaning, setDiaryMeaning] = useState(false);
   const diaryEl = useRef<HTMLOListElement>(null);
   const play = playRef.current;
+  // Aprofundar: as palavras e a gramática da fala na tela (e das respostas), e a cena inteira.
+  const shown = mode === 'play' && play ? play.shown : null;
+  const entrada = mode === 'diary' ? diaryEntries(SCENES, save, app.data.cards, findWord)[diaryIndex] : undefined;
+  useAprofundar(
+    shown && play
+      ? [
+          ...[shown.tokens, ...shown.options.map((o) => o.tokens)].flat().flatMap((t) => (t.word ? [{ t: 'palavra', id: t.word.id } as const] : [])),
+          ...gramaticaDaFrase(shown.plain),
+          { t: 'cena', id: `aventura:${play.scene.id}` },
+        ]
+      : entrada
+        ? [...entrada.tokens.flatMap((t) => (t.word ? [{ t: 'palavra', id: t.word.id } as const] : [])), ...gramaticaDaFrase(entrada.plain), { t: 'cena', id: `aventura:${entrada.scene.id}` }]
+        : [],
+  );
 
   // Missão da Jornada: o Enter abre a cena da missão, mesmo antes de a história chegar nela.
   const sugerida = () => SCENES.find((s) => s.id === foco.value?.cena) ?? suggestScene(SCENES, save, app.data.cards, Date.now());

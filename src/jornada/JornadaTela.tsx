@@ -1,4 +1,5 @@
 import { useLayoutEffect, useRef, useState } from 'preact/hooks';
+import { alvosDaLicaoPorId, useAprofundar } from '../core/aprofundar/estado';
 import { commit, go, jornadaSave, licaoAberta, screen, tick } from '../core/app';
 import { cenaStyle } from '../core/arte';
 import { sfx } from '../core/audio';
@@ -62,6 +63,9 @@ export function JornadaTela() {
   const lista = aberta ? missoesDa(aberta) : [];
   const [sel, setSel] = useState(() => (proxima ? Math.max(0, lista.indexOf(proxima)) : 0));
   const listaEl = useRef<HTMLOListElement>(null);
+  // Aprofundar: o assunto da missão selecionada (ponto de gramática, situação).
+  const missaoSel = lista[sel];
+  useAprofundar(missaoSel?.acao.tipo === 'licao' ? alvosDaLicaoPorId(missaoSel.acao.licao) : []);
 
   const abrir = (e: Etapa | null) => {
     const s = jornadaSave();

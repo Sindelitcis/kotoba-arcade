@@ -143,7 +143,7 @@ test('no fliperama, a letra de um jogo com a ajuda aberta não abre o jogo', asy
   await expect(page.getByTestId('play-now')).toBeVisible();
 });
 
-test('abrir a ajuda pausa o Kana Beat; fechar deixa a pausa esperando uma tecla', async ({ page }) => {
+test('abrir a ajuda pausa o Kana Beat; fechar volta a música de onde parou', async ({ page }) => {
   await page.keyboard.press('k');
   const nota = page.getByTestId('target-note');
   await expect(nota).toBeVisible();
@@ -155,13 +155,21 @@ test('abrir a ajuda pausa o Kana Beat; fechar deixa a pausa esperando uma tecla'
 
   await page.keyboard.press('Escape');
   await expect(painel(page)).toBeHidden();
-  await expect(page.getByRole('heading', { name: 'Pausado' })).toBeVisible();
-  await page.waitForTimeout(300);
-  expect(await nota.getAttribute('style')).toBe(antes);
-
-  await page.keyboard.press('Enter');
   await expect(page.getByRole('heading', { name: 'Pausado' })).toBeHidden();
   await expect.poll(async () => nota.getAttribute('style')).not.toBe(antes);
+});
+
+test('pausa do Kana Beat pelo Espaço continua esperando uma tecla depois da ajuda', async ({ page }) => {
+  await page.keyboard.press('k');
+  const nota = page.getByTestId('target-note');
+  await expect(nota).toBeVisible();
+  await page.keyboard.press('Space');
+  await expect(page.getByRole('heading', { name: 'Pausado' })).toBeVisible();
+  await page.keyboard.press('?');
+  await page.keyboard.press('Escape');
+  await expect(painel(page)).toBeHidden();
+  await page.waitForTimeout(300);
+  await expect(page.getByRole('heading', { name: 'Pausado' })).toBeVisible();
 });
 
 test('na Conversa, F1 continua sendo do jogo e ? abre a ajuda', async ({ page }) => {

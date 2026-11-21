@@ -4,6 +4,9 @@
  * (Media Session). O texto da aula aparece só se você quiser.
  */
 import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
+import { alvosDaLicaoPorId, useAprofundar } from '../core/aprofundar/estado';
+import { useAoAbrirAjuda, useAoFecharCamada } from '../core/help/ajuda';
+import { hasKanji } from '../core/kana';
 import { AULAS, duracao, type Aula } from '../aulas';
 import { app, commit, go, ouvirSave, screen, tick } from '../core/app';
 import { sfx } from '../core/audio';
@@ -94,6 +97,26 @@ export function OuvirTela() {
   };
 
   const alternar = () => (tocando ? parar() : tocar(idx, trecho >= aula.trechos.length ? 0 : trecho));
+
+  // A ajuda e o Aprofundar param a aula; ao fechar, ela volta do trecho em que parou.
+  const paradaPelaCamada = useRef(false);
+  useAoAbrirAjuda(() => {
+    if (!tocador.current) return;
+    paradaPelaCamada.current = true;
+    parar();
+  });
+  useAoFecharCamada(() => {
+    if (!paradaPelaCamada.current) return;
+    paradaPelaCamada.current = false;
+    tocar(idx, trecho);
+  });
+  // Aprofundar: o japonês que acabou de tocar (palavra ou kanji) e o assunto da aula.
+  const ultimoJp = aula.trechos.slice(0, trecho + 1).reverse().find((t) => t.tipo === 'jp');
+  const palavraTocada = ultimoJp?.tipo === 'jp' && 'palavra' in ultimoJp.fala ? (ultimoJp.fala as { palavra?: { jp: string } }).palavra : undefined;
+  useAprofundar([
+    ...(palavraTocada ? [[...palavraTocada.jp].length === 1 && hasKanji(palavraTocada.jp) ? ({ t: 'kanji', c: palavraTocada.jp } as const) : ({ t: 'palavra', id: `w:${palavraTocada.jp}` } as const)] : []),
+    ...alvosDaLicaoPorId(aula.id),
+  ]);
   const pularBloco = (d: 1 | -1) => {
     const alvo = pular(aula.trechos, trecho, d);
     if (alvo >= aula.trechos.length) {

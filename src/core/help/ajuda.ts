@@ -18,9 +18,25 @@ export const telaAtual = computed<TelaAjuda>(() => subtelaAjuda.value ?? telaAju
 export const ajudaAberta = signal(false);
 /** Seção mostrada no painel (índice em `SECOES`). */
 export const secaoAjuda = signal(0);
+/** Painel do Aprofundar aberto agora (ver `core/aprofundar`). */
+export const aprofundarAberto = signal(false);
+/** Alguma camada por cima do jogo (ajuda ou Aprofundar): o jogo fica parado e sem teclado. */
+export const camadaAberta = computed(() => ajudaAberta.value || aprofundarAberto.value);
 
 const aoAbrir = new Set<() => void>();
+const aoFechar = new Set<() => void>();
 let focoAntes: Element | null = null;
+
+/** Uma camada acabou de abrir: os jogos com tempo correndo pausam. */
+export function avisarAbertura(): void {
+  for (const fn of aoAbrir) fn();
+}
+
+/** Uma camada fechou. Se não sobrou nenhuma aberta, o jogo volta de onde parou. */
+export function avisarFechamento(): void {
+  if (camadaAberta.value) return;
+  for (const fn of aoFechar) fn();
+}
 
 export function abrirAjuda(secao = 0): void {
   if (ajudaAberta.value) {
@@ -30,7 +46,7 @@ export function abrirAjuda(secao = 0): void {
   focoAntes = document.activeElement;
   secaoAjuda.value = secao;
   ajudaAberta.value = true;
-  for (const fn of aoAbrir) fn();
+  avisarAbertura();
 }
 
 export function fecharAjuda(): void {
@@ -40,17 +56,27 @@ export function fecharAjuda(): void {
   const antes = focoAntes;
   focoAntes = null;
   if (antes instanceof HTMLElement && antes.isConnected) antes.focus();
+  avisarFechamento();
 }
 
-/** Roda `fn` toda vez que o painel abrir. Jogo com tempo correndo usa para pausar. */
-export function useAoAbrirAjuda(fn: () => void): void {
+function useOuvinte(lista: Set<() => void>, fn: () => void): void {
   const ref = useRef(fn);
   ref.current = fn;
   useEffect(() => {
     const chamar = () => ref.current();
-    aoAbrir.add(chamar);
-    return () => void aoAbrir.delete(chamar);
-  }, []);
+    lista.add(chamar);
+    return () => void lista.delete(chamar);
+  }, [lista]);
+}
+
+/** Roda `fn` toda vez que a ajuda ou o Aprofundar abrir. Jogo com tempo correndo usa para pausar. */
+export function useAoAbrirAjuda(fn: () => void): void {
+  useOuvinte(aoAbrir, fn);
+}
+
+/** Roda `fn` quando a última camada fechar: o jogo pausado por ela volta de onde parou. */
+export function useAoFecharCamada(fn: () => void): void {
+  useOuvinte(aoFechar, fn);
 }
 
 /** Enquanto `sub` não for nulo, a ajuda explica `sub` em vez da tela. Ex.: os Ajustes abertos no fliperama. */

@@ -8,6 +8,7 @@ import { acertou, cor, corStyle, errou, zerar } from '../../core/cor';
 import { burstFrom, FX_COR, onomato, pulse } from '../../core/fx';
 import type { Question } from '../../core/questions';
 import { teclaDe } from '../../core/teclas';
+import { alvosDasCartas, useAprofundar } from '../../core/aprofundar/estado';
 import { EFFECTS, effectText, faceOf, NODES, RELICS, REST_HEAL, Run, SHARPEN, type Intent, type RunCard, type RunEvent } from './engine';
 
 interface Asking {
@@ -234,6 +235,8 @@ export function RoguelikeGame() {
 
   const q = asking?.question;
   const feedback = asking?.feedback;
+  // O Aprofundar mostra o item depois da resposta: antes, ele entregaria a resposta.
+  useAprofundar(feedback && q ? alvosDasCartas([q.card]) : []);
   const enemy = run.enemy;
   const inCombat = (run.phase === 'combat' || run.phase === 'question') && enemy;
   useClima(run.phase === 'over' && run.won ? 'vitoria' : inCombat && enemy.kind === 'boss' ? 'chefe' : undefined);

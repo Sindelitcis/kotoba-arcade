@@ -6,6 +6,7 @@ const SVGS = import.meta.glob<string>('../assets/icones/*.svg', { eager: true, q
 
 export type NomeIcone =
   | 'arrow-left'
+  | 'book-open'
   | 'check'
   | 'chevron-right'
   | 'circle-question-mark'

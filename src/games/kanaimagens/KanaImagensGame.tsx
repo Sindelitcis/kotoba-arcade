@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { useClima } from '../../core/som/climas';
+import { useAprofundar } from '../../core/aprofundar/estado';
 import { KANA_IMAGENS, LOTES, kanaItem, type KanaItem } from '../../content/kana';
 import { app, commit, go, kanaImagensSave, screen } from '../../core/app';
 import { sfx, speakWord } from '../../core/audio';
@@ -155,6 +156,16 @@ export function KanaImagensGame() {
   const timer = useRef<number | undefined>(undefined);
   const disponiveis = Rodada.modosDisponiveis(app.data.cards);
   const novato = save.rodadas === 0 && !save.teste;
+  // Aprofundar: o kana da pergunta depois da resposta (ou na apresentação); no fim, os errados e os novos.
+  const rodada = fase === 'rodada' ? rodadaRef.current : null;
+  const pergunta = rodada && !rodada.fim ? rodada.atual : null;
+  useAprofundar(
+    pergunta?.alvo && (pergunta.modo === 'apresenta' || rodada?.respondida !== null)
+      ? { t: 'kana', id: pergunta.alvo.id }
+      : fase === 'resumo' && resumo
+        ? [...resumo.errados, ...resumo.novos].map((k) => ({ t: 'kana', id: k.id }) as const)
+        : [],
+  );
 
   const limparTimer = () => {
     if (timer.current !== undefined) clearTimeout(timer.current);

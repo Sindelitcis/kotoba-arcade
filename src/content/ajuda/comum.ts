@@ -27,3 +27,9 @@ export const PARAR: Pergunta = {
   p: 'Posso sair no meio?',
   r: 'Pode. Esc sai e o que você respondeu até ali já está gravado.',
 };
+
+/** Vale para todas as telas: o painel de ajuda mostra junto das perguntas da tela. */
+export const APROFUNDAR: Pergunta = {
+  p: 'Quero estudar isto com calma. Como faço?',
+  r: 'Aperte F4 (ou !) ou clique no livro, ao lado da interrogação. O jogo pausa e abre a ficha do que está na tela: leituras, acento, exemplos, palavras da mesma família, como se escreve e os erros comuns. Numa pergunta, a ficha aparece depois que você responde, para não entregar a resposta. Esc volta ao jogo do mesmo ponto. O que você estudou ali conta como revisão leve, sem tirar ponto. Nos Ajustes, o ritmo de estudo diz se o jogo oferece a ficha sozinho depois de um erro.',
+};

@@ -6,12 +6,12 @@ import { figuraUrl } from '../core/figuras';
 import { hasJapaneseVoice, sfx, speak } from '../core/audio';
 import { visitados, type Saves } from '../core/cor';
 import { Icone } from '../core/Icone';
-import type { Tema } from '../core/save';
+import type { Ritmo, Tema } from '../core/save';
 import { useSubtelaAjuda } from '../core/help/ajuda';
 import { AjustesSom } from '../core/som/AjustesSom';
 import { levelInfo, readingMeter, recentDays } from '../core/progress';
 import { NOME_VOZ_PT, VOZES_PT, type VozPt } from '../core/fala-pt';
-import { exportSave } from '../core/save';
+import { EXPLICA_RITMO, exportSave, NOME_RITMO, RITMOS } from '../core/save';
 import { teclaDe } from '../core/teclas';
 import { BOOSTER_COST, canOpenBooster } from '../games/kanjimon/engine';
 import { etapaDa, proximaMissao } from '../jornada/etapas';
@@ -125,6 +125,12 @@ export function Hub() {
 
   const escolherTema = (tema: Tema) => {
     settings.tema = tema;
+    commit();
+    sfx.click();
+  };
+
+  const escolherRitmo = (ritmo: Ritmo) => {
+    settings.ritmo = ritmo;
     commit();
     sfx.click();
   };
@@ -330,6 +336,15 @@ export function Hub() {
             <label class="check">
               <input type="checkbox" checked={settings.calm} onChange={() => toggle('calm')} /> Modo calmo (menos movimento e faíscas)
             </label>
+            <h3 id="ritmo-titulo">Ritmo de estudo</h3>
+            <div class="segmento" role="group" aria-labelledby="ritmo-titulo">
+              {RITMOS.map((r) => (
+                <button key={r} aria-pressed={settings.ritmo === r} onClick={() => escolherRitmo(r)} data-testid={`ritmo-${r}`}>
+                  {NOME_RITMO[r]}
+                </button>
+              ))}
+            </div>
+            <p class="muted">{EXPLICA_RITMO[settings.ritmo]}</p>
             <h3 id="voz-pt-titulo">Voz em português</h3>
             <div class="segmento" role="group" aria-labelledby="voz-pt-titulo">
               {VOZES_PT.map((v) => (

@@ -70,12 +70,18 @@ export function gradeFor(o: Outcome): Grade {
   return Rating.Good;
 }
 
+/** Quem quer saber de cada resposta (o Aprofundar, para os recentes e para oferecer a ficha). */
+export type OuvinteRevisao = (depois: CardState, outcome: Outcome, nova: boolean) => void;
+export const ouvintesDeRevisao = new Set<OuvinteRevisao>();
+
 export function review(card: CardState | undefined, outcome: Outcome, now: number): CardState {
   const base = card ?? newCard(now);
   // Relógio do computador pode andar para trás (fuso, ajuste de hora). O FSRS não aceita
   // revisão "antes" da anterior, então a revisão nunca acontece antes da última registrada.
   const when = Math.max(now, base.last_review ?? now);
-  return fromCard(scheduler.next(toCard(base), new Date(when), gradeFor(outcome)).card);
+  const depois = fromCard(scheduler.next(toCard(base), new Date(when), gradeFor(outcome)).card);
+  for (const fn of ouvintesDeRevisao) fn(depois, outcome, !card);
+  return depois;
 }
 
 /** Chance (0 a 1) de lembrar agora. Carta nunca vista devolve 0. */

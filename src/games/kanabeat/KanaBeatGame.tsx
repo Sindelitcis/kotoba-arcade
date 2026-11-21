@@ -4,7 +4,8 @@ import { sfx, speakWord } from '../../core/audio';
 import { cenaStyle } from '../../core/arte';
 import { acertou, cor, corStyle, errou, zerar } from '../../core/cor';
 import { foco } from '../../core/foco';
-import { ajudaAberta, useAoAbrirAjuda } from '../../core/help/ajuda';
+import { alvosDasCartas, useAprofundar } from '../../core/aprofundar/estado';
+import { camadaAberta, useAoAbrirAjuda, useAoFecharCamada } from '../../core/help/ajuda';
 import { teclaDe } from '../../core/teclas';
 import { burst, FX_COR, onomato, pulse } from '../../core/fx';
 import { kanaToRomaji } from '../../core/kana';
@@ -150,7 +151,19 @@ export function KanaBeatGame() {
     setPaused(on);
   };
 
-  useAoAbrirAjuda(() => setPause(true));
+  // A ajuda e o Aprofundar param a música; ao fechar, ela volta de onde parou (se foram eles que pararam).
+  const pausadoPelaCamada = useRef(false);
+  useAoAbrirAjuda(() => {
+    const r = run.current as Run;
+    if (result || r.pausedAt !== null) return;
+    pausadoPelaCamada.current = true;
+    setPause(true);
+  });
+  useAoFecharCamada(() => {
+    if (!pausadoPelaCamada.current) return;
+    pausadoPelaCamada.current = false;
+    setPause(false);
+  });
 
   const restart = (mode?: Mode) => {
     (run.current as Run).music.stop();
@@ -240,11 +253,11 @@ export function KanaBeatGame() {
   // num campo marcado como do jogo, toda tecla chega, e clicar em qualquer lugar não atrapalha.
   const playing = !result && !paused && !credits;
   useLayoutEffect(() => {
-    if (playing && !ajudaAberta.value && document.activeElement !== inputEl.current) inputEl.current?.focus({ preventScroll: true });
+    if (playing && !camadaAberta.value && document.activeElement !== inputEl.current) inputEl.current?.focus({ preventScroll: true });
   });
   const keepFocus = () => {
     requestAnimationFrame(() => {
-      if (playing && !ajudaAberta.value && inputEl.current?.isConnected) inputEl.current.focus({ preventScroll: true });
+      if (playing && !camadaAberta.value && inputEl.current?.isConnected) inputEl.current.focus({ preventScroll: true });
     });
   };
   // O que o IME chegar a escrever no campo é descartado: a tecla já foi tratada no keydown.
@@ -262,6 +275,8 @@ export function KanaBeatGame() {
 
   const visible = stage.visible(t);
   const target = stage.target;
+  // Aprofundar: as notas na pista; no fim da fase, as que passaram sem acertar.
+  useAprofundar(alvosDasCartas(result ? stage.notes.filter((n) => n.state === 'miss').map((n) => n.card) : visible.map((n) => n.card)));
   const beatPhase = ((t % stage.beatMs) + stage.beatMs) % stage.beatMs / stage.beatMs;
   const progress = Math.max(0, Math.min(1, t / stage.endTime));
   const typoFresh = performance.now() - typoAt < 250;

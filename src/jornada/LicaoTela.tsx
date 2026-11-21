@@ -6,6 +6,11 @@ import { acertou, cor, corStyle, errou } from '../core/cor';
 import { onomato } from '../core/fx';
 import { tocarSequencia, type Trecho } from '../core/sequencia';
 import { teclaDe } from '../core/teclas';
+import { alvosDaLicaoPorId, alvosDasCartas, useAprofundar } from '../core/aprofundar/estado';
+import type { Alvo } from '../content/aprofundar/alvo';
+import { EXPRESSOES } from '../content/escola';
+import { textoSimples } from '../content/escola/ruby';
+import { hasKanji } from '../core/kana';
 import { NOME_REGISTRO } from '../content/escola/tipos';
 import { Andamento, MOEDAS_LICAO, XP_ACERTO, XP_LICAO } from './andamento';
 import { etapaDa, registrarMissao } from './etapas';
@@ -63,6 +68,24 @@ function Opcao({ texto }: { texto: string }) {
   return temJapones(texto) ? <Marcado texto={texto} /> : <span>{texto}</span>;
 }
 
+/**
+ * Aprofundar na lição: o kanji, a palavra ou a expressão do quadro; a carta da pergunta
+ * depois da resposta; e o assunto da lição (ponto de gramática ou situação).
+ */
+function alvosDaLicao(id: string, p: Passo | undefined, respondida: boolean): Alvo[] {
+  const out: Alvo[] = [];
+  if (p?.tipo === 'quadro') {
+    if (p.grande && [...p.grande].length === 1 && hasKanji(p.grande)) out.push({ t: 'kanji', c: p.grande });
+    if (p.fala?.palavra) out.push({ t: 'palavra', id: `w:${p.fala.palavra.jp}` });
+    if (p.grande) out.push({ t: 'palavra', id: `w:${p.grande}` });
+    const jp = p.jp ? textoSimples(p.jp) : p.grande;
+    const e = jp ? EXPRESSOES.find((x) => textoSimples(x.jp) === jp) : undefined;
+    if (e) out.push({ t: 'expressao', id: e.id });
+  } else if (p?.tipo === 'pergunta' && respondida) out.push(...alvosDasCartas([p.carta]));
+  out.push(...alvosDaLicaoPorId(id));
+  return out;
+}
+
 export function LicaoTela() {
   const aberta = licaoAberta.value;
   const licao = aberta ? acharLicao(aberta.licao) : undefined;
@@ -73,6 +96,7 @@ export function LicaoTela() {
   const redraw = () => setFrame((n) => n + 1);
   const quadroEl = useRef<HTMLDivElement>(null);
   const a = andRef.current;
+  useAprofundar(licao && a ? alvosDaLicao(licao.id, a.passo, !!a.resposta) : []);
 
   const sair = () => {
     licaoAberta.value = null;

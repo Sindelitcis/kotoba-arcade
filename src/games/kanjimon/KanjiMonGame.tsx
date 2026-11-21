@@ -6,6 +6,7 @@ import { cenaStyle } from '../../core/arte';
 import { acertou, cor, corStyle, errou, zerar } from '../../core/cor';
 import { burstFrom, onomato, pulse } from '../../core/fx';
 import { teclaDe } from '../../core/teclas';
+import { alvosDasCartas, useAprofundar } from '../../core/aprofundar/estado';
 import { artUrl, RARITY_COLORS } from './art';
 import { CHEST_EVERY, Hunt, MAX_HEARTS, RARITY, type Enemy, type HuntEvent, type Question } from './engine';
 
@@ -65,6 +66,8 @@ export function KanjiMonGame() {
   const timer = useRef<number | undefined>(undefined);
   const overlay = overlays[0];
   const q = view.question;
+  // O Aprofundar mostra o kanji depois da resposta: antes, ele entregaria a resposta.
+  useAprofundar(feedback || overlay ? [{ t: 'kanji', c: view.enemy.kanji.kanji }, ...alvosDasCartas([q.card])] : []);
 
   /** Mostra a próxima pergunta (ou o próximo KanjiMon) e libera a resposta. */
   const advance = () => {

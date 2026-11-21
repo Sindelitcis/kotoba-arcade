@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { useClima } from '../../core/som/climas';
+import { useAprofundar } from '../../core/aprofundar/estado';
 import { app, commit, go, pecasSave, screen } from '../../core/app';
 import { cenaStyle } from '../../core/arte';
 import { sfx, speak, speakKanji } from '../../core/audio';
@@ -123,6 +124,19 @@ export function PecasGame() {
   const [resumo, setResumo] = useState<Resumo | null>(null);
   const [aviso, setAviso] = useState('');
   const pedidoRef = useRef<Modo | 'misto' | null>(null);
+  // Aprofundar: o kanji (e a palavra) da pergunta depois da resposta; no fim, os kanji novos.
+  const rodadaAtual = tela === 'rodada' ? rodadaRef.current : null;
+  const perguntaAtual = rodadaAtual?.fase === 'revela' || rodadaAtual?.fase === 'licao' ? rodadaAtual.pergunta : null;
+  useAprofundar(
+    perguntaAtual
+      ? [
+          { t: 'kanji', c: perguntaAtual.k.kanji },
+          ...(perguntaAtual.modo === 'intruso' ? [{ t: 'kanji', c: perguntaAtual.maioria.kanji } as const, { t: 'kanji', c: perguntaAtual.diferente.kanji } as const] : []),
+        ]
+      : tela === 'resumo' && resumo
+        ? resumo.novos.map((c) => ({ t: 'kanji', c }) as const)
+        : [],
+  );
   const rodada = rodadaRef.current;
   void tracos.value;
 

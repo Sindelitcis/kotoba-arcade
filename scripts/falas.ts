@@ -31,6 +31,7 @@ import type { FalaJp } from '../src/core/sequencia';
 import { FIGURAS, IMAGEM_WORDS } from '../src/content/imagens';
 import { daCoisa, ETAPAS, falaDaTarefa, falaDoNome, nomeDe, tarefas, type Seg } from '../src/games/cena/engine';
 import { LUGARES } from '../src/games/cena/lugares';
+import { falasDaFicha, fichaDe, todosOsAlvos } from '../src/content/aprofundar/fichas';
 
 export interface Fala {
   /** Exatamente o texto que o jogo passa para `speak()`. */
@@ -342,6 +343,14 @@ function cena(): Fala[] {
   return out;
 }
 
+/** Aprofundar: o japonês de cada ficha (quase tudo já é dos jogos; o resto é novo). */
+function aprofundar(): Fala[] {
+  return todosOsAlvos().flatMap((a) => {
+    const f = fichaDe(a);
+    return f ? falasDaFicha(f).map((x) => falaDoQuadro(x, `aprofundar/${a.t}`)) : [];
+  });
+}
+
 /** Lista sem repetição (mesmo texto na mesma voz entra uma vez só). */
 export function listarFalas(): Fala[] {
   const todas: Fala[] = [
@@ -384,6 +393,7 @@ export function listarFalas(): Fala[] {
     ...FIGURAS.map((f) => palavra(f.word, 'imagens/figura')),
     ...IMAGEM_WORDS.map((w) => palavra(w, 'imagens/palavra')),
     ...cena(),
+    ...aprofundar(),
   ];
   const vistas = new Set<string>();
   return todas.filter((f) => {

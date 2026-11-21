@@ -6,6 +6,7 @@ import { loadVoices } from './core/audio';
 import { zerar } from './core/cor';
 import { HelpButton } from './core/help/HelpButton';
 import { ligarSom } from './core/som/climas';
+import { Aprofundar } from './core/aprofundar/Aprofundar';
 import './core/tema';
 import { AventuraGame } from './games/aventura/AventuraGame';
 import { CenaGame } from './games/cena/CenaGame';
@@ -80,6 +81,7 @@ function Raiz() {
     <>
       <App />
       <HelpButton tela={screen.value} />
+      <Aprofundar />
     </>
   );
 }

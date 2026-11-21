@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { useClima } from '../../core/som/climas';
+import { useAprofundar } from '../../core/aprofundar/estado';
 import type { Word } from '../../content';
 import { FIGURAS, type Figura } from '../../content/imagens';
 import { app, commit, go, memoriaSave, screen } from '../../core/app';
@@ -112,6 +113,14 @@ export function MemoriaGame() {
   const ultimaFala = useRef<string | null>(null);
   const fechar = useRef<number | null>(null);
   const r = rodadaRef.current;
+  // Aprofundar: as palavras dos pares já feitos (e as novas apresentadas); no fim, as novas e as que subiram.
+  useAprofundar(
+    modo === 'rodada' && r
+      ? [...r.quadro.novas, ...r.quadro.cartas.filter((c) => c.feita && c.lado === 'palavra').map((c) => c.figura)].map((f) => ({ t: 'palavra', id: f.word.id }) as const)
+      : modo === 'resumo' && resumo
+        ? [...resumo.novas, ...resumo.subiram].map((f) => ({ t: 'palavra', id: f.word.id }) as const)
+        : [],
+  );
 
   const comecar = () => {
     zerar();

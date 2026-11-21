@@ -1,4 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
+import { useAprofundar } from '../../core/aprofundar/estado';
+import { gramaticaDaFrase } from '../../content/aprofundar/detectar';
 import { app, commit, conversaSave, go, screen } from '../../core/app';
 import { CENA_CONVERSA, cenaStyle, pessoaUrl } from '../../core/arte';
 import { sfx, speak, speakWord } from '../../core/audio';
@@ -62,6 +64,19 @@ export function ConversaGame() {
   const [traduzidas, setTraduzidas] = useState<Set<number>>(new Set());
   const [resumo, setResumo] = useState<Resumo | null>(null);
   const [ouvindo, setOuvindo] = useState<'nao' | 'gravando' | 'transcrevendo'>('nao');
+  // Aprofundar: a cena, as palavras dela que aparecem na última fala e a gramática dessa fala.
+  const emConversa = (fase === 'conversa' && conversa.current) || (fase === 'resumo' && resumo ? resumo : null);
+  const cenaAberta = emConversa ? emConversa.cena : null;
+  const ultima = fase === 'conversa' ? conversa.current?.linhas.at(-1)?.jp ?? '' : '';
+  useAprofundar(
+    cenaAberta
+      ? [
+          ...cenaAberta.vocabulario.filter((t) => ultima.includes(t.jp) || ultima.includes(t.kana)).map((t) => ({ t: 'palavra', id: t.id }) as const),
+          ...gramaticaDaFrase(ultima),
+          { t: 'cena', id: `conversa:${cenaAberta.id}` },
+        ]
+      : [],
+  );
   const gravacao = useRef<Gravacao | null>(null);
   const inputEl = useRef<HTMLInputElement>(null);
   const listaEl = useRef<HTMLOListElement>(null);

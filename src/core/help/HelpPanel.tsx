@@ -1,6 +1,7 @@
 import { createPortal } from 'preact/compat';
 import { useEffect, useRef } from 'preact/hooks';
 import { AJUDA, rotuloTeclas, SECOES, telaUsaF1, type Ajuda } from '../../content/ajuda';
+import { APROFUNDAR } from '../../content/ajuda/comum';
 import { fecharAjuda, secaoAjuda, telaAtual } from './ajuda';
 
 function Teclas({ teclas }: { teclas: readonly string[] }) {
@@ -41,6 +42,12 @@ function Corpo({ a, secao }: { a: Ajuda; secao: number }) {
           </dt>
           <dd>Abrir e fechar esta ajuda</dd>
         </div>
+        <div>
+          <dt>
+            <Teclas teclas={['F4', '!']} />
+          </dt>
+          <dd>Aprofundar: estudar com calma o que está na tela</dd>
+        </div>
       </dl>
     );
   if (id === 'tela')
@@ -64,7 +71,7 @@ function Corpo({ a, secao }: { a: Ajuda; secao: number }) {
     );
   return (
     <div class="ajuda-perguntas">
-      {a.perguntas.map((q) => (
+      {[...a.perguntas, APROFUNDAR].map((q) => (
         <div key={q.p}>
           <h3>{q.p}</h3>
           <p>{q.r}</p>
