@@ -9,7 +9,12 @@ export const SAVE_VERSION = 1;
 export const SAVE_KEY = 'kotoba-arcade:save';
 
 export interface Settings {
+  /** Som ligado (música, efeitos e voz). Desligado, nada toca. */
   sound: boolean;
+  /** Volumes de 0 a 1 de cada parte do som (ajuste fino; o `sound` desliga tudo). */
+  volMusica: number;
+  volEfeitos: number;
+  volVoz: number;
   voice: boolean;
   /** Reduz tremor de tela e partículas. */
   calm: boolean;
@@ -52,7 +57,7 @@ export function emptySave(now: number): SaveData {
     createdAt: now,
     updatedAt: now,
     profile: { xp: 0, coins: 0, daysPlayed: [] },
-    settings: { sound: true, voice: true, calm: false, vozPt: VOZ_PT_PADRAO, tema: 'auto' },
+    settings: { sound: true, volMusica: 0.6, volEfeitos: 0.8, volVoz: 1, voice: true, calm: false, vozPt: VOZ_PT_PADRAO, tema: 'auto' },
     cards: {},
     games: {},
   };
@@ -89,6 +94,7 @@ export function normalizeSave(input: unknown, now: number): SaveData {
   const profile = isObject(input.profile) ? input.profile : {};
   const settings = isObject(input.settings) ? input.settings : {};
   const num = (x: unknown, fallback: number) => (typeof x === 'number' && Number.isFinite(x) ? x : fallback);
+  const vol = (x: unknown, fallback: number) => Math.min(1, Math.max(0, num(x, fallback)));
   return {
     v: SAVE_VERSION,
     createdAt: num(input.createdAt, now),
@@ -103,6 +109,9 @@ export function normalizeSave(input: unknown, now: number): SaveData {
     },
     settings: {
       sound: typeof settings.sound === 'boolean' ? settings.sound : base.settings.sound,
+      volMusica: vol(settings.volMusica, base.settings.volMusica),
+      volEfeitos: vol(settings.volEfeitos, base.settings.volEfeitos),
+      volVoz: vol(settings.volVoz, base.settings.volVoz),
       voice: typeof settings.voice === 'boolean' ? settings.voice : base.settings.voice,
       calm: typeof settings.calm === 'boolean' ? settings.calm : base.settings.calm,
       vozPt: VOZES_PT.includes(settings.vozPt as VozPt) ? (settings.vozPt as VozPt) : base.settings.vozPt,

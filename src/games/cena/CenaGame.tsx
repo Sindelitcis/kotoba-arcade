@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
+import { useClima } from '../../core/som/climas';
 import { app, cenaSave, commit, go, screen } from '../../core/app';
 import { sfx, speak, speakWord } from '../../core/audio';
 import { acertou, cor, corStyle, errou, zerar } from '../../core/cor';
@@ -115,6 +116,7 @@ function Cena({ r, cursor, onClick, mostrados }: { r: CenaRound; cursor: string 
 export function CenaGame() {
   const save = cenaSave();
   const [modo, setModoState] = useState<Modo>('menu');
+  useClima(modo === 'resumo' ? 'vitoria' : undefined);
   const modoRef = useRef<Modo>('menu');
   const setModo = (m: Modo) => {
     modoRef.current = m;

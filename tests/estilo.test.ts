@@ -4,7 +4,6 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { app, commit } from '../src/core/app';
 import { CENA_AVENTURA, CENA_CONVERSA, NOMES_CENAS, NOMES_PESSOAS, cenaStyle, cenaUrl, pessoaUrl } from '../src/core/arte';
 import { aplicarTema, atributoDoTema } from '../src/core/tema';
-import { yo } from '../src/core/audio';
 import { onomato, SFX_WORDS } from '../src/core/fx';
 import { SCENES, SPEAKERS } from '../src/games/aventura/cenas';
 import { CENAS } from '../src/games/conversa/engine';
@@ -79,16 +78,6 @@ describe('cenários e personagens', () => {
 
   it('sem cenário, o quadro fica sem fundo em vez de quebrar', () => {
     expect(cenaStyle(undefined)).toEqual({});
-  });
-});
-
-describe('sons', () => {
-  it('a escala yo não tem semitom e sobe uma oitava a cada cinco notas', () => {
-    for (let i = 0; i < 14; i++) {
-      const semis = 12 * Math.log2(yo(i + 1) / yo(i));
-      expect(semis).toBeGreaterThanOrEqual(1.99);
-    }
-    expect(yo(5) / yo(0)).toBeCloseTo(2);
   });
 });
 

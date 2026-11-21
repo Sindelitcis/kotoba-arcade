@@ -51,6 +51,13 @@ describe('save', () => {
     expect(s.settings.sound).toBe(true);
   });
 
+  it('os volumes de música, efeitos e voz ficam entre 0 e 1; valor estranho volta ao padrão', () => {
+    const s = importSave(JSON.stringify({ v: 1, settings: { volMusica: 3, volEfeitos: -1, volVoz: 'alto' } }), T0).settings;
+    expect([s.volMusica, s.volEfeitos, s.volVoz]).toEqual([1, 0, 1]);
+    const padrao = importSave(JSON.stringify({ v: 1 }), T0).settings;
+    expect([padrao.volMusica, padrao.volEfeitos, padrao.volVoz]).toEqual([0.6, 0.8, 1]);
+  });
+
   it('o tema fica entre automático, claro e escuro; valor estranho volta ao automático', () => {
     expect(importSave(JSON.stringify({ v: 1, settings: { tema: 'escuro' } }), T0).settings.tema).toBe('escuro');
     expect(importSave(JSON.stringify({ v: 1, settings: { tema: 'neon' } }), T0).settings.tema).toBe('auto');

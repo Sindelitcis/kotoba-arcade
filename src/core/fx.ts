@@ -31,7 +31,8 @@ let drops: Drop[] = [];
 let running = false;
 let last = 0;
 
-function calm(): boolean {
+/** Modo calmo nos Ajustes ou "reduzir movimento" no sistema. */
+export function calm(): boolean {
   return app.data.settings.calm || (typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches);
 }
 

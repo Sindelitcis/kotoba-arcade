@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
+import { useClima } from '../../core/som/climas';
 import { KANA_IMAGENS, LOTES, kanaItem, type KanaItem } from '../../content/kana';
 import { app, commit, go, kanaImagensSave, screen } from '../../core/app';
 import { sfx, speakWord } from '../../core/audio';
@@ -137,6 +138,7 @@ function Enunciado({ p }: { p: Pergunta }) {
 export function KanaImagensGame() {
   const save = kanaImagensSave();
   const [fase, setFaseState] = useState<Fase>('menu');
+  useClima(fase === 'resumo' || fase === 'teste-fim' ? 'vitoria' : undefined);
   // Teclas seguidas chegam antes de a tela redesenhar: o teclado lê a fase daqui.
   const faseRef = useRef<Fase>('menu');
   const setFase = (f: Fase) => {

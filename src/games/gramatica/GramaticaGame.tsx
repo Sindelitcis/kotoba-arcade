@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
+import { useClima } from '../../core/som/climas';
 import { findWord } from '../../content/vida';
 import { app, commit, go, gramaticaSave, screen } from '../../core/app';
 import { cenaStyle } from '../../core/arte';
@@ -34,6 +35,7 @@ function Word({ w }: { w: Written }) {
 export function GramaticaGame() {
   const save = gramaticaSave();
   const [mode, setModeState] = useState<Mode>('menu');
+  useClima(mode === 'summary' ? 'vitoria' : undefined);
   // Duas teclas seguidas chegam antes de a tela redesenhar: o teclado lê o modo daqui, que muda na hora.
   const modeRef = useRef<Mode>('menu');
   const setMode = (next: Mode) => {

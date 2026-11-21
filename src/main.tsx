@@ -2,9 +2,10 @@ import './core/mudanca';
 import { effect } from '@preact/signals';
 import { render } from 'preact';
 import { screen } from './core/app';
-import { loadVoices, sfx } from './core/audio';
+import { loadVoices } from './core/audio';
 import { zerar } from './core/cor';
 import { HelpButton } from './core/help/HelpButton';
+import { ligarSom } from './core/som/climas';
 import './core/tema';
 import { AventuraGame } from './games/aventura/AventuraGame';
 import { CenaGame } from './games/cena/CenaGame';
@@ -64,14 +65,14 @@ function App() {
   }
 }
 
-// Trocar de tela zera o brilho do combo e toca o som de página.
-let firstScreen = true;
+// Trocar de tela zera o brilho do combo.
 effect(() => {
   void screen.value;
   zerar();
-  if (firstScreen) firstScreen = false;
-  else sfx.page();
 });
+
+// Trilha de cada tela, som de troca de tela e de menu (src/core/som/climas.ts).
+ligarSom();
 
 /** A tela e, num canto, o botão de ajuda dela. */
 function Raiz() {

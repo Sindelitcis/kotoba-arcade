@@ -176,7 +176,9 @@ Cenários e personagens e as primeiras ilustrações de vocabulário: gerados no
 
 Kanji em peças: traços e peças do [KanjiVG](https://kanjivg.tagaini.net), de Ulrich Apel (CC BY-SA 3.0); leituras, lista de peças e conferência das palavras pelo KANJIDIC2, KRADFILE e JMdict, da [EDRDG](https://www.edrdg.org) (CC BY-SA 4.0); nível do JLPT pelo [kanji-data](https://github.com/davidluzgouveia/kanji-data), de David Luz Gouveia (MIT). Os arquivos gerados desses dados seguem CC BY-SA. Nomes das peças, imagens e historinhas foram escritos para o jogo. Detalhes e como regenerar: [docs/pecas.md](docs/pecas.md).
 
-Efeitos sonoros: todos sintetizados no próprio jogo (`src/core/audio.ts`). As falas em japonês são gravações, com as vozes no fim desta seção.
+Música de fundo: seis faixas do [魔王魂](https://maou.audio/) (Maou Damashii), de 森田交一, cortadas em loop. 音楽：魔王魂. São アコースティック27 (fliperama e Jornada), ヒーリング15 (lições e jogos de estudo), アコースティック32 (Aventura e Cena Viva), ネオロック73 (KanjiMon e Kotodama), 民族33 (chefe do Kotodama) e アコースティック03 (resultado e vitória). As [regras](https://maou.audio/rule/) liberam o uso em jogo e não deixam redistribuir o arquivo solto.
+
+Efeitos sonoros: do [効果音ラボ](https://soundeffect-lab.info/), cortados e com o volume igualado. 効果音：効果音ラボ. As [regras](https://soundeffect-lab.info/agreement/) liberam o uso como som de app e não deixam redistribuir o arquivo solto. A lista de cada música e efeito, e onde toca, está em [docs/musica.md](docs/musica.md) e nos Ajustes, em Créditos do som. As falas em japonês são gravações, com as vozes no fim desta seção.
 
 Músicas do Kana Beat: trechos de cerca de 1 minuto, cortados em loop, de faixas livres do [OpenGameArt](https://opengameart.org). Como foram escolhidas e cortadas está em [docs/musica.md](docs/musica.md). Dentro do jogo, a tela de resultado tem o botão Músicas com esta mesma lista.
 

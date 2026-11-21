@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
+import { useClima } from '../../core/som/climas';
 import { app, commit, go, roguelikeSave } from '../../core/app';
 import { sfx, speak } from '../../core/audio';
 import { VOZ_PALAVRA } from '../../core/vozes';
@@ -87,7 +88,7 @@ export function RoguelikeGame() {
         sfx.levelup();
         setNote(`Nível ${e.level}!`);
       } else if (e.t === 'over') {
-        if (e.won) sfx.chest();
+        if (e.won) sfx.vitoria();
         else sfx.over();
       }
     }
@@ -235,6 +236,7 @@ export function RoguelikeGame() {
   const feedback = asking?.feedback;
   const enemy = run.enemy;
   const inCombat = (run.phase === 'combat' || run.phase === 'question') && enemy;
+  useClima(run.phase === 'over' && run.won ? 'vitoria' : inCombat && enemy.kind === 'boss' ? 'chefe' : undefined);
   const total = run.stats.correct + run.stats.wrong;
 
   return (

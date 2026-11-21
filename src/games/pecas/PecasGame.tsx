@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
+import { useClima } from '../../core/som/climas';
 import { app, commit, go, pecasSave, screen } from '../../core/app';
 import { cenaStyle } from '../../core/arte';
 import { sfx, speak, speakKanji } from '../../core/audio';
@@ -109,6 +110,7 @@ function Opcao({ i, children, estado, ok, onClick }: { i: number; children: prea
 export function PecasGame() {
   const save = pecasSave();
   const [tela, setTelaState] = useState<Tela>('menu');
+  useClima(tela === 'resumo' ? 'vitoria' : undefined);
   // Duas teclas seguidas chegam antes de a tela redesenhar: o teclado lê daqui, que muda na hora.
   const telaRef = useRef<Tela>('menu');
   const setTela = (t: Tela) => {

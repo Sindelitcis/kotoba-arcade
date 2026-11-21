@@ -1,0 +1,25 @@
+/* Volumes e créditos do som, dentro dos Ajustes. Herda cores e fontes do tema. */
+.som-volumes {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0.25rem 0 0.5rem;
+}
+.som-volumes label {
+  display: grid;
+  grid-template-columns: 5rem 1fr;
+  align-items: center;
+  gap: 0.5rem;
+}
+.som-volumes input[type='range'] {
+  width: 100%;
+  accent-color: currentColor;
+}
+.som-creditos {
+  max-height: 40vh;
+  overflow: auto;
+  font-size: 0.9em;
+}
+.som-creditos ul {
+  margin: 0.25rem 0 0.75rem;
+  padding-left: 1.1rem;
+}

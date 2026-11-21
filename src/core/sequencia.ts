@@ -10,6 +10,7 @@
 import { app } from './app';
 import { assumirFala, largarFala, loadVoices, recordedFile, VOZES_URL, type Manifesto } from './audio';
 import { carregarPt, urlPt, type FontesPt } from './fala-pt';
+import { acompanharVoz } from './som/mixer';
 import { VOZ_PADRAO, VOZ_PALAVRA } from './vozes';
 
 /** Japonês falado: a chave da gravação, a voz e o kana para a voz do navegador. */
@@ -46,6 +47,7 @@ export const saidaDoNavegador: Saida = {
   tocar(url, sinal) {
     if (typeof Audio === 'undefined') return Promise.resolve(0);
     const a = new Audio(url);
+    acompanharVoz(a);
     const fim = new Promise<number>((resolve) => {
       a.addEventListener('ended', () => resolve(Number.isFinite(a.duration) ? a.duration : 0), { once: true });
       a.addEventListener('error', () => resolve(0), { once: true });
@@ -65,6 +67,7 @@ export const saidaDoNavegador: Saida = {
       u.onend = () => resolve();
       u.onerror = () => resolve();
     });
+    acompanharVoz(u);
     speechSynthesis.speak(u);
     return Promise.race([fim, abortado(sinal).then(() => speechSynthesis.cancel())]);
   },

@@ -5,11 +5,15 @@
  * então as notas caem na batida. O ajuste fino de andamento é `playbackRate`, que muda um pouco o tom;
  * a escolha da faixa mantém essa mudança em no máximo 10% (menos de um tom e meio).
  */
-import { audioContext } from '../../core/audio';
+import { barramentoMusica, carregar, contextoAudio } from '../../core/som/mixer';
 import { pickTrack, songPosition, type Track, type TrackChoice } from './tracks';
 
 const ARQUIVOS = import.meta.glob<string>('../../assets/musica/*.ogg', { eager: true, query: '?url', import: 'default' });
-const VOLUME = 0.55;
+/**
+ * Ganho sobre o volume de música dos Ajustes. Aqui a música é o jogo (as notas caem nela),
+ * então fica bem mais alta que a trilha de fundo das outras telas.
+ */
+const VOLUME = 1.8;
 /** Se a música não carregar nesse tempo, a fase começa sem ela. */
 const LOAD_TIMEOUT = 4000;
 
@@ -17,23 +21,9 @@ export function trackUrl(track: Track): string | undefined {
   return ARQUIVOS[`../../assets/musica/${track.id}.ogg`];
 }
 
-const cache = new Map<string, Promise<AudioBuffer | null>>();
-
 function load(ac: AudioContext, track: Track): Promise<AudioBuffer | null> {
   const url = trackUrl(track);
-  if (!url) return Promise.resolve(null);
-  let p = cache.get(url);
-  if (!p) {
-    p = fetch(url)
-      .then((r) => (r.ok ? r.arrayBuffer() : Promise.reject(new Error(String(r.status)))))
-      .then((data) => ac.decodeAudioData(data))
-      .catch(() => {
-        cache.delete(url);
-        return null;
-      });
-    cache.set(url, p);
-  }
-  return p;
+  return url ? carregar(ac, url) : Promise.resolve(null);
 }
 
 export interface Music {
@@ -53,7 +43,7 @@ export interface Music {
 
 export function startMusic(bpm: number): Music {
   const choice = pickTrack(bpm);
-  const ac = audioContext();
+  const ac = contextoAudio();
   let buffer: AudioBuffer | null = null;
   let source: AudioBufferSourceNode | null = null;
   let master: GainNode | null = null;
@@ -87,9 +77,11 @@ export function startMusic(bpm: number): Music {
       const now = performance.now();
       if (!ac || !buffer || stopped) return now + delayMs;
       if (!master) {
+        const saida = barramentoMusica();
+        if (!saida) return now + delayMs;
         master = ac.createGain();
         master.gain.value = VOLUME;
-        master.connect(ac.destination);
+        master.connect(saida);
       }
       const at = ac.currentTime + delayMs / 1000;
       source = ac.createBufferSource();

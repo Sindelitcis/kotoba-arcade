@@ -67,7 +67,9 @@ export const AJUSTES: Ajuda = {
   ],
   teclas: [{ teclas: ['Esc'], faz: 'Fechar os Ajustes' }],
   elementos: [
-    { nome: 'Efeitos sonoros', texto: 'Os sons de acerto, erro, combo e baú.' },
+    { nome: 'Som', texto: 'Liga ou desliga tudo que toca: música, efeitos e voz.' },
+    { nome: 'Música, Efeitos e Voz', texto: 'O volume de cada parte. A música abaixa sozinha enquanto uma voz fala.' },
+    { nome: 'Créditos do som', texto: 'Quem fez cada música e cada efeito, com o link da origem e as regras de uso.' },
     { nome: 'Voz em japonês', texto: 'A voz que lê palavras e frases. Usa a voz japonesa do navegador. Se o navegador não tiver uma, aparece um aviso do lado.' },
     { nome: 'Voz em português', texto: 'Escolhe quem fala o português das aulas e das explicações: Voz 1 ou Voz 2. As duas já vêm no site. Se uma fala faltar na voz escolhida, toca a outra.' },
     { nome: 'Modo calmo', texto: 'Para as animações que se repetem, deixa o brilho mais lento e diminui os efeitos e as onomatopeias. Bom para dias de cabeça cheia. Toda a informação continua na tela.' },

@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { app, commit, conversaSave, go, screen } from '../../core/app';
 import { CENA_CONVERSA, cenaStyle, pessoaUrl } from '../../core/arte';
 import { sfx, speak, speakWord } from '../../core/audio';
+import { acompanharVoz } from '../../core/som/mixer';
 import { VOZ_CONVERSA } from '../../core/vozes';
 import { onomato } from '../../core/fx';
 import { foco } from '../../core/foco';
@@ -143,6 +144,7 @@ export function ConversaGame() {
         // Cada fala é um arquivo na memória: solta quando acaba de tocar.
         a.onended = a.onerror = () => URL.revokeObjectURL(url);
         audioEl.current = a;
+        acompanharVoz(a);
         await a.play();
         return;
       } catch {

@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
+import { useClima } from '../../core/som/climas';
 import type { Word } from '../../content';
 import { FIGURAS, type Figura } from '../../content/imagens';
 import { app, commit, go, memoriaSave, screen } from '../../core/app';
@@ -97,6 +98,7 @@ function Licao({ novas, onGo }: { novas: Figura[]; onGo: () => void }) {
 export function MemoriaGame() {
   const save = memoriaSave();
   const [modo, setModoState] = useState<Modo>('menu');
+  useClima(modo === 'resumo' ? 'vitoria' : undefined);
   const modoRef = useRef<Modo>('menu');
   const setModo = (m: Modo) => {
     modoRef.current = m;

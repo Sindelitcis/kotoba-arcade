@@ -8,6 +8,7 @@ import { visitados, type Saves } from '../core/cor';
 import { Icone } from '../core/Icone';
 import type { Tema } from '../core/save';
 import { useSubtelaAjuda } from '../core/help/ajuda';
+import { AjustesSom } from '../core/som/AjustesSom';
 import { levelInfo, readingMeter, recentDays } from '../core/progress';
 import { NOME_VOZ_PT, VOZES_PT, type VozPt } from '../core/fala-pt';
 import { exportSave } from '../core/save';
@@ -134,7 +135,7 @@ export function Hub() {
     sfx.click();
   };
 
-  const toggle = (opcao: 'sound' | 'voice' | 'calm') => {
+  const toggle = (opcao: 'voice' | 'calm') => {
     settings[opcao] = !settings[opcao];
     commit();
     sfx.click();
@@ -321,9 +322,7 @@ export function Hub() {
         <div class="modal" onClick={() => setShowSettings(false)}>
           <div class="modal-box" ref={settingsRef} role="dialog" aria-modal="true" aria-labelledby="ajustes-titulo" onClick={(e) => e.stopPropagation()}>
             <h2 id="ajustes-titulo">Ajustes</h2>
-            <label class="check">
-              <input type="checkbox" checked={settings.sound} onChange={() => toggle('sound')} /> Efeitos sonoros
-            </label>
+            <AjustesSom />
             <label class="check">
               <input type="checkbox" checked={settings.voice} onChange={() => toggle('voice')} /> Voz em japonês
               {!hasJapaneseVoice() && <small class="muted"> (este navegador não tem voz japonesa instalada)</small>}
