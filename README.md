@@ -156,7 +156,7 @@ O texto fica em `src/content/ajuda/`, um arquivo por jogo. Um teste confere que 
 
 ## Visual
 
-O visual se chama Sora: tela limpa, cartões arredondados, um azul de marca e as ilustrações de anime sempre coloridas. Uma coisa em foco por vez. Acertos seguidos fazem o quadro do jogo brilhar; errar baixa o brilho devagar. Tem tema claro e escuro (Ajustes > Tema, ou o do sistema). O modo calmo, em Ajustes, para as animações que se repetem e diminui os efeitos. As regras e o motivo da mudança estão em [docs/estilo.md](docs/estilo.md).
+O visual se chama Sora com pincel: tela limpa, uma coisa em foco por vez e as ilustrações de anime sempre coloridas, com traço pintado à mão por cima (quadros com linha de pincel, canto cortado, ilustração com a borda pintada). Acertos seguidos fazem o quadro do jogo brilhar; errar baixa o brilho devagar. Tem tema claro e escuro (Ajustes > Tema, ou o do sistema). O modo calmo, em Ajustes, para as animações que se repetem e diminui os efeitos. As regras e o motivo da mudança estão em [docs/estilo.md](docs/estilo.md).
 
 ## Créditos
 

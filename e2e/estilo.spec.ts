@@ -14,10 +14,16 @@ test('as três fontes carregam: português, japonês e o kanji de estudo', async
   await expect(page.locator('.tile-title').first()).toHaveCSS('font-family', /Plus Jakarta Sans/);
 });
 
-test('os cartões do fliperama mostram a ilustração colorida de cada jogo', async ({ page }) => {
-  const backgrounds = await page.locator('.tiles .tile').evaluateAll((els) => els.map((el) => getComputedStyle(el).backgroundImage));
-  expect(backgrounds).toHaveLength(10);
-  for (const bg of backgrounds) expect(bg).toMatch(/url\(/);
+test('os cartões do fliperama mostram a ilustração colorida de cada jogo, com a borda pintada', async ({ page }) => {
+  // A ilustração fica no ::before do cartão, recortada por uma máscara de borda irregular.
+  const artes = await page
+    .locator('.tiles .tile')
+    .evaluateAll((els) => els.map((el) => ({ fundo: getComputedStyle(el, '::before').backgroundImage, mascara: getComputedStyle(el, '::before').maskImage })));
+  expect(artes).toHaveLength(10);
+  for (const a of artes) {
+    expect(a.fundo).toMatch(/url\(/);
+    expect(a.mascara).toMatch(/url\("data:image\/svg\+xml/);
+  }
   // Nada de versão em cinza: a imagem é a da pasta colorida.
   const cenas = await page.locator('.tiles .tile').evaluateAll((els) => els.map((el) => (el as HTMLElement).style.getPropertyValue('--cena')));
   for (const c of cenas) expect(c).not.toMatch(/-tinta|\/cenas\//);
@@ -203,4 +209,50 @@ test('no celular a tela de senha da Conversa cabe na largura, num cartão no mei
   expect(caixa!.x + caixa!.width).toBeLessThanOrEqual(360);
   await expect(page.getByTestId('cv-senha')).not.toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
   await ctx.close();
+});
+
+test('os quadros têm traço de pincel parado e os cartões do fliperama têm o canto cortado', async ({ page }) => {
+  // O filtro existe na página e não tem nada animado dentro (o traço não treme).
+  expect(await page.locator('svg filter#pincel').count()).toBe(1);
+  expect(await page.locator('svg filter#pincel animate').count()).toBe(0);
+  const traco = (sel: string) =>
+    page.locator(sel).first().evaluate((el) => {
+      const s = getComputedStyle(el, '::after');
+      return { filtro: s.filter, borda: s.borderTopStyle, animacao: s.animationName };
+    });
+  for (const sel of ['.tiles .tile', '.jornada-faixa', '.panel']) {
+    const t = await traco(sel);
+    expect(t.filtro, sel).toContain('#pincel');
+    expect(t.borda, sel).toBe('solid');
+    expect(t.animacao, sel).toBe('none');
+  }
+  await expect(page.getByTestId('tile-kanjimon')).toHaveCSS('clip-path', /polygon/);
+  // No jogo também: o quadro da caçada tem o traço.
+  await page.getByTestId('play-now').click();
+  expect((await traco('[data-testid="arena"]')).filtro).toContain('#pincel');
+});
+
+test('o foco do teclado aparece por dentro do cartão de canto cortado', async ({ page }) => {
+  // O recorte esconderia um contorno por fora.
+  await page.getByTestId('tile-kanjimon').focus();
+  const offset = await page.getByTestId('tile-kanjimon').evaluate((el) => parseFloat(getComputedStyle(el).outlineOffset));
+  expect(offset).toBeLessThan(0);
+});
+
+test('a mancha de tinta no canto do quadro cresce com o combo e some sem ele', async ({ page }) => {
+  await page.getByTestId('play-now').click();
+  const tamanho = (cor: string) =>
+    page.getByTestId('arena').evaluate((el, cor) => {
+      (el as HTMLElement).style.transition = 'none';
+      (el as HTMLElement).style.setProperty('--cor', cor);
+      const s = getComputedStyle(el, '::before');
+      return { tam: parseFloat(s.maskSize), img: s.maskImage };
+    }, cor);
+  const sem = await tamanho('0');
+  const meio = await tamanho('0.5');
+  const cheio = await tamanho('1');
+  expect(sem.tam).toBe(0);
+  expect(meio.tam).toBeGreaterThan(0);
+  expect(cheio.tam).toBeGreaterThan(meio.tam);
+  expect(cheio.img).toMatch(/url\("data:image\/svg\+xml/);
 });

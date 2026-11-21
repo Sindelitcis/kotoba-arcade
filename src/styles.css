@@ -69,6 +69,8 @@
   --sakura: #e9468f;
   --sakura-soft: #fde5f0;
   --sakura-text: #b0246a;
+  /* Traço de pincel dos quadros */
+  --tinta: #1a2444;
 
   /* Fontes */
   --f-texto: 'Plus Jakarta Sans', 'Zen Maru Gothic', 'Yu Gothic UI', 'Hiragino Sans', 'Noto Sans JP', system-ui, sans-serif;
@@ -77,9 +79,9 @@
   --f-mono: ui-monospace, 'Cascadia Mono', Consolas, monospace;
 
   /* Forma */
-  --r-s: 10px;
-  --r-m: 16px;
-  --r-l: 24px;
+  --r-s: 6px;
+  --r-m: 8px;
+  --r-l: 10px;
   --r-pill: 999px;
   --vao: 16px;
   --sh-1: 0 1px 2px rgb(20 28 46 / 0.06), 0 1px 3px rgb(20 28 46 / 0.06);
@@ -132,6 +134,8 @@
     --sakura: #ff6fae;
     --sakura-soft: #44203a;
     --sakura-text: #ffa6cd;
+  --tinta: #c9d6f5;
+    --tinta: #c9d6f5;
     --sh-1: 0 1px 2px rgb(0 0 0 / 0.3);
     --sh-2: 0 8px 20px -6px rgb(0 0 0 / 0.5);
     --sh-3: 0 24px 48px -16px rgb(0 0 0 / 0.7);
@@ -166,6 +170,7 @@
   --sakura: #ff6fae;
   --sakura-soft: #44203a;
   --sakura-text: #ffa6cd;
+  --tinta: #c9d6f5;
   --sh-1: 0 1px 2px rgb(0 0 0 / 0.3);
   --sh-2: 0 8px 20px -6px rgb(0 0 0 / 0.5);
   --sh-3: 0 24px 48px -16px rgb(0 0 0 / 0.7);
@@ -344,18 +349,18 @@ input[type='text'], input:not([type]) { color: var(--text); }
   min-height: 56px; padding: 8px 10px 8px 14px;
   background: color-mix(in srgb, var(--surface) 80%, transparent);
   border: 1px solid var(--line);
-  border-radius: var(--r-pill);
+  border-radius: var(--r-s);
   box-shadow: var(--sh-1);
   backdrop-filter: blur(10px);
 }
-.km-top > button:first-child, .km-top > button:last-child, .jn-topo > button:first-child, .lc-topo > button:first-child { border-radius: var(--r-pill); }
+.km-top > button:first-child, .km-top > button:last-child, .jn-topo > button:first-child, .lc-topo > button:first-child { border-radius: var(--r-s); }
 
 /* ───────── Fliperama ───────── */
 .hub { max-width: 1120px; margin: 0 auto; padding: 20px 20px 80px; display: grid; gap: 28px; }
 .hub-top { display: flex; align-items: center; justify-content: space-between; gap: 14px 18px; flex-wrap: wrap; }
 .brand { display: flex; align-items: center; gap: 12px; }
 .brand-jp {
-  display: grid; place-items: center; width: 52px; height: 52px; border-radius: 16px;
+  display: grid; place-items: center; width: 52px; height: 52px; border-radius: var(--r-m);
   font: 600 1.15rem/1 var(--f-kanji); letter-spacing: -0.04em;
   color: #fff;
   background: linear-gradient(140deg, #5b8cff, var(--brand) 55%, #7a4dff);
@@ -406,7 +411,7 @@ input[type='text'], input:not([type]) { color: var(--text); }
   display: flex; align-items: center; gap: 14px; padding: 16px 18px; text-align: left;
   background: var(--surface); border-radius: var(--r-l);
 }
-.ouvir-faixa .jornada-faixa-jp { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 14px; background: var(--brand-soft); color: var(--brand-text); font: 600 1.4rem/1 var(--f-kanji); }
+.ouvir-faixa .jornada-faixa-jp { display: grid; place-items: center; width: 44px; height: 44px; border-radius: var(--r-m); background: var(--brand-soft); color: var(--brand-text); font: 600 1.4rem/1 var(--f-kanji); }
 .ouvir-faixa .jornada-faixa-txt b { font-size: 1.05rem; }
 .ouvir-faixa .jornada-faixa-txt > span { color: var(--text-2); font-weight: 500; font-size: 0.9rem; }
 .ouvir-faixa kbd { background: var(--surface-2); color: var(--text-2); border-color: var(--line-2); }
@@ -490,7 +495,7 @@ input[type='text'], input:not([type]) { color: var(--text); }
 .enemy-card {
   --moldura: var(--line-2);
   position: relative; width: 100%; max-width: 340px; aspect-ratio: 3 / 4;
-  overflow: hidden; padding: 0; border-radius: 20px;
+  overflow: hidden; padding: 0; border-radius: var(--r-m);
   background: linear-gradient(160deg, var(--surface-2), var(--surface-3));
   border: 3px solid var(--moldura);
   box-shadow: var(--sh-3);
@@ -499,7 +504,7 @@ input[type='text'], input:not([type]) { color: var(--text); }
 .enemy-card.r-r { --moldura: color-mix(in srgb, var(--brand) 60%, var(--surface)); }
 .enemy-card.r-sr { --moldura: var(--sakura); box-shadow: 0 0 0 4px var(--sakura-soft), var(--sh-3); }
 .enemy-card.r-ur { --moldura: var(--raro); box-shadow: 0 0 0 4px var(--raro-soft), 0 0 40px -6px var(--raro), var(--sh-3); overflow: visible; }
-.enemy-card.r-ur img { border-radius: 17px; }
+.enemy-card.r-ur img { border-radius: var(--r-m); }
 .enemy-card.r-ur::before { inset: -50px; z-index: -1; animation: girar 18s linear infinite; }
 @keyframes girar { to { transform: rotate(360deg); } }
 .enemy-card.hidden-face img, .enemy-card.locked img { filter: blur(18px) saturate(0.6) brightness(1.1); }
@@ -571,7 +576,7 @@ input[type='text'], input:not([type]) { color: var(--text); }
 .overlay h2.big.win, .av-panel h2.big.win { color: var(--text); }
 .gain { color: var(--sakura-text); font: 800 1.05rem/1.3 var(--f-texto); }
 .capture-card {
-  position: relative; width: 230px; aspect-ratio: 3 / 4; overflow: hidden; border-radius: 20px;
+  position: relative; width: 230px; aspect-ratio: 3 / 4; overflow: hidden; border-radius: var(--r-m);
   border: 3px solid var(--line-2); box-shadow: var(--sh-3);
 }
 .capture-card.r-r { border-color: #7aa2ff; }
@@ -782,10 +787,10 @@ input[type='text'], input:not([type]) { color: var(--text); }
 /* A fala é um balão. */
 .av-line {
   position: relative; font: 700 2.1rem/2.1 var(--f-jp);
-  background: var(--surface); border: 1px solid var(--line); border-radius: 22px 22px 22px 6px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-m) 22px 22px 6px;
   padding: 4px 26px 8px; box-shadow: var(--sh-2);
 }
-.mine .av-line { border-radius: 22px 22px 6px 22px; background: var(--brand-soft); border-color: transparent; }
+.mine .av-line { border-radius: var(--r-m) 22px 6px 22px; background: var(--brand-soft); border-color: transparent; }
 .av-line rt, .av-option-jp rt, .av-entry-jp rt { font: 600 0.42em/1 var(--f-jp); color: var(--text-3); }
 /* Palavra nova ganha 傍点, os pontinhos de ênfase do japonês. */
 .av-w.new { text-emphasis: filled dot var(--sakura); text-emphasis-position: under right; -webkit-text-emphasis: filled dot var(--sakura); -webkit-text-emphasis-position: under right; }
@@ -834,7 +839,7 @@ input[type='text'], input:not([type]) { color: var(--text); }
   background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-l); box-shadow: var(--sh-2);
 }
 .cv[data-phase='senha'] .tile-jp, .cv[data-phase='desligado'] .tile-jp {
-  display: grid; place-items: center; justify-self: center; order: 0; margin: 0; width: 64px; height: 64px; padding: 0; border-radius: 20px;
+  display: grid; place-items: center; justify-self: center; order: 0; margin: 0; width: 64px; height: 64px; padding: 0; border-radius: var(--r-m);
   font: 700 1.4rem/1 var(--f-jp); color: var(--brand-text); background: var(--brand-soft);
 }
 .cv[data-phase='senha'] .av-panel h2.big, .cv[data-phase='desligado'] .av-panel h2.big { font-size: 1.8rem; margin: 0; }
@@ -852,8 +857,8 @@ input[type='text'], input:not([type]) { color: var(--text); }
 .cv-cena img { position: relative; z-index: 1; width: 120px; height: 140px; object-fit: cover; object-position: top; border-radius: var(--r-m); background: var(--surface-2); box-shadow: var(--sh-2); }
 .cv-cena .av-narra { position: relative; z-index: 1; font-size: 1rem; }
 .cv-lines { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
-.cv-line { position: relative; display: grid; gap: 4px; justify-items: start; background: var(--surface); border: 1px solid var(--line); border-radius: 22px 22px 22px 6px; padding: 12px 18px; max-width: 80%; box-shadow: var(--sh-1); }
-.cv-line.jogador { justify-self: end; border-radius: 22px 22px 6px 22px; background: var(--brand-soft); border-color: transparent; }
+.cv-line { position: relative; display: grid; gap: 4px; justify-items: start; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-m) 22px 22px 6px; padding: 12px 18px; max-width: 80%; box-shadow: var(--sh-1); }
+.cv-line.jogador { justify-self: end; border-radius: var(--r-m) 22px 6px 22px; background: var(--brand-soft); border-color: transparent; }
 .cv-line.jogador .av-who { background: var(--surface); color: var(--text-2); }
 .cv-line.thinking .cv-jp { animation: cv-blink 1s infinite; }
 @keyframes cv-blink { 50% { opacity: 0.25; } }
@@ -992,7 +997,7 @@ input[type='text'], input:not([type]) { color: var(--text); }
 .lc-grande { font: 600 6rem/1.1 var(--f-kanji); }
 .lc-grande rt { font: 700 1.2rem/1 var(--f-jp); color: var(--brand-text); }
 .lc-jp { font-size: 2rem; line-height: 2; font-weight: 700; }
-.lc-fala { font-size: 1.7rem; line-height: 2; font-weight: 700; background: var(--surface); border: 1px solid var(--line); border-radius: 22px 22px 22px 6px; padding: 6px 22px; box-shadow: var(--sh-1); }
+.lc-fala { font-size: 1.7rem; line-height: 2; font-weight: 700; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-m) 22px 22px 6px; padding: 6px 22px; box-shadow: var(--sh-1); }
 .lc-pt { font-size: 1.15rem; font-weight: 700; }
 .lc-registro { font-size: 0.85rem; border-left: 4px solid var(--raro); padding-left: 10px; }
 .lc-linha { font-size: 1.1rem; }
@@ -1189,7 +1194,7 @@ input[type='text'], input:not([type]) { color: var(--text); }
   .hub, .km, .dex, .booster, .kb, .rg, .av, .cv, .gr, .jn, .lc, .pc, .me, .cn { padding: 12px 14px 88px; gap: 16px; }
   .km-top, .jn-topo, .lc-topo { border-radius: var(--r-l); padding: 8px 10px; gap: 8px 12px; }
   .hub-top { gap: 12px; }
-  .brand-jp { width: 44px; height: 44px; border-radius: 14px; font-size: 1rem; }
+  .brand-jp { width: 44px; height: 44px; border-radius: var(--r-m); font-size: 1rem; }
   .brand h1 { font-size: 1.15rem; }
   .brand p { display: none; }
   .stats { width: 100%; flex-wrap: nowrap; gap: 6px; }
@@ -1207,4 +1212,199 @@ input[type='text'], input:not([type]) { color: var(--text); }
   .prompt.word-reading, .prompt.word-meaning { font-size: 2.8rem; }
   .kb-track { height: 280px; }
   .av-line { font-size: 1.6rem; padding: 2px 18px 6px; }
+}
+
+/* ───────── Pincel ─────────
+ * O traço pintado do visual antigo, mais leve, por cima do Sora (docs/estilo.md, "Pincel").
+ * Tudo parado: o filtro #pincel (index.html) só deixa a linha irregular, não treme.
+ */
+:root {
+  --corte: 22px;
+  --pincel-borda: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E %3Cfilter id='f' x='-10%25' y='-10%25' width='120%25' height='120%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.045 0.07' numOctaves='3' seed='5'/%3E %3CfeDisplacementMap in='SourceGraphic' scale='5'/%3E%3C/filter%3E%3Crect x='3.5' y='3.5' width='93' height='93' filter='url(%23f)'/%3E%3C/svg%3E");
+  --pincel-faixa: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 30' preserveAspectRatio='none'%3E %3Cfilter id='f' x='-5%25' y='-20%25' width='110%25' height='140%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.08 0.45' numOctaves='2' seed='2'/%3E %3CfeDisplacementMap in='SourceGraphic' scale='4'/%3E%3C/filter%3E%3Cpath d='M2.5 5 Q 50 1.5 97.5 3.5 L 96.5 26.5 Q 50 29 3.5 25.5 Z' filter='url(%23f)'/%3E%3C/svg%3E");
+  --pincelada: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 20' preserveAspectRatio='none'%3E %3Cpath d='M1 13 C 30 6, 90 3, 199 6 L 197 11 C 120 9, 50 13, 4 18 Z'/%3E%3C/svg%3E");
+  --enso: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.06' numOctaves='3' seed='9'/%3E %3CfeDisplacementMap in='SourceGraphic' scale='5'/%3E%3C/filter%3E %3Cpath d='M80 23 C 62 6, 22 9, 13 40 C 4 72, 36 94, 64 86 C 87 79, 95 52, 85 33' fill='none' stroke='%23000' stroke-width='10' stroke-linecap='round' filter='url(%23f)'/%3E%3C/svg%3E");
+  --borrao: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.07' numOctaves='2' seed='3'/%3E %3CfeDisplacementMap in='SourceGraphic' scale='6'/%3E%3C/filter%3E%3Cg filter='url(%23f)'%3E%3Ccircle cx='50' cy='50' r='31'/%3E%3Ccircle cx='77' cy='39' r='10'/%3E %3Ccircle cx='25' cy='66' r='12'/%3E%3Ccircle cx='62' cy='80' r='9'/%3E%3Ccircle cx='31' cy='27' r='9'/%3E%3Ccircle cx='88' cy='71' r='4'/%3E %3Ccircle cx='11' cy='41' r='4.5'/%3E%3Ccircle cx='70' cy='15' r='5'/%3E%3Ccircle cx='43' cy='92' r='3.5'/%3E%3C/g%3E%3C/svg%3E");
+  --grao: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E %3CfeColorMatrix values='0 0 0 0 0.1 0 0 0 0 0.14 0 0 0 0 0.27 0 0 0 0.07 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+}
+:root[data-theme='dark'] { --grao: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E %3CfeColorMatrix values='0 0 0 0 0.8 0 0 0 0 0.85 0 0 0 0 1 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E"); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme='light']) { --grao: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E %3CfeColorMatrix values='0 0 0 0 0.8 0 0 0 0 0.85 0 0 0 0 1 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E"); } }
+
+body {
+  background:
+    var(--grao),
+    radial-gradient(1200px 500px at 85% -10%, var(--bg-tinta), transparent 70%),
+    var(--bg);
+  background-attachment: fixed;
+}
+
+/* Quadro: canto quase reto e uma linha de pincel no lugar da borda fina. */
+.koma, .panel, .play-now, .tile, .arena, .kb-track, .rg-side, .av-stage, .gr-board, .gr-lesson, .cv-cena,
+.pc-quadro, .me-quadro, .ki-quadro, .lc-quadro, .cn-cena, .jn-etapa, .ouvir-faixa, .modal-box, .jornada-faixa,
+.km-top, .jn-topo, .lc-topo, .me-licao, .rg-ask .question, .ajuda-painel,
+.cv[data-phase='senha'] > .av-panel, .cv[data-phase='desligado'] > .av-panel {
+  position: relative;
+  border-color: transparent;
+  border-radius: 4px;
+}
+.koma::after, .panel::after, .play-now::after, .tile::after, .arena::after, .kb-track::after, .rg-side::after, .av-stage::after,
+.gr-board::after, .gr-lesson::after, .cv-cena::after, .pc-quadro::after, .me-quadro::after, .ki-quadro::after, .lc-quadro::after,
+.cn-cena::after, .jn-etapa::after, .ouvir-faixa::after, .modal-box::after, .jornada-faixa::after,
+.km-top::after, .jn-topo::after, .lc-topo::after, .me-licao::after, .rg-ask .question::after, .ajuda-painel::after,
+.cv[data-phase='senha'] > .av-panel::after, .cv[data-phase='desligado'] > .av-panel::after {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  z-index: 3;
+  border: 2.5px solid var(--traco, var(--tinta));
+  border-radius: 3px;
+  pointer-events: none;
+  filter: url('#pincel');
+}
+
+/* Caixas pequenas (narração, fala, explicação): linha fina de tinta, sem filtro, como balão de fala. */
+.teach, .summary div, .av-narra, .av-line, .av-glosses li, .cv-line, .cv-hint, .cv-fix, .gr-why, .gr-point, .lc-fala, .pc-kanji, .pc-diferenca {
+  border: 1.5px solid color-mix(in srgb, var(--tinta) 55%, transparent);
+}
+
+/* Canto cortado nos cartões do fliperama e da Jornada. A diagonal também ganha traço. */
+.tile, .play-now, .jornada-faixa, .ouvir-faixa, .jn-etapa {
+  clip-path: polygon(0 0, calc(100% - var(--corte)) 0, 100% var(--corte), 100% 100%, 0 100%);
+}
+.tile::after, .play-now::after, .jornada-faixa::after, .ouvir-faixa::after, .jn-etapa::after {
+  clip-path: polygon(0 0, calc(100% - var(--corte) + 3px) 0, 100% calc(var(--corte) - 3px), 100% 100%, 0 100%);
+  background: linear-gradient(to bottom left, transparent calc(50% - 2px), var(--traco, var(--tinta)) calc(50% - 2px) calc(50% + 1.5px), transparent calc(50% + 1.5px))
+    top right / calc(var(--corte) - 2px) calc(var(--corte) - 2px) no-repeat;
+}
+/* O contorno do foco fica por dentro, senão o recorte esconde. */
+.tile:focus-visible, .play-now:focus-visible, .jornada-faixa:focus-visible, .ouvir-faixa:focus-visible, .jn-etapa:focus-visible { outline-offset: -9px; }
+.tile:hover:not(:disabled), .play-now:hover:not(:disabled), .jornada-faixa:hover:not(:disabled), .ouvir-faixa:hover:not(:disabled) { box-shadow: none; }
+
+/* Sobre a ilustração escura o traço é claro. */
+.play-now, .jornada-faixa { --traco: rgb(255 255 255 / 0.92); }
+/* Linhas de concentração (集中線) que aparecem ao passar o mouse no cartão grande. */
+.play-now::before, .jornada-faixa::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: repeating-conic-gradient(from 3deg at 82% 40%, rgb(255 255 255 / 0.9) 0 0.45deg, transparent 0.45deg 3.1deg);
+  -webkit-mask: radial-gradient(ellipse at 82% 40%, transparent 28%, #000 85%);
+  mask: radial-gradient(ellipse at 82% 40%, transparent 28%, #000 85%);
+  opacity: 0;
+  transition: opacity var(--d-2) var(--ease);
+}
+.play-now:hover:not(:disabled)::before, .jornada-faixa:hover:not(:disabled)::before, .play-now:focus-visible::before, .jornada-faixa:focus-visible::before { opacity: 0.22; }
+.play-now > *, .jornada-faixa > * { position: relative; z-index: 1; }
+
+/* Cartão de jogo: a ilustração entra como pintura, com a borda irregular, e o texto fica embaixo. */
+.tile[style*='--cena'] { background: var(--surface); padding-top: 152px; align-content: start; }
+.tile[style*='--cena']::before {
+  content: '';
+  position: absolute;
+  inset: 8px 8px auto 8px;
+  height: 136px;
+  background: var(--cena) center 30% / cover;
+  -webkit-mask: var(--pincel-borda) center / 100% 100% no-repeat;
+  mask: var(--pincel-borda) center / 100% 100% no-repeat;
+}
+
+/* Etiqueta em faixa de pincel, levemente torta. */
+.tile-jp, .hub-rotulo { position: relative; isolation: isolate; background: none; border-radius: 0; backdrop-filter: none; }
+.tile-jp { transform: rotate(-2deg); }
+.tile-jp::before, .hub-rotulo::before {
+  content: '';
+  position: absolute;
+  inset: -1px -4px;
+  z-index: -1;
+  background: var(--faixa, var(--brand-soft));
+  -webkit-mask: var(--pincel-faixa) center / 100% 100% no-repeat;
+  mask: var(--pincel-faixa) center / 100% 100% no-repeat;
+}
+.tile.done .tile-jp, .tile.jogado .tile-jp { background: none; --faixa: var(--ok-soft); }
+.hub-rotulo { --faixa: rgb(10 16 34 / 0.55); }
+
+/* Botão principal: uma pincelada azul. */
+button.primary, button.primary:hover:not(:disabled) { position: relative; isolation: isolate; background: transparent; border-color: transparent; border-radius: 4px; }
+button.primary::before {
+  content: '';
+  position: absolute;
+  inset: -2px -3px;
+  z-index: -1;
+  background: var(--brand);
+  -webkit-mask: var(--pincel-faixa) center / 100% 100% no-repeat;
+  mask: var(--pincel-faixa) center / 100% 100% no-repeat;
+  transition: background var(--d-1);
+}
+button.primary:hover:not(:disabled)::before { background: var(--brand-2); }
+button.primary:disabled::before { background: var(--surface-3); }
+button.primary:disabled { background: transparent; color: var(--text-3); }
+
+/* Títulos com pincelada embaixo. */
+.brush-under::after, .overlay h2.big::after, .av-panel h2.big::after, .secao-titulo h2::after {
+  height: 0.34em;
+  bottom: -0.12em;
+  left: -4%;
+  right: -4%;
+  z-index: -1;
+  border-radius: 0;
+  background: color-mix(in srgb, var(--sakura) 75%, transparent);
+  -webkit-mask: var(--pincelada) center / 100% 100% no-repeat;
+  mask: var(--pincelada) center / 100% 100% no-repeat;
+}
+.overlay h2.big.win::after, .av-panel h2.big.win::after { background: color-mix(in srgb, var(--raro) 80%, transparent); }
+.secao-titulo h2 { position: relative; isolation: isolate; }
+.secao-titulo h2::after { content: ''; position: absolute; background: color-mix(in srgb, var(--brand) 45%, transparent); }
+.brush-under, .overlay h2.big, .av-panel h2.big { isolation: isolate; }
+
+/* Marca: 言葉 dentro de um ensō. */
+.brand-jp { position: relative; isolation: isolate; color: var(--text); background: none; box-shadow: none; border-radius: 50%; }
+.brand-jp::before {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  z-index: -1;
+  background: var(--brand);
+  -webkit-mask: var(--enso) center / contain no-repeat;
+  mask: var(--enso) center / contain no-repeat;
+}
+
+/* Mancha de tinta do combo: cresce no canto do quadro do jogo junto com o brilho (--cor) e encolhe no erro. */
+.arena, .pc-quadro, .me-quadro, .ki-quadro, .lc-quadro, .cn-cena, .gr-board, .rg-side { isolation: isolate; }
+.arena::before, .pc-quadro::before, .me-quadro::before, .ki-quadro::before, .lc-quadro::before, .cn-cena::before, .gr-board::before, .rg-side::before {
+  content: '';
+  position: absolute;
+  left: -40px;
+  bottom: -40px;
+  width: 300px;
+  height: 300px;
+  z-index: -1;
+  pointer-events: none;
+  background: color-mix(in srgb, var(--sakura) 30%, transparent);
+  -webkit-mask: var(--borrao) center / calc(var(--cor, 0) * 100%) calc(var(--cor, 0) * 100%) no-repeat;
+  mask: var(--borrao) center / calc(var(--cor, 0) * 100%) calc(var(--cor, 0) * 100%) no-repeat;
+}
+
+/* Mancha de tinta atrás do título da vitória e do resumo. */
+.overlay h2 { position: relative; isolation: isolate; }
+.overlay h2::before, .av-panel h2.big::before {
+  content: '';
+  position: absolute;
+  inset: -150% -25%;
+  z-index: -2;
+  pointer-events: none;
+  background: color-mix(in srgb, var(--brand) 20%, transparent);
+  -webkit-mask: var(--borrao) center / 100% 100% no-repeat;
+  mask: var(--borrao) center / 100% 100% no-repeat;
+}
+.overlay h2.big.win::before, .overlay.win h2::before, .av-panel h2.big.win::before { background: color-mix(in srgb, var(--sakura) 26%, transparent); }
+
+/* Onomatopeia carimbada com sombra de tinta. */
+.onomato { filter: drop-shadow(3px 3px 0 color-mix(in srgb, var(--tinta) 85%, transparent)); }
+
+@media (max-width: 600px) {
+  .tile { border-radius: 4px; }
+  .tile[style*='--cena'] { background: var(--surface); padding-top: 10px; align-content: center; }
+  .tile[style*='--cena']::before { inset: 7px auto 7px 7px; width: 100px; height: auto; background-position: center; }
 }

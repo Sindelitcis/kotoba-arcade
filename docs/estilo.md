@@ -1,6 +1,6 @@
-# Guia de estilo: Sora (空)
+# Guia de estilo: Sora com pincel (空と筆)
 
-O visual se chama Sora, "céu". É uma interface de jogo de anime atual: fundo claro e limpo, cartões arredondados, um azul só de marca e as ilustrações de anime sempre coloridas. Tem tema claro e escuro.
+O visual se chama Sora, "céu", com uma camada de pincel por cima. A base é limpa: um foco por tela, um azul de marca, ilustrações de anime sempre coloridas, tema claro e escuro. Por cima vem o traço pintado à mão: quadros com linha de pincel, canto cortado, ilustração com a borda pintada, etiquetas e botão principal em faixa de pincel, grão de papel no fundo.
 
 Fica de fora qualquer coisa retrô: anos 80 e 90, city pop, neon, VHS, tela de tubo, pixel art nostálgica.
 
@@ -15,6 +15,17 @@ Até novembro de 2026 o jogo era mangá em preto e branco, com a cor de anime ch
 - No celular o topo ficava apertado e algumas telas sobravam vazias.
 
 O Sora resolve com uma regra: **um foco por tela**. O que o jogador tem que olhar agora é o maior e o mais forte; o resto fica calmo.
+
+### E por que o pincel voltou
+
+O Sora puro ficou claro, mas genérico: parecia qualquer aplicativo. O Rafael pediu de volta o lado artístico do visual antigo, os efeitos de borda e de pintura. A camada "Pincel" traz isso sem o barulho de antes:
+
+- O traço é parado. O tremor de linha do visual antigo não volta.
+- Um efeito por elemento: quadro tem linha de pincel, ilustração tem borda pintada, etiqueta tem faixa. Nada de retícula e linha de velocidade espalhadas pela tela.
+- A ilustração continua colorida. A pintura está na borda, não na imagem.
+- O efeito vem de filtro e máscara em SVG, sem imagem duplicada.
+
+A inspiração é o jeito de interface pintada de alguns jogos japoneses recentes, mas nada é copiado: as formas, as fontes e as imagens são nossas ou de licença livre.
 
 ## Cores
 
@@ -64,19 +75,44 @@ Os kanji que só o Kanji em peças usa ficam em arquivos à parte (`*-Pecas.woff
 
 ## Forma
 
-- Cantos: `--r-s` 10px (botão, campo), `--r-m` 16px (cartão), `--r-l` 24px (painel grande, quadro de jogo), `--r-pill` para etiquetas.
+- Cantos quase retos: `--r-s` 6px (botão, campo), `--r-m` 8px (cartão), `--r-l` 10px (painel grande). Quadros com traço de pincel ficam com 4px. `--r-pill` só para etiquetas pequenas e contadores.
 - Vão entre blocos (`--vao`): 16px.
-- Sombra macia em três níveis (`--sh-1` a `--sh-3`). Borda de 1px em `--line`.
-- A ilustração de fundo se dissolve no cartão por um véu (`--veu-baixo`, `--veu-forte`, `--veu-lado`), para o texto ler bem em cima de qualquer imagem.
+- Sombra macia em três níveis (`--sh-1` a `--sh-3`). Quadro grande leva o traço de pincel (veja abaixo); caixa pequena leva linha fina de `--tinta`.
+- Quando o texto fica por cima da ilustração, ela se dissolve num véu (`--veu-baixo`, `--veu-forte`, `--veu-lado`), para o texto ler bem.
 - Ícones: [Lucide](https://lucide.dev) (ISC), em `src/assets/icones/`, pelo componente `<Icone nome="..." />`.
 
 ## Componentes
 
-- **Botão**: `.primary` é azul cheio, e tem um por tela. Os outros são de superfície. `.ghost` para voltar e ações pequenas.
-- **Cartão de jogo** (`.tile`): ilustração colorida em cima, nome e uma linha embaixo. Jogo já jogado ganha o sinal ✓ (`.jogado`).
+- **Botão**: `.primary` é uma pincelada azul, e tem um por tela. Os outros são de superfície. `.ghost` para voltar e ações pequenas.
+- **Cartão de jogo** (`.tile`): canto cortado, ilustração colorida com borda pintada em cima, etiqueta em japonês, nome e uma linha embaixo. Jogo já jogado ganha o sinal ✓ (`.jogado`).
 - **Etiqueta** (`.hub-rotulo`, raridade, `済`): pílula pequena com fundo `-soft`.
 - **Segmento** (`.segmento`): botões com `aria-pressed` para escolhas curtas, como o tema.
 - **Atalho** (`kbd`): só aparece com mouse e teclado. Em tela de toque (`pointer: coarse`) some.
+
+## Pincel
+
+Tudo fica no bloco "Pincel" no fim do `src/styles.css`, com as formas em SVG dentro do próprio CSS.
+
+| Peça | Como é feita | Onde |
+| --- | --- | --- |
+| Traço do quadro | `::after` com borda de 2,5px em `--tinta` e o filtro `#pincel` (`index.html`): ruído que entorta a linha e abre falhas de cerda | cartões do fliperama, quadros dos jogos, barra do topo, painéis, ajuda |
+| Canto cortado | `clip-path` com o canto de cima à direita cortado em `--corte` (22px); a diagonal também ganha traço | cartões do fliperama, Jornada, Ouvir, etapas |
+| Borda pintada | máscara `--pincel-borda`: retângulo com a borda entortada por ruído | ilustração dos cartões |
+| Faixa de pincel | máscara `--pincel-faixa` atrás do texto | etiquetas (`.tile-jp`, `.hub-rotulo`) e botão principal |
+| Pincelada | máscara `--pincelada` embaixo do título | títulos grandes, "Jogos" |
+| Ensō | máscara `--enso`, um círculo de pincel | 言葉 da marca |
+| Mancha de tinta | máscara `--borrao`, borrão com respingos | no canto do quadro do jogo, crescendo com o combo (`--cor`); atrás do título da vitória e do resumo |
+| Grão de papel | `--grao`, ruído quase invisível no fundo | página toda |
+| Linhas de concentração | `repeating-conic-gradient` com máscara | só no cartão grande, ao passar o mouse |
+
+`--tinta` é azul-marinho no tema claro e quase branco no escuro, então o traço vira giz claro sobre o fundo escuro. Sobre ilustração escura o traço é branco (`--traco`).
+
+Regras:
+
+- Nada do pincel se mexe sozinho. O modo calmo não precisa desligar nada aqui.
+- Caixa pequena (narração, fala, explicação) não leva filtro: só uma linha fina de tinta, como balão de fala.
+- O foco do teclado nos cartões de canto cortado fica por dentro (`outline-offset` negativo), senão o recorte esconde.
+- Um teste (`e2e/estilo.spec.ts`) confere o traço, o canto cortado, a borda pintada e que nada disso anima.
 
 ## Fliperama
 
@@ -91,7 +127,7 @@ O cartão do jogo ganha um aro sakura e um brilho em volta que crescem com os ac
 - Pausa, recomeço e troca de tela: apaga.
 - Progresso que só cresce (frases do Kumitate): `progresso()`, no máximo metade.
 
-No Kana Beat a linha de acerto passa do azul para o rosa com o combo.
+No Kana Beat a linha de acerto passa do azul para o rosa com o combo. No canto de baixo do quadro do jogo, uma mancha de tinta rosa cresce junto com o brilho e encolhe no erro.
 
 ## Feedback (onomatopeia)
 
