@@ -86,7 +86,7 @@ A voz do AivisSpeech no PC continua bem melhor (tem uma voz por personagem e ent
 
 | Limite | Valor | Quanto a Conversa gasta |
 | --- | --- | --- |
-| Workers AI | 10.000 neurons por dia, zera às 00:00 UTC (21h em Brasília) | Por fala sua: ~4 (ouvir) + ~9 (resposta) + ~60 (furigana, se a resposta tiver kanji). Uma conversa de 8 falas fica em torno de 600 neurons: **umas 15 conversas por dia**. |
+| Workers AI | 10.000 neurons por dia, zera às 00:00 UTC (21h em Brasília) | Por fala sua: ~4 (ouvir) + ~9 (resposta) + ~60 (furigana, se a resposta tiver kanji). Uma conversa de 8 falas fica em torno de 600 neurons: **umas 15 conversas por dia**. Com a IA do PC ligada (modo híbrido, `docs/ia-do-pc.md`), a nuvem só escreve o texto: ouvir e furigana ficam no PC e a fala custa só os ~9 da resposta. Aí são uns 75 neurons por conversa, **mais de 100 conversas por dia**, e quando a cota acaba o modelo do PC continua sozinho. |
 | Pages Functions | 100.000 pedidos por dia; 10 ms de CPU por pedido | Folgado. A CPU é pouca porque o áudio já chega em base64 e a espera pela IA não conta. |
 | Workers KV | 1.000 gravações e 100.000 leituras por dia | Só senha errada grava. |
 | Pages | 500 publicações por mês, 20.000 arquivos, 25 MB por arquivo | Uma publicação por push no `main`. O site tem uns 4.900 arquivos. |

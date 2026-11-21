@@ -12,6 +12,7 @@ import { teclaDe } from '../../core/teclas';
 import {
   avisoDaFalha,
   criarCliente,
+  criarClienteHibrido,
   criarClienteNuvem,
   entrar,
   ESPERA_LICENCA_MS,
@@ -24,7 +25,9 @@ import {
   procurarNuvem,
   procurarServidor,
   salvarMotor,
+  textoDeQuem,
   type Cliente,
+  type ClienteHibrido,
   type ClienteNuvem,
   type Escolha,
   type Motor,
@@ -71,6 +74,8 @@ export function ConversaGame() {
   const [avisoMotor, setAvisoMotor] = useState('');
   const [pcFora, setPcFora] = useState<Extract<Escolha, { onde: 'pc-fora' }> | null>(null);
   const [ligando, setLigando] = useState(false);
+  /** PC ligado mas sem sessão na nuvem: o texto fica no modelo do PC até a pessoa entrar. */
+  const [nuvemSemSessao, setNuvemSemSessao] = useState(false);
   const [texto, setTexto] = useState('');
   const [dica, setDica] = useState<Dica | null>(null);
   const [aviso, setAviso] = useState('');
@@ -155,9 +160,22 @@ export function ConversaGame() {
       await new Promise((r) => setTimeout(r, 2000));
       s = await procurarServidor();
     }
-    cliente.current = criarCliente();
-    setSaude(s);
-    setFase(s && s.conversa.ok ? 'menu' : 'desligado');
+    if (!s || !s.conversa.ok) {
+      setSaude(s);
+      setFase('desligado');
+      return;
+    }
+    // Híbrido: com sessão na nuvem, o texto vai primeiro para o modelo maior de lá; o resto fica no PC.
+    const n = await procurarNuvem();
+    setNuvemSemSessao(n.tipo === 'senha');
+    if (n.tipo === 'pronto') {
+      cliente.current = criarClienteHibrido(criarCliente(), criarClienteNuvem(), { nuvem: n.saude.conversa.modelo, pc: s.conversa.modelo });
+      setSaude({ ...s, texto: { modelo: n.saude.conversa.modelo } });
+    } else {
+      cliente.current = criarCliente();
+      setSaude(s);
+    }
+    setFase('menu');
   };
 
   const trocarMotor = (m: Motor) => {
@@ -409,7 +427,13 @@ export function ConversaGame() {
     </button>
   );
 
-  const ondeRoda = saude ? (saude.nuvem ? 'na nuvem' : `no seu PC (${saude.conversa.modelo})`) : '';
+  const ondeRoda = !saude
+    ? ''
+    : saude.nuvem
+      ? 'na nuvem'
+      : saude.texto
+        ? `texto na nuvem (${saude.texto.modelo}), ouvido, furigana e voz no seu PC`
+        : `no seu PC (${saude.conversa.modelo})`;
   const seletor = (
     <div class="cv-motor" role="group" aria-label="Qual IA usar" data-testid="cv-motor">
       <span class="muted">IA:</span>
@@ -583,6 +607,14 @@ export function ConversaGame() {
               {avisoMotor}
             </p>
           )}
+          {nuvemSemSessao && saude && !saude.nuvem && (
+            <p class="muted" data-testid="cv-entrar-nuvem">
+              O texto está no modelo do PC. Com a senha da nuvem, ele vem do modelo maior de lá.{' '}
+              <button class="ghost small" onClick={() => setFase('senha')}>
+                Entrar na nuvem
+              </button>
+            </p>
+          )}
           {motor === 'auto' && saude?.nuvem && <p class="muted">Quer a voz de cada personagem e sem limite diário? {botaoLigar(false)}</p>}
           <p class="muted">Escolha uma situação. Fale no microfone ou digite em romaji ou kana. Cada conversa leva de 2 a 4 minutos.</p>
           <button class="play-now" onClick={() => comecar(sugerida)} data-testid="cv-start">
@@ -713,6 +745,7 @@ export function ConversaGame() {
   const c = conversa.current;
   if (!c) return null;
   const pensando = c.fase === 'pensando' || ouvindo === 'transcrevendo';
+  const quem = (cliente.current as Partial<ClienteHibrido>).quem ?? null;
   return (
     <main class="cv" data-testid="cv" data-phase="conversa" data-turn={c.fase}>
       <header class="km-top">
@@ -722,6 +755,11 @@ export function ConversaGame() {
         <div class="av-place">
           <b>{c.cena.personagem.nome}</b> · {c.cena.personagem.papel}
         </div>
+        {quem && (
+          <span class="muted small" data-testid="cv-modelo" data-onde={quem.onde}>
+            {textoDeQuem(quem)}
+          </span>
+        )}
         <ul class="cv-goals" data-testid="cv-goals">
           {c.cena.passos.map((p) => (
             <li key={p.id} class={c.feitos.has(p.id) ? 'done' : undefined}>

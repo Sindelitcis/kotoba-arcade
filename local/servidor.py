@@ -132,7 +132,8 @@ def conversa(dados: dict = Body(...)):
         "format": dados.get("esquema") or "json",
         "stream": False,
         "think": False,
-        "keep_alive": "30m",
+        # O modelo do PC é reserva da nuvem: sobe só quando chamado e sai da placa depois de um tempo parado.
+        "keep_alive": c.get("keep_alive", "5m"),
         "options": {"temperature": 0.7, "num_ctx": 4096, "num_predict": 400},
     }
     t = time.time()
@@ -147,32 +148,53 @@ def conversa(dados: dict = Body(...)):
 _modelo = {"pronto": False, "erro": ""}
 
 
-def _aquecer_modelo():
-    # Carrega o modelo na placa ao subir: sem isso a primeira fala do jogador esperava o Ollama abrir o modelo.
+def _conferir_modelo():
+    # Só confere que o modelo existe no Ollama, sem carregar na placa: no site publicado o texto vem
+    # primeiro da nuvem, e o modelo do PC só sobe se ela falhar (a primeira resposta dele demora mais).
     c = CFG["conversa"]
     for _ in range(60):
         try:
-            r = http.post(c["ollama"] + "/api/generate", json={"model": c["modelo"], "prompt": "", "keep_alive": "30m"}, timeout=300)
+            r = http.post(c["ollama"] + "/api/show", json={"model": c["modelo"]}, timeout=10)
             if r.status_code == 404:
                 _modelo["erro"] = f"o modelo {c['modelo']} não está no Ollama (ollama pull {c['modelo']})"
                 print(f"[conversa] {_modelo['erro']}", flush=True)
                 return
             r.raise_for_status()
             _modelo["pronto"] = True
-            print(f"[conversa] {c['modelo']} pronto", flush=True)
+            print(f"[conversa] {c['modelo']} disponível (sobe na placa quando for usado)", flush=True)
+            threading.Thread(target=_ler_do_disco, args=(r.json().get("modelfile", ""),), daemon=True).start()
             return
         except httpx.HTTPError:
             time.sleep(2)  # o Ollama ainda está abrindo
 
 
+def _ler_do_disco(modelfile: str):
+    """Lê os arquivos do modelo uma vez, para o Windows guardar no cache de disco (RAM, não placa).
+
+    Medido: com o arquivo fora do cache, o Ollama leva 35 s para subir o modelo na primeira reserva;
+    com ele no cache, 5 s. Assim a conversa não fica parada quando a nuvem falha.
+    """
+    t = time.time()
+    total = 0
+    for linha in modelfile.splitlines():
+        caminho = Path(linha[5:].strip()) if linha.startswith("FROM ") else None
+        if not caminho or not caminho.is_file():
+            continue
+        with open(caminho, "rb", buffering=0) as f:
+            while bloco := f.read(16 * 1024 * 1024):
+                total += len(bloco)
+    if total:
+        print(f"[conversa] modelo lido do disco ({total / 1e9:.1f} GB em {time.time() - t:.0f} s): a reserva sobe rápido", flush=True)
+
+
 # ---------------------------------------------------------------- placa de vídeo
 
-_placa = {"ok": False, "motivo": "ainda não tentou"}
+_placa = {"ok": False, "motivo": "abrindo"}
 _trava = []
 
 
 def _prender_placa():
-    """Prende a placa e só então carrega o Whisper e o modelo de conversa. Ocupada: tenta de novo a cada 30 s."""
+    """Prende a placa e só então carrega o Whisper e confere o modelo de conversa. Ocupada: tenta de novo a cada 30 s."""
     vram = float((CFG.get("placa") or {}).get("vram_gb", 0))
     while True:
         try:
@@ -188,7 +210,7 @@ def _prender_placa():
         _placa.update(ok=True, motivo="")
         print("[placa] presa para a Conversa", flush=True)
         threading.Thread(target=_carregar_whisper, daemon=True).start()
-        threading.Thread(target=_aquecer_modelo, daemon=True).start()
+        threading.Thread(target=_conferir_modelo, daemon=True).start()
         return
 
 

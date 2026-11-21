@@ -15,6 +15,8 @@ export interface Saude {
   /** Só no PC: a trava da placa de vídeo (scripts/placa.py). Ocupada = o PC não carregou os modelos. */
   placa?: { ok: boolean; motivo?: string };
   conversa: { ok: boolean; modelo: string; erro?: string };
+  /** Só no modo híbrido (PC ligado e sessão na nuvem): o texto vem primeiro deste modelo da nuvem. */
+  texto?: { modelo: string };
   fala: { ok: boolean; estado?: string };
   voz: { ok: boolean; motor: string };
 }
@@ -123,6 +125,9 @@ export const ESPERA_LICENCA_MS = 60_000;
  * Decide quem faz a IA. No automático, o PC só é procurado se o navegador já deixou (assim
  * ninguém leva um pedido de licença de surpresa); com a placa ocupada, vai para a nuvem com aviso.
  */
+/** Placa livre, ou o servidor acabou de abrir e ainda vai prender a trava (a tela espera o modelo). */
+const placaServe = (s: Saude) => !s.placa || s.placa.ok || s.placa.motivo === 'abrindo';
+
 export async function escolherMotor(motor: Motor, d: DepsEscolha): Promise<Escolha> {
   if (motor === 'nuvem') return { onde: 'nuvem', procura: await d.procurarNuvem() };
   const licenca = await d.licenca();
@@ -130,11 +135,11 @@ export async function escolherMotor(motor: Motor, d: DepsEscolha): Promise<Escol
     if (licenca === 'nao') return { onde: 'pc-fora', motivo: 'licenca' };
     const s = await d.procurarPC(licenca === 'perguntar' ? ESPERA_LICENCA_MS : 2500);
     if (!s) return { onde: 'pc-fora', motivo: 'desligado' };
-    if (s.placa && !s.placa.ok) return { onde: 'pc-fora', motivo: 'placa', detalhe: s.placa.motivo };
+    if (!placaServe(s)) return { onde: 'pc-fora', motivo: 'placa', detalhe: s.placa?.motivo };
     return { onde: 'pc', saude: s };
   }
   const s = licenca === 'sim' || licenca === 'desconhecida' ? await d.procurarPC(1500) : null;
-  if (s && (!s.placa || s.placa.ok)) return { onde: 'pc', saude: s };
+  if (s && placaServe(s)) return { onde: 'pc', saude: s };
   const aviso = s?.placa && !s.placa.ok ? `A placa de vídeo do PC está ocupada (${s.placa.motivo ?? 'outro programa'}). Usando a nuvem.` : undefined;
   return { onde: 'nuvem', procura: await d.procurarNuvem(), ...(aviso ? { aviso } : {}) };
 }
@@ -293,4 +298,74 @@ export function avisoDaFalha(motivo: ErroNuvem | null): string {
     default:
       return 'A IA não respondeu desta vez. Sua fala não se perdeu: mande de novo.';
   }
+}
+
+// ---------------------------------------------------------------- híbrido
+
+/** Quem escreveu a última resposta do personagem, para a tela mostrar. */
+export interface QuemRespondeu {
+  onde: 'nuvem' | 'pc';
+  modelo: string;
+  /** Quando o PC respondeu no lugar da nuvem: por que a nuvem não serviu. */
+  motivo?: ErroNuvem;
+}
+
+export interface ClienteHibrido extends Cliente {
+  quem: QuemRespondeu | null;
+}
+
+/** Quanto esperar a nuvem antes de passar o texto para o modelo do PC. */
+export const ESPERA_NUVEM_MS = 25_000;
+
+/**
+ * PC ligado e sessão na nuvem: o texto vai primeiro para o modelo maior da nuvem; se ela falhar,
+ * ficar sem cota ou sem internet, o modelo do PC responde no lugar. Ouvir, furigana e voz ficam no PC.
+ * Depois de cota acabada ou sessão vencida, não insiste na nuvem até a próxima vez que abrir a Conversa.
+ */
+export function criarClienteHibrido(
+  pc: Cliente,
+  nuvem: ClienteNuvem,
+  modelos: { nuvem: string; pc: string },
+  esperaMs = ESPERA_NUVEM_MS,
+): ClienteHibrido {
+  let desistiu: ErroNuvem | null = null;
+  const h: ClienteHibrido = {
+    quem: null,
+    chat: async (mensagens, esquema) => {
+      let motivo: ErroNuvem | undefined = desistiu ?? undefined;
+      if (!desistiu) {
+        let timer: ReturnType<typeof setTimeout> | undefined;
+        try {
+          const texto = await Promise.race([
+            nuvem.chat(mensagens, esquema),
+            new Promise<never>((_, nao) => {
+              timer = setTimeout(() => nao(new FalhaNuvem('rede')), esperaMs);
+            }),
+          ]);
+          h.quem = { onde: 'nuvem', modelo: modelos.nuvem };
+          return texto;
+        } catch (e) {
+          motivo = e instanceof FalhaNuvem ? e.motivo : 'ia';
+          if (motivo === 'limite' || motivo === 'sessao') desistiu = motivo;
+        } finally {
+          clearTimeout(timer);
+        }
+      }
+      const texto = await pc.chat(mensagens, esquema);
+      h.quem = { onde: 'pc', modelo: modelos.pc, motivo };
+      return texto;
+    },
+    leitura: (texto) => pc.leitura(texto),
+    ouvir: (audio, dica) => pc.ouvir(audio, dica),
+    voz: (texto, voz) => pc.voz(texto, voz),
+  };
+  return h;
+}
+
+/** A linha que a tela mostra embaixo da conversa: qual modelo escreveu a última resposta. */
+export function textoDeQuem(q: QuemRespondeu | null): string {
+  if (!q) return '';
+  if (q.onde === 'nuvem') return `Texto: ${q.modelo} (nuvem)`;
+  const porque = q.motivo === 'limite' ? 'a cota da nuvem acabou' : q.motivo === 'sessao' ? 'a sessão da nuvem venceu' : q.motivo ? 'a nuvem não respondeu' : '';
+  return `Texto: ${q.modelo} (seu PC${porque ? `, porque ${porque}` : ''})`;
 }

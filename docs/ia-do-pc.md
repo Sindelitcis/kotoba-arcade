@@ -12,7 +12,22 @@ Nas telas da Conversa tem uma linha "IA: Automático · Nuvem · Meu PC", e ao l
 | Nuvem | Só a nuvem, nem olha o PC. |
 | Meu PC | Só o PC. Desligado, mostra a tela "IA do seu PC" com o botão **Ligar a IA do meu PC**. Placa ocupada, diz quem está usando. |
 
-A regra está em `escolherMotor` (`src/games/conversa/cliente.ts`), com testes em `tests/motor.test.ts` e `e2e/motor.spec.ts`.
+## Com o PC ligado: modo híbrido
+
+O `gemma4:12b` do PC é menor que o Gemma 4 26B da nuvem. Então, com o PC ligado e a sessão da nuvem aberta (a senha já digitada), cada parte vai para onde é melhor:
+
+| Parte | Onde |
+| --- | --- |
+| Texto do personagem | Primeiro a nuvem (Gemma 4 26B). Se ela der erro, ficar sem cota (429), sem internet ou passar de 25 s, o `gemma4:12b` do PC responde aquela fala no lugar, sem parar a conversa. Depois de cota acabada ou sessão vencida, as próximas falas vão direto para o PC. |
+| Ouvir | Whisper no PC |
+| Furigana | MeCab no PC |
+| Voz | AivisSpeech no PC, uma voz por personagem |
+
+Na conversa aparece embaixo do nome do personagem qual modelo escreveu a última resposta, por exemplo "Texto: gemma-4-26b-a4b-it (nuvem)" ou "Texto: gemma4:12b (seu PC, porque a cota da nuvem acabou)". No menu, "rodando texto na nuvem (...), ouvido, furigana e voz no seu PC".
+
+Sem sessão na nuvem, tudo fica no PC e o menu oferece "Entrar na nuvem". Sem o PC, tudo na nuvem, como antes.
+
+A regra está em `criarClienteHibrido` (`src/games/conversa/cliente.ts`), com testes em `tests/hibrido.test.ts` e `e2e/hibrido.spec.ts`. A regra de qual IA usar está em `escolherMotor` (`src/games/conversa/cliente.ts`), com testes em `tests/motor.test.ts` e `e2e/motor.spec.ts`.
 
 ## Brave e Chrome: o pedido de licença
 
@@ -57,9 +72,19 @@ Abre uma janela com o andamento. Quando a IA responde, a Conversa sai da tela de
 
 ## Placa de vídeo
 
-O servidor passa pela mesma trava dos outros programas que usam a placa (`scripts/placa.py`, arquivo `D:\KotobaArcade\arte\gpu.lock`), pedindo 11 GB (`placa.vram_gb`). Se outro programa estiver com a placa, ele espera e tenta de novo a cada 30 s; enquanto isso o `/saude` responde `placa: { ok: false, motivo }` e o site usa a nuvem com o aviso. O AivisSpeech só abre depois que a trava está presa.
+O servidor passa pela mesma trava dos outros programas que usam a placa (`scripts/placa.py`, arquivo `D:\KotobaArcade\arte\gpu.lock`), pedindo 11 GB (`placa.vram_gb`, o máximo com o modelo de reserva aberto). Se outro programa estiver com a placa, ele espera e tenta de novo a cada 30 s; enquanto isso o `/saude` responde `placa: { ok: false, motivo }` e o site usa a nuvem com o aviso. O AivisSpeech só abre depois que a trava está presa.
 
-Medido numa RTX 5060 Ti de 16 GB, com tudo aberto depois de uma conversa inteira (ouvir, responder, furigana e voz):
+**O modelo do PC é reserva:** o servidor só confere que ele existe no Ollama, sem pôr na placa. Ele sobe quando a nuvem falha e sai sozinho depois de 5 min sem uso (`conversa.keep_alive`). Ao abrir, o servidor lê o arquivo do modelo uma vez para o cache de disco do Windows (RAM, não placa): medido, a primeira resposta da reserva cai de 35 s (arquivo fora do cache) para 5 s.
+
+Medido numa RTX 5060 Ti de 16 GB:
+
+| Situação | Memória dedicada | Memória compartilhada |
+| --- | --- | --- |
+| Placa parada | 1,5 GB | 0,04 GB |
+| Whisper + AivisSpeech, texto na nuvem (o normal no híbrido) | 3,7 GB | 0,14 GB |
+| Mais o `gemma4:12b` aberto como reserva | 12,4 GB | 1,35 GB |
+
+Antes do híbrido, com o modelo sempre aberto e depois de uma conversa inteira (ouvir, responder, furigana e voz), as partes eram:
 
 | | Memória dedicada | Memória compartilhada |
 | --- | --- | --- |
@@ -71,7 +96,7 @@ Medido numa RTX 5060 Ti de 16 GB, com tudo aberto depois de uma conversa inteira
 
 Os 1,2 GB "compartilhados" do Ollama não são vazamento: é a tabela de palavras do modelo, que o llama.cpp deixa na RAM fixa de propósito (`CUDA_Host`, 787 + 272 MiB no log). As 49 camadas ficam todas na placa (`offloaded 49/49 layers to GPU`). Medido com `Get-Counter '\GPU Adapter Memory(*)\Shared Usage'` e `nvidia-smi`.
 
-Tempos, pedidos feitos com a origem do site publicado: subir tudo 48 s; ouvir 0,7 s; responder 2,6 s; furigana 0,2 s; voz 5,7 s (a primeira de cada personagem é a mais lenta).
+Tempos, pedidos feitos com a origem do site publicado: subir tudo 30 a 48 s; ouvir 0,7 s; responder 2,6 s; furigana 0,2 s; voz 5,7 s (a primeira de cada personagem é a mais lenta).
 
 ## Config
 

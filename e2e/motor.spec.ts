@@ -34,11 +34,11 @@ test('automático com o PC desligado: usa a nuvem e oferece ligar a IA do PC', a
   await expect(page.getByTestId('cv-ligar-pc')).toHaveAttribute('href', 'kotoba-local://iniciar');
 });
 
-test('automático com o PC ligado: usa o PC', async ({ page }) => {
+test('automático com o PC ligado (e sessão na nuvem): usa o PC, com o texto da nuvem', async ({ page }) => {
   await preparar(page, SAUDE_PC);
   await abrir(page);
   await expect(fase(page)).toHaveAttribute('data-phase', 'menu');
-  await expect(page.getByTestId('cv-onde')).toContainText('no seu PC (gemma4:12b)');
+  await expect(page.getByTestId('cv-onde')).toContainText('ouvido, furigana e voz no seu PC');
   await expect(page.getByTestId('cv-ligar-pc')).toHaveCount(0);
 });
 

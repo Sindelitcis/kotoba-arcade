@@ -89,6 +89,14 @@ describe('qual IA a Conversa usa', () => {
   });
 });
 
+describe('servidor do PC recém-aberto (ainda prendendo a placa)', () => {
+  it('não é placa ocupada: usa o PC e a tela espera o modelo', async () => {
+    const abrindo = { ...PC, conversa: { ok: false, modelo: 'gemma4:12b' }, placa: { ok: false, motivo: 'abrindo' } };
+    expect((await escolherMotor('auto', deps('sim', abrindo).d)).onde).toBe('pc');
+    expect((await escolherMotor('pc', deps('sim', abrindo).d)).onde).toBe('pc');
+  });
+});
+
 describe('escolha guardada no navegador', () => {
   it('começa no automático e lembra a troca', () => {
     const store = memoryStore();

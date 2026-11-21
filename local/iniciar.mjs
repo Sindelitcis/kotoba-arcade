@@ -137,7 +137,7 @@ const timer = setInterval(async () => {
   const s = await lerSaude();
   if (!s) return; // ainda subindo
   if (s.placa && !s.placa.ok) {
-    if (s.placa.motivo !== avisouPlaca) console.log(`[placa] ocupada (${s.placa.motivo}). Esperando ficar livre; enquanto isso o site usa a nuvem.`);
+    if (s.placa.motivo !== avisouPlaca && s.placa.motivo !== 'abrindo') console.log(`[placa] ocupada (${s.placa.motivo}). Esperando ficar livre; enquanto isso o site usa a nuvem.`);
     avisouPlaca = s.placa.motivo;
     return;
   }

@@ -18,7 +18,8 @@
   },
   "conversa": {
     "ollama": "http://127.0.0.1:11434",
-    "modelo": "gemma4:12b"
+    "modelo": "gemma4:12b",
+    "keep_alive": "5m"
   },
   "fala": {
     "modelo": "large-v3-turbo",
