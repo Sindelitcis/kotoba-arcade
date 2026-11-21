@@ -632,13 +632,29 @@ def recortar(img):
 
 
 
+def salvar_webp(img, destino: pathlib.Path, qualidade: int, limite: int) -> int:
+    """Salva em WebP baixando a qualidade até caber no limite (o teste do repositório barra acima de 160 KB)."""
+    import io
+
+    for q in range(qualidade, 29, -5):
+        buf = io.BytesIO()
+        img.save(buf, "WEBP", quality=q, method=6)
+        if buf.tell() <= limite:
+            break
+    destino.write_bytes(buf.getvalue())
+    return q
+
+
 def exportar(lista: dict, repo: pathlib.Path, relatorio: dict) -> list[str]:
     from PIL import Image
 
     out = pasta(lista)
     destino = repo / lista["destino"]
     destino.mkdir(parents=True, exist_ok=True)
-    lado = lista.get("saida", 384)
+    # saida: lado máximo, ou [largura, altura] máximas (o retrato antigo tinha 520 de largura).
+    caixa = lista.get("saida", 384)
+    caixa = tuple(caixa) if isinstance(caixa, list) else (caixa, caixa)
+    limite = lista.get("limite_kb", 150) * 1024
     faltando = []
     medidas: dict[str, list[int]] = {}
     for iid, chave in escolhidas(lista, relatorio).items():
@@ -650,9 +666,12 @@ def exportar(lista: dict, repo: pathlib.Path, relatorio: dict) -> list[str]:
         if lista.get("corte_altura"):
             # Retrato: só da cintura para cima.
             img = img.crop((0, 0, img.width, int(img.height * lista["corte_altura"])))
-        img.thumbnail((lado, lado), Image.LANCZOS)
-        img.save(destino / f"{iid}.webp", "WEBP", quality=lista.get("qualidade", 72), method=6)
+        img.thumbnail(caixa, Image.LANCZOS)
+        salvar_webp(img, destino / f"{iid}.webp", lista.get("qualidade", 72), limite)
         medidas[iid] = [img.width, img.height]
+    if not lista.get("medidas", True):
+        # Cenários e retratos dos outros jogos não usam medidas; a pasta deles só tem imagens.
+        return faltando
     # Largura e altura de cada imagem: os jogos usam para montar a cena sem esperar a imagem carregar.
     (destino / "medidas.json").write_text(json.dumps(dict(sorted(medidas.items())), indent=0) + "\n", encoding="utf-8", newline="\n")
     return faltando

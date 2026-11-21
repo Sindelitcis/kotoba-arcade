@@ -18,19 +18,19 @@ const TAMPO: Readonly<Record<string, number>> = {
   beddo: 0.42,
   sofa: 0.45,
   benchi: 0.42,
-  isu: 0.48,
+  isu: 0.6,
   reji: 0.05,
   reizouko: 0.02,
-  kopiki: 0.04,
+  kopiki: 0.15,
   jihanki: 0.02,
-  hako: 0.04,
+  hako: 0.12,
   suutsukesu: 0.04,
 };
 
 /** Prateleiras abertas: base de cada nível, em fração da altura contada do topo. */
 const NIVEIS: Readonly<Record<string, readonly number[]>> = {
-  tana: [0.37, 0.57, 0.77],
-  hondana: [0.3, 0.58, 0.85],
+  tana: [0.31, 0.57, 0.83],
+  hondana: [0.31, 0.58, 0.83],
 };
 
 /** Recipientes: o que está dentro aparece saindo pela boca (desenhado atrás). */
@@ -144,7 +144,7 @@ export const LUGARES: readonly Lugar[] = [
       .dentro('gyunyu1', 'gyunyu', 'tana2', 0.25, 5, 2)
       .dentro('jusu1', 'jusu', 'tana2', 0.55, 4, 2)
       .dentro('aisu1', 'aisu', 'tana2', 0.8, 4, 2)
-      .chao('teburu1', 'teburu', 82, 88, 24)
+      .chao('teburu1', 'teburu', 82, 88, 20)
       .sobre('reji1', 'reji', 'teburu1', 0.6, 11)
       .sobre('fukuro1', 'fukuro', 'teburu1', 0.2, 7)
       .frente('kau1', 'kau', 'teburu1', 0.25, 10)
@@ -161,14 +161,14 @@ export const LUGARES: readonly Lugar[] = [
   }),
 
   lugar('eki', '駅', 'えき', 'estação de trem', (m) => {
-    m.chao('densha1', 'densha', 22, 46, 34, { z: 1 })
-      .chao('benchi1', 'benchi', 22, 88, 22)
+    m.chao('densha1', 'densha', 20, 40, 24, { z: 1 })
+      .chao('benchi1', 'benchi', 22, 90, 19)
       .sobre('kaban1', 'kaban-kuro', 'benchi1', 0.25, 6)
       .sobre('kaban4', 'kaban-aka', 'benchi1', 0.45, 5)
       .sobre('hon1', 'hon', 'benchi1', 0.75, 5)
       .sob('kaban2', 'kaban-aka', 'benchi1', 0.5, 6)
-      .chao('benchi2', 'benchi', 56, 90, 22)
-      .sobre('neru1', 'neru', 'benchi2', 0.5, 18)
+      .chao('benchi2', 'benchi', 56, 92, 19)
+      .sobre('neru1', 'neru', 'benchi2', 0.5, 12)
       .sob('kaban3', 'kaban-kuro', 'benchi2', 0.3, 6)
       .chao('jihanki1', 'jihanki', 84, 86, 13)
       .lado('gomibako1', 'gomibako', 'jihanki1', -1, 5)
@@ -198,7 +198,7 @@ export const LUGARES: readonly Lugar[] = [
       .sob('kutsu2', 'kutsu-aka', 'beddo1', 0.82, 5)
       .sob('kutsu3', 'kutsu-kuro', 'beddo1', 0.95, 5)
       .sobre('hon6', 'hon', 'beddo1', 0.36, 7)
-      .chao('tsukue1', 'tsukue', 66, 90, 24)
+      .chao('tsukue1', 'tsukue', 66, 90, 20)
       .sobre('pasokon1', 'pasokon', 'tsukue1', 0.3, 9)
       .sobre('hon1', 'hon', 'tsukue1', 0.62, 4)
       .sobre('hon2', 'hon', 'tsukue1', 0.72, 4)
@@ -226,7 +226,7 @@ export const LUGARES: readonly Lugar[] = [
   }),
 
   lugar('jimusho', '事務所', 'じむしょ', 'escritório', (m) => {
-    m.chao('tsukue1', 'tsukue', 22, 88, 26)
+    m.chao('tsukue1', 'tsukue', 22, 88, 21)
       .sobre('pasokon1', 'pasokon', 'tsukue1', 0.35, 9)
       .sobre('denwa1', 'denwa', 'tsukue1', 0.75, 6)
       .sobre('fairu1', 'fairu', 'tsukue1', 0.1, 4)
@@ -235,7 +235,7 @@ export const LUGARES: readonly Lugar[] = [
       .sobre('pen4', 'pen', 'tsukue1', 0.58, 4)
       .chao('isu1', 'isu', 14, 98, 10)
       .sobre('kaban3', 'kaban-kuro', 'isu1', 0.5, 9)
-      .chao('tsukue2', 'tsukue', 58, 88, 26)
+      .chao('tsukue2', 'tsukue', 58, 88, 21)
       .sobre('pen1', 'pen', 'tsukue2', 0.15, 4)
       .sobre('pen2', 'pen', 'tsukue2', 0.25, 4)
       .sobre('pen3', 'pen', 'tsukue2', 0.35, 4)
@@ -261,7 +261,7 @@ export const LUGARES: readonly Lugar[] = [
   lugar('daidokoro', '台所', 'だいどころ', 'cozinha', (m) => {
     m.chao('reizouko1', 'reizouko', 10, 90, 14)
       .sobre('denshirenji1', 'denshirenji', 'reizouko1', 0.5, 11)
-      .chao('teburu1', 'teburu', 48, 92, 34)
+      .chao('teburu1', 'teburu', 48, 92, 27)
       .sobre('ringo1', 'ringo', 'teburu1', 0.1, 3.5)
       .sobre('ringo2', 'ringo', 'teburu1', 0.18, 3.5)
       .sobre('ringo3', 'ringo', 'teburu1', 0.26, 3.5)
@@ -283,7 +283,7 @@ export const LUGARES: readonly Lugar[] = [
       .chao('suihanki1', 'suihanki', 70, 52, 6)
       .chao('yakan1', 'yakan', 79, 56, 5)
       .chao('furaipan1', 'furaipan', 62, 49, 6)
-      .chao('teburu2', 'teburu', 30, 76, 20, { z: 300 })
+      .chao('teburu2', 'teburu', 30, 76, 16, { z: 300 })
       .sobre('manaita1', 'manaita', 'teburu2', 0.3, 6)
       .sobre('houchou1', 'houchou', 'teburu2', 0.48, 2.5)
       .sobre('tamago1', 'tamago', 'teburu2', 0.62, 2)
@@ -316,7 +316,7 @@ export const LUGARES: readonly Lugar[] = [
       .dentro('haburashi1', 'haburashi', 'tana2', 0.6, 4, 1)
       .dentro('haburashi2', 'haburashi', 'tana2', 0.75, 4, 1)
       .dentro('taoru1', 'taoru', 'tana2', 0.4, 7, 2)
-      .chao('teburu1', 'teburu', 84, 88, 24)
+      .chao('teburu1', 'teburu', 84, 88, 20)
       .sobre('reji1', 'reji', 'teburu1', 0.65, 10)
       .sobre('fukuro1', 'fukuro', 'teburu1', 0.2, 6)
       .frente('kau1', 'kau', 'teburu1', 0.3, 10)
@@ -331,7 +331,7 @@ export const LUGARES: readonly Lugar[] = [
   }),
 
   lugar('resutoran', 'レストラン', 'レストラン', 'restaurante', (m) => {
-    m.chao('teburu1', 'teburu', 26, 92, 32)
+    m.chao('teburu1', 'teburu', 26, 92, 26)
       .sobre('ramen1', 'ramen', 'teburu1', 0.2, 7)
       .sobre('gyoza1', 'gyoza', 'teburu1', 0.45, 7)
       .sobre('biru1', 'biru', 'teburu1', 0.65, 4)
@@ -340,7 +340,7 @@ export const LUGARES: readonly Lugar[] = [
       .chao('isu1', 'isu', 10, 98, 10)
       .chao('isu2', 'isu', 42, 98, 10)
       .sobre('kaban1', 'kaban-aka', 'isu2', 0.5, 6)
-      .chao('teburu2', 'teburu', 72, 92, 32)
+      .chao('teburu2', 'teburu', 72, 92, 26)
       .sobre('sushi1', 'sushi', 'teburu2', 0.15, 7)
       .sobre('tenpura1', 'tenpura', 'teburu2', 0.35, 7)
       .sobre('misoshiru1', 'misoshiru', 'teburu2', 0.55, 5)
@@ -380,7 +380,7 @@ export const LUGARES: readonly Lugar[] = [
       .chao('aruku1', 'aruku', 55, 99, 9)
       .chao('toru1', 'toru', 88, 99, 9)
       .chao('jihanki1', 'jihanki', 36, 64, 7, { z: 3 })
-      .chao('benchi1', 'benchi', 22, 98, 14)
+      .chao('benchi1', 'benchi', 22, 98, 12)
       .sobre('kasa1', 'kasa-ao', 'benchi1', 0.3, 3)
       .sobre('boushi1', 'boushi-shiro', 'benchi1', 0.7, 4)
       .chao('kumo1', 'kumo', 36, 16, 12, { z: 0 })

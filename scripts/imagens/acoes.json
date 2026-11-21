@@ -41,7 +41,7 @@
   {
    "id": "neru",
    "rotulo": "a person sleeping",
-   "prompt": "1boy, sleeping, lying down, eyes closed, futon, blanket"
+   "prompt": "1boy, sleeping, lying on his side, side view, horizontal, eyes closed, head on a pillow, blanket, no bed"
   },
   {
    "id": "hashiru",
@@ -229,8 +229,11 @@
    "prompt": "1man, office worker, very tired, slumped shoulders, sweat, exhausted, dark circles under eyes"
   }
  ],
+ "desde_seed": 10000,
  "escolha": {
-  "warau": 2,
+  "aruku": 10003,
+  "denwasuru": 11001,
+  "warau": 10003,
   "kiru": 10003,
   "kangaeru": 10002,
   "tsukareru": 10001

@@ -31,7 +31,7 @@
   {
    "id": "heya",
    "rotulo": "an empty bedroom",
-   "prompt": "empty japanese apartment bedroom, wooden floor, white walls, window with curtains, daylight"
+   "prompt": "empty japanese apartment room with no furniture, bare wooden floor, white walls, window with curtains, daylight, no bed"
   },
   {
    "id": "jimusho",
@@ -58,5 +58,10 @@
    "rotulo": "a residential street",
    "prompt": "japanese residential street, asphalt road, sidewalk, houses in background, blue sky, utility poles, empty street"
   }
- ]
+ ],
+ "desde_seed": 10000,
+ "escolha": {
+  "michi": 10001,
+  "yakkyoku": 10002
+ }
 }

@@ -2,49 +2,11 @@
 
 Tudo foi gerado no PC, numa RTX 5060 Ti de 16 GB. Nenhuma imagem passou por serviço online.
 
-- Cenários e personagens, e as primeiras ilustrações de vocabulário: [Animagine XL 4.0](https://huggingface.co/cagliostrolab/animagine-xl-4.0), da Cagliostro Research Lab (licença CreativeML Open RAIL++-M). O arquivo do modelo foi apagado do PC em novembro de 2026; para gerar estas de novo, baixe outra vez.
-- Ilustrações de vocabulário daqui para a frente (Memória, Cena Viva, kana com imagem): [Anima Turbo v1.1](https://huggingface.co/circlestone-labs/Anima), da CircleStone Labs. Ganhou de seis modelos num teste com os mesmos prompts: traço de anime mais natural, gato com o rabo ligado ao corpo, konbini sem texto falso e o único que fez uma reverência de verdade.
+Todas as imagens do jogo hoje são do [Anima Turbo v1.1](https://huggingface.co/circlestone-labs/Anima), da CircleStone Labs, feitas pelo estúdio (`scripts/estudio.py`, explicado mais abaixo). Ele ganhou de seis modelos num teste com os mesmos prompts: traço de anime mais natural, gato com o rabo ligado ao corpo, konbini sem texto falso e o único que fez uma reverência de verdade.
 
-O que fica no repositório são só as imagens finais, sempre coloridas: cenários em `src/assets/cenas-cor/`, retratos em `src/assets/pessoas-cor/` e vocabulário em `imagens/`, `acoes/`, `gente/`, `lugares/` e `kana/`. Até novembro de 2026 cada imagem tinha também uma cópia em cinza para o visual de mangá; o visual Sora (docs/estilo.md) usa só a colorida, e as cópias saíram. Todas com até 960px de largura e menos de 160 KB cada (um teste confere).
+As primeiras versões (cenários, personagens e as primeiras ilustrações de vocabulário) eram do [Animagine XL 4.0](https://huggingface.co/cagliostrolab/animagine-xl-4.0), em mangá e pintadas depois. Em novembro de 2026 foram todas refeitas no Anima, para o traço ficar igual em todo o fliperama. O Animagine foi apagado do PC; os scripts antigos (`gerar.py`, `otimizar.py`, `colorir.py`, `otimizar_cor.py`) ainda estão em `D:\KotobaArcaderte\scripts`, só como registro. As imagens de kana são de outra leva e não entraram nesta troca.
 
-## Gerar de novo
-
-Os scripts e o modelo ficam fora do repositório, em `D:\KotobaArcade\\arte`:
-
-```
-D:\KotobaArcade\\arte
-  modelos\animagine-xl-4.0-opt.safetensors   (6,9 GB; apagado em novembro de 2026, baixe de novo para refazer)
-  venv\                                       Python 3.11 + PyTorch (CUDA 12.8) + diffusers
-  scripts\gerar.py                            prompts de cada cenário e personagem
-  scripts\otimizar.py                         escolhe a versão, passa para cinza e copia para cá
-  scripts\colorir.py                          pinta a versão de mangá escolhida em anime (img2img)
-  scripts\otimizar_cor.py                     passa as coloridas para WebP e copia para cá
-  geradas\                                    todas as versões em PNG
-  coloridas\                                  versões anime em PNG
-```
-
-Antes de gerar, feche o Ollama e o servidor da Conversa: os dois disputam a mesma placa.
-
-```bash
-cd D:/KotobaArcade/arte
-HF_HOME=D:/KotobaArcade/arte/hf venv/Scripts/python -I scripts/gerar.py
-python -I scripts/otimizar.py D:/Rafael/Documents/GitHub/kotoba-arcade
-```
-
-`gerar.py` aceita ids para gerar só alguns (`scripts/gerar.py p-yui kotodama-inari`). Cada imagem leva uns 12 segundos.
-
-Os prompts seguiam o guia de estilo da época: mangá em preto e branco, retícula, nanquim. O prompt negativo tira cor, texto, balão e qualquer coisa com cara de anos 80 ou 90.
-
-## Versão anime
-
-A versão colorida não é gerada do zero: `colorir.py` parte do PNG de mangá escolhido e pinta por cima (img2img, força 0,80, mesma seed). Assim o lugar, o enquadramento e a pessoa são os mesmos nas duas versões. Com força 0,55 e 0,70 a imagem continuava quase cinza.
-
-```bash
-HF_HOME=D:/KotobaArcade/arte/hf venv/Scripts/python -I scripts/colorir.py 0.80
-python -I scripts/otimizar_cor.py D:/Rafael/Documents/GitHub/kotoba-arcade
-```
-
-O prompt é o mesmo do mangá, trocando o estilo por anime atual: cor viva, cel shading limpo, luz natural, céu azul. O negativo tira monocromático, sépia, neon, synthwave, VHS e cara de anos 80 e 90. Algumas imagens têm uma dica de cor própria em `DICA` (os torii de Fushimi Inari são vermelho-alaranjados, o cabelo do Takeshi é preto), porque sem ela o modelo pintava tudo de arco-íris.
+O que fica no repositório são só as imagens finais, sempre coloridas: cenários em `src/assets/cenas-cor/`, retratos em `src/assets/pessoas-cor/` e vocabulário em `imagens/`, `acoes/`, `gente/`, `lugares/` e `kana/`. Até novembro de 2026 cada imagem tinha também uma cópia em cinza para o visual de mangá; o visual Sora (docs/estilo.md) usa só a colorida, e as cópias saíram. Cenários com até 960 px de largura, retratos com 520 px, e nenhuma imagem passa de 160 KB (um teste confere; o `exportar` baixa a qualidade até caber).
 
 ## Lugares
 
@@ -64,13 +26,13 @@ O prompt é o mesmo do mangá, trocando o estilo por anime atual: cor viva, cel 
 | `conversa-restaurante` | restaurante pequeno (izakaya) |
 | `pecas-ryoanji` | jardim de pedras do templo Ryoan-ji, Kyoto |
 
-O modelo não copia o lugar ao pé da letra: é a impressão do lugar, como num mangá.
+O modelo não copia o lugar ao pé da letra: é a impressão do lugar. Placas e letreiros saíram dos prompts, porque o modelo escreve letras falsas.
 
 ## Estúdio de imagens (ilustrações de vocabulário)
 
 Os jogos de imagem (Memória, Cena Viva e os de kana e kanji com imagem) usam o estúdio: `scripts/estudio.py`. Ele gera tudo de novo a partir de uma lista de prompts versionada em `scripts/imagens/<lote>.json`, confere cada imagem com o CLIP e exporta só o resultado final para o repositório.
 
-O que ele usa, tudo fora do repositório em `D:\KotobaArcade\\arte`:
+O que ele usa, tudo fora do repositório em `D:\KotobaArcade\arte`:
 
 | Modelo | Para quê | Tamanho | Licença |
 | --- | --- | --- | --- |
@@ -125,7 +87,7 @@ Só um modelo fica na placa por vez: no `tudo`, o modelo de imagem sai antes de 
 
 ### Motores
 
-O modelo de imagem vem de `scripts/imagens/motores.json`. Cada motor diz o tipo (`anima`, a base do Anima com os pesos de uma variante por cima; `sdxl-arquivo`, um `.safetensors` em `D:\KotobaArcade\\arte`; ou `diffusers`, uma pasta ou repositório), os passos, o cfg, o offload (`nenhum`, `modelo` ou `sequencial`), a memória que precisa livre (`vram`, em GB) as palavras que o modelo espera no começo (`prefixo`) e no fim (`qualidade`) do prompt, onde nasce a seed (`gerador`), quantas imagens por chamada (`lote`) e um deslocamento de seed (`seed`). O deslocamento dá outro nome de arquivo à candidata de um modelo novo: sem ele, o estúdio acharia que `neko-1` já foi gerada. Para trocar, use `"motor": "nome"` na lista ou `KOTOBA_MOTOR=nome`. Uma lista pode ajustar um motor em `"por_motor": {"nome": {"passos": 24}}`. Trocar de motor não refaz o que já foi aprovado: só gera as candidatas que faltam.
+O modelo de imagem vem de `scripts/imagens/motores.json`. Cada motor diz o tipo (`anima`, a base do Anima com os pesos de uma variante por cima; `sdxl-arquivo`, um `.safetensors` em `D:\KotobaArcade\arte`; ou `diffusers`, uma pasta ou repositório), os passos, o cfg, o offload (`nenhum`, `modelo` ou `sequencial`), a memória que precisa livre (`vram`, em GB) as palavras que o modelo espera no começo (`prefixo`) e no fim (`qualidade`) do prompt, onde nasce a seed (`gerador`), quantas imagens por chamada (`lote`) e um deslocamento de seed (`seed`). O deslocamento dá outro nome de arquivo à candidata de um modelo novo: sem ele, o estúdio acharia que `neko-1` já foi gerada. Para trocar, use `"motor": "nome"` na lista ou `KOTOBA_MOTOR=nome`. Uma lista pode ajustar um motor em `"por_motor": {"nome": {"passos": 24}}`. Trocar de motor não refaz o que já foi aprovado: só gera as candidatas que faltam.
 
 ### Formato da lista
 
@@ -148,21 +110,31 @@ O modelo de imagem vem de `scripts/imagens/motores.json`. Cada motor diz o tipo 
 - `id`: nome do arquivo (a-z, 0-9 e hífen).
 - `rotulo`: o que o CLIP precisa reconhecer, em inglês, curto. Dois itens do mesmo lote com rótulos quase iguais vão se reprovar um ao outro: isso é bom, porque na tela eles também se confundiriam.
 - `evitar`: rótulos extras só daquele item (o que ele não pode parecer).
+- `estilo` no item: troca o estilo do lote só para ele.
+- `saida`: lado máximo em px, ou `[largura, altura]`.
+- `corte_altura`: corta a imagem nessa fração da altura antes de reduzir (retrato da cintura para cima).
+- `limite_kb`: tamanho máximo de cada arquivo (150 se faltar).
+- `"medidas": false`: não grava o `medidas.json` (as pastas dos outros jogos só têm imagens).
+- `desde_seed`: candidatas com seed menor não podem ser escolhidas.
 
 Uma imagem precisa mostrar uma ideia só e não pode ter texto escrito. Por isso o estilo de objeto pede um objeto centralizado, sem pessoas, e o negativo tira letras, logotipos e etiquetas.
 
 ### Os lotes do vocabulário
 
-Os prompts ficam em `scripts/imagens/gerar-listas.py`, que escreve as quatro listas. Os ajustes feitos depois de olhar as folhas (`vetadas`, `escolha`) ficam no fim dele, em `AJUSTES`, com o motivo.
+Os prompts ficam em `scripts/imagens/gerar-listas.py`, que escreve as seis listas. Os ajustes feitos depois de olhar as folhas (`vetadas`, `escolha`) ficam no fim dele, em `AJUSTES`, com o motivo.
 
 | Lote | O que tem | Gerado em | Sai em |
 | --- | --- | --- | --- |
 | `objetos.json` | 258 imagens: coisas do dia a dia, comida, bichos, prédios, tempo e partes do corpo, uma por imagem, mais seis objetos (guarda-chuva, bolsa, carro, chapéu, sapato, camiseta) em vermelho, azul, preto e branco. O guarda-chuva branco não tem imagem (`SEM_IMAGEM`): no fundo recortado ele some | 896×896, fundo recortado | `src/assets/imagens` (384 px) |
 | `acoes.json` | 42 imagens de uma pessoa fazendo uma coisa (ler, comer, dirigir, pedir desculpas...), para 読んでいる人 | 832×1216, fundo recortado | `src/assets/acoes` (512 px) |
-| `pessoas.json` | 17 imagens de gente parada: menino, avó, médico, funcionário da estação... Contam com 人 e, na Cena Viva, ficam no lugar como as coisas, mas com います | 832×1216, fundo recortado | `src/assets/gente` (512 px) |
+| `pessoas.json` | 16 imagens de gente parada: menino, avó, médico, funcionário da estação... Contam com 人 e, na Cena Viva, ficam no lugar como as coisas, mas com います | 832×1216, fundo recortado | `src/assets/gente` (512 px) |
 | `lugares.json` | os oito fundos da Cena Viva, sem gente e sem objeto solto no meio | 1216×832 | `src/assets/lugares` (960 px) |
+| `cenas.json` | os 13 cenários dos outros jogos (Shibuya, Fushimi Inari, konbini, café...) | 1216×832 | `src/assets/cenas-cor` (960 px) |
+| `personagens.json` | os 9 personagens das conversas (Yui, Takeshi, a senhora, o fiscal...), da cintura para cima, fundo branco | 832×1216, cortado em 72% da altura | `src/assets/pessoas-cor` (520 px) |
 
 Saíram da lista as palavras que o modelo não desenhou de forma reconhecível em três rodadas de prompt: cartão, boneco de neve, bilhete, cartão de visita, revista, jornal, papel, colírio, curativo, pasta de dente, bala, sol e o verbo esperar. Quase todas dependem de texto escrito ou são uma folha lisa, que vira só um retângulo. Elas continuam nos outros jogos, só não têm imagem. Na segunda leva, já no Anima, saíram também せんべい, イヤホン e 横断歩道 pelo mesmo motivo.
+
+Toda lista tem `"desde_seed": 10000`: as candidatas do Animagine (seed abaixo de 10000) não podem mais ser escolhidas, nem as já aprovadas. Foi assim que tudo que era do Animagine saiu do jogo sem perder as escolhas feitas no Anima.
 
 As partes do corpo (mão, olho, boca...) usam um estilo próprio (`estilo` no item), porque o dos objetos pede "no humans" e apagava a mão. O modelo de visão reprova toda boca em close dizendo que falta a cabeça; a boca foi escolhida à mão.
 

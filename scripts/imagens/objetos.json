@@ -341,7 +341,7 @@
   {
    "id": "sakana",
    "rotulo": "a fish",
-   "prompt": "one whole raw fish"
+   "prompt": "one whole fish, side view, silver scales, fins and tail, mackerel"
   },
   {
    "id": "niku",
@@ -376,7 +376,7 @@
   {
    "id": "mizu",
    "rotulo": "a bottle of water",
-   "prompt": "plastic bottle of water, plain label"
+   "prompt": "transparent plastic water bottle, blank, unlabeled, no sticker, blue cap"
   },
   {
    "id": "jusu",
@@ -410,8 +410,8 @@
   },
   {
    "id": "okashi",
-   "rotulo": "a bag of snacks",
-   "prompt": "bag of potato chips, plain orange bag with a picture of chips, blank"
+   "rotulo": "snacks and sweets on a plate",
+   "prompt": "white plate with round rice crackers, cookies and colorful candy balls"
   },
   {
    "id": "ramen",
@@ -471,12 +471,12 @@
   {
    "id": "cupramen",
    "rotulo": "a cup noodle",
-   "prompt": "cup noodles, instant ramen cup with lid"
+   "prompt": "plain white paper cup of instant ramen seen from above at an angle, paper lid peeled back, curly noodles inside, completely plain cup"
   },
   {
    "id": "donburi",
    "rotulo": "a donburi bowl",
-   "prompt": "katsudon in a donburi bowl"
+   "prompt": "large ceramic donburi bowl, rice topped with fried pork cutlet and egg, katsudon, lid beside it"
   },
   {
    "id": "tana",
@@ -516,7 +516,7 @@
   {
    "id": "kusuri",
    "rotulo": "medicine pills",
-   "prompt": "white medicine pills and a pill bottle"
+   "prompt": "white round medicine tablets and capsules in a silver blister pack, no bottle"
   },
   {
    "id": "masuku",
@@ -536,12 +536,12 @@
   {
    "id": "shanpu",
    "rotulo": "a shampoo bottle",
-   "prompt": "shampoo pump bottle, plain"
+   "prompt": "transparent pump bottle filled with pink liquid soap, no label, soap bubbles around"
   },
   {
    "id": "sekken",
    "rotulo": "a bar of soap",
-   "prompt": "one bar of soap"
+   "prompt": "one white rectangular bar of soap on a small soap dish, soap bubbles, no bottle"
   },
   {
    "id": "tisshu",
@@ -591,7 +591,7 @@
   {
    "id": "hanko",
    "rotulo": "a stamp seal",
-   "prompt": "one cylindrical japanese name seal stamp, hanko, standing upright, red ink on the bottom, small round red ink pad beside it"
+   "prompt": "one plain black cylindrical japanese seal stamp, hanko, lying on its side, blank, no characters, no engraving, small round red ink pad beside it"
   },
   {
    "id": "kanyoshokubutsu",
@@ -636,7 +636,7 @@
   {
    "id": "jihanki",
    "rotulo": "a vending machine",
-   "prompt": "drink vending machine, front view, no text"
+   "prompt": "red drink vending machine, front view, rows of plain colored bottles, blank panels, unlabeled"
   },
   {
    "id": "inu",
@@ -1316,8 +1316,22 @@
    "prompt": "white short sleeve t-shirt laid flat, front view, plain, no print, round collar, entirely white, pure white with soft light grey shading, thick black outline"
   }
  ],
+ "desde_seed": 10000,
  "escolha": {
-  "teburu": 3,
+  "densha": 10002,
+  "cupramen": 10002,
+  "sakana": 10002,
+  "mizu": 10003,
+  "donburi": 10001,
+  "kusuri": 10001,
+  "sekken": 10002,
+  "hanko": 10003,
+  "jihanki": 10001,
+  "chawan": 11002,
+  "foku": 10003,
+  "gomibako": 10002,
+  "posuto": 10002,
+  "tokei": 10001,
   "neko": 10003,
   "tsuki": 10001,
   "okonomiyaki": 10001,

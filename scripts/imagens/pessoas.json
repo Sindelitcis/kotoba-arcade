@@ -99,6 +99,7 @@
    "prompt": "solo, 1man, office worker, business suit, necktie, briefcase"
   }
  ],
+ "desde_seed": 10000,
  "escolha": {
   "obaasan": 11003,
   "gakusei": 10001,

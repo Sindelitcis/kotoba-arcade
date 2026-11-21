@@ -1,0 +1,98 @@
+{
+ "lote": "cenas",
+ "destino": "src/assets/cenas-cor",
+ "medidas": false,
+ "largura": 1216,
+ "altura": 832,
+ "saida": 960,
+ "recorte": false,
+ "estilo": "scenery, wide shot, eye level, detailed background, anime background, clean lineart, cel shading, bright natural light",
+ "negativo": "text, letters, english text, sign text, watermark, signature, frame, border, photo, realistic, 3d, blurry",
+ "seeds": [
+  1,
+  2,
+  3
+ ],
+ "distratores": [
+  "a portrait of a person",
+  "a single object",
+  "a blank wall"
+ ],
+ "itens": [
+  {
+   "id": "hub-shibuya",
+   "rotulo": "a busy city crossing",
+   "prompt": "shibuya scramble crossing, tokyo, empty crossing, no humans, tall glass buildings, plain facades, daytime, street level view, zebra crossing, traffic lights"
+  },
+  {
+   "id": "kanjimon-takao",
+   "rotulo": "a forest mountain trail",
+   "prompt": "mount takao hiking trail, japan, cedar forest, stone lanterns, stone steps, light mist, no humans"
+  },
+  {
+   "id": "kanabeat-dotonbori",
+   "rotulo": "a canal street at night",
+   "prompt": "dotonbori, osaka, canal, colorful shop facades, bridge, crowd, evening, view from bridge"
+  },
+  {
+   "id": "kotodama-inari",
+   "rotulo": "a tunnel of red torii gates",
+   "prompt": "fushimi inari taisha, kyoto, endless tunnel of red torii gates, stone path, one point perspective, no humans"
+  },
+  {
+   "id": "kumitate-gion",
+   "rotulo": "an old wooden street",
+   "prompt": "hanamikoji street, gion, kyoto, wooden machiya houses, paper lanterns, stone pavement, no humans"
+  },
+  {
+   "id": "pecas-ryoanji",
+   "rotulo": "a zen rock garden",
+   "prompt": "ryoanji temple, kyoto, zen rock garden, raked white gravel, large stones, low earthen wall, wooden veranda, trees behind the wall, no humans"
+  },
+  {
+   "id": "aventura-narita",
+   "rotulo": "an airport arrival hall",
+   "prompt": "airport arrival hall, japan, immigration counters, luggage carts, large windows, airplane outside, a few travelers"
+  },
+  {
+   "id": "aventura-shinjuku",
+   "rotulo": "a train station concourse",
+   "prompt": "big japanese train station concourse, ticket gates, commuters, train platform in the distance"
+  },
+  {
+   "id": "aventura-konbini",
+   "rotulo": "a convenience store interior",
+   "prompt": "japanese convenience store interior, shelves with onigiri and drinks, cash register counter, no humans"
+  },
+  {
+   "id": "conversa-cafe",
+   "rotulo": "a small cafe interior",
+   "prompt": "small cafe interior in tokyo, wooden counter, coffee cups, window with street view, plants, no humans"
+  },
+  {
+   "id": "conversa-osaka",
+   "rotulo": "a residential street",
+   "prompt": "residential street in osaka, japan, utility poles, power lines, vending machine, bicycles, small houses, no humans"
+  },
+  {
+   "id": "conversa-sharehouse",
+   "rotulo": "a shared house kitchen",
+   "prompt": "kitchen of a japanese share house, table, chairs, rice cooker, window, cozy, no humans"
+  },
+  {
+   "id": "conversa-restaurante",
+   "rotulo": "a small restaurant interior",
+   "prompt": "inside a small japanese izakaya restaurant, counter seats, noren curtain, wooden walls, no humans"
+  }
+ ],
+ "desde_seed": 10000,
+ "escolha": {
+  "aventura-konbini": 10001,
+  "hub-shibuya": 11001
+ },
+ "vetadas": [
+  "hub-shibuya-10001",
+  "hub-shibuya-10002",
+  "hub-shibuya-10003"
+ ]
+}

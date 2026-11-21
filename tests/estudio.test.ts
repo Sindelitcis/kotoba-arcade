@@ -108,6 +108,30 @@ print(json.dumps([falta, cor.size, r > g + 100, sorted(p.name for p in base.iter
     // Nada de cópia em cinza ao lado (o visual Sora usa só a ilustração colorida).
     expect(r).toEqual([[], [100, 100], true, ['cor', 'lote']]);
   });
+
+  it('retrato com largura e altura máximas, sem medidas.json, e cenário barulhento cabe no limite', () => {
+    const r = py(`
+from PIL import Image
+import random
+base = pathlib.Path(${JSON.stringify(pasta)}) / "exp2"
+out = base / "lote"
+out.mkdir(parents=True, exist_ok=True)
+estudio.pasta = lambda lista: out
+Image.new("RGB", (832, 1216), (90, 120, 200)).save(out / "yui-10001.png")
+ruido = Image.frombytes("L", (304, 208), random.Random(1).randbytes(304 * 208)).resize((1216, 832)).convert("RGB")
+ruido.save(out / "rua-10001.png")
+import io
+buf = io.BytesIO()
+ruido.resize((960, 657), Image.LANCZOS).save(buf, "WEBP", quality=52, method=6)
+kb = buf.tell() // 1024 + 1  # só cabe baixando a qualidade de 72 para 52
+rel = {"yui-10001": {"id": "yui", "ok": True, "p": 1.0}, "rua-10001": {"id": "rua", "ok": True, "p": 1.0}}
+lista = {"itens": [{"id": "yui"}], "destino": "cor", "saida": [520, 1040], "corte_altura": 0.72, "medidas": False}
+estudio.exportar(lista, base, rel)
+cena = {"itens": [{"id": "rua"}], "destino": "cenas", "saida": 960, "limite_kb": kb}
+estudio.exportar(cena, base, rel)
+print(json.dumps([Image.open(base / "cor" / "yui.webp").size, (base / "cor" / "medidas.json").exists(), (base / "cenas" / "rua.webp").stat().st_size <= kb * 1024]))`);
+    expect(r).toEqual([[520, 547], false, true]);
+  });
 });
 
 describe.runIf(PY)('estúdio: prompt de cada item', () => {

@@ -1,0 +1,83 @@
+{
+ "lote": "personagens",
+ "destino": "src/assets/pessoas-cor",
+ "medidas": false,
+ "largura": 832,
+ "altura": 1216,
+ "saida": [
+  520,
+  1040
+ ],
+ "corte_altura": 0.72,
+ "recorte": false,
+ "estilo": "solo, upper body, portrait, from front, looking at viewer, simple background, white background, clean lineart, anime, cel shading",
+ "negativo": "multiple people, text, letters, name tag text, watermark, signature, frame, border, photo, realistic, 3d, gradient background",
+ "seeds": [
+  1,
+  2,
+  3
+ ],
+ "distratores": [
+  "an object",
+  "a room",
+  "an animal"
+ ],
+ "itens": [
+  {
+   "id": "fiscal",
+   "rotulo": "an immigration officer",
+   "prompt": "1man, adult, japanese immigration officer, uniform, cap, serious face"
+  },
+  {
+   "id": "funcionaria",
+   "rotulo": "an airport staff woman",
+   "prompt": "1girl, adult woman, japanese airport employee, navy uniform, scarf, polite smile, head and shoulders, hands out of frame"
+  },
+  {
+   "id": "atendente",
+   "rotulo": "a train station attendant",
+   "prompt": "1man, young adult, japanese train station staff, uniform, cap, helpful smile, arms at sides, empty hands"
+  },
+  {
+   "id": "senhora",
+   "rotulo": "an old woman",
+   "prompt": "1girl, old woman, japanese grandmother, grey hair, cardigan, gentle smile"
+  },
+  {
+   "id": "balconista",
+   "rotulo": "a convenience store clerk",
+   "prompt": "1boy, young man, japanese convenience store clerk, striped uniform shirt, smile"
+  },
+  {
+   "id": "sakura",
+   "rotulo": "a cafe waitress",
+   "prompt": "1girl, young woman, cafe waitress, apron, short hair, cheerful smile"
+  },
+  {
+   "id": "takeshi",
+   "rotulo": "a middle-aged man",
+   "prompt": "1man, middle-aged man, japanese, glasses, casual jacket, friendly"
+  },
+  {
+   "id": "yui",
+   "rotulo": "a university student",
+   "prompt": "1girl, young woman, university student, long hair, hoodie, friendly smile"
+  },
+  {
+   "id": "tanaka",
+   "rotulo": "a restaurant manager",
+   "prompt": "1man, adult man, japanese restaurant manager, white shirt, apron, short hair, calm"
+  }
+ ],
+ "desde_seed": 10000,
+ "escolha": {
+  "balconista": 12001,
+  "tanaka": 11001,
+  "atendente": 11001
+ },
+ "vetadas": [
+  "atendente-10001",
+  "atendente-10002",
+  "atendente-10003"
+ ]
+}

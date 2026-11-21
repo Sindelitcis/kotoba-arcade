@@ -99,7 +99,7 @@ OBJETOS = [
     ("ninjin", "a carrot", "one orange carrot with green leaves"),
     ("tamanegi", "an onion", "one brown onion"),
     ("kyabetsu", "a cabbage", "one green cabbage"),
-    ("sakana", "a fish", "one whole raw fish"),
+    ("sakana", "a fish", "one whole fish, side view, silver scales, fins and tail, mackerel"),
     ("niku", "a piece of meat", "raw red meat steak"),
     ("budou", "grapes", "bunch of purple grapes"),
     ("suika", "a watermelon", "slice of watermelon"),
@@ -107,14 +107,14 @@ OBJETOS = [
     # comida e bebida
     ("ocha", "a cup of green tea", "japanese teacup of green tea, yunomi"),
     ("koohii", "a coffee can", "one small steel drink can, plain brown and cream stripes, blank"),
-    ("mizu", "a bottle of water", "plastic bottle of water, plain label"),
+    ("mizu", "a bottle of water", "transparent plastic water bottle, blank, unlabeled, no sticker, blue cap"),
     ("jusu", "a glass of orange juice", "glass of orange juice"),
     ("biru", "a mug of beer", "glass beer mug with handle, golden beer and thick white foam on top"),
     ("onigiri", "an onigiri rice ball", "one triangle onigiri, white rice, rectangular black nori sheet wrapped at the bottom, front view"),
     ("bento", "a bento lunch box", "japanese bento lunch box, open, rice and side dishes"),
     ("sandoitchi", "a sandwich", "triangle sandwich"),
     ("aisu", "an ice cream cone", "ice cream cone"),
-    ("okashi", "a bag of snacks", "bag of potato chips, plain orange bag with a picture of chips, blank"),
+    ("okashi", "snacks and sweets on a plate", "white plate with round rice crackers, cookies and colorful candy balls"),
     ("ramen", "a bowl of ramen", "bowl of ramen noodles with egg and chashu"),
     ("sushi", "sushi", "two pieces of nigiri sushi on wooden plate"),
     ("tenpura", "tempura", "shrimp tempura on plate"),
@@ -126,8 +126,8 @@ OBJETOS = [
     ("yakitori", "yakitori skewers", "yakitori, grilled chicken skewers"),
     ("edamame", "edamame beans", "bowl of green edamame pods"),
     ("shoyu", "a soy sauce bottle", "small glass soy sauce dispenser with red cap, dark brown sauce, blank"),
-    ("cupramen", "a cup noodle", "cup noodles, instant ramen cup with lid"),
-    ("donburi", "a donburi bowl", "katsudon in a donburi bowl"),
+    ("cupramen", "a cup noodle", "plain white paper cup of instant ramen seen from above at an angle, paper lid peeled back, curly noodles inside, completely plain cup"),
+    ("donburi", "a donburi bowl", "large ceramic donburi bowl, rice topped with fried pork cutlet and egg, katsudon, lid beside it"),
     # konbini e loja
     ("tana", "a store shelf", "empty white metal store shelf unit, three empty shelves, front view, nothing on the shelves"),
     ("reji", "a cash register", "cash register machine"),
@@ -137,12 +137,12 @@ OBJETOS = [
     ("kitte", "a postage stamp", "one postage stamp with flower picture, perforated edge"),
     ("okane", "coins", "pile of gold and silver coins"),
     # farmácia
-    ("kusuri", "medicine pills", "white medicine pills and a pill bottle"),
+    ("kusuri", "medicine pills", "white round medicine tablets and capsules in a silver blister pack, no bottle"),
     ("masuku", "a face mask", "white surgical face mask"),
     ("taionkei", "a thermometer", "digital thermometer"),
     ("houtai", "a roll of bandage", "one roll of white gauze bandage, partly unrolled strip, side view"),
-    ("shanpu", "a shampoo bottle", "shampoo pump bottle, plain"),
-    ("sekken", "a bar of soap", "one bar of soap"),
+    ("shanpu", "a shampoo bottle", "transparent pump bottle filled with pink liquid soap, no label, soap bubbles around"),
+    ("sekken", "a bar of soap", "one white rectangular bar of soap on a small soap dish, soap bubbles, no bottle"),
     ("tisshu", "a tissue box", "tissue box with tissue sticking out"),
     # escritório
     ("denwa", "a desk telephone", "office desk telephone with handset"),
@@ -153,7 +153,7 @@ OBJETOS = [
     ("nekutai", "a necktie", "one red striped necktie laid flat, full length, knot at top, pointed tip at bottom"),
     ("howaitobodo", "a whiteboard", "blank whiteboard on stand"),
     ("purinta", "a printer", "office printer"),
-    ("hanko", "a stamp seal", "one cylindrical japanese name seal stamp, hanko, standing upright, red ink on the bottom, small round red ink pad beside it"),
+    ("hanko", "a stamp seal", "one plain black cylindrical japanese seal stamp, hanko, lying on its side, blank, no characters, no engraving, small round red ink pad beside it"),
     ("kanyoshokubutsu", "a potted plant", "green leafy potted plant"),
     # rua e estação
     ("basu", "a bus", "city bus, side view"),
@@ -164,7 +164,7 @@ OBJETOS = [
     ("shingou", "a traffic light", "traffic light on pole, green light"),
     ("ki", "a tree", "one green tree"),
     ("posuto", "a mailbox", "red japanese post box, mailbox"),
-    ("jihanki", "a vending machine", "drink vending machine, front view, no text"),
+    ("jihanki", "a vending machine", "red drink vending machine, front view, rows of plain colored bottles, blank panels, unlabeled"),
     ("inu", "a dog", "shiba inu dog standing, full body, side view, four legs, curled tail"),
     # neko: o de antes saiu de costas, com o rabo virado mancha solta. De lado, inteiro, sem dúvida.
     ("neko", "a cat", "one cat sitting, full body, side view, head turned to viewer, four legs, tail attached to body"),
@@ -319,7 +319,7 @@ ACOES = [
     ("nomu", "a person drinking", "1boy, standing, drinking from a glass, head tilted back"),
     ("yomu", "a person reading a book", "1girl, sitting, reading an open book, looking at book"),
     ("kaku", "a person writing on a whiteboard", "1boy, standing, side view, writing on a whiteboard with a marker, arm raised"),
-    ("neru", "a person sleeping", "1boy, sleeping, lying down, eyes closed, futon, blanket"),
+    ("neru", "a person sleeping", "1boy, sleeping, lying on his side, side view, horizontal, eyes closed, head on a pillow, blanket, no bed"),
     ("hashiru", "a person running", "1girl, running, motion lines, sportswear"),
     ("aruku", "a person walking", "1boy, walking, side view, calm"),
     ("suwaru", "a person sitting on a chair", "1girl, sitting on chair, hands on lap, chair"),
@@ -396,7 +396,7 @@ LUGAR_NEG = "people, text, sign, letters, clutter, frame, border, photo, realist
 LUGARES = [
     ("konbini", "an empty convenience store interior", "inside japanese convenience store, empty floor, white tiled floor, bare walls, glass door, bright ceiling lights"),
     ("eki", "a train station platform", "japanese train station platform, empty, yellow tactile paving, roof, railway tracks"),
-    ("heya", "an empty bedroom", "empty japanese apartment bedroom, wooden floor, white walls, window with curtains, daylight"),
+    ("heya", "an empty bedroom", "empty japanese apartment room with no furniture, bare wooden floor, white walls, window with curtains, daylight, no bed"),
     ("jimusho", "an empty office", "empty japanese office room, grey carpet floor, white walls, large windows, city view"),
     ("daidokoro", "an empty kitchen", "japanese home kitchen, counter, sink, wooden floor, window, empty counter"),
     ("yakkyoku", "an empty pharmacy interior", "inside japanese pharmacy, pharmacist counter at the back, green cross sign on the wall, white walls, shelves with medicine boxes, empty floor, clean, bright"),
@@ -404,29 +404,87 @@ LUGARES = [
     ("michi", "a residential street", "japanese residential street, asphalt road, sidewalk, houses in background, blue sky, utility poles, empty street"),
 ]
 
+# Cenários e retratos dos outros jogos (Aventura, Conversa, hub...). Antes eram do Animagine em mangá, pintados depois;
+# agora saem coloridos do Anima, como todo o resto.
+# Placas e letreiros saíram dos prompts: o modelo escreve letras falsas.
+CENA_ESTILO = "scenery, wide shot, eye level, detailed background, anime background, clean lineart, cel shading, bright natural light"
+CENA_NEG = "text, letters, english text, sign text, watermark, signature, frame, border, photo, realistic, 3d, blurry"
+
+CENAS = [
+    ("hub-shibuya", "a busy city crossing", "shibuya scramble crossing, tokyo, empty crossing, no humans, tall glass buildings, plain facades, daytime, street level view, zebra crossing, traffic lights"),
+    ("kanjimon-takao", "a forest mountain trail", "mount takao hiking trail, japan, cedar forest, stone lanterns, stone steps, light mist, no humans"),
+    ("kanabeat-dotonbori", "a canal street at night", "dotonbori, osaka, canal, colorful shop facades, bridge, crowd, evening, view from bridge"),
+    ("kotodama-inari", "a tunnel of red torii gates", "fushimi inari taisha, kyoto, endless tunnel of red torii gates, stone path, one point perspective, no humans"),
+    ("kumitate-gion", "an old wooden street", "hanamikoji street, gion, kyoto, wooden machiya houses, paper lanterns, stone pavement, no humans"),
+    ("pecas-ryoanji", "a zen rock garden", "ryoanji temple, kyoto, zen rock garden, raked white gravel, large stones, low earthen wall, wooden veranda, trees behind the wall, no humans"),
+    ("aventura-narita", "an airport arrival hall", "airport arrival hall, japan, immigration counters, luggage carts, large windows, airplane outside, a few travelers"),
+    ("aventura-shinjuku", "a train station concourse", "big japanese train station concourse, ticket gates, commuters, train platform in the distance"),
+    ("aventura-konbini", "a convenience store interior", "japanese convenience store interior, shelves with onigiri and drinks, cash register counter, no humans"),
+    ("conversa-cafe", "a small cafe interior", "small cafe interior in tokyo, wooden counter, coffee cups, window with street view, plants, no humans"),
+    ("conversa-osaka", "a residential street", "residential street in osaka, japan, utility poles, power lines, vending machine, bicycles, small houses, no humans"),
+    ("conversa-sharehouse", "a shared house kitchen", "kitchen of a japanese share house, table, chairs, rice cooker, window, cozy, no humans"),
+    ("conversa-restaurante", "a small restaurant interior", "inside a small japanese izakaya restaurant, counter seats, noren curtain, wooden walls, no humans"),
+]
+
+PERSONAGEM_ESTILO = "solo, upper body, portrait, from front, looking at viewer, simple background, white background, clean lineart, anime, cel shading"
+PERSONAGEM_NEG = "multiple people, text, letters, name tag text, watermark, signature, frame, border, photo, realistic, 3d, gradient background"
+
+PERSONAGENS = [
+    ("fiscal", "an immigration officer", "1man, adult, japanese immigration officer, uniform, cap, serious face"),
+    ("funcionaria", "an airport staff woman", "1girl, adult woman, japanese airport employee, navy uniform, scarf, polite smile, head and shoulders, hands out of frame"),
+    ("atendente", "a train station attendant", "1man, young adult, japanese train station staff, uniform, cap, helpful smile, arms at sides, empty hands"),
+    ("senhora", "an old woman", "1girl, old woman, japanese grandmother, grey hair, cardigan, gentle smile"),
+    ("balconista", "a convenience store clerk", "1boy, young man, japanese convenience store clerk, striped uniform shirt, smile"),
+    ("sakura", "a cafe waitress", "1girl, young woman, cafe waitress, apron, short hair, cheerful smile"),
+    ("takeshi", "a middle-aged man", "1man, middle-aged man, japanese, glasses, casual jacket, friendly"),
+    ("yui", "a university student", "1girl, young woman, university student, long hair, hoodie, friendly smile"),
+    ("tanaka", "a restaurant manager", "1man, adult man, japanese restaurant manager, white shirt, apron, short hair, calm"),
+]
+
 # Depois de olhar as folhas: candidatas vetadas (passaram no CLIP mas ensinam errado) e escolhas à mão.
 AJUSTES: dict[str, dict] = {
-    # teburu: a mesa larga (seed 3) cabe as coisas da cena; a quadradinha que o CLIP preferiu, não.
     # neko: no Anima, a seed 10003 é o gato inteiro de lado com o rabo ligado; a 10002 tem uma assinatura falsa no canto.
     # tsuki: a 10001 é a lua crescente limpa. gita: as de antes saíam com o braço cortado ou deformadas.
     # okonomiyaki: a 10002 parece panqueca com manteiga. houki: a 10003 são duas vassouras cruzadas.
     # kaisatsu: a 10003 tem letreiro na tela. te: a 10001 é uma luva rosa. kuchi: o modelo de visão
     # reprova toda boca em close ("falta a cabeça"), mas é o que a palavra pede.
-    "objetos": {"escolha": {"teburu": 3, "neko": 10003, "tsuki": 10001, "okonomiyaki": 10001, "houki": 10002,
+    # densha: o trem de lado cabe na estação da Cena Viva; o de frente ficava enorme.
+    # okashi: com "snacks" no prompt sempre vinham pacotes de marca com letra falsa; agora só o que vai no prato.
+    # cupramen: todo copo sai com letra; a 10002 tem só uma marquinha.
+    # chawan, foku, gomibako, posuto, tokei: a escolhida tinha letra falsa (ou três garfos); estas não têm.
+    # Os itens que só saíam com letra falsa, e o peixe que virou fatia de toranja, ganharam prompt novo;
+    # as candidatas antigas foram para D:\KotobaArcade\arte\estudio\objetos\descartadas.
+    "objetos": {"escolha": {"densha": 10002, "cupramen": 10002, "sakana": 10002, "mizu": 10003, "donburi": 10001, "kusuri": 10001, "sekken": 10002, "hanko": 10003, "jihanki": 10001, "chawan": 11002, "foku": 10003, "gomibako": 10002, "posuto": 10002, "tokei": 10001, "neko": 10003, "tsuki": 10001, "okonomiyaki": 10001, "houki": 10002,
                             "kaisatsu": 10001, "te": 10002, "kuchi": 10001},
                 "vetadas": ["gita-2", "gita-10001", "gita-10002", "gita-10003"]},
-    # warau: o CLIP achava "dançando", mas a seed 2 é uma pessoa rindo de olho fechado, sem dúvida a olho.
     # oyogu: as seis primeiras do Anima mostram um menino parado na borda da piscina, não nadando.
     # kiru, kangaeru, tsukareru: o CLIP achou outra ação em todas, mas estas mostram a certa sem dúvida a olho.
-    "acoes": {"escolha": {"warau": 2, "kiru": 10003, "kangaeru": 10002, "tsukareru": 10001}, "vetadas": [f"oyogu-{s}" for s in (10001, 10002, 10003, 11001, 11002, 11003)]},
-    "lugares": {},
+    # neru: as primeiras eram vistas de cima, numa cama em pé; agora a pessoa dorme de lado, sem cama (vai no banco e no futon).
+    # aruku, denwasuru, warau: o CLIP reprovou todas, mas estas mostram a ação sem dúvida a olho.
+    "acoes": {"escolha": {"aruku": 10003, "denwasuru": 11001, "warau": 10003, "kiru": 10003, "kangaeru": 10002, "tsukareru": 10001}, "vetadas": [f"oyogu-{s}" for s in (10001, 10002, 10003, 11001, 11002, 11003)]},
+    # michi: as outras olham a rua por dentro de uma porta. yakkyoku: a 10002 tem menos caixa com letra falsa.
+    "lugares": {"escolha": {"michi": 10001, "yakkyoku": 10002}},
+    # hub-shibuya: a multidão saía como silhuetas brancas, e os prédios com letreiro de letra falsa; agora o cruzamento é vazio.
+    # aventura-konbini: a 10003 tem uma faixa com letras falsas em cima do caixa.
+    "cenas": {"escolha": {"aventura-konbini": 10001, "hub-shibuya": 11001}, "vetadas": [f"hub-shibuya-{s}" for s in (10001, 10002, 10003)]},
+    # balconista e tanaka: o CLIP confunde os uniformes (balcão, estação, restaurante); estas foram escolhidas a olho.
+    # O boné azul do balconista sai com logotipo falso. Funcionária e atendente saíam segurando um bastão
+    # (um com letras falsas): "staff", em inglês, também é cajado; agora é "employee". Do atendente ficou a 11001, a única sem bastão; a funcionária ganhou prompt de ombros
+    # para cima e as candidatas antigas foram para D:\KotobaArcade\arte\estudio\personagens\descartadas.
+    "personagens": {"escolha": {"balconista": 12001, "tanaka": 11001, "atendente": 11001},
+                    "vetadas": [f"{i}-{s}" for i in ("atendente",) for s in (10001, 10002, 10003)]},
     # O CLIP confunde avó com mulher e estudante com menino; estas foram escolhidas a olho.
     # 運転手 saiu: toda candidata de motorista parecia policial.
     "pessoas": {"escolha": {"obaasan": 11003, "gakusei": 10001, "tenin": 10001}},
 }
 
 
+# Tudo que ainda era do Animagine (seed abaixo de 10000) foi refeito no Anima Turbo: as candidatas antigas não voltam.
+ANIMA = 10000
+
+
 def escrever(nome, dados):
+    dados["desde_seed"] = ANIMA
     dados.update(AJUSTES[nome])
     (AQUI / f"{nome}.json").write_text(json.dumps(dados, indent=1, ensure_ascii=False) + "\n", encoding="utf-8", newline="\n")
 
@@ -455,4 +513,17 @@ escrever("lugares", {
     "distratores": ["a crowded room full of people", "a forest", "a shrine"],
     "itens": [{"id": i, "rotulo": r, "prompt": p} for i, r, p in LUGARES],
 })
-print(len(OBJETOS), "objetos,", len(ACOES), "ações,", len(PESSOAS), "pessoas,", len(LUGARES), "lugares")
+escrever("cenas", {
+    "lote": "cenas", "destino": "src/assets/cenas-cor", "medidas": False,
+    "largura": 1216, "altura": 832, "saida": 960, "recorte": False, "estilo": CENA_ESTILO, "negativo": CENA_NEG,
+    "seeds": [1, 2, 3], "distratores": ["a portrait of a person", "a single object", "a blank wall"],
+    "itens": [{"id": i, "rotulo": r, "prompt": p} for i, r, p in CENAS],
+})
+escrever("personagens", {
+    "lote": "personagens", "destino": "src/assets/pessoas-cor", "medidas": False,
+    "largura": 832, "altura": 1216, "saida": [520, 1040], "corte_altura": 0.72, "recorte": False,
+    "estilo": PERSONAGEM_ESTILO, "negativo": PERSONAGEM_NEG, "seeds": [1, 2, 3],
+    "distratores": ["an object", "a room", "an animal"],
+    "itens": [{"id": i, "rotulo": r, "prompt": p} for i, r, p in PERSONAGENS],
+})
+print(len(OBJETOS), "objetos,", len(ACOES), "ações,", len(PESSOAS), "pessoas,", len(LUGARES), "lugares,", len(CENAS), "cenários,", len(PERSONAGENS), "personagens")
