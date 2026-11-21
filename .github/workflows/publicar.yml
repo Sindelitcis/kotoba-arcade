@@ -65,7 +65,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: github-pages
-      url: ${{ steps.deploy.outputs.page_url }}
+      url: ${{ steps.deploy.outputs.page_url || steps.deploy-de-novo.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
       # Um nome por tentativa: ao rodar o job de novo, o pacote da tentativa anterior continua na run,
@@ -74,7 +74,17 @@ jobs:
         with:
           path: scripts/github-pages
           name: github-pages-${{ github.run_attempt }}
+      # O deploy-pages às vezes procura o pacote no mesmo segundo em que ele foi criado e não acha
+      # ("No artifacts named github-pages-N", com o pacote lá). Espera um pouco e tenta de novo.
       - id: deploy
+        continue-on-error: true
+        uses: actions/deploy-pages@v4
+        with:
+          artifact_name: github-pages-${{ github.run_attempt }}
+      - if: steps.deploy.outcome == 'failure'
+        run: sleep 20
+      - id: deploy-de-novo
+        if: steps.deploy.outcome == 'failure'
         uses: actions/deploy-pages@v4
         with:
           artifact_name: github-pages-${{ github.run_attempt }}

@@ -11,4 +11,12 @@ describe('workflow de publicação', () => {
     expect(yml).toMatch(/upload-pages-artifact@v\d[\s\S]*?name: github-pages-\$\{\{ github\.run_attempt \}\}/);
     expect(yml).toMatch(/deploy-pages@v\d[\s\S]*?artifact_name: github-pages-\$\{\{ github\.run_attempt \}\}/);
   });
+
+  // No mesmo dia, o deploy-pages procurou o pacote no mesmo segundo em que ele foi criado e não achou,
+  // três vezes seguidas (o pacote estava lá). O deploy tenta de novo sozinho depois de esperar.
+  it('o deploy do GitHub Pages tenta de novo se não achar o pacote na primeira', () => {
+    expect(yml).toMatch(/id: deploy\r?\n\s+continue-on-error: true\r?\n\s+uses: actions\/deploy-pages@v\d/);
+    expect(yml).toMatch(/if: steps\.deploy\.outcome == 'failure'\r?\n\s+run: sleep \d+/);
+    expect(yml).toMatch(/id: deploy-de-novo\r?\n\s+if: steps\.deploy\.outcome == 'failure'\r?\n\s+uses: actions\/deploy-pages@v\d[\s\S]*?artifact_name: github-pages-\$\{\{ github\.run_attempt \}\}/);
+  });
 });
