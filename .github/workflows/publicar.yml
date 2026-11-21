@@ -32,6 +32,8 @@ jobs:
         env:
           KOTOBA_SENHA: ${{ secrets.KOTOBA_SENHA }}
       - run: npm run e2e
+      # Porteiro do servidor da IA do PC (CORS e acesso à rede local): só biblioteca padrão do Python.
+      - run: python3 -I -m unittest discover -s local -p "test_*.py" -v
       - uses: actions/upload-artifact@v4
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
         with:

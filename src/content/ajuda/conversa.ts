@@ -11,7 +11,7 @@ export const CONVERSA: Ajuda = {
     'A IA fica na nuvem e é protegida por senha. Você digita a senha uma vez e o navegador lembra por 30 dias.',
   ],
   passos: [
-    'Na primeira vez, digite a senha da Conversa e aperte Enter. Jogando no PC com npm run local ligado, a IA do próprio PC entra no lugar da nuvem e não pede senha.',
+    'Na primeira vez, digite a senha da Conversa e aperte Enter. Com a IA do seu PC ligada, ela entra no lugar da nuvem e não pede senha. A linha "IA: Automático · Nuvem · Meu PC" escolhe qual usar.',
     'Escolha uma situação pelo número, ou Enter para a sugerida.',
     'O personagem fala com voz e com a leitura por cima dos kanji.',
     'Responda: Espaço (com o campo vazio) liga o microfone, ou digite em romaji ou kana e aperte Enter. Ex.: koohii wo kudasai ou コーヒーをください.',
@@ -42,10 +42,11 @@ export const CONVERSA: Ajuda = {
   ],
   perguntas: [
     { p: 'Por que pede senha?', r: 'A IA da nuvem tem uma cota grátis por dia. A senha garante que só você gasta essa cota. Depois de entrar, o navegador lembra por 30 dias.' },
-    { p: 'Apareceu que a cota de hoje acabou.', r: 'A nuvem grátis tem um limite por dia, que zera às 21h (horário de Brasília). Até lá, os outros jogos funcionam. No PC, npm run local usa a IA do próprio PC, sem limite.' },
-    { p: 'Por que a voz do personagem às vezes muda?', r: 'As falas fixas tocam a gravação. O resto usa a voz japonesa do navegador, porque a nuvem grátis não tem voz em japonês. Com npm run local, a voz vem do AivisSpeech no seu PC.' },
+    { p: 'Apareceu que a cota de hoje acabou.', r: 'A nuvem grátis tem um limite por dia, que zera às 21h (horário de Brasília). Até lá, os outros jogos funcionam. Com a IA do seu PC (escolha "Meu PC"), não tem limite.' },
+    { p: 'Por que a voz do personagem às vezes muda?', r: 'As falas fixas tocam a gravação. O resto usa a voz japonesa do navegador, porque a nuvem grátis não tem voz em japonês. Com a IA do seu PC, a voz vem do AivisSpeech, uma para cada personagem.' },
+    { p: 'Como uso a IA do meu PC no site?', r: 'Escolha "Meu PC" e clique em "Ligar a IA do meu PC". Na primeira vez, o navegador pede licença para o site falar com o PC: clique em Permitir. Depois disso, o Automático acha o PC sozinho.' },
     { p: 'O microfone não liga.', r: 'O reconhecimento de fala ainda está carregando, ou o navegador não deu permissão. Enquanto isso, digite.' },
-    { p: 'O que eu falo sai do meu PC?', r: 'Na nuvem, o áudio vai para a IA da Cloudflare, vira texto e não fica guardado. Com npm run local, nada sai do PC.' },
+    { p: 'O que eu falo sai do meu PC?', r: 'Na nuvem, o áudio vai para a IA da Cloudflare, vira texto e não fica guardado. Com a IA do seu PC, nada sai da máquina.' },
     { p: 'Por que a conversa acabou do nada?', r: 'Cada cena tem no máximo 10 falas suas e 4 minutos. Passou disso, o personagem se despede. É para ter um ponto de parada.' },
     { p: 'A ajuda abre com F1?', r: 'Aqui não, porque a F1 traduz a fala. Use a tecla ? (fora do campo de texto) ou o botão de interrogação.' },
     MEMORIA_UNICA,

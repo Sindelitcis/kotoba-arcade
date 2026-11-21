@@ -15,7 +15,7 @@ Jogos que já dá para jogar:
 - **Aventura**: você acabou de chegar ao Japão e vive cenas curtas do dia a dia (imigração, guichê do trem, konbini). As pessoas falam japonês de verdade, com áudio, e você responde escolhendo o que dizer. Não tem tela de erro: se a pessoa não entende, ela estranha, repete, e a conversa continua. Palavra nova aparece com leitura e significado; conforme firma na memória, a ajuda some. Cada cena leva de 3 a 5 minutos e as falas vividas ficam num diário para reler e ouvir.
 - **Kumitate**: puzzle de montar frases. Cada frase tem buracos e você encaixa partículas (は, を, に, で...) e pontas de verbo (ます, ません, た, ない...) até ela dizer o que foi pedido em português. A ponta encaixada transforma o verbo na hora: 飲む vira 飲みました. Peça que não serve volta para a bandeja com o motivo, sem tela de erro. Cada ponto de gramática é uma peça nova que destrava depois de você acertar a anterior de primeira algumas vezes, e chega com uma lição curta e um exemplo antes de ser cobrado. Uma rodada são seis frases.
 - **Kanji em peças**: o kanji visto como desenho feito de peças que se repetem. 休 é uma pessoa (亻) encostada na árvore (木): descansar. São cinco modos curtos: achar a peça, montar o kanji, achar o intruso entre kanji parecidos (未 e 末, 土 e 士), adivinhar o significado de um kanji nunca visto só pelas peças e ler palavras de dois kanji. Cobre todos os kanji do N5, N4 e N3 (612), com 383 peças, cada uma com nome em português e uma imagem. No fliperama, a tecla P abre direto.
-- **Conversa por voz**: você escolhe uma cena (pedir no café, perguntar o caminho, se apresentar, entrevista de trabalho) e conversa em japonês falando no microfone ou digitando em romaji ou kana. O personagem responde com voz e com furigana, no seu nível, puxando as palavras que você já está aprendendo. Travou, aperta Tab: vem uma dica e, na segunda vez, duas respostas prontas. Cada cena tem um objetivo, dura de 2 a 4 minutos e acaba num resumo com o que você disse bem, uma ou duas sugestões para soar mais natural e as palavras novas, que entram na memória. A IA fica na nuvem da Cloudflare, protegida por senha (veja `docs/nuvem.md`). Quem joga no PC pode usar a IA da própria máquina com `npm run local`.
+- **Conversa por voz**: você escolhe uma cena (pedir no café, perguntar o caminho, se apresentar, entrevista de trabalho) e conversa em japonês falando no microfone ou digitando em romaji ou kana. O personagem responde com voz e com furigana, no seu nível, puxando as palavras que você já está aprendendo. Travou, aperta Tab: vem uma dica e, na segunda vez, duas respostas prontas. Cada cena tem um objetivo, dura de 2 a 4 minutos e acaba num resumo com o que você disse bem, uma ou duas sugestões para soar mais natural e as palavras novas, que entram na memória. A IA fica na nuvem da Cloudflare, protegida por senha (veja `docs/nuvem.md`). Quem tem placa de vídeo pode usar a IA da própria máquina, até no site publicado (veja `docs/ia-do-pc.md`).
 - **Memória** (tecla `M`): jogo da memória de imagem e palavra. Cada carta de imagem tem o par com a palavra em japonês. Começa com a palavra em kana, passa para o kanji, depois só o áudio (a carta fala e você acha a imagem) e por fim pares que se confundem, como いす (cadeira) e いぬ (cachorro). Uma rodada são três quadros curtos, com pausa entre eles, e leva de 1 a 3 minutos. Palavra nova aparece antes numa lição, com imagem e voz. Par errado só desvira; depois de dois enganos, o par certo brilha.
 - **Cena Viva** (tecla `L`): oito lugares de verdade (konbini, estação, quarto, escritório, cozinha, farmácia, restaurante e rua), cada um com 20 a 35 coisas que dá para clicar. A frase pede e você acha: começa em 傘はどこ？ e cresce para cor (赤い傘), tamanho, lugar (机の上の本), contadores (りんごが三つ), quem está fazendo o quê (読んでいる人), frases longas que juntam tudo e, no fim, você mesmo monta a frase que descreve a cena (テーブルの上にかばんがあります). Vai do N5 ao N3. Clicou na coisa errada, ela diz o próprio nome e o pedido continua. Cada rodada são oito pedidos.
 
@@ -40,6 +40,8 @@ npm run local
 
 Ele sobe o servidor da pasta `local/` em `127.0.0.1:8791`, abre o Ollama e o AivisSpeech se ainda não estiverem abertos e roda o jogo em http://localhost:5173. Quando aparecer "tudo pronto", é só jogar. Ctrl+C fecha tudo.
 
+Para usar essa IA no site publicado (kotoba-arcade.pages.dev), com um botão que liga tudo sem abrir o terminal, veja `docs/ia-do-pc.md`.
+
 | Parte      | O que usa                                                                                 | Onde roda                                   |
 | ---------- | ----------------------------------------------------------------------------------------- | ------------------------------------------- |
 | Ouvir você | [faster-whisper](https://github.com/SYSTRAN/faster-whisper) com o modelo `large-v3-turbo` | placa de vídeo (ou processador, mais lento) |
@@ -48,7 +50,7 @@ Ele sobe o servidor da pasta `local/` em `127.0.0.1:8791`, abre o Ollama e o Aiv
 
 Requisitos:
 
-- Windows com placa NVIDIA de 16 GB (testado numa RTX 5060 Ti: com o modelo de conversa, o Whisper e o AivisSpeech abertos, a placa fica em 15,7 GB). Com placa de 12 GB, use o VOICEVOX, que roda no processador.
+- Windows com placa NVIDIA de 16 GB (testado numa RTX 5060 Ti: com o modelo de conversa, o Whisper e o AivisSpeech abertos, a placa fica em 13,6 GB). Com placa de 12 GB, use o VOICEVOX, que roda no processador.
 - Uns 15 GB livres em disco para os modelos.
 - Python 3.11, Ollama 0.40 ou mais novo e o AivisSpeech Engine (testado na 1.2.0).
 
@@ -70,7 +72,7 @@ Quem preferir o VOICEVOX, que roda no processador, troca `voz.motor` para `voice
 
 Sem motor de voz a Conversa usa a voz japonesa do navegador. O primeiro `npm run local` demora alguns minutos porque baixa o Whisper e carrega os modelos; depois sobe em uns 10 segundos.
 
-O servidor só aceita conexões do próprio PC. Nada do que você fala sai da máquina.
+O servidor só aceita conexões do próprio PC, e só de páginas do próprio PC ou do site publicado. Nada do que você fala sai da máquina.
 
 ## Testes
 

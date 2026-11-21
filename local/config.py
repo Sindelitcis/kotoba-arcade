@@ -1,4 +1,8 @@
-"""Lê local/config.exemplo.json e, por cima, local/config.local.json (que fica fora do Git)."""
+"""Lê local/config.exemplo.json e, por cima, o config do PC (fora do Git).
+
+O config do PC é o primeiro que existir: KOTOBA_CONFIG, local/config.local.json ou
+D:\KotobaArcade\ia\config.local.json (onde ficam os programas da Conversa neste PC).
+"""
 import json
 import os
 from pathlib import Path
@@ -16,7 +20,14 @@ def _juntar(base, extra):
 
 def carregar_config():
     cfg = json.loads((AQUI / "config.exemplo.json").read_text(encoding="utf-8"))
-    local = Path(os.environ.get("KOTOBA_CONFIG", AQUI / "config.local.json"))
-    if local.exists():
-        _juntar(cfg, json.loads(local.read_text(encoding="utf-8")))
+    for local in caminhos_do_config():
+        if local.exists():
+            _juntar(cfg, json.loads(local.read_text(encoding="utf-8")))
+            break
     return cfg
+
+
+def caminhos_do_config():
+    if os.environ.get("KOTOBA_CONFIG"):
+        return [Path(os.environ["KOTOBA_CONFIG"])]
+    return [AQUI / "config.local.json", Path("D:/KotobaArcade/ia/config.local.json")]

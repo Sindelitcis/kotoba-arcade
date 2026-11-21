@@ -80,7 +80,7 @@ Uma alternativa seria o kuromoji no navegador (dicionário de 17 MB, leitura exa
 - falas fixas (abertura de cada cena e tudo que já foi gravado): os mp3 de `public/vozes`, gravados com AivisSpeech/VOICEVOX, como antes;
 - falas novas da IA: a voz japonesa do navegador, com a configuração de cada personagem (`VOZ_CONVERSA`).
 
-A voz do AivisSpeech no PC continua bem melhor (tem uma voz por personagem e entonação natural). Quem quiser ela na Conversa usa `npm run local` no PC: a página aberta em `localhost` procura o servidor do PC primeiro e só usa a nuvem se ele não estiver ligado.
+A voz do AivisSpeech no PC continua bem melhor (tem uma voz por personagem e entonação natural). Quem tem a IA instalada no PC pode usar ela no próprio site publicado: a Conversa tem a escolha "IA: Automático · Nuvem · Meu PC". Veja `docs/ia-do-pc.md`.
 
 ## Limites do plano gratuito
 

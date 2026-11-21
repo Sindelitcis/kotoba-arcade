@@ -2,6 +2,13 @@
   "porta": 8791,
   "python": "",
   "cache_modelos": "",
+  "origens": [
+    "https://kotoba-arcade.pages.dev"
+  ],
+  "placa": {
+    "vram_gb": 11
+  },
+  "desligar_ocioso_min": 20,
   "voz1": {
     "python": "",
     "motor": "",

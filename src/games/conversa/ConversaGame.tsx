@@ -14,17 +14,26 @@ import {
   criarCliente,
   criarClienteNuvem,
   entrar,
+  ESPERA_LICENCA_MS,
+  escolherMotor,
+  lerMotor,
+  licencaDoPC,
+  LINK_LIGAR_PC,
+  MOTORES,
   podeProcurar,
   procurarNuvem,
   procurarServidor,
+  salvarMotor,
   type Cliente,
   type ClienteNuvem,
+  type Escolha,
+  type Motor,
   type Saude,
 } from './cliente';
 import { CENAS, Conversa, proximaCena, type Cena, type Dica, type Evento, type Linha, type Resumo, type Ruby } from './engine';
 import { gravar, type Gravacao } from './microfone';
 
-type Fase = 'procurando' | 'senha' | 'desligado' | 'menu' | 'conversa' | 'resumo';
+type Fase = 'procurando' | 'senha' | 'desligado' | 'pc-fora' | 'menu' | 'conversa' | 'resumo';
 
 function RubyText({ ruby }: { ruby: readonly Ruby[] }) {
   return (
@@ -58,6 +67,10 @@ export function ConversaGame() {
   const [senha, setSenha] = useState('');
   const [senhaAviso, setSenhaAviso] = useState('');
   const [entrando, setEntrando] = useState(false);
+  const [motor, setMotor] = useState<Motor>(lerMotor());
+  const [avisoMotor, setAvisoMotor] = useState('');
+  const [pcFora, setPcFora] = useState<Extract<Escolha, { onde: 'pc-fora' }> | null>(null);
+  const [ligando, setLigando] = useState(false);
   const [texto, setTexto] = useState('');
   const [dica, setDica] = useState<Dica | null>(null);
   const [aviso, setAviso] = useState('');
@@ -82,11 +95,27 @@ export function ConversaGame() {
   const listaEl = useRef<HTMLOListElement>(null);
   const audioEl = useRef<HTMLAudioElement | null>(null);
 
-  /** No PC, o servidor local vem primeiro (se estiver ligado). Fora dele, ou sem ele, a nuvem. */
-  const procurar = async () => {
+  /** Quem faz a IA: o PC ou a nuvem, conforme a escolha (Automático, Nuvem, Meu PC). */
+  const procurar = async (m: Motor = motor) => {
     setFase('procurando');
-    if (podeProcurar(location.hostname) && (await procurarLocal())) return;
-    const n = await procurarNuvem();
+    setAvisoMotor('');
+    const e = await escolherMotor(m, {
+      licenca: () => licencaDoPC(location.hostname),
+      procurarPC: (t) => procurarServidor(fetch, undefined, t),
+      procurarNuvem: () => procurarNuvem(),
+    });
+    if (e.onde === 'pc') {
+      await usarPC(e.saude);
+      return;
+    }
+    if (e.onde === 'pc-fora') {
+      setSaude(null);
+      setPcFora(e);
+      setFase('pc-fora');
+      return;
+    }
+    if (e.aviso) setAvisoMotor(e.aviso);
+    const n = e.procura;
     if (n.tipo === 'pronto') {
       cliente.current = criarClienteNuvem();
       setSaude(n.saude);
@@ -118,20 +147,42 @@ export function ConversaGame() {
     return 'ultimaFalha' in c ? avisoDaFalha(c.ultimaFalha ?? null) : 'O servidor local não respondeu. Sua fala não se perdeu: mande de novo.';
   };
 
-  /** Servidor do PC. Devolve false se ele não está ligado. */
-  const procurarLocal = async (): Promise<boolean> => {
-    let s = await procurarServidor(location.hostname);
-    if (!s) return false;
-    // Servidor ligado mas o modelo ainda abrindo na placa: espera até 3 minutos em vez de dizer que está desligado.
+  /** Servidor do PC respondeu. Se o modelo ainda está abrindo na placa, espera até 3 minutos. */
+  const usarPC = async (primeira: Saude) => {
+    let s: Saude | null = primeira;
     for (let i = 0; i < 90 && s && !s.conversa.ok && !s.conversa.erro && screen.value === 'conversa'; i++) {
       setSaude(s);
       await new Promise((r) => setTimeout(r, 2000));
-      s = await procurarServidor(location.hostname);
+      s = await procurarServidor();
     }
     cliente.current = criarCliente();
     setSaude(s);
     setFase(s && s.conversa.ok ? 'menu' : 'desligado');
-    return true;
+  };
+
+  const trocarMotor = (m: Motor) => {
+    if (m === motor) return;
+    salvarMotor(m);
+    setMotor(m);
+    void procurar(m);
+  };
+
+  /** O link kotoba-local:// abre o local/iniciar.mjs --site. Aqui a tela espera a IA do PC responder. */
+  const ligarPC = async () => {
+    if (ligando) return;
+    setLigando(true);
+    const limite = Date.now() + 4 * 60_000;
+    while (Date.now() < limite && montado.current) {
+      const espera = (await licencaDoPC(location.hostname)) === 'perguntar' ? ESPERA_LICENCA_MS : 3000;
+      const s = await procurarServidor(fetch, undefined, espera);
+      if (s && (!s.placa || s.placa.ok)) {
+        setLigando(false);
+        await usarPC(s);
+        return;
+      }
+      await new Promise((r) => setTimeout(r, 3000));
+    }
+    setLigando(false);
   };
 
   // Saiu da tela: para a voz e desliga o microfone, mesmo no meio de uma gravação.
@@ -342,7 +393,7 @@ export function ConversaGame() {
     } else if (tecla === 'Enter') {
       e.preventDefault();
       if (fase === 'menu' || fase === 'resumo') comecar(cenaSugerida(conversaSave()));
-      else if (fase === 'desligado') void procurar();
+      else if (fase === 'desligado' || fase === 'pc-fora') void procurar();
     }
   };
   // Ligado junto com o desenho da tela: tecla apertada logo que a tela aparece não se perde.
@@ -357,6 +408,77 @@ export function ConversaGame() {
       ← Fliperama <kbd>Esc</kbd>
     </button>
   );
+
+  const ondeRoda = saude ? (saude.nuvem ? 'na nuvem' : `no seu PC (${saude.conversa.modelo})`) : '';
+  const seletor = (
+    <div class="cv-motor" role="group" aria-label="Qual IA usar" data-testid="cv-motor">
+      <span class="muted">IA:</span>
+      {MOTORES.map((m) => (
+        <button
+          key={m.id}
+          type="button"
+          class={motor === m.id ? 'ghost small on' : 'ghost small'}
+          aria-pressed={motor === m.id}
+          onClick={() => trocarMotor(m.id)}
+          data-motor={m.id}
+        >
+          {m.nome}
+        </button>
+      ))}
+      {ondeRoda && (
+        <span class="muted" data-testid="cv-onde">
+          · rodando {ondeRoda}
+        </span>
+      )}
+    </div>
+  );
+  const botaoLigar = (principal: boolean) => (
+    <a
+      class={principal ? 'button primary' : 'button ghost small'}
+      href={LINK_LIGAR_PC}
+      onClick={() => void ligarPC()}
+      data-testid="cv-ligar-pc"
+      aria-disabled={ligando}
+    >
+      {ligando ? 'Esperando a IA do PC...' : 'Ligar a IA do meu PC'}
+    </a>
+  );
+
+  if (fase === 'pc-fora' && pcFora) {
+    return (
+      <main class="cv" data-testid="cv" data-phase="pc-fora">
+        <header class="km-top">{voltar}</header>
+        <section class="av-panel" data-testid="cv-pc-fora">
+          <span class="tile-jp" lang="ja">
+            会話
+          </span>
+          <h2 class="big">IA do seu PC</h2>
+          {pcFora.motivo === 'desligado' && (
+            <p class="cv-off-text">
+              A IA do seu PC não está ligada. O botão abaixo liga (o navegador pergunta antes de abrir). Na primeira vez, ele também pede licença para o site falar com o PC: clique em Permitir.
+            </p>
+          )}
+          {pcFora.motivo === 'licenca' && (
+            <p class="cv-off-text">
+              O navegador não deixa este site falar com o seu PC. Libere no cadeado ao lado do endereço, em "Acesso à rede local", e tente de novo.
+            </p>
+          )}
+          {pcFora.motivo === 'placa' && (
+            <p class="cv-off-text" data-testid="cv-placa">
+              A placa de vídeo está ocupada ({pcFora.detalhe ?? 'outro programa'}). Quando ela ficar livre, a IA do PC abre sozinha. Até lá, dá para usar a nuvem.
+            </p>
+          )}
+          {seletor}
+          <div class="actions center">
+            {pcFora.motivo === 'desligado' && botaoLigar(true)}
+            <button class="ghost" onClick={() => void procurar()} data-testid="cv-retry">
+              Procurar de novo <kbd>Enter</kbd>
+            </button>
+          </div>
+        </section>
+      </main>
+    );
+  }
 
   if (fase === 'procurando') {
     return (
@@ -405,6 +527,7 @@ export function ConversaGame() {
               {senhaAviso}
             </p>
           )}
+          {seletor}
         </section>
       </main>
     );
@@ -431,6 +554,7 @@ export function ConversaGame() {
               {saude.conversa.erro ? `: ${saude.conversa.erro}` : '.'}
             </p>
           )}
+          {seletor}
           <div class="actions center">
             <button class="primary" onClick={() => void procurar()} data-testid="cv-retry">
               Procurar de novo <kbd>Enter</kbd>
@@ -453,6 +577,13 @@ export function ConversaGame() {
           </span>
         </header>
         <section class="av-panel">
+          {seletor}
+          {avisoMotor && (
+            <p class="notice" data-testid="cv-aviso-motor">
+              {avisoMotor}
+            </p>
+          )}
+          {motor === 'auto' && saude?.nuvem && <p class="muted">Quer a voz de cada personagem e sem limite diário? {botaoLigar(false)}</p>}
           <p class="muted">Escolha uma situação. Fale no microfone ou digite em romaji ou kana. Cada conversa leva de 2 a 4 minutos.</p>
           <button class="play-now" onClick={() => comecar(sugerida)} data-testid="cv-start">
             <span class="play-now-main">{sugerida.titulo}</span>

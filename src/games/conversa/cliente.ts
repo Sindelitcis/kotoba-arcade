@@ -12,6 +12,8 @@ export const SERVIDOR = 'http://127.0.0.1:8791';
 export interface Saude {
   /** true quando quem responde é a nuvem (e não o servidor do PC). */
   nuvem?: boolean;
+  /** Só no PC: a trava da placa de vídeo (scripts/placa.py). Ocupada = o PC não carregou os modelos. */
+  placa?: { ok: boolean; motivo?: string };
   conversa: { ok: boolean; modelo: string; erro?: string };
   fala: { ok: boolean; estado?: string };
   voz: { ok: boolean; motor: string };
@@ -26,14 +28,13 @@ export interface Cliente extends AiClient {
 
 type Fetch = typeof fetch;
 
-/** Só uma página aberta no próprio PC procura o servidor. O site público nem tenta. */
+/** Página aberta no próprio PC (localhost). Fora dele, o servidor do PC só é procurado com permissão do navegador. */
 export function podeProcurar(hostname: string): boolean {
   return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '[::1]' || hostname.endsWith('.localhost');
 }
 
-/** Devolve o estado do servidor local, ou null se ele não está ligado (ou se a página não é local). */
-export async function procurarServidor(hostname: string, f: Fetch = fetch, base = SERVIDOR, timeoutMs = 1500): Promise<Saude | null> {
-  if (!podeProcurar(hostname)) return null;
+/** Devolve o estado do servidor do PC, ou null se ele não está ligado. */
+export async function procurarServidor(f: Fetch = fetch, base = SERVIDOR, timeoutMs = 1500): Promise<Saude | null> {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), timeoutMs);
   try {
@@ -41,13 +42,105 @@ export async function procurarServidor(hostname: string, f: Fetch = fetch, base 
     if (!r.ok) return null;
     const s = (await r.json()) as Partial<Saude> & { ok?: boolean };
     if (!s.ok || !s.conversa || !s.fala || !s.voz) return null;
-    return { conversa: s.conversa, fala: s.fala, voz: s.voz };
+    return { conversa: s.conversa, fala: s.fala, voz: s.voz, ...(s.placa ? { placa: s.placa } : {}) };
   } catch {
     return null;
   } finally {
     clearTimeout(timer);
   }
 }
+
+// ---------------------------------------------------------------- qual IA usar
+
+/** Automático: o PC se ele responder, senão a nuvem. */
+export type Motor = 'auto' | 'nuvem' | 'pc';
+export const MOTORES: readonly { id: Motor; nome: string }[] = [
+  { id: 'auto', nome: 'Automático' },
+  { id: 'nuvem', nome: 'Nuvem' },
+  { id: 'pc', nome: 'Meu PC' },
+];
+export const MOTOR_KEY = 'kotoba-arcade:motor-conversa';
+
+interface Guardado {
+  getItem(k: string): string | null;
+  setItem(k: string, v: string): void;
+}
+
+export function lerMotor(store: Guardado | undefined = globalThis.localStorage): Motor {
+  try {
+    const m = store?.getItem(MOTOR_KEY);
+    return m === 'nuvem' || m === 'pc' ? m : 'auto';
+  } catch {
+    return 'auto';
+  }
+}
+
+export function salvarMotor(m: Motor, store: Guardado | undefined = globalThis.localStorage): void {
+  try {
+    store?.setItem(MOTOR_KEY, m);
+  } catch {
+    // navegador sem espaço: vale só até fechar a página
+  }
+}
+
+/**
+ * Se o navegador deixa este site falar com o PC. O Chrome e o Brave pedem licença
+ * ("acesso à rede local") na primeira vez que um site publicado chama 127.0.0.1.
+ */
+export type Licenca = 'sim' | 'perguntar' | 'nao' | 'desconhecida';
+
+export async function licencaDoPC(hostname: string, perms: Permissions | undefined = globalThis.navigator?.permissions): Promise<Licenca> {
+  if (podeProcurar(hostname)) return 'sim';
+  for (const name of ['local-network-access', 'loopback-network']) {
+    try {
+      const st = (await perms?.query({ name } as unknown as PermissionDescriptor))?.state;
+      if (st === 'granted') return 'sim';
+      if (st === 'denied') return 'nao';
+      if (st === 'prompt') return 'perguntar';
+    } catch {
+      // este navegador não conhece a licença com esse nome
+    }
+  }
+  return 'desconhecida';
+}
+
+export type Escolha =
+  | { onde: 'pc'; saude: Saude }
+  | { onde: 'nuvem'; procura: Procura; aviso?: string }
+  /** "Meu PC" escolhido, mas ele não está pronto. */
+  | { onde: 'pc-fora'; motivo: 'desligado' | 'licenca' | 'placa'; detalhe?: string };
+
+export interface DepsEscolha {
+  licenca(): Promise<Licenca>;
+  procurarPC(timeoutMs: number): Promise<Saude | null>;
+  procurarNuvem(): Promise<Procura>;
+}
+
+/** Quanto esperar o PC responder quando o navegador ainda vai perguntar se pode: dá tempo de clicar em Permitir. */
+export const ESPERA_LICENCA_MS = 60_000;
+
+/**
+ * Decide quem faz a IA. No automático, o PC só é procurado se o navegador já deixou (assim
+ * ninguém leva um pedido de licença de surpresa); com a placa ocupada, vai para a nuvem com aviso.
+ */
+export async function escolherMotor(motor: Motor, d: DepsEscolha): Promise<Escolha> {
+  if (motor === 'nuvem') return { onde: 'nuvem', procura: await d.procurarNuvem() };
+  const licenca = await d.licenca();
+  if (motor === 'pc') {
+    if (licenca === 'nao') return { onde: 'pc-fora', motivo: 'licenca' };
+    const s = await d.procurarPC(licenca === 'perguntar' ? ESPERA_LICENCA_MS : 2500);
+    if (!s) return { onde: 'pc-fora', motivo: 'desligado' };
+    if (s.placa && !s.placa.ok) return { onde: 'pc-fora', motivo: 'placa', detalhe: s.placa.motivo };
+    return { onde: 'pc', saude: s };
+  }
+  const s = licenca === 'sim' || licenca === 'desconhecida' ? await d.procurarPC(1500) : null;
+  if (s && (!s.placa || s.placa.ok)) return { onde: 'pc', saude: s };
+  const aviso = s?.placa && !s.placa.ok ? `A placa de vídeo do PC está ocupada (${s.placa.motivo ?? 'outro programa'}). Usando a nuvem.` : undefined;
+  return { onde: 'nuvem', procura: await d.procurarNuvem(), ...(aviso ? { aviso } : {}) };
+}
+
+/** Link que o Windows entrega para local/iniciar.mjs --site (registrado por local/protocolo-instalar.ps1). */
+export const LINK_LIGAR_PC = 'kotoba-local://iniciar';
 
 export function criarCliente(f: Fetch = fetch, base = SERVIDOR): Cliente {
   const post = async (path: string, body: unknown): Promise<Response> => {

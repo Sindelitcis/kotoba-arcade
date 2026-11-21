@@ -7,7 +7,13 @@ Junta em http://127.0.0.1:8791 as três peças que o jogo usa:
 e mais /leitura (separa a frase em palavras com a leitura, para o furigana)
 e /saude (o que está ligado).
 
-Só atende a própria máquina. Quem sobe tudo é `npm run local` (local/iniciar.mjs).
+Só atende a própria máquina: páginas abertas em localhost e o site publicado (config "origens"),
+que no Chrome e no Brave chega aqui pelo Private Network Access (local/guarda.py).
+Quem sobe tudo é `npm run local` ou o link kotoba-local:// do site (local/iniciar.mjs).
+
+Antes de pôr qualquer coisa na placa de vídeo, o servidor prende a trava dela (scripts/placa.py). Se
+outro programa está com a placa, ele não carrega nada, avisa no /saude e tenta de novo a cada 30 s:
+o jogo usa a nuvem enquanto isso.
 """
 import asyncio
 import io
@@ -20,23 +26,31 @@ from pathlib import Path
 
 import httpx
 from fastapi import Body, FastAPI, HTTPException, Request
-from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
 
 AQUI = Path(__file__).resolve().parent
 sys.path.insert(0, str(AQUI))
 from config import carregar_config  # noqa: E402
+from guarda import Guarda, origens_do_config  # noqa: E402
+
+sys.path.insert(0, str(AQUI.parent / "scripts"))
+from placa import Ocupada, Placa  # noqa: E402
 
 
 CFG = carregar_config()
 app = FastAPI(title="Kotoba Arcade: conversa local")
-# Só páginas abertas nesta máquina podem chamar: um site qualquer não consegue usar o modelo nem o microfone daqui.
-app.add_middleware(
-    CORSMiddleware,
-    allow_origin_regex=r"^http://(localhost|127\.0\.0\.1|\[::1\])(:\d+)?$",
-    allow_methods=["GET", "POST"],
-    allow_headers=["*"],
-)
+# Rotas que gastam a placa: só elas contam como uso para o desligamento por ociosidade (iniciar.mjs).
+ROTAS_DE_USO = {"/ouvir", "/conversa", "/voz", "/leitura"}
+_uso = {"ultimo": time.time()}
+
+
+def _marcar_uso(path):
+    if path in ROTAS_DE_USO:
+        _uso["ultimo"] = time.time()
+
+
+# Só páginas abertas nesta máquina e o site publicado podem chamar: um site qualquer não usa o modelo daqui.
+app.add_middleware(Guarda, porta=int(CFG["porta"]), origens=origens_do_config(CFG), ao_usar=_marcar_uso)
 http = httpx.Client(timeout=120)
 
 # ---------------------------------------------------------------- fala -> texto
@@ -76,8 +90,6 @@ def _carregar_whisper():
             print(f"[fala] Whisper em {dev} não abriu: {e}", flush=True)
     _whisper["estado"] = "erro"
 
-
-threading.Thread(target=_carregar_whisper, daemon=True).start()
 
 # Frases que o Whisper inventa quando só ouve silêncio ou ruído.
 ALUCINACOES = re.compile(r"ご視聴ありがとうございました|チャンネル登録|字幕|おやすみなさい。?$^")
@@ -153,7 +165,34 @@ def _aquecer_modelo():
             time.sleep(2)  # o Ollama ainda está abrindo
 
 
-threading.Thread(target=_aquecer_modelo, daemon=True).start()
+# ---------------------------------------------------------------- placa de vídeo
+
+_placa = {"ok": False, "motivo": "ainda não tentou"}
+_trava = []
+
+
+def _prender_placa():
+    """Prende a placa e só então carrega o Whisper e o modelo de conversa. Ocupada: tenta de novo a cada 30 s."""
+    vram = float((CFG.get("placa") or {}).get("vram_gb", 0))
+    while True:
+        try:
+            trava = Placa("conversa-local (Conversa por voz no PC)", vram_gb=vram, esperar=False)
+            trava.__enter__()
+        except Ocupada as e:
+            if _placa["motivo"] != str(e):
+                print(f"[placa] ocupada ({e}): o jogo usa a nuvem até ela ficar livre", flush=True)
+            _placa.update(ok=False, motivo=str(e))
+            time.sleep(30)
+            continue
+        _trava.append(trava)  # fica presa até o processo terminar; o sistema solta sozinho
+        _placa.update(ok=True, motivo="")
+        print("[placa] presa para a Conversa", flush=True)
+        threading.Thread(target=_carregar_whisper, daemon=True).start()
+        threading.Thread(target=_aquecer_modelo, daemon=True).start()
+        return
+
+
+threading.Thread(target=_prender_placa, daemon=True).start()
 
 
 # ---------------------------------------------------------------- leitura (furigana)
@@ -207,7 +246,7 @@ def _motor_vivo():
     motor = CFG["voz"]["motor"]
     try:
         if motor in MOTORES:
-            return http.get(CFG["voz"][motor]["url"] + "/version", timeout=2).status_code == 200
+            return http.get(CFG["voz"][motor]["url"] + "/version", timeout=0.5).status_code == 200
     except Exception:  # noqa: BLE001
         pass
     return False
@@ -235,6 +274,8 @@ def voz(dados: dict = Body(...)):
 def saude():
     return {
         "ok": True,
+        "placa": dict(_placa),
+        "ocioso_s": round(time.time() - _uso["ultimo"]),
         "conversa": {"ok": _modelo["pronto"], "modelo": CFG["conversa"]["modelo"], "erro": _modelo["erro"]},
         "fala": {"ok": _whisper["estado"] == "ok", "estado": _whisper["estado"], "modelo": CFG["fala"]["modelo"], "onde": _whisper["onde"]},
         "voz": {"ok": _motor_vivo(), "motor": CFG["voz"]["motor"]},
