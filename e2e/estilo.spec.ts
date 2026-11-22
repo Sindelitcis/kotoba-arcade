@@ -1,5 +1,5 @@
 import { expect, test, type Page } from './base';
-import { chavesDosKana, chavesDosKanji, firmarCartas } from './apoio';
+import { chavesDosKana, chavesDosKanji, firmarCartas, seguir } from './apoio';
 
 test.beforeEach(async ({ page }) => {
   await page.route('https://kanjimon.online/**', (route) => route.abort());
@@ -39,7 +39,9 @@ test('jogo já jogado ganha o sinal no cartão e a contagem sobe', async ({ page
   await page.getByTestId('play-now').click();
   for (let i = 0; i < 200 && !(await page.locator('.overlay h2').isVisible()); i++) {
     const certa = page.locator('[data-answer="yes"]:not(.right)');
-    if (await certa.isVisible()) await certa.click();
+    if (await page.getByTestId('apresentacao').isVisible()) await page.keyboard.press('Enter');
+    else if (await page.getByTestId('seguir').isVisible()) await page.getByTestId('seguir').click();
+    else if (await certa.isVisible()) await certa.click();
     await page.waitForTimeout(120);
   }
   await expect(page.locator('.overlay h2')).toHaveText('Capturado!');
@@ -65,6 +67,9 @@ test('na caçada o brilho sobe com os acertos seguidos e cai no erro', async ({ 
     await page.locator('[data-answer="yes"]:not(.right)').click();
     await page.waitForTimeout(80);
     valores.push(await corDe(page, 'arena'));
+    await seguir(page);
+    // A captura espera o Enter (antes fechava sozinha).
+    if (await page.locator('.overlay').isVisible()) await page.keyboard.press('Enter');
     await expect(page.locator('[data-answer="yes"]:not(.right)')).toBeVisible();
   }
   expect(valores[0]).toBeGreaterThan(0);

@@ -9,6 +9,7 @@ import { acertou, cor, corStyle, errou, zerar } from '../../core/cor';
 import { burstFrom, FX_COR, onomato, pulse } from '../../core/fx';
 import type { Question } from '../../core/questions';
 import { teclaDe } from '../../core/teclas';
+import { Seguinte } from '../../core/calma';
 import { alvosDasCartas, useAprofundar } from '../../core/aprofundar/estado';
 import { Apresentacao } from '../../core/Apresentacao';
 import { artUrl } from '../kanjimon/art';
@@ -23,8 +24,6 @@ interface Asking {
   feedback?: { ok: boolean; chosen: string; note: string };
 }
 
-const HIT_DELAY = 520;
-const MISS_DELAY = 1800;
 const COLORS: Record<string, string[]> = {
   attack: [FX_COR.festa, FX_COR.raro],
   block: [FX_COR.marca],
@@ -86,7 +85,7 @@ export function RoguelikeGame() {
   /** Errou na prática: o item aparece de novo antes de seguir. */
   const [deNovo, setDeNovo] = useState<ItemNovo | null>(null);
   const shownAt = useRef(0);
-  const timer = useRef<number | undefined>(undefined);
+  const seguinte = useRef(new Seguinte());
   const enemyEl = useRef<HTMLDivElement>(null);
   const playerEl = useRef<HTMLDivElement>(null);
   const fieldEl = useRef<HTMLElement>(null);
@@ -178,7 +177,8 @@ export function RoguelikeGame() {
           : `${what} (efeito fraco)`;
     setAsking({ ...asking, feedback: { ok: played.correct, chosen: input, note } });
     react(events);
-    timer.current = window.setTimeout(
+    // O retorno fica até a pessoa seguir (Enter, espaço ou o botão).
+    seguinte.current.marcar(
       () => {
         setAsking(null);
         setTyped('');
@@ -193,7 +193,6 @@ export function RoguelikeGame() {
         }
         redraw();
       },
-      played.correct && !played.close ? HIT_DELAY : MISS_DELAY,
     );
   };
 
@@ -221,7 +220,7 @@ export function RoguelikeGame() {
   };
 
   const restart = () => {
-    clearTimeout(timer.current);
+    seguinte.current.limpar();
     runRef.current = newRun();
     zerar();
     setAsking(null);
@@ -249,7 +248,11 @@ export function RoguelikeGame() {
       const digit = /^[0-9]$/.test(tecla) ? Number(tecla) : -1;
       const confirm = tecla === 'Enter' || tecla === ' ';
       if (asking) {
-        if (!asking.feedback && !asking.question.typing && digit >= 1 && digit <= 4) {
+        if (asking.feedback) {
+          if (confirm && seguinte.current.seguirPorTecla(e)) e.preventDefault();
+          return;
+        }
+        if (!asking.question.typing && digit >= 1 && digit <= 4) {
           const choice = asking.question.choices[digit - 1];
           if (choice) submit(choice);
         }
@@ -280,7 +283,7 @@ export function RoguelikeGame() {
     return () => removeEventListener('keydown', onKey);
   });
 
-  useEffect(() => () => clearTimeout(timer.current), []);
+  useEffect(() => () => seguinte.current.limpar(), []);
 
   useEffect(() => {
     if (asking?.question.typing && !asking.feedback) inputEl.current?.focus();
@@ -582,6 +585,9 @@ export function RoguelikeGame() {
                   {!feedback.ok && <b>Era: {q.answer}</b>}
                   <b>{feedback.note}</b>
                   <span>{q.echo}</span>
+                  <button class="primary seguir" data-testid="seguir" onClick={() => seguinte.current.seguir()}>
+                    Seguir <kbd>Enter</kbd>
+                  </button>
                 </>
               )}
             </div>

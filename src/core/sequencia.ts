@@ -11,7 +11,7 @@ import { app } from './app';
 import { assumirFala, largarFala, loadVoices, recordedFile, VOZES_URL, type Manifesto } from './audio';
 import { carregarPt, urlPt, type ManifestoPt } from './fala-pt';
 import { avisarSemGravacao } from './sem-gravacao';
-import { acompanharVoz } from './som/mixer';
+import { acompanharVoz, esperarEfeitos } from './som/mixer';
 import { VOZ_PADRAO, VOZ_PALAVRA } from './vozes';
 
 /** Japonês falado: a chave da gravação, a voz e o kana (outra chave, se o texto não tiver gravação). */
@@ -43,8 +43,11 @@ export interface Saida {
 const abortado = (sinal: AbortSignal) => new Promise<void>((resolve) => sinal.addEventListener('abort', () => resolve(), { once: true }));
 
 export const saidaDoNavegador: Saida = {
-  tocar(url, sinal) {
-    if (typeof Audio === 'undefined') return Promise.resolve(0);
+  async tocar(url, sinal) {
+    if (typeof Audio === 'undefined') return 0;
+    // Efeito curto que acabou de tocar termina antes; voz nunca fica por baixo de efeito.
+    await esperarEfeitos();
+    if (sinal.aborted) return 0;
     const a = new Audio(url);
     acompanharVoz(a);
     const fim = new Promise<number>((resolve) => {

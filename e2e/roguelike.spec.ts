@@ -1,5 +1,5 @@
 import { expect, test, type Page } from './base';
-import { chavesDosKanji, firmarCartas, passarApresentacao } from './apoio';
+import { chavesDosKanji, firmarCartas, passarApresentacao, seguir } from './apoio';
 
 const SHOTS = process.env.SHOTS_DIR;
 
@@ -39,6 +39,12 @@ async function playToTheEnd(page: Page) {
     seen.add(now);
     if (now === 'over') return seen;
     if (now === 'question') {
+      // Respondida: o retorno espera o Enter (a trava da tecla deixa passar depois de um instante).
+      if (await page.getByTestId('seguir').isVisible()) {
+        await page.keyboard.press('Enter');
+        await page.waitForTimeout(120);
+        continue;
+      }
       // Leitura que já firmou vira digitação.
       const typing = page.getByTestId('typing');
       if ((await typing.count()) > 0 && (await typing.isEnabled())) {
@@ -91,6 +97,7 @@ test('carta em prática pergunta com dica e duas opções, e acertar solta o efe
   await expect(page.locator('.choice')).toHaveCount(2);
   await page.locator('[data-answer="yes"]').click();
   await expect(page.getByTestId('rg-echo')).toContainText('Golpe: 9 de dano');
+  await seguir(page);
   await expect(page.getByTestId('rg-ask')).toBeHidden();
   expect(await enemyHp(page)).toBe(before - 9);
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/roguelike-combate.png` });
@@ -102,6 +109,7 @@ test('na prática, errar não enfraquece a carta: o golpe sai forte e a carta ap
   await page.locator('.rg-card.e-attack').first().click();
   await page.locator('.choice:not([data-answer])').first().click();
   await expect(page.getByTestId('rg-echo')).toContainText('Prática: a carta saiu inteira');
+  await seguir(page);
   await expect(page.getByTestId('apresentacao')).toHaveAttribute('data-modo', 'de-novo');
   await passarApresentacao(page);
   expect(await enemyHp(page)).toBe(before - 9);
@@ -118,7 +126,8 @@ test('na cobrança, errar solta o efeito fraco e mostra a resposta certa', async
   await page.locator('.choice:not([data-answer])').first().click();
   await expect(page.getByTestId('rg-echo')).toContainText(`Era: ${answer}`);
   await expect(page.getByTestId('rg-echo')).toContainText('efeito fraco');
-  await expect(page.getByTestId('rg-ask')).toBeHidden({ timeout: 4000 });
+  await seguir(page);
+  await expect(page.getByTestId('rg-ask')).toBeHidden();
   // Com o Amuleto do aprendiz, a carta errada sai com metade da força.
   const amulet = (await page.getByTestId('rg-relics').innerText()).includes('Amuleto');
   expect(await enemyHp(page)).toBe(before - (amulet ? 5 : 3));
@@ -166,6 +175,7 @@ test('Esc no meio da run volta ao fliperama sem perder o que foi estudado', asyn
   const apresentados = await open(page);
   await page.locator('.rg-card').first().click();
   await page.locator('[data-answer="yes"]').click();
+  await seguir(page);
   await expect(page.getByTestId('rg-ask')).toBeHidden();
   await page.keyboard.press('Escape');
   await expect(page.getByTestId('play-now')).toBeVisible();

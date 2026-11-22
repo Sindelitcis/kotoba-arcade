@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
+import { useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { useClima } from '../../core/som/climas';
 import { useAprofundar } from '../../core/aprofundar/estado';
 import type { Word } from '../../content';
@@ -90,7 +90,6 @@ export function MemoriaGame() {
   const deNovoRef = useRef<ItemNovo | null>(null);
   deNovoRef.current = deNovo;
   const ultimaFala = useRef<string | null>(null);
-  const fechar = useRef<number | null>(null);
   const r = rodadaRef.current;
   // Aprofundar: as palavras dos pares já feitos (e as novas apresentadas); no fim, as novas e as que subiram.
   useAprofundar(
@@ -131,6 +130,7 @@ export function MemoriaGame() {
         errou();
         sfx.miss();
         onomato('erro', document.querySelector(`[data-carta="${e.cartas[1]}"]`), 'neutro', 0.7);
+        setNota('Não é par. Elas fecham quando você abrir a próxima carta.');
       } else if (e.t === 'de-novo') {
         setDeNovo(itemDaFigura(e.figura));
       } else if (e.t === 'sobe') setNota(`${e.figura.word.kana}: ${e.nivel === 1 ? 'agora em kanji' : 'agora só no som'}`);
@@ -153,19 +153,9 @@ export function MemoriaGame() {
   const escolher = (i: number) => {
     const rr = rodadaRef.current;
     if (!rr) return;
-    if (fechar.current) {
-      clearTimeout(fechar.current);
-      fechar.current = null;
-    }
+    // Na memória, o par errado fica aberto até a próxima carta: dá para ler e ouvir com calma.
+    if (rr.quadro.modo === 'memoria' && rr.escolha.length >= 2) setNota('');
     reagir(rr.escolher_carta(i));
-    // Na memória, o par errado fica aberto um instante e fecha sozinho.
-    if (rr.quadro.modo === 'memoria' && rr.escolha.length === 2) {
-      fechar.current = window.setTimeout(() => {
-        fechar.current = null;
-        rr.fecharErradas();
-        redesenhar();
-      }, 1100);
-    }
   };
 
   const seguir = () => {
@@ -195,10 +185,6 @@ export function MemoriaGame() {
     zerar();
     setModo('menu');
   };
-
-  useEffect(() => () => {
-    if (fechar.current) clearTimeout(fechar.current);
-  }, []);
 
   useLayoutEffect(() => {
     const onKey = (e: KeyboardEvent) => {

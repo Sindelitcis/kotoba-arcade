@@ -43,7 +43,9 @@ Regras de ensino que valem em tudo ([docs/ensino.md](docs/ensino.md)):
 - **Explicar o porquê:** regra geral e contexto cultural, sempre corretos e com fonte. Quando a
   leitura de um kanji muda entre palavras, a lição explica a mudança.
 - **Calma:** nada rápido ou caótico a ponto de atrapalhar. O feedback com a leitura fica na tela até
-  a pessoa seguir, e o efeito sonoro nunca toca por cima de uma voz.
+  a pessoa seguir (`src/core/calma.ts`), e o efeito sonoro nunca toca por cima de uma voz: a voz
+  espera o efeito curto e efeito não toca enquanto alguém fala (`src/core/som/mixer.ts`). Jogo novo
+  não passa sozinho depois de uma resposta; `tests/calma.test.ts` barra temporizador novo.
 - **Furigana em todo kanji** para quem está começando, só em cima do kanji. A leitura que o
   conteúdo não traz fica em `src/content/data/furigana.json`, feita por `npm run furigana`
   (OpenJTalk, conferido com as vozes). Texto novo com kanji pede rodar de novo; o teste

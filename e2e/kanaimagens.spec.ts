@@ -35,7 +35,9 @@ test('do fliperama à primeira resposta só no teclado: apresentação antes da 
   const certa = await page.locator('.ki-opcao').evaluateAll((els) => els.findIndex((e) => e.getAttribute('data-certa') === 'sim'));
   await page.keyboard.press(String(certa + 1));
   await expect(page.locator('.ki-opcao.certa')).toContainText('あ');
-  // Acertou: a próxima vem sozinha.
+  // Acertou: a resposta fica até o Enter (ritmo calmo), e então vem a próxima.
+  await expect(page.getByTestId('ki-seguir')).toBeVisible();
+  await page.keyboard.press('Enter');
   await expect(page.locator('.ki-grande[data-kana="い"]')).toBeVisible();
 });
 

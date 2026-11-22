@@ -6,6 +6,9 @@
  *   disso fica guardada e começa nessa hora.
  * - Quando uma voz fala, a música abaixa (ducking) e volta quando ela acaba: o áudio que
  *   ensina tem prioridade.
+ * - Efeito nunca toca por cima de voz (docs/ensino.md, "Calma"). A voz espera o efeito curto
+ *   que já está tocando acabar (`esperarEfeitos`), o que sobrar some quando ela começa, e
+ *   efeito pedido enquanto alguém fala não toca.
  * - Trocar de clima faz crossfade entre as trilhas.
  * - Som desligado nos Ajustes cala tudo; aba escondida baixa a música.
  */
@@ -115,6 +118,7 @@ export function acompanharVoz(fonte: HTMLAudioElement): void {
     if (ativa) return;
     ativa = true;
     vozesAtivas.value++;
+    calarEfeitos();
     aplicarVolumes();
   };
   const acaba = () => {
@@ -157,22 +161,87 @@ export interface OpcoesEfeito {
   atraso?: number;
 }
 
-/** Toca um efeito. Antes da primeira interação ou com som desligado, não faz nada. */
+/** Quanto uma voz espera, no máximo, o efeito que já está tocando (ou carregando) acabar. */
+export const ESPERA_MAX_EFEITO_MS = 700;
+
+interface EfeitoTocando {
+  src: AudioBufferSourceNode;
+  g: GainNode;
+  /** Quando acaba, no relógio do AudioContext. */
+  fim: number;
+}
+const efeitosTocando = new Set<EfeitoTocando>();
+const efeitosChegando = new Set<Promise<void>>();
+
+/** Alguém está falando: efeito não toca agora. */
+export function vozFalando(): boolean {
+  return vozesAtivas.value > 0;
+}
+
+/**
+ * Toca um efeito. Antes da primeira interação, com som desligado ou com uma voz falando,
+ * não faz nada.
+ */
 export function tocarEfeito(id: EfeitoId, op: OpcoesEfeito = {}): void {
+  if (vozFalando()) return;
   const c = contextoAudio();
   const url = urlDoEfeito(id);
   if (!c || !url || !efeitos || !EFEITOS[id]) return;
   const quando = c.currentTime + (op.atraso ?? 0);
-  void carregar(c, url).then((buf) => {
-    if (!buf || !efeitos) return;
+  const chegando = carregar(c, url).then((buf) => {
+    if (!buf || !efeitos || vozFalando()) return;
     const src = c.createBufferSource();
     src.buffer = buf;
-    src.playbackRate.value = op.rate ?? 1;
+    const rate = op.rate ?? 1;
+    src.playbackRate.value = rate;
     const g = c.createGain();
     g.gain.value = op.ganho ?? 1;
     src.connect(g).connect(efeitos);
-    src.start(Math.max(quando, c.currentTime));
+    const inicio = Math.max(quando, c.currentTime);
+    const t: EfeitoTocando = { src, g, fim: inicio + buf.duration / rate };
+    efeitosTocando.add(t);
+    src.onended = () => efeitosTocando.delete(t);
+    src.start(inicio);
   });
+  efeitosChegando.add(chegando);
+  void chegando.finally(() => efeitosChegando.delete(chegando));
+}
+
+/** Quanto falta para o último efeito tocando acabar, em ms (0 se nenhum). */
+export function msAteEfeitosAcabarem(): number {
+  if (!ac) return 0;
+  let fim = 0;
+  for (const t of efeitosTocando) fim = Math.max(fim, t.fim);
+  return Math.max(0, (fim - ac.currentTime) * 1000);
+}
+
+const dormir = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
+
+/**
+ * Chamado antes de uma voz tocar: espera o efeito curto que acabou de ser pedido (o acerto,
+ * o erro) terminar, para a pronúncia vir depois dele, inteira e sem nada por cima. Espera no
+ * máximo `ESPERA_MAX_EFEITO_MS`; o que sobrar some quando a voz começa.
+ */
+export async function esperarEfeitos(): Promise<void> {
+  if (!ac || (efeitosChegando.size === 0 && efeitosTocando.size === 0)) return;
+  const ate = Date.now() + ESPERA_MAX_EFEITO_MS;
+  if (efeitosChegando.size > 0) await Promise.race([Promise.all([...efeitosChegando]), dormir(ESPERA_MAX_EFEITO_MS)]);
+  const falta = Math.min(msAteEfeitosAcabarem(), ate - Date.now());
+  if (falta > 0) await dormir(falta);
+}
+
+/** A voz começou: o efeito que ainda soa desce rápido e para. */
+function calarEfeitos(): void {
+  if (!ac) return;
+  for (const t of efeitosTocando) {
+    rampa(t.g, 0, 0.05);
+    try {
+      t.src.stop(ac.currentTime + 0.06);
+    } catch {
+      // já parado
+    }
+  }
+  efeitosTocando.clear();
 }
 
 // ---------- trilhas ----------
@@ -265,5 +334,7 @@ export function _zerarParaTeste(): void {
   pedido = null;
   ac = mestre = musica = duck = efeitos = null;
   buffers.clear();
+  efeitosTocando.clear();
+  efeitosChegando.clear();
   esperarInteracao();
 }

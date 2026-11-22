@@ -9,7 +9,7 @@
  */
 import { app } from './app';
 import { avisarSemGravacao } from './sem-gravacao';
-import { acompanharVoz, tocarEfeito } from './som/mixer';
+import { acompanharVoz, esperarEfeitos, tocarEfeito } from './som/mixer';
 import { VOZ_PADRAO, VOZ_PALAVRA, type VozId } from './vozes';
 
 /** Tom do acerto: sobe meio passo a cada acerto seguido, até 12. */
@@ -138,7 +138,7 @@ function tocarJp(text: string, voz: VozId, alternativa: string | undefined, avis
   if (!app.data.settings.voice) return Promise.resolve();
   const n = ++request;
   silence();
-  return loadVoices().then((m) => {
+  return loadVoices().then(async (m) => {
     if (n !== request) return; // outra fala veio antes de o manifesto chegar
     const file = m ? (recordedFile(m, text, voz) ?? (alternativa ? recordedFile(m, alternativa, voz) : undefined)) : undefined;
     if (!file) {
@@ -146,6 +146,9 @@ function tocarJp(text: string, voz: VozId, alternativa: string | undefined, avis
       return;
     }
     if (typeof Audio === 'undefined') return;
+    // O efeito do acerto ou do erro toca antes, curto; a pronúncia vem depois, sem nada por cima.
+    await esperarEfeitos();
+    if (n !== request) return;
     const a = new Audio(VOZES_URL + file);
     playing = a;
     acompanharVoz(a);

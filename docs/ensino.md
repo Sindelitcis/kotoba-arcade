@@ -60,6 +60,33 @@ O exemplo dos cartões de estrutura segue a mesma regra. Na Cena Viva, a lição
 | Conversa | as palavras da situação antes de conversar | palavra não apresentada aparece com o significado (aviso "nova"), sem carta | o resto da conversa |
 | Jornada | o quadro da lição apresenta a palavra ou o kanji, de três em três | a pergunta logo depois é prática; a alternativa errada é de um quadro anterior (o trio de expressões evita juntar as que se confundem) | missões seguintes |
 
+## Calma: nada rápido a ponto de atrapalhar
+
+Pedido do Rafael: no KanjiMon, depois de acertar 水, o "Rápido! +2" e o "水 · みず (mizu) · água" sumiam
+quase na hora, o "Capturado!" entrava por cima e o som do acerto tapava a pronúncia. Jogo nenhum pode ser
+tão rápido ou caótico que atrapalhe entender e guardar o que está na tela. Vale para todos os jogos e para
+a Jornada.
+
+- **O retorno espera a pessoa.** Depois de responder, a resposta certa com a leitura e o significado fica
+  na tela até a pessoa seguir (Enter, espaço ou o botão Seguir). Nada passa sozinho para a próxima
+  pergunta, nem abre um aviso (captura, nível, baú) por cima, enquanto a palavra ainda está sendo falada.
+  O aviso de captura também espera o Enter. O Enter que mandou a resposta digitada não conta como
+  "seguir" (`src/core/calma.ts`).
+- **Efeito nunca por cima de voz.** O efeito do acerto ou do erro toca primeiro e é curto. A voz espera
+  ele acabar (no máximo 0,7 s) e o que sobrar some quando ela começa. Efeito pedido enquanto alguém
+  fala não toca, e a música abaixa enquanto a voz fala (`src/core/som/mixer.ts`). A pronúncia sempre
+  tem prioridade.
+- **Nada some rápido demais.** A palavra de efeito (ドン, ピカッ) fica 1,6 s. Na Memória, o par errado
+  fica aberto até você abrir a próxima carta. Na Conversa, o resumo só abre quando você pede, depois da
+  última fala.
+- **Tempo só onde o tempo é o jogo.** O Kana Beat segue a música, e a resposta rápida dá bônus em alguns
+  jogos. Mesmo assim, o retorno depois da resposta nunca tem pressa.
+
+Os testes: `tests/som.test.ts` confere que efeito não toca enquanto a voz fala e que a voz espera o efeito.
+Os e2e (`e2e/calma.spec.ts`) respondem em cada jogo, esperam alguns segundos e conferem que o retorno
+continua na tela e que nada veio por cima. No navegador, eles também conferem que nenhum efeito começa
+enquanto uma voz toca.
+
 ## A ordem entre os jogos
 
 A Jornada (`src/jornada/etapas.ts`) põe os jogos na mesma ordem. Na etapa Kana: Kana em imagens de hiragana, Kana Beat de hiragana, a lição dos sons, Kana em imagens de katakana, Kana Beat de katakana. Depois, as primeiras palavras: a Cena Viva de um lugar, só com o nome das coisas, e a Memória com as mesmas palavras. O KanjiMon vem no N5, com os kanji. Nada fica trancado: é a sugestão de caminho, e `tests/jornada.test.ts` confere essa ordem.

@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
+import { useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { useClima } from '../../core/som/climas';
 import { useAprofundar } from '../../core/aprofundar/estado';
 import { KANA_IMAGENS, LOTES, kanaItem, type KanaItem } from '../../content/kana';
@@ -25,7 +25,6 @@ function ouvir(texto: string): void {
 }
 
 /** Depois de um acerto, a próxima pergunta vem sozinha. */
-const ESPERA_ACERTO_MS = 750;
 
 function Opcoes({ p, respondida, onEscolha }: { p: Pergunta; respondida: number | null; onEscolha: (i: number) => void }) {
   const imagem = p.modo === 'letra-imagem';
@@ -178,7 +177,6 @@ export function KanaImagensGame() {
   const [resumo, setResumo] = useState<Resumo | null>(null);
   const [resultado, setResultado] = useState<ResultadoTeste | null>(null);
   const [aviso, setAviso] = useState('');
-  const timer = useRef<number | undefined>(undefined);
   const disponiveis = Rodada.modosDisponiveis(app.data.cards);
   const novato = save.rodadas === 0 && !save.teste;
   // Aprofundar: o kana da pergunta depois da resposta (ou na apresentação); no fim, os errados e os novos.
@@ -192,16 +190,10 @@ export function KanaImagensGame() {
         : [],
   );
 
-  const limparTimer = () => {
-    if (timer.current !== undefined) clearTimeout(timer.current);
-    timer.current = undefined;
-  };
-  useEffect(() => limparTimer, []);
 
   const deps = () => ({ cards: app.data.cards, profile: app.data.profile, save, rng: Math.random, now: () => Date.now(), escrita: foco.value?.kana });
 
   const comecar = (modo?: ModoTreino) => {
-    limparTimer();
     if (modo && !disponiveis.has(modo)) return;
     rodadaRef.current = new Rodada(deps(), modo);
     zerar();
@@ -223,7 +215,6 @@ export function KanaImagensGame() {
   };
 
   const comecarTeste = () => {
-    limparTimer();
     testeRef.current = new TesteEntrada(deps());
     zerar();
     setResultado(null);
@@ -263,7 +254,6 @@ export function KanaImagensGame() {
   };
 
   const seguir = () => {
-    limparTimer();
     const r = rodadaRef.current;
     if (!r) return;
     reagir(r.seguir());
@@ -280,7 +270,7 @@ export function KanaImagensGame() {
     // Depois de responder, a voz confirma o som certo.
     if (p.modo === 'relampago' && p.palavra) ouvir(p.palavra.kana);
     else if (p.modo === 'imagem-letra' || p.modo === 'letra-imagem') ouvir(p.fala);
-    if (ev.some((e) => e.t === 'acerto')) timer.current = window.setTimeout(seguir, ESPERA_ACERTO_MS);
+    // Certo ou errado, a resposta fica na tela até a pessoa seguir: a voz fala o som inteiro.
   };
 
   const escolherTeste = (i: number) => {
@@ -292,11 +282,9 @@ export function KanaImagensGame() {
     else sfx.click();
     commit();
     redraw();
-    timer.current = window.setTimeout(seguirTeste, certo ? 450 : 1100);
   };
 
   const seguirTeste = () => {
-    limparTimer();
     const t = testeRef.current;
     if (!t) return;
     const res = t.seguir();
@@ -309,7 +297,6 @@ export function KanaImagensGame() {
   };
 
   const pararTeste = () => {
-    limparTimer();
     const t = testeRef.current;
     if (!t) return setFase('menu');
     setResultado(t.parar());
@@ -340,7 +327,6 @@ export function KanaImagensGame() {
         const r = rodadaRef.current;
         if (!r) return;
         if (tecla === 'Escape') {
-          limparTimer();
           zerar();
           setFase('menu');
           return;
@@ -428,7 +414,8 @@ export function KanaImagensGame() {
                 <Licao k={p.alvo} compacta />
               </div>
             )}
-            {errou && p.palavra && (
+            {/* A palavra do relâmpago com o significado, certo ou errado: dá tempo de ler e de ouvir. */}
+            {respondeu && p.palavra && (
               <p class="ki-volta" data-testid="ki-volta" lang="ja">
                 {p.palavra.kana} · {p.palavra.pt}
               </p>
@@ -480,10 +467,23 @@ export function KanaImagensGame() {
         <section class="ki-quadro" data-testid="ki-teste" data-modo="leitura">
           <Enunciado p={p} />
           <Opcoes p={p} respondida={t.respondida} onEscolha={escolherTeste} />
+          {t.respondida !== null && (
+            <button class="primary" onClick={seguirTeste} data-testid="ki-seguir">
+              Seguir <kbd>Enter</kbd>
+            </button>
+          )}
         </section>
         <footer class="av-keys">
           <span>
-            <kbd>1</kbd>–<kbd>4</kbd> responder
+            {t.respondida !== null ? (
+              <>
+                <kbd>Enter</kbd> seguir
+              </>
+            ) : (
+              <>
+                <kbd>1</kbd>–<kbd>4</kbd> responder
+              </>
+            )}
           </span>
           <span>
             <kbd>Esc</kbd> parar e começar dali

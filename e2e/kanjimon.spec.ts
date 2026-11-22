@@ -1,5 +1,5 @@
 import { expect, test, type Page } from './base';
-import { chavesDosKanji, firmarCartas, passarApresentacao } from './apoio';
+import { chavesDosKanji, firmarCartas, passarApresentacao, seguir } from './apoio';
 
 test.beforeEach(async ({ page }) => {
   // As artes vêm de outro site; nos testes ficam de fora para não depender de rede.
@@ -39,7 +39,8 @@ async function playUntilOverlay(page: Page, title: string) {
       continue;
     }
     const right = page.locator('[data-answer="yes"]:not(.right)');
-    if (await right.isVisible()) await right.click();
+    if (await page.getByTestId('seguir').isVisible()) await page.getByTestId('seguir').click();
+    else if (await right.isVisible()) await right.click();
     await page.waitForTimeout(120);
   }
   throw new Error(`não chegou em "${title}"`);
@@ -91,6 +92,7 @@ test('na prática, errar não tira coração nem combo: o kanji aparece de novo'
   await expect(page.locator('.echo')).toContainText('Prática: não perdeu nada');
   await expect(page.getByTestId('hearts').locator('.heart.on')).toHaveCount(5);
   await expect(page.locator('.combo')).toHaveText(combo);
+  await seguir(page);
   // O item volta numa apresentação rápida.
   await expect(page.getByTestId('apresentacao')).toBeVisible();
   await passarApresentacao(page);

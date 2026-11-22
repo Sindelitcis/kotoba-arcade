@@ -130,9 +130,13 @@ class FonteFalsa extends GanhoFalso {
   buffer: unknown = null;
   loop = false;
   playbackRate = { value: 1 };
+  onended: (() => void) | null = null;
   start = vi.fn();
-  stop() {}
+  stop = vi.fn();
 }
+
+/** Duração dos áudios decodificados pelo contexto falso, em segundos. */
+let duracaoFalsa = 60;
 
 let criados: ContextoFalso[] = [];
 class ContextoFalso {
@@ -155,7 +159,7 @@ class ContextoFalso {
     return f;
   }
   decodeAudioData() {
-    return Promise.resolve({ duration: 60 });
+    return Promise.resolve({ duration: duracaoFalsa });
   }
   resume() {
     return Promise.resolve();
@@ -165,6 +169,7 @@ class ContextoFalso {
 describe('gerenciador de som', () => {
   beforeEach(async () => {
     criados = [];
+    duracaoFalsa = 60;
     vi.stubGlobal('AudioContext', ContextoFalso);
     vi.stubGlobal(
       'fetch',
@@ -258,5 +263,80 @@ describe('gerenciador de som', () => {
     expect(ganhoHub.gain.alvo).toBe(0);
     await vi.waitFor(() => expect(ac.fontes).toHaveLength(2));
     expect(ac.ganhos.at(-1)!.gain.alvo).toBe(1);
+  });
+});
+
+describe('voz e efeito nunca ao mesmo tempo (ritmo calmo)', () => {
+  beforeEach(async () => {
+    criados = [];
+    duracaoFalsa = 0.3;
+    vi.stubGlobal('AudioContext', ContextoFalso);
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => ({ ok: true, arrayBuffer: async () => new ArrayBuffer(8) })),
+    );
+    (await import('../src/core/som/mixer'))._zerarParaTeste();
+  });
+  afterEach(async () => {
+    (await import('../src/core/som/mixer'))._zerarParaTeste();
+    vi.unstubAllGlobals();
+  });
+
+  const efeitosTocados = () => criados[0]!.fontes.filter((f) => !f.loop && f.start.mock.calls.length > 0);
+
+  it('efeito pedido enquanto uma voz fala não toca', async () => {
+    const m = await import('../src/core/som/mixer');
+    m.liberar();
+    const voz = new Audio();
+    m.acompanharVoz(voz);
+    voz.dispatchEvent(new Event('play'));
+    m.tocarEfeito('acerto');
+    m.tocarEfeito('captura');
+    await new Promise((r) => setTimeout(r, 20));
+    expect(efeitosTocados()).toHaveLength(0);
+    voz.dispatchEvent(new Event('ended'));
+    m.tocarEfeito('acerto');
+    await vi.waitFor(() => expect(efeitosTocados()).toHaveLength(1));
+  });
+
+  it('a voz espera o efeito curto do acerto acabar antes de começar', async () => {
+    const m = await import('../src/core/som/mixer');
+    m.liberar();
+    const ac = criados[0]!;
+    m.tocarEfeito('acerto');
+    let comecou = false;
+    const espera = m.esperarEfeitos().then(() => (comecou = true));
+    await vi.waitFor(() => expect(efeitosTocados()).toHaveLength(1));
+    // Falta o efeito inteiro (0,3 s): a voz ainda não começou.
+    expect(m.msAteEfeitosAcabarem()).toBeCloseTo(300);
+    await new Promise((r) => setTimeout(r, 100));
+    expect(comecou).toBe(false);
+    ac.currentTime = 0.3;
+    await espera;
+    expect(comecou).toBe(true);
+  });
+
+  it('efeito longo não segura a voz: ela espera no máximo um instante e o efeito some quando ela começa', async () => {
+    duracaoFalsa = 2.5;
+    const m = await import('../src/core/som/mixer');
+    m.liberar();
+    m.tocarEfeito('vitoria');
+    await vi.waitFor(() => expect(efeitosTocados()).toHaveLength(1));
+    const t0 = Date.now();
+    await m.esperarEfeitos();
+    expect(Date.now() - t0).toBeLessThan(m.ESPERA_MAX_EFEITO_MS + 150);
+    const voz = new Audio();
+    m.acompanharVoz(voz);
+    voz.dispatchEvent(new Event('play'));
+    expect(efeitosTocados()[0]!.stop).toHaveBeenCalled();
+    expect(m.msAteEfeitosAcabarem()).toBe(0);
+  });
+
+  it('sem efeito tocando, a voz não espera nada', async () => {
+    const m = await import('../src/core/som/mixer');
+    m.liberar();
+    const t0 = Date.now();
+    await m.esperarEfeitos();
+    expect(Date.now() - t0).toBeLessThan(30);
   });
 });

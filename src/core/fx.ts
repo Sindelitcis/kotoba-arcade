@@ -160,6 +160,10 @@ function ensureLayer(): HTMLDivElement {
 
 export type CorFx = 'bom' | 'festa' | 'raro' | 'neutro';
 
+/** Quanto a palavra de efeito fica na tela (igual à animação `carimbo` do styles.css). */
+export const ONOMATO_MS = 1600;
+export const ONOMATO_CALMO_MS = 1200;
+
 /**
  * Mostra uma palavra de efeito perto de um elemento.
  * `cor`: 'bom' (verde, acerto), 'festa' (rosa, captura e nível), 'raro' (dourado) ou 'neutro' (cinza, o resto).
@@ -182,6 +186,7 @@ export function onomato(word: SfxWord, el: Element | null, cor: CorFx = 'neutro'
   span.style.setProperty('--rot', `${quiet ? 0 : side * (6 + Math.random() * 10)}deg`);
   span.style.setProperty('--size', String(size));
   ensureLayer().appendChild(span);
-  window.setTimeout(() => span.remove(), quiet ? 700 : 950);
+  // Devagar o bastante para ler (docs/ensino.md, "Calma"); a animação do CSS tem o mesmo tempo.
+  window.setTimeout(() => span.remove(), quiet ? ONOMATO_CALMO_MS : ONOMATO_MS);
   return span;
 }

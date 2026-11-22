@@ -4,7 +4,7 @@ import { gramaticaDaFrase } from '../../content/aprofundar/detectar';
 import { app, commit, conversaSave, go, screen } from '../../core/app';
 import { CENA_CONVERSA, cenaStyle, pessoaUrl } from '../../core/arte';
 import { sfx, speakSeGravado, speakWord } from '../../core/audio';
-import { acompanharVoz } from '../../core/som/mixer';
+import { acompanharVoz, esperarEfeitos } from '../../core/som/mixer';
 import { VOZ_CONVERSA } from '../../core/vozes';
 import { onomato } from '../../core/fx';
 import { foco } from '../../core/foco';
@@ -240,6 +240,8 @@ export function ConversaGame() {
         a.onended = a.onerror = () => URL.revokeObjectURL(url);
         audioEl.current = a;
         acompanharVoz(a);
+        await esperarEfeitos();
+        if (!montado.current || audioEl.current !== a) return;
         await a.play();
         return;
       } catch {
@@ -266,8 +268,8 @@ export function ConversaGame() {
       } else if (e.t === 'falha') setAviso(avisoDeFalha());
       else if (e.t === 'fim') {
         if (e.resumo.concluida) sfx.chest();
+        // O resumo espera a pessoa: a última fala do personagem toca inteira antes.
         setResumo(e.resumo);
-        setTimeout(() => setFase('resumo'), 1800);
       }
     }
     commit();
@@ -372,6 +374,12 @@ export function ConversaGame() {
     }
   };
 
+  /** A conversa acabou sozinha: a pessoa abre o resumo quando quiser. */
+  const verResumo = () => {
+    audioEl.current?.pause();
+    setFase('resumo');
+  };
+
   const encerrar = () => {
     const c = conversa.current;
     if (!c) return;
@@ -420,9 +428,13 @@ export function ConversaGame() {
     }
     const noCampo = e.target === inputEl.current;
     if (fase === 'conversa') {
-      if (tecla === 'Escape') {
+      if (resumo && tecla === 'Enter' && !e.repeat) {
         e.preventDefault();
-        encerrar();
+        verResumo();
+      } else if (tecla === 'Escape') {
+        e.preventDefault();
+        if (resumo) verResumo();
+        else encerrar();
       } else if (tecla === 'Tab') {
         e.preventDefault();
         void pedirDica();
@@ -910,6 +922,13 @@ export function ConversaGame() {
             {aviso}
           </p>
         )}
+        {resumo ? (
+          <div class="cv-form">
+            <button class="primary" onClick={verResumo} data-testid="cv-ver-resumo">
+              Ver como foi <kbd>Enter</kbd>
+            </button>
+          </div>
+        ) : (
         <form
           class="cv-form"
           onSubmit={(e) => {
@@ -941,6 +960,7 @@ export function ConversaGame() {
             Enviar <kbd>Enter</kbd>
           </button>
         </form>
+        )}
         <p class="av-keys">
           <span>
             <kbd>Tab</kbd> dica

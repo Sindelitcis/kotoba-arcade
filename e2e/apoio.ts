@@ -34,6 +34,17 @@ export async function passarApresentacao(page: Page): Promise<number> {
   return total;
 }
 
+/**
+ * Ritmo calmo: o retorno da resposta fica até a pessoa seguir (docs/ensino.md, "Calma").
+ * Clica no Seguir e espera o retorno sair.
+ */
+export async function seguir(page: Page): Promise<void> {
+  const botao = page.getByTestId('seguir');
+  await expect(botao).toBeVisible();
+  await botao.click();
+  await expect(botao).toHaveCount(0);
+}
+
 /** Se houver apresentação na tela agora, passa por ela; senão, não faz nada. */
 export async function seApresentar(page: Page): Promise<number> {
   await page.waitForTimeout(150);

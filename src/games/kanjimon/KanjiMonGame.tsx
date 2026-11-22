@@ -6,6 +6,7 @@ import { cenaStyle } from '../../core/arte';
 import { acertou, cor, corStyle, errou, zerar } from '../../core/cor';
 import { burstFrom, onomato, pulse } from '../../core/fx';
 import { teclaDe } from '../../core/teclas';
+import { Seguinte } from '../../core/calma';
 import { alvosDasCartas, useAprofundar } from '../../core/aprofundar/estado';
 import { Apresentacao } from '../../core/Apresentacao';
 import { itemNovoDe, type ItemNovo } from '../../content/ensino';
@@ -33,9 +34,6 @@ type Overlay =
   | { t: 'levelup'; level: number }
   | { t: 'chest'; coins: number; booster: boolean }
   | { t: 'over' };
-
-const HIT_DELAY = 420;
-const MISS_DELAY = 1700;
 
 function newHunt(): Hunt {
   return new Hunt({
@@ -141,7 +139,7 @@ function Cacada({ h, view, setView: setViewOu, setApres, deNovo, setDeNovo, rein
   const cardEl = useRef<HTMLDivElement>(null);
   const arenaEl = useRef<HTMLElement>(null);
   const inputEl = useRef<HTMLInputElement>(null);
-  const timer = useRef<number | undefined>(undefined);
+  const seguinte = useRef(new Seguinte());
   const overlay = overlays[0];
   const q = view.question;
   // O Aprofundar mostra o kanji depois da resposta: antes, ele entregaria a resposta.
@@ -221,14 +219,13 @@ function Cacada({ h, view, setView: setViewOu, setApres, deNovo, setDeNovo, rein
       setView((v) => ({ ...v, combo: 0, hearts: current.hearts }));
     }
 
-    timer.current = window.setTimeout(
-      () => {
-        if (pratica) setDeNovo(itemDaCaca(pratica.card));
-        else if (queue.length > 0) setOverlays(queue);
-        else advance();
-      },
-      hit ? (hit.close ? MISS_DELAY : HIT_DELAY) : MISS_DELAY,
-    );
+    // O retorno (a resposta, a leitura, o significado) fica até a pessoa seguir. Só depois vêm a
+    // prática de novo, a captura e os outros avisos.
+    seguinte.current.marcar(() => {
+      if (pratica) setDeNovo(itemDaCaca(pratica.card));
+      else if (queue.length > 0) setOverlays(queue);
+      else advance();
+    });
   };
 
   /** Fecha o aviso atual; quando acabam os avisos, a caçada segue. */
@@ -274,8 +271,7 @@ function Cacada({ h, view, setView: setViewOu, setApres, deNovo, setDeNovo, rein
       sfx.capture(tier);
       onomato('captura', document.querySelector('.capture-card'), 'festa', 1.3);
       burstFrom(document.querySelector('.capture-card'), RARITY_COLORS[overlay.enemy.rarity], 30 + tier * 20, 520);
-      const auto = window.setTimeout(dismiss, 1500);
-      return () => clearTimeout(auto);
+      return undefined;
     }
     if (overlay.t === 'levelup') {
       sfx.levelup();
@@ -308,6 +304,10 @@ function Cacada({ h, view, setView: setViewOu, setApres, deNovo, setDeNovo, rein
         }
         return;
       }
+      if (seguinte.current.esperando) {
+        if ((tecla === 'Enter' || tecla === ' ') && seguinte.current.seguirPorTecla(e)) e.preventDefault();
+        return;
+      }
       if (!q.typing && /^[1-4]$/.test(tecla)) {
         const choice = q.choices[Number(tecla) - 1];
         if (choice) submit(choice);
@@ -317,7 +317,7 @@ function Cacada({ h, view, setView: setViewOu, setApres, deNovo, setDeNovo, rein
     return () => removeEventListener('keydown', onKey);
   });
 
-  useEffect(() => () => clearTimeout(timer.current), []);
+  useEffect(() => () => seguinte.current.limpar(), []);
 
   useEffect(() => {
     if (q.typing && !overlay) inputEl.current?.focus();
@@ -435,6 +435,12 @@ function Cacada({ h, view, setView: setViewOu, setApres, deNovo, setDeNovo, rein
                 {!feedback.ok && <b>Era: {q.answer}</b>}
                 {feedback.note && <b>{feedback.note}</b>}
                 <span>{q.echo}</span>
+                {/* Com o aviso ou o "olhe de novo" na tela, quem segue é ele. */}
+                {!overlay && !deNovo && (
+                  <button class="primary seguir" data-testid="seguir" onClick={() => seguinte.current.seguir()}>
+                    Seguir <kbd>Enter</kbd>
+                  </button>
+                )}
               </>
             )}
           </div>

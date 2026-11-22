@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { app, commit } from '../src/core/app';
 import { CENA_AVENTURA, CENA_CONVERSA, NOMES_CENAS, NOMES_PESSOAS, cenaStyle, cenaUrl, pessoaUrl } from '../src/core/arte';
 import { aplicarTema, atributoDoTema } from '../src/core/tema';
-import { onomato, SFX_WORDS } from '../src/core/fx';
+import { onomato, ONOMATO_CALMO_MS, ONOMATO_MS, SFX_WORDS } from '../src/core/fx';
 import { SCENES, SPEAKERS } from '../src/games/aventura/cenas';
 import { CENAS } from '../src/games/conversa/engine';
 
@@ -97,8 +97,17 @@ describe('onomatopeia e modo calmo', () => {
     expect(el?.textContent).toBe('ドン');
     expect(el?.classList.contains('c-bom')).toBe(true);
     expect(document.querySelectorAll('.onomato')).toHaveLength(1);
-    vi.advanceTimersByTime(1000);
+    // Ritmo calmo: some devagar, com tempo de ler (antes sumia em 0,9 s).
+    vi.advanceTimersByTime(1200);
+    expect(document.querySelectorAll('.onomato')).toHaveLength(1);
+    vi.advanceTimersByTime(ONOMATO_MS - 1200);
     expect(document.querySelectorAll('.onomato')).toHaveLength(0);
+  });
+
+  it('a animação da palavra de efeito no CSS dura o mesmo que ela fica na tela', () => {
+    const css = readFileSync(join(__dirname, '..', 'src', 'styles.css'), 'utf8');
+    expect(css).toContain(`animation: carimbo ${ONOMATO_MS / 1000}s`);
+    expect(css).toContain(`animation: carimbo-calmo ${ONOMATO_CALMO_MS / 1000}s`);
   });
 
   it('sem elemento não faz nada', () => {

@@ -151,9 +151,12 @@ test('uma conversa digitada completa, do pedido ao resumo', async ({ page }) => 
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/conversa-meio.png` });
 
   await dizer(page, 'kaado de onegaishimasu. arigatou gozaimasu');
-  await expect(page.getByTestId('cv')).toHaveAttribute('data-phase', 'resumo', {
-    timeout: 5000,
-  });
+  // Ritmo calmo: o resumo não pula sozinho por cima da última fala; ele espera a pessoa.
+  await expect(page.getByTestId('cv-ver-resumo')).toBeVisible();
+  await page.waitForTimeout(2500);
+  await expect(page.getByTestId('cv')).toHaveAttribute('data-phase', 'conversa');
+  await page.keyboard.press('Enter');
+  await expect(page.getByTestId('cv')).toHaveAttribute('data-phase', 'resumo');
   const resumo = page.getByTestId('cv-summary');
   await expect(resumo).toContainText('Objetivo cumprido!');
   await expect(page.getByTestId('cv-good')).toContainText('こおひいおください');
