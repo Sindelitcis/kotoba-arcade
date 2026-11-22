@@ -54,6 +54,15 @@ const TELAS: Record<string, string> = {
   ouvir: 'ouvir/OuvirTela.tsx',
 };
 
+
+/** O texto do elemento sem a leitura em cima (o <rt> do furigana). */
+function semRt(el: Element | null): string {
+  if (!el) return '';
+  const copia = el.cloneNode(true) as Element;
+  copia.querySelectorAll('rt').forEach((rt) => rt.remove());
+  return copia.textContent ?? '';
+}
+
 describe('conteúdo do Aprofundar', () => {
   const alvos = todosOsAlvos();
 
@@ -395,7 +404,7 @@ describe('painel do Aprofundar', () => {
       await act(() => press('F4'));
       expect(aprofundarAberto.value).toBe(true);
       expect(pausas).toBe(1);
-      expect(document.querySelector('.apr-grande')?.textContent).toBe('山');
+      expect(semRt(document.querySelector('.apr-grande'))).toBe('山');
       expect(document.getElementById('app')?.hasAttribute('inert')).toBe(true);
       await act(() => {
         press('Enter');
@@ -438,7 +447,7 @@ describe('painel do Aprofundar', () => {
     await act(() => abrirAprofundar());
     await act(() => irPara({ t: 'palavra', id: 'w:火山' }));
     expect(pilha.value.length).toBe(2);
-    expect(document.querySelector('.apr-grande')?.textContent).toBe('火山');
+    expect(semRt(document.querySelector('.apr-grande'))).toBe('火山');
     await act(() => press('Backspace'));
     expect(pilha.value.length).toBe(1);
     expect(voltar()).toBe(false);
@@ -450,6 +459,14 @@ describe('painel do Aprofundar', () => {
       recentes.value = [{ t: 'kanji', c: '川' }];
     });
     await act(() => press('F4'));
-    expect(document.querySelector('.apr-grande')?.textContent).toBe('川');
+    expect(semRt(document.querySelector('.apr-grande'))).toBe('川');
+  });
+
+  it('palavra com kanji mostra a leitura em cima, e não mais ao lado', async () => {
+    await montar([{ t: 'kanji', c: '山' }]);
+    await act(() => abrirAprofundar());
+    await act(() => irPara({ t: 'palavra', id: 'w:火山' }));
+    expect([...document.querySelectorAll('.apr-grande rt')].map((r) => r.textContent)).toEqual(['かざん']);
+    expect(document.querySelector('.apr-leitura')).toBeNull();
   });
 });

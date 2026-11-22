@@ -402,7 +402,15 @@ export function PecasGame() {
             <>
               <h3>Kanji novos</h3>
               <p class="pc-novos" lang="ja" data-testid="pc-novos">
-                {resumo.novos.join(' ')}
+                {resumo.novos.map((c, i) => {
+                  const k = KANJI_PECAS.find((x) => x.kanji === c);
+                  return (
+                    <span key={c}>
+                      {i > 0 && ' '}
+                      {k ? <Furigana texto={c} leitura={leituraOficial(k)} /> : c}
+                    </span>
+                  );
+                })}
               </p>
             </>
           )}

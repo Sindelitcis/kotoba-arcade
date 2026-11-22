@@ -1,3 +1,4 @@
+import { Furigana } from '../../core/Furigana';
 import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { useClima } from '../../core/som/climas';
 import { app, commit, go, roguelikeSave } from '../../core/app';
@@ -310,7 +311,7 @@ export function RoguelikeGame() {
         <div class="rg-relics" data-testid="rg-relics">
           {run.relics.map((r) => (
             <span key={r} class="rg-relic" title={`${RELICS[r].name}: ${RELICS[r].text}`}>
-              <i>{RELICS[r].jp}</i> {RELICS[r].name}
+              <i lang="ja"><Furigana texto={RELICS[r].jp} /></i> {RELICS[r].name}
             </span>
           ))}
         </div>
@@ -353,7 +354,9 @@ export function RoguelikeGame() {
               style={{ ...cenaStyle('kotodama-inari'), ...corStyle(enemy.kind === 'combat' ? cor.value : 1) }}
               data-testid="rg-enemy"
             >
-              <span class="rg-glyph">{enemy.jp}</span>
+              <span class="rg-glyph" lang="ja">
+                <Furigana texto={enemy.jp} />
+              </span>
               <b>{enemy.name}</b>
               <div class="bar">
                 <i class="rg-enemy-fill" style={{ width: `${(enemy.hp / enemy.maxHp) * 100}%` }} />
@@ -405,7 +408,9 @@ export function RoguelikeGame() {
                     disabled={f !== run.floor}
                     onClick={() => act(run.choose(i))}
                   >
-                    <i>{NODES[n].jp}</i>
+                    <i lang="ja">
+                      <Furigana texto={NODES[n].jp} />
+                    </i>
                     <span>{NODES[n].name}</span>
                     {f === run.floor && <kbd>{nodes.length > 1 ? i + 1 : 'Enter'}</kbd>}
                   </button>
@@ -478,7 +483,9 @@ export function RoguelikeGame() {
                 )}
                 {item.t === 'relic' && (
                   <>
-                    <span class="rg-card-jp">{RELICS[item.relic].jp}</span>
+                    <span class="rg-card-jp" lang="ja">
+                      <Furigana texto={RELICS[item.relic].jp} />
+                    </span>
                     <b>{RELICS[item.relic].name}</b>
                     <span>{RELICS[item.relic].text}</span>
                   </>

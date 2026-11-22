@@ -495,6 +495,9 @@ export interface Correcao {
   dito: string;
   melhor: string;
   nota: string;
+  /** `dito` e `melhor` com a leitura em cima do kanji (do mesmo serviço de leitura das falas). */
+  rubyDito?: Ruby[];
+  rubyMelhor?: Ruby[];
 }
 
 export interface Resposta {
@@ -918,7 +921,10 @@ export class Conversa {
     const reserva = r === RESERVA;
     const correcaoLida = r.correcao ? await this.ruby(r.correcao.melhor) : null;
     const pendentes = cena.passos.filter((p) => !this.feitos.has(p.id));
-    const leitura = pendentes.some((p) => p.sinais) ? (await this.ruby(jp)).kana : '';
+    // A fala do jogador também ganha furigana quando tem kanji (o reconhecimento de voz escreve com kanji).
+    const precisaLer = pendentes.some((p) => p.sinais);
+    const meu = precisaLer || hasKanji(jp) ? await this.ruby(jp) : null;
+    const leitura = precisaLer && meu ? meu.kana : '';
     const lido = await this.ruby(r.fala);
     if (this.fechada) return [];
 
@@ -936,12 +942,12 @@ export class Conversa {
 
     const events: Evento[] = [];
     const before = levelInfo(deps.profile.xp).level;
-    const minha: Linha = { quem: 'jogador', jp, ruby: [{ t: jp }], comAjuda };
+    const minha: Linha = { quem: 'jogador', jp, ruby: meu && hasKanji(jp) ? meu.ruby : [{ t: jp }], comAjuda };
     if (jp !== digitado) minha.digitado = digitado;
     if (!reserva) minha.entendida = r.entendi;
     if (r.correcao && correcaoLida) {
       // O modelo às vezes "corrige" só a escrita (こおひい → コーヒー): soa igual, então não é correção.
-      if (!correcaoLida.kana || !mesmoSom(correcaoLida.kana, jp)) minha.correcao = { dito: jp, ...r.correcao };
+      if (!correcaoLida.kana || !mesmoSom(correcaoLida.kana, jp)) minha.correcao = { dito: jp, ...r.correcao, rubyDito: minha.ruby, rubyMelhor: correcaoLida.ruby };
     }
     this.linhas.push(minha);
     events.push({ t: 'linha', linha: minha });

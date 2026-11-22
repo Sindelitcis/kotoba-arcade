@@ -4,7 +4,9 @@ import type { Bloco, ExemploFicha, Ficha, PalavraFicha } from '../../content/apr
 import { desenho, moras, NOME_ACENTO } from '../../content/aprofundar/acento';
 import { carregarTracos, tracos } from '../../games/pecas/Tracos';
 import { tocarSequencia, type FalaJp, type Trecho } from '../sequencia';
+import { Furigana, Jp, Misto } from '../Furigana';
 import { Icone } from '../Icone';
+import { hasKanji } from '../kana';
 import { irPara } from './estado';
 
 let tocando: { parar(): void } | null = null;
@@ -37,14 +39,11 @@ function Exemplos({ itens }: { itens: readonly ExemploFicha[] }) {
           <Ouvir fala={e.fala} rotulo={e.jp} />
           <div>
             <p class="apr-jp" lang="ja">
-              {e.jp}
+              <Jp texto={e.jp} leitura={e.kana} />
             </p>
-            {e.kana && e.kana !== e.jp && (
-              <p class="apr-kana" lang="ja">
-                {e.kana}
-              </p>
-            )}
-            <p class="apr-pt">{e.pt}</p>
+            <p class="apr-pt">
+              <Misto texto={e.pt} />
+            </p>
           </div>
         </li>
       ))}
@@ -60,17 +59,23 @@ function Palavras({ itens }: { itens: readonly PalavraFicha[] }) {
           <Ouvir fala={w.fala} rotulo={w.jp} />
           {w.alvo ? (
             <button class="apr-palavra" onClick={() => w.alvo && irPara(w.alvo)} title="Aprofundar esta">
-              <span lang="ja">{w.jp}</span>
-              {w.kana && w.kana !== w.jp && (
-                <small lang="ja">{w.kana}</small>
-              )}
-              <em>{w.pt}</em>
+              <span lang="ja">
+                <Jp texto={w.jp} leitura={w.kana} />
+              </span>
+              {w.kana && w.kana !== w.jp && !hasKanji(w.jp) && <small lang="ja">{w.kana}</small>}
+              <em>
+                <Misto texto={w.pt} />
+              </em>
             </button>
           ) : (
             <span class="apr-palavra">
-              <span lang="ja">{w.jp}</span>
-              {w.kana && w.kana !== w.jp && <small lang="ja">{w.kana}</small>}
-              <em>{w.pt}</em>
+              <span lang="ja">
+                <Jp texto={w.jp} leitura={w.kana} />
+              </span>
+              {w.kana && w.kana !== w.jp && !hasKanji(w.jp) && <small lang="ja">{w.kana}</small>}
+              <em>
+                <Misto texto={w.pt} />
+              </em>
             </span>
           )}
         </li>
@@ -150,7 +155,14 @@ function Montar({ partes, pt, fala }: { partes: readonly string[]; pt: string; f
     <div class="apr-montar" data-testid="apr-montar">
       <p class="apr-pt">{pt}</p>
       <p class="apr-montada" lang="ja" aria-live="polite">
-        {feitas.map((i) => partes[i]).join(' ') || '…'}
+        {feitas.length === 0
+          ? '…'
+          : feitas.map((i, n) => (
+              <span key={n}>
+                {n > 0 && ' '}
+                <Furigana texto={partes[i] as string} />
+              </span>
+            ))}
       </p>
       {pronta ? (
         <p class="apr-certo">
@@ -164,7 +176,7 @@ function Montar({ partes, pt, fala }: { partes: readonly string[]; pt: string; f
           {ordem.map((i) =>
             feitas.includes(i) ? null : (
               <button key={i} class={errou === i ? 'errou' : ''} lang="ja" onClick={() => escolher(i)}>
-                {partes[i]}
+                <Furigana texto={partes[i] as string} />
               </button>
             ),
           )}
@@ -190,12 +202,18 @@ function embaralhar(xs: number[]): number[] {
 function BlocoFicha({ b }: { b: Bloco }) {
   switch (b.k) {
     case 'texto':
-      return <p>{b.t}</p>;
+      return (
+        <p>
+          <Misto texto={b.t} />
+        </p>
+      );
     case 'lista':
       return (
         <ul class="apr-lista">
           {b.itens.map((t) => (
-            <li key={t}>{t}</li>
+            <li key={t}>
+              <Misto texto={t} />
+            </li>
           ))}
         </ul>
       );
@@ -203,7 +221,9 @@ function BlocoFicha({ b }: { b: Bloco }) {
       return (
         <ol class="apr-passos">
           {b.itens.map((t) => (
-            <li key={t}>{t}</li>
+            <li key={t}>
+              <Misto texto={t} />
+            </li>
           ))}
         </ol>
       );
@@ -215,17 +235,33 @@ function BlocoFicha({ b }: { b: Bloco }) {
       return <Acento kana={b.kana} acentos={b.acentos} />;
     case 'tracos':
       return <Tracos c={b.c} />;
+    case 'pecas':
+      return (
+        <p class="apr-pecas-do-kanji">
+          Peças:{' '}
+          {b.itens.map((p, i) => (
+            <span key={i}>
+              {i > 0 && ' + '}
+              <span lang="ja">{p.peca}</span> ({p.nome})
+            </span>
+          ))}
+          .
+        </p>
+      );
     case 'conjugacao':
       return (
         <table class="apr-conjugacao">
           <tbody>
             {b.linhas.map((l) => (
               <tr key={l.verbo}>
-                <td lang="ja">{l.verbo}</td>
+                <td lang="ja">
+                  <Jp texto={l.verbo} />
+                </td>
                 <td>{l.grupo}</td>
                 <td lang="ja">
-                  <strong>{l.forma}</strong>
-                  {l.leitura !== l.forma && <small> {l.leitura}</small>}
+                  <strong>
+                    <Furigana texto={l.forma} leitura={l.leitura} />
+                  </strong>
                 </td>
               </tr>
             ))}

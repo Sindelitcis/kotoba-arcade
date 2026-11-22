@@ -102,7 +102,14 @@ test('no KanjiMon, a ficha só aparece depois da resposta, para não entregar na
   await expect(page.locator('.choice.right')).toBeVisible();
   const kanji = (await page.getByTestId('enemy-kanji').innerText()).trim();
   await page.keyboard.press('F4');
-  await expect(painel(page).locator('.apr-grande')).toHaveText(kanji);
+  // O kanji grande leva a leitura de quando está sozinho em cima (furigana); o texto sem ela é o kanji.
+  const grande = painel(page).locator('.apr-grande');
+  await expect(grande.locator('rt')).toHaveCount(1);
+  expect(await grande.evaluate((el) => {
+    const copia = el.cloneNode(true) as Element;
+    copia.querySelectorAll('rt').forEach((r) => r.remove());
+    return copia.textContent;
+  })).toBe(kanji);
   await expect(painel(page)).toContainText('Leituras');
   await expect(painel(page)).toContainText('Palavras da mesma família');
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/aprofundar-ficha-kanji.png` });

@@ -39,6 +39,7 @@ import { cardKey } from '../../content';
 import { itemDaPalavra, type ItemNovo } from '../../content/ensino';
 import { gravar, type Gravacao } from './microfone';
 import { Furigana } from '../../core/Furigana';
+import { hasKanji } from '../../core/kana';
 
 type Fase = 'procurando' | 'senha' | 'desligado' | 'pc-fora' | 'menu' | 'apresenta' | 'conversa' | 'resumo';
 
@@ -513,7 +514,7 @@ export function ConversaGame() {
         <header class="km-top">{voltar}</header>
         <section class="av-panel" data-testid="cv-pc-fora">
           <span class="tile-jp" lang="ja">
-            会話
+            <Furigana texto="会話" />
           </span>
           <h2 class="big">IA do seu PC</h2>
           {pcFora.motivo === 'desligado' && (
@@ -560,7 +561,7 @@ export function ConversaGame() {
         <header class="km-top">{voltar}</header>
         <section class="av-panel" data-testid="cv-senha">
           <span class="tile-jp" lang="ja">
-            会話
+            <Furigana texto="会話" />
           </span>
           <h2 class="big">Conversa por voz</h2>
           <p class="cv-off-text">A IA da Conversa fica na nuvem e é só sua. Digite a senha uma vez: este navegador lembra por 30 dias.</p>
@@ -602,7 +603,7 @@ export function ConversaGame() {
         <header class="km-top">{voltar}</header>
         <section class="av-panel" data-testid="cv-off">
           <span class="tile-jp" lang="ja">
-            会話
+            <Furigana texto="会話" />
           </span>
           <h2 class="big">Conversa por voz</h2>
           <p class="cv-off-text">Não consegui falar com a IA da Conversa agora. Confira a internet e tente de novo.</p>
@@ -692,7 +693,7 @@ export function ConversaGame() {
                 data-scene={c.id}
               >
                 <span class="tile-jp" lang="ja">
-                  {c.jp}
+                  <Furigana texto={c.jp} />
                 </span>
                 <span class="tile-title">
                   {c.titulo} <kbd>{i + 1}</kbd>
@@ -753,7 +754,7 @@ export function ConversaGame() {
               <h3>O que você disse bem</h3>
               {resumo.bem.map((l, i) => (
                 <p key={i} class="cv-said" lang="ja">
-                  {l.jp}
+                  <RubyText ruby={l.ruby} />
                   {l.digitado && <small class="muted"> · {l.digitado}</small>}
                 </p>
               ))}
@@ -765,7 +766,12 @@ export function ConversaGame() {
               {resumo.correcoes.map((c, i) => (
                 <div key={i} class="cv-fix">
                   <p lang="ja">
-                    <span class="muted">{c.dito}</span> → <b>{c.melhor}</b>
+                    <span class="muted">
+                      <RubyText ruby={c.rubyDito ?? [{ t: c.dito }]} />
+                    </span>{' '}
+                    → <b>
+                      <RubyText ruby={c.rubyMelhor ?? [{ t: c.melhor }]} />
+                    </b>
                   </p>
                   <small>{c.nota}</small>
                 </div>
@@ -779,8 +785,10 @@ export function ConversaGame() {
                 {resumo.novas.map((t) => (
                   <li key={t.id}>
                     <button onClick={() => speakWord(t.kana)}>
-                      <b lang="ja">{t.jp}</b>
-                      {t.kana !== t.jp && <i lang="ja">{t.kana}</i>}
+                      <b lang="ja">
+                        <Furigana texto={t.jp} leitura={t.kana} />
+                      </b>
+                      {t.kana !== t.jp && !hasKanji(t.jp) && <i lang="ja">{t.kana}</i>}
                       <span>{t.pt}</span>
                     </button>
                   </li>
@@ -888,7 +896,9 @@ export function ConversaGame() {
                 }}
                 data-testid="cv-suggest"
               >
-                <b lang="ja">{s.jp}</b>
+                <b lang="ja">
+                  <Furigana texto={s.jp} leitura={s.kana} />
+                </b>
                 {s.romaji && <i>{s.romaji}</i>}
                 <span>{s.pt}</span>
               </button>

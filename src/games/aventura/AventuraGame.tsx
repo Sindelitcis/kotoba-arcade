@@ -8,7 +8,6 @@ import { CENA_AVENTURA, cenaStyle, pessoaUrl } from '../../core/arte';
 import { sfx, speak, speakWord } from '../../core/audio';
 import { vozDaAventura } from '../../core/vozes';
 import { onomato } from '../../core/fx';
-import { hasKanji } from '../../core/kana';
 import { foco } from '../../core/foco';
 import { tocarSequencia } from '../../core/sequencia';
 import { teclaDe } from '../../core/teclas';
@@ -81,7 +80,11 @@ function Glosses({ tokens, all }: { tokens: readonly TokenView[]; all: boolean }
         return (
           <li key={w.id} class={t.help === 'full' ? 'new' : undefined}>
             <b>{t.text}</b>
-            {w.jp !== t.text && <i>{hasKanji(w.jp) && w.kana !== t.text ? `${w.jp}・${w.kana}` : w.jp}</i>}
+            {w.jp !== t.text && (
+              <i lang="ja">
+                <Furigana texto={w.jp} leitura={w.kana} />
+              </i>
+            )}
             <span>{w.pt}</span>
           </li>
         );
@@ -401,8 +404,9 @@ export function AventuraGame() {
                 {summary.newWords.map((w) => (
                   <li key={w.id}>
                     <button onClick={() => speakWord(w.kana)} title="Ouvir">
-                      <b lang="ja">{w.jp}</b>
-                      {hasKanji(w.jp) && <i>{w.kana}</i>}
+                      <b lang="ja">
+                        <Furigana texto={w.jp} leitura={w.kana} />
+                      </b>
                       <span>{w.pt}</span>
                     </button>
                   </li>

@@ -59,6 +59,8 @@ export type Bloco =
   | { k: 'palavras'; itens: PalavraFicha[] }
   | { k: 'acento'; kana: string; acentos: readonly number[] }
   | { k: 'tracos'; c: string }
+  /** As peças do kanji, como desenho (sem leitura: muitas peças não são palavra). */
+  | { k: 'pecas'; itens: { peca: string; nome: string }[] }
   | { k: 'conjugacao'; linhas: { verbo: string; grupo: string; forma: string; leitura: string }[] }
   /** Frase para montar: as palavras embaralhadas na tela, clique na ordem. */
   | { k: 'montar'; partes: string[]; pt: string; fala?: FalaFicha };
@@ -230,7 +232,7 @@ function fichaKanji(c: string): Ficha | null {
   if (a?.story) lembrar.push(a.story);
   if (e?.associacao && e.associacao !== a?.story) lembrar.push(e.associacao);
   if (p?.historia && !lembrar.includes(p.historia)) lembrar.push(p.historia);
-  const pecas = p ? p.pecas.map((x) => { const pc = pecaDoKanji(x); return `${pc.peca} (${pc.nome})`; }) : [];
+  const pecas = p ? p.pecas.map((x) => { const pc = pecaDoKanji(x); return { peca: pc.peca, nome: pc.nome }; }) : [];
 
   const ouvir: Trecho[] = [];
   if (sozinho) ouvir.push(pt(FRASES_FIXAS.sozinho), jp(falaComKanji(c, sozinho)));
@@ -248,7 +250,7 @@ function fichaKanji(c: string): Ficha | null {
     ouvir,
     secoes: semVazias([
       { titulo: 'Leituras', blocos: [{ k: 'lista', itens: leituras }, ...(porQue ? [{ k: 'texto', t: porQue } as const] : []), ...(sozinho ? [{ k: 'acento', kana: sozinho, acentos: acentosDe(c, sozinho) } as const] : [])] },
-      { titulo: 'Como se escreve', blocos: [{ k: 'tracos', c }, ...(pecas.length > 0 ? [{ k: 'texto', t: `Peças: ${pecas.join(' + ')}.` } as const] : [])] },
+      { titulo: 'Como se escreve', blocos: [{ k: 'tracos', c }, ...(pecas.length > 0 ? [{ k: 'pecas', itens: pecas } as const] : [])] },
       { titulo: 'Para lembrar', blocos: [{ k: 'lista', itens: lembrar }] },
       { titulo: 'Palavras da mesma família', blocos: [{ k: 'palavras', itens: fam }] },
       { titulo: 'Em frases', blocos: [{ k: 'exemplos', itens: exemplos.slice(0, 3) }] },

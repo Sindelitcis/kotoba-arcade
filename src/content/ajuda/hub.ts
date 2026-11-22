@@ -72,6 +72,7 @@ export const AJUSTES: Ajuda = {
     { nome: 'Créditos do som', texto: 'Quem fez cada música e cada efeito, com o link da origem e as regras de uso.' },
     { nome: 'Voz', texto: 'Liga ou desliga as falas gravadas: o japonês das palavras e frases e o português das aulas e explicações.' },
     { nome: 'Modo calmo', texto: 'Para as animações que se repetem, deixa o brilho mais lento e diminui os efeitos e as onomatopeias. Bom para dias de cabeça cheia. Toda a informação continua na tela.' },
+    { nome: 'Leitura em cima do kanji', texto: 'Sempre: todo kanji vem com a leitura em kana por cima. Só no que ainda aprendo: a leitura some do kanji que você já lê bem e fica no resto.' },
     { nome: 'Exportar backup', texto: 'Baixa um arquivo .json com todo o seu progresso.' },
     { nome: 'Importar backup', texto: 'Troca o progresso deste navegador pelo do arquivo. O progresso atual é substituído.' },
   ],

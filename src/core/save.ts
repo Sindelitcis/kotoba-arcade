@@ -27,7 +27,12 @@ export interface Settings {
   tema: Tema;
   /** Ritmo de estudo: quanto os jogos oferecem o Aprofundar sozinhos (ver `core/aprofundar`). */
   ritmo: Ritmo;
+  /** Leitura em cima do kanji: sempre, ou só nos kanji cuja leitura ainda não está firme. */
+  furigana: ModoFurigana;
 }
+
+export type ModoFurigana = 'sempre' | 'aprendendo';
+export const MODOS_FURIGANA: readonly ModoFurigana[] = ['sempre', 'aprendendo'];
 
 export type Tema = 'auto' | 'claro' | 'escuro';
 const TEMAS: readonly Tema[] = ['auto', 'claro', 'escuro'];
@@ -66,7 +71,7 @@ export function emptySave(now: number): SaveData {
     createdAt: now,
     updatedAt: now,
     profile: { xp: 0, coins: 0, daysPlayed: [] },
-    settings: { sound: true, volMusica: 0.6, volEfeitos: 0.8, volVoz: 1, voice: true, calm: false, tema: 'auto', ritmo: 'equilibrado' },
+    settings: { sound: true, volMusica: 0.6, volEfeitos: 0.8, volVoz: 1, voice: true, calm: false, tema: 'auto', ritmo: 'equilibrado', furigana: 'sempre' },
     cards: {},
     games: {},
   };
@@ -140,6 +145,7 @@ export function normalizeSave(input: unknown, now: number): SaveData {
       calm: typeof settings.calm === 'boolean' ? settings.calm : base.settings.calm,
       tema: TEMAS.includes(settings.tema as Tema) ? (settings.tema as Tema) : base.settings.tema,
       ritmo: RITMOS.includes(settings.ritmo as Ritmo) ? (settings.ritmo as Ritmo) : base.settings.ritmo,
+      furigana: MODOS_FURIGANA.includes(settings.furigana as ModoFurigana) ? (settings.furigana as ModoFurigana) : base.settings.furigana,
     },
     cards: input.v < 2 ? cartasDoSave1(cleanCards(input.cards)) : cleanCards(input.cards),
     games: isObject(input.games) ? input.games : {},
@@ -207,4 +213,14 @@ export const EXPLICA_RITMO: Record<Ritmo, string> = {
   jogo: 'O Aprofundar só abre quando você pedir (F4 ou o botão do livro).',
   equilibrado: 'Errou a mesma coisa duas vezes? O jogo oferece o Aprofundar dela, num cantinho. Ignore e a oferta some.',
   estudo: 'Depois de cada erro e de cada palavra nova, o jogo oferece o Aprofundar dela. Ignore e a oferta some.',
+};
+
+export const NOME_FURIGANA: Record<ModoFurigana, string> = {
+  sempre: 'Sempre',
+  aprendendo: 'Só no que ainda aprendo',
+};
+
+export const EXPLICA_FURIGANA: Record<ModoFurigana, string> = {
+  sempre: 'Todo kanji vem com a leitura em kana por cima.',
+  aprendendo: 'A leitura some do kanji que você já lê bem (a leitura dele aguenta uma semana sem revisar). O resto continua com ela.',
 };

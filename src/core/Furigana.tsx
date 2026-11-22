@@ -1,54 +1,35 @@
 /**
  * Furigana só em cima de kanji. これは傘です。 com a leitura これはかさです。 vira
  * これは + 傘(かさ) + です。: o kana já está escrito, então não ganha leitura em cima.
+ *
+ * Todo japonês com kanji na tela passa por aqui. A leitura de cada pedaço vem dos dados
+ * versionados (`leitura-jp.ts`) ou, fora deles, da `leitura` dada; sem nenhuma, o console
+ * avisa e o e2e falha.
+ * Nos Ajustes dá para esconder a leitura dos kanji que você já lê (carta de leitura firme).
  */
-import { hasKanji } from './kana';
+import { cardKey } from '../content';
+import { app } from './app';
+import { avisarSemLeitura, dividirMisto, FORMAS_SEM_LEITURA, partesDe } from './leitura-jp';
+import { isKnown } from './srs';
 
-export interface Parte {
-  t: string;
-  /** Leitura, só nos pedaços com kanji. */
-  r?: string;
-}
+export { partesFurigana, type Parte } from './leitura-jp';
 
 const KANJI = /[一-鿿々〆ヶ]/;
 
-/** Katakana e hiragana contam como o mesmo som na hora de alinhar. */
-const igualar = (s: string) => s.replace(/[ァ-ヶ]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0x60));
-
-const escapar = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-
-/**
- * Divide o texto em pedaços de kanji (com leitura) e de kana (sem leitura), alinhando pela
- * leitura inteira. Se não der para alinhar (leitura que não bate com o kana escrito), devolve
- * o texto inteiro com a leitura inteira, como antes.
- */
-export function partesFurigana(texto: string, leitura: string | undefined): Parte[] {
-  if (!leitura || !hasKanji(texto) || leitura === texto) return [{ t: texto }];
-  const blocos: { t: string; kanji: boolean }[] = [];
-  for (const c of texto) {
-    const k = KANJI.test(c);
-    const ultimo = blocos[blocos.length - 1];
-    if (ultimo && ultimo.kanji === k) ultimo.t += c;
-    else blocos.push({ t: c, kanji: k });
-  }
-  const molde = new RegExp(`^${blocos.map((b) => (b.kanji ? '(.+?)' : `(${escapar(igualar(b.t))})`)).join('')}$`, 'u');
-  const m = molde.exec(igualar(leitura));
-  if (!m) return [{ t: texto, r: leitura }];
-  // A leitura original (não a igualada), cortada nas mesmas posições.
-  let pos = 0;
-  const pedacos = m.slice(1).map((g) => {
-    const p = leitura.slice(pos, pos + (g as string).length);
-    pos += (g as string).length;
-    return p;
-  });
-  return blocos.map((b, i) => (b.kanji ? { t: b.t, r: pedacos[i] } : { t: b.t }));
+/** O kanji cuja leitura já está firme na memória (aguenta uma semana sem revisar). */
+function jaLe(trecho: string): boolean {
+  const ks = [...trecho].filter((c) => KANJI.test(c));
+  return ks.length > 0 && ks.every((c) => isKnown(app.data.cards[cardKey(`k:${c}`, 'reading')]));
 }
 
 export function Furigana({ texto, leitura }: { texto: string; leitura?: string }) {
+  const partes = partesDe(texto, leitura);
+  if (partes.some((p) => !p.r && KANJI.test(p.t)) && !FORMAS_SEM_LEITURA.has(texto)) avisarSemLeitura(texto);
+  const esconder = app.data.settings.furigana === 'aprendendo';
   return (
     <>
-      {partesFurigana(texto, leitura).map((p, i) =>
-        p.r ? (
+      {partes.map((p, i) =>
+        p.r && !(esconder && jaLe(p.t)) ? (
           <ruby key={i}>
             {p.t}
             <rt>{p.r}</rt>
@@ -59,4 +40,26 @@ export function Furigana({ texto, leitura }: { texto: string; leitura?: string }
       )}
     </>
   );
+}
+
+/** Texto em português com japonês no meio: furigana só nos pedaços em japonês com kanji. */
+export function Misto({ texto }: { texto: string }) {
+  return (
+    <>
+      {dividirMisto(texto).map((p, i) =>
+        p.jp ? (
+          <span key={i} lang="ja">
+            <Furigana texto={p.t} />
+          </span>
+        ) : (
+          p.t
+        ),
+      )}
+    </>
+  );
+}
+
+/** Japonês do conteúdo: com rótulo ou explicação em português junto ("Você: …", "飲む (beber)"), só o japonês ganha leitura. */
+export function Jp({ texto, leitura }: { texto: string; leitura?: string }) {
+  return /[A-Za-zÀ-ú]/.test(texto) ? <Misto texto={texto} /> : <Furigana texto={texto} leitura={leitura} />;
 }

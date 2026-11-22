@@ -19,7 +19,8 @@ import { camadaAberta } from './help/ajuda';
 import { Icone } from './Icone';
 import { tocarSequencia, type Tocador } from './sequencia';
 import { teclaDe } from './teclas';
-import { Furigana } from './Furigana';
+import { Furigana, Misto } from './Furigana';
+import { hasKanji } from './kana';
 
 export interface PropsApresentacao {
   itens: readonly ItemNovo[];
@@ -42,7 +43,7 @@ function falar(item: ItemNovo | undefined): void {
 }
 
 function Escrita({ item }: { item: ItemNovo }) {
-  const fur = item.leitura && item.alvo.t !== 'kana' && item.leitura !== item.grande;
+  const fur = item.alvo.t !== 'kana' && hasKanji(item.grande);
   const longo = [...item.grande].length > 4;
   return (
     <span class={`ap-grande${longo ? ' longo' : ''}${item.alvo.t === 'kanji' ? ' kanji' : ''}`} lang="ja">
@@ -122,18 +123,19 @@ export function Apresentacao({ itens, onFim, modo = 'novos', fim, visual, onItem
         <div class="ap-texto">
           <Escrita item={item} />
           {item.alvo.t === 'kana' && item.leitura && <span class="ap-romaji">{item.leitura}</span>}
-          <p class="ap-pt">{item.pt}</p>
-          {item.explicacao && item.explicacao !== item.pt && <p class="ap-explica">{item.explicacao}</p>}
+          <p class="ap-pt">
+            <Misto texto={item.pt} />
+          </p>
+          {item.explicacao && item.explicacao !== item.pt && (
+            <p class="ap-explica">
+              <Misto texto={item.explicacao} />
+            </p>
+          )}
           {item.exemplo && (
             <p class="ap-exemplo">
               <span class="ap-ex-jp" lang="ja">
-                {item.exemplo.jp}
+                <Furigana texto={item.exemplo.jp} leitura={item.exemplo.kana} />
               </span>
-              {item.exemplo.kana && item.exemplo.kana !== item.exemplo.jp && (
-                <span class="ap-ex-kana" lang="ja">
-                  {item.exemplo.kana}
-                </span>
-              )}
               <span class="ap-ex-pt">{item.exemplo.pt}</span>
             </p>
           )}

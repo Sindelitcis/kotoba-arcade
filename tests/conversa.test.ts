@@ -448,6 +448,9 @@ describe('conversa', () => {
         dito: 'いくら',
         melhor: 'いくらですか',
         nota: 'Com "desu ka" a pergunta fica completa.',
+        // As duas frases do "para soar mais natural" com a leitura do serviço de leitura (aqui, sem kanji).
+        rubyDito: [{ t: 'いくら' }],
+        rubyMelhor: expect.any(Array),
       },
     ]);
     expect(resumo.xp).toBe(3 * XP_TURNO + 3 * XP_PASSO + XP_FIM);

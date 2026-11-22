@@ -16,7 +16,10 @@ export function Marcado({ texto, class: cls }: { texto: string; class?: string }
                 <Furigana texto={s.texto} leitura={s.leitura} />
               </span>
             ) : (
-              <span key={j}>{s.texto}</span>
+              // Sem marcação de leitura: a dos dados (texto simples numa opção, por exemplo).
+              <span key={j}>
+                <Furigana texto={s.texto} />
+              </span>
             ),
           )}
         </span>

@@ -163,3 +163,33 @@ test('com o IME japonês ligado, o número ainda escolhe a alternativa e o Esc d
   });
   await expect(page.locator('.choice.right, .choice.wrong').first()).toBeVisible();
 });
+
+// Pedido do Rafael: a frase de exemplo do cartão (火を消して。) aparecia sem leitura em cima.
+test('cartão de apresentação: a frase de exemplo tem furigana em cima de cada kanji', async ({ page }) => {
+  await page.getByTestId('play-now').click();
+  const cartao = page.getByTestId('apresentacao');
+  await expect(cartao).toBeVisible();
+  const total = Number(await cartao.getAttribute('data-total'));
+  let vistos = 0;
+  for (let n = 0; n < total; n++) {
+    const exemplo = cartao.locator('.ap-ex-jp');
+    if (await exemplo.isVisible()) {
+      // Cada pedaço de kanji está num <ruby> com <rt>, e nenhum kanji fica solto fora dele.
+      const solto = await exemplo.evaluate((el) => {
+        const fora = [...el.childNodes].filter((c) => c.nodeName !== 'RUBY').map((c) => c.textContent ?? '').join('');
+        return /[一-鿿々]/.test(fora) ? fora : '';
+      });
+      expect(solto, `kanji sem leitura em "${await exemplo.textContent()}"`).toBe('');
+      expect(await exemplo.locator('ruby rt').count()).toBeGreaterThan(0);
+      for (const rt of await exemplo.locator('rt').allTextContents()) expect(rt).toMatch(/^[ぁ-ゖァ-ヺー]+$/);
+      vistos++;
+    }
+    const antes = `${await cartao.getAttribute('data-item')}|${n}`;
+    await page.keyboard.press('Enter');
+    await expect(async () => {
+      if (!(await cartao.isVisible())) return;
+      expect(`${await cartao.getAttribute('data-item')}|${await cartao.getAttribute('data-i')}`).not.toBe(antes);
+    }).toPass({ timeout: 3000 });
+  }
+  expect(vistos).toBeGreaterThan(0);
+});

@@ -4,6 +4,7 @@ import { commit, go, jornadaSave, licaoAberta, screen, tick } from '../core/app'
 import { cenaStyle } from '../core/arte';
 import { sfx } from '../core/audio';
 import { foco } from '../core/foco';
+import { Furigana } from '../core/Furigana';
 import { teclaDe } from '../core/teclas';
 import { andamento, ETAPAS, etapaDa, missoesDa, NOME_JOGO, proximaMissao, type Etapa, type Missao } from './etapas';
 
@@ -38,7 +39,9 @@ function EtapaQuadro({ e, n, onAbrir }: { e: Etapa; n: number; onAbrir: () => vo
   const feitas = Math.round(v * total);
   return (
     <button class={`koma jn-etapa${total === 0 ? ' depois' : ''}`} style={cenaStyle(e.cena)} onClick={onAbrir} data-testid={`jn-etapa-${e.id}`}>
-      <span class="jn-etapa-jp">{e.jp}</span>
+      <span class="jn-etapa-jp" lang="ja">
+        <Furigana texto={e.jp} />
+      </span>
       <span class="jn-etapa-titulo">
         {e.titulo} <kbd>{n}</kbd>
       </span>
@@ -126,7 +129,10 @@ export function JornadaTela() {
           </button>
           <div>
             <h1>
-              <span class="jn-topo-jp">{aberta.jp}</span> {aberta.titulo}
+              <span class="jn-topo-jp" lang="ja">
+                <Furigana texto={aberta.jp} />
+              </span>{' '}
+              {aberta.titulo}
             </h1>
             <p class="muted">{aberta.resumo}</p>
           </div>

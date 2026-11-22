@@ -13,6 +13,7 @@ import { BLOCOS, MODOS, RODADA, Rodada, somEhPista, TesteEntrada, type Evento, t
 import { Imagem } from './Imagem';
 import { Apresentacao } from '../../core/Apresentacao';
 import { itemNovoDe, type ItemNovo } from '../../content/ensino';
+import { Furigana, Misto } from '../../core/Furigana';
 import './kanaimagens.css';
 
 type Fase = 'menu' | 'rodada' | 'resumo' | 'teste' | 'teste-fim';
@@ -63,10 +64,20 @@ function Licao({ k, compacta = false }: { k: KanaItem; compacta?: boolean }) {
           {k.char} <span class="ki-romaji">{k.romaji}</span>
         </p>
         {k.soa && <p class="ki-soa">Soa: {k.soa}</p>}
-        <p class="ki-mnemo">{k.mnemonico}</p>
+        <p class="ki-mnemo">
+          <Misto texto={k.mnemonico} />
+        </p>
         {!compacta && (
           <button class="ki-exemplo" onClick={() => ouvir(k.exemplo.kana)} title="Ouvir o exemplo (E)">
-            <span lang="ja">{k.exemplo.jp !== k.exemplo.kana ? `${k.exemplo.kana} (${k.exemplo.jp})` : k.exemplo.kana}</span>
+            <span lang="ja">
+              {k.exemplo.kana}
+              {k.exemplo.jp !== k.exemplo.kana && (
+                <>
+                  {' ('}
+                  <Furigana texto={k.exemplo.jp} leitura={k.exemplo.kana} />)
+                </>
+              )}
+            </span>
             <small>{k.exemplo.pt}</small>
           </button>
         )}

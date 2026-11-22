@@ -15,18 +15,14 @@ import { itemDaLicao } from './falado';
 import { itemDaPalavra } from '../../content/ensino';
 import { cardOf, cartaDaPalavra, exampleView, fits, GramaticaRound, openPoints, plainSentence, ROUND_SIZE, slotWritten, WINS_TO_UNLOCK, type RoundEvent, type RoundSummary, type Written } from './engine';
 import { COURSE, POINTS } from './pontos';
-import { Furigana } from '../../core/Furigana';
+import { Furigana, Misto } from '../../core/Furigana';
 
 type Mode = 'menu' | 'round' | 'summary';
 
 function Word({ w }: { w: Written }) {
   return (
     <>
-      {w.text && w.reading ? (
-        <Furigana texto={w.text} leitura={w.reading} />
-      ) : (
-        w.text
-      )}
+      <Furigana texto={w.text} leitura={w.reading} />
       {w.tail}
     </>
   );
@@ -242,7 +238,7 @@ export function GramaticaGame() {
 
             {pz.why && (
               <p class="gr-why" data-testid="gr-why">
-                <b lang="ja">{pz.why.block}</b> não encaixa aqui. {pz.why.text}
+                <b lang="ja">{pz.why.block}</b> não encaixa aqui. <Misto texto={pz.why.text} />
               </p>
             )}
 

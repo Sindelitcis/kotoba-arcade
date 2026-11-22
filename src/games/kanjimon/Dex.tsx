@@ -2,7 +2,8 @@ import { useLayoutEffect, useState } from 'preact/hooks';
 import { cardKey, KANJI, type Kanji } from '../../content';
 import { app, go, kanjimonSave, tick } from '../../core/app';
 import { speak, speakKanji, speakWord } from '../../core/audio';
-import { kanaToRomaji } from '../../core/kana';
+import { Furigana, Misto } from '../../core/Furigana';
+import { hasKanji, kanaToRomaji } from '../../core/kana';
 import { masteryLevel } from '../../core/srs';
 import { teclaDe } from '../../core/teclas';
 import { useAprofundar } from '../../core/aprofundar/estado';
@@ -68,7 +69,9 @@ export function Dex() {
           const best = mine[mine.length - 1];
           return (
             <button key={k.id} class={`dex-tile${seen ? '' : ' unseen'}${best ? ` r-${best}` : ''}`} disabled={!seen} onClick={() => show(k)}>
-              <span class="dex-kanji">{seen ? k.kanji : '?'}</span>
+              <span class="dex-kanji" lang="ja">
+                {seen ? <Furigana texto={k.kanji} leitura={k.reading} /> : '?'}
+              </span>
               <span class="dex-pt">{seen ? k.pt[0] : '???'}</span>
               {seen && <Stars level={masteryLevel(cards[cardKey(k.id, 'meaning')])} />}
               <span class="dex-rarities">
@@ -110,19 +113,25 @@ export function Dex() {
                   <span class="muted">sozinho · {kanaToRomaji(open.reading).replace(/'/g, '')}</span>
                 </button>
                 {open.otherReadings.length > 0 && <p class="muted">Dentro de palavras também: {open.otherReadings.join(', ')}</p>}
-                <p>{open.story}</p>
+                <p>
+                  <Misto texto={open.story} />
+                </p>
                 <h3>Palavras</h3>
                 {open.words.map((w) => (
                   <button key={w.id} class="word" onClick={() => speakWord(w.kana)} title="Ouvir">
-                    <b>{w.jp}</b>
-                    <span>{w.kana}</span>
+                    <b lang="ja">
+                      <Furigana texto={w.jp} leitura={w.kana} />
+                    </b>
+                    {!hasKanji(w.jp) && <span>{w.kana}</span>}
                     <span class="muted">{w.pt}</span>
                     <Stars level={Math.max(masteryLevel(cards[cardKey(w.id, 'meaning')]), masteryLevel(cards[cardKey(w.id, 'reading')]))} />
                   </button>
                 ))}
                 {open.sentences.map((s) => (
                   <button key={s.jp} class="word sentence-line" onClick={() => speak(s.jp)} title="Ouvir">
-                    <b>{s.jp}</b>
+                    <b lang="ja">
+                      <Furigana texto={s.jp} />
+                    </b>
                     <span class="muted">
                       {s.romaji} · {s.pt}
                     </span>

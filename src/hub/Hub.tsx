@@ -6,11 +6,12 @@ import { figuraUrl } from '../core/figuras';
 import { sfx, speak } from '../core/audio';
 import { visitados, type Saves } from '../core/cor';
 import { Icone } from '../core/Icone';
-import type { Ritmo, Tema } from '../core/save';
+import type { ModoFurigana, Ritmo, Tema } from '../core/save';
 import { useSubtelaAjuda } from '../core/help/ajuda';
 import { AjustesSom } from '../core/som/AjustesSom';
 import { levelInfo, readingMeter, recentDays } from '../core/progress';
-import { EXPLICA_RITMO, exportSave, NOME_RITMO, RITMOS } from '../core/save';
+import { EXPLICA_FURIGANA, EXPLICA_RITMO, exportSave, MODOS_FURIGANA, NOME_FURIGANA, NOME_RITMO, RITMOS } from '../core/save';
+import { Furigana } from '../core/Furigana';
 import { teclaDe } from '../core/teclas';
 import { BOOSTER_COST, canOpenBooster } from '../games/kanjimon/engine';
 import { etapaDa, proximaMissao } from '../jornada/etapas';
@@ -134,6 +135,12 @@ export function Hub() {
     sfx.click();
   };
 
+  const escolherFurigana = (modo: ModoFurigana) => {
+    settings.furigana = modo;
+    commit();
+    sfx.click();
+  };
+
   const toggle = (opcao: 'voice' | 'calm') => {
     settings[opcao] = !settings[opcao];
     commit();
@@ -164,7 +171,9 @@ export function Hub() {
     <main class="hub">
       <header class="hub-top">
         <div class="brand">
-          <span class="brand-jp" lang="ja">言葉</span>
+          <span class="brand-jp" lang="ja">
+            <Furigana texto="言葉" />
+          </span>
           <div>
             <h1>Kotoba Arcade</h1>
             <p>Jogue. O japonês vem junto.</p>
@@ -226,7 +235,7 @@ export function Hub() {
 
           <button class="koma ouvir-faixa" onClick={() => go('ouvir')} data-testid="hub-ouvir">
             <span class="jornada-faixa-jp" lang="ja">
-              聞
+              <Furigana texto="聞" />
             </span>
             <span class="jornada-faixa-txt">
               <b>
@@ -256,7 +265,7 @@ export function Hub() {
             onClick={() => t.screen && go(t.screen)}
           >
             <span class="tile-jp" lang="ja">
-              {t.jp}
+              <Furigana texto={t.jp} />
             </span>
             <span class="tile-title">
               {t.title}
@@ -291,7 +300,9 @@ export function Hub() {
           {sentence ? (
             <button class="sentence" onClick={() => speak(sentence.jp)} title="Ouvir">
               <span class="sentence-count">{sentences.length} {sentences.length === 1 ? 'frase' : 'frases'} que você já consegue ler. A mais recente:</span>
-              <span class="sentence-jp">{sentence.jp}</span>
+              <span class="sentence-jp" lang="ja">
+                <Furigana texto={sentence.jp} />
+              </span>
               <span class="sentence-pt">{sentence.romaji} · {sentence.pt}</span>
             </button>
           ) : (
@@ -337,6 +348,15 @@ export function Hub() {
               ))}
             </div>
             <p class="muted">{EXPLICA_RITMO[settings.ritmo]}</p>
+            <h3 id="furigana-titulo">Leitura em cima do kanji</h3>
+            <div class="segmento" role="group" aria-labelledby="furigana-titulo">
+              {MODOS_FURIGANA.map((m) => (
+                <button key={m} aria-pressed={settings.furigana === m} onClick={() => escolherFurigana(m)} data-testid={`furigana-${m}`}>
+                  {NOME_FURIGANA[m]}
+                </button>
+              ))}
+            </div>
+            <p class="muted">{EXPLICA_FURIGANA[settings.furigana]}</p>
             <h3 id="tema-titulo">Tema</h3>
             <div class="segmento" role="group" aria-labelledby="tema-titulo">
               {(

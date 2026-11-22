@@ -125,6 +125,8 @@ As frases usam só o vocabulário que já está nos outros jogos, mais umas pouc
 
 Kanji nunca vem sozinho: toda carta traz palavras de verdade, com leitura em kana e áudio gravado. Como as vozes foram escolhidas e gravadas: [docs/vozes.md](docs/vozes.md).
 
+Todo kanji na tela vem com a leitura em kana por cima (furigana), só em cima do kanji. Nos Ajustes dá para esconder a leitura do kanji que você já lê bem. A leitura que o conteúdo não traz foi lida pelo [OpenJTalk](https://open-jtalk.sourceforge.net) (BSD), pelo [pyopenjtalk](https://github.com/r9y9/pyopenjtalk) (MIT), e conferida com as vozes gravadas. Como gerar de novo: [docs/furigana.md](docs/furigana.md).
+
 ## Organização
 
 ```

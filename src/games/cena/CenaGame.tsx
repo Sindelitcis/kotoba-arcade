@@ -97,7 +97,10 @@ function Dica({ r }: { r: CenaRound }) {
         return (
           <span key={w.id} class="cn-dica-item">
             {f && <img src={figuraUrl(f.img)} alt="" draggable={false} />}
-            <span lang="ja">{w.jp}</span> = {w.pt}
+            <span lang="ja">
+              <Furigana texto={w.jp} leitura={w.kana} />
+            </span>{' '}
+            = {w.pt}
           </span>
         );
       })}
@@ -373,7 +376,10 @@ export function CenaGame() {
           Parar <kbd>Esc</kbd>
         </button>
         <div class="gr-progress" data-testid="cn-progresso">
-          <span lang="ja">{lugarRef.current.jp}</span> · {r.indice + 1} de {TAREFAS_POR_RODADA} · <b>{r.pontos}</b> pontos
+          <span lang="ja">
+            <Furigana texto={lugarRef.current.jp} />
+          </span>{' '}
+          · {r.indice + 1} de {TAREFAS_POR_RODADA} · <b>{r.pontos}</b> pontos
           {r.combo > 1 && <span class="combo on"> · combo {r.combo}</span>}
         </div>
         <span class="gr-note" data-testid="cn-nota">{nota}</span>
@@ -519,7 +525,13 @@ export function CenaGame() {
           </div>
           {resumo.novas.length > 0 && (
             <p class="muted" lang="ja">
-              Palavras novas: {resumo.novas.map((w) => w.jp).join('、')}
+              Palavras novas:{' '}
+              {resumo.novas.map((w, i) => (
+                <span key={w.id}>
+                  {i > 0 && '、'}
+                  <Furigana texto={w.jp} leitura={w.kana} />
+                </span>
+              ))}
             </p>
           )}
           {resumo.abertas.length > 0 && <p class="notice">Etapa nova aberta: {resumo.abertas.map((e) => ETAPA_INFO[e].titulo).join(', ')}</p>}
@@ -554,7 +566,10 @@ export function CenaGame() {
         <button class="play-now" style={{ '--cena': `url("${figuraUrl(sugerido.fundo)}")` }} onClick={() => comecar(sugerido)} data-testid="cn-start">
           <span class="play-now-main">{save.rounds > 0 ? 'Nova rodada' : 'Começar'}</span>
           <span class="play-now-sub">
-            <span lang="ja">{sugerido.jp}</span> · {sugerido.pt} · {TAREFAS_POR_RODADA} pedidos <kbd>Enter</kbd>
+            <span lang="ja">
+              <Furigana texto={sugerido.jp} />
+            </span>{' '}
+            · {sugerido.pt} · {TAREFAS_POR_RODADA} pedidos <kbd>Enter</kbd>
           </span>
         </button>
         <ol class="cn-lugares" data-testid="cn-lugares">
@@ -562,7 +577,9 @@ export function CenaGame() {
             <li key={l.id}>
               <button onClick={() => comecar(l)} data-lugar={l.id}>
                 <kbd>{i + 1}</kbd>
-                <span lang="ja">{l.jp}</span>
+                <span lang="ja">
+                  <Furigana texto={l.jp} />
+                </span>
                 <small>
                   {l.pt} · {l.coisas.length} coisas{save.lugares[l.id] ? ` · ${save.lugares[l.id]}×` : ''}
                 </small>

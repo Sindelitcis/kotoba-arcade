@@ -362,7 +362,7 @@ export function MemoriaGame() {
                 {resumo.novas.map((f) => (
                   <li key={f.img}>
                     <img src={figuraUrl(f.img)} alt="" />
-                    {f.word.jp} <small>{f.word.pt}</small>
+                    <Furigana texto={f.word.jp} leitura={f.word.kana} /> <small>{f.word.pt}</small>
                   </li>
                 ))}
               </ul>

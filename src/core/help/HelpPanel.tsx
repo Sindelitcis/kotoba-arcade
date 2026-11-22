@@ -2,6 +2,7 @@ import { createPortal } from 'preact/compat';
 import { useEffect, useRef } from 'preact/hooks';
 import { AJUDA, rotuloTeclas, SECOES, telaUsaF1, type Ajuda } from '../../content/ajuda';
 import { APROFUNDAR } from '../../content/ajuda/comum';
+import { Furigana, Misto } from '../Furigana';
 import { fecharAjuda, secaoAjuda, telaAtual } from './ajuda';
 
 function Teclas({ teclas }: { teclas: readonly string[] }) {
@@ -16,12 +17,14 @@ function Teclas({ teclas }: { teclas: readonly string[] }) {
 
 function Corpo({ a, secao }: { a: Ajuda; secao: number }) {
   const id = SECOES[secao]?.id;
-  if (id === 'objetivo') return <>{a.objetivo.map((p) => <p key={p}>{p}</p>)}</>;
+  if (id === 'objetivo') return <>{a.objetivo.map((p) => <p key={p}><Misto texto={p} /></p>)}</>;
   if (id === 'passos')
     return (
       <ol class="ajuda-passos">
         {a.passos.map((p) => (
-          <li key={p}>{p}</li>
+          <li key={p}>
+            <Misto texto={p} />
+          </li>
         ))}
       </ol>
     );
@@ -33,7 +36,9 @@ function Corpo({ a, secao }: { a: Ajuda; secao: number }) {
             <dt>
               <Teclas teclas={l.teclas} />
             </dt>
-            <dd>{l.faz}</dd>
+            <dd>
+              <Misto texto={l.faz} />
+            </dd>
           </div>
         ))}
         <div>
@@ -55,8 +60,12 @@ function Corpo({ a, secao }: { a: Ajuda; secao: number }) {
       <dl class="ajuda-lista larga">
         {a.elementos.map((e) => (
           <div key={e.nome}>
-            <dt>{e.nome}</dt>
-            <dd>{e.texto}</dd>
+            <dt>
+              <Misto texto={e.nome} />
+            </dt>
+            <dd>
+              <Misto texto={e.texto} />
+            </dd>
           </div>
         ))}
       </dl>
@@ -65,7 +74,9 @@ function Corpo({ a, secao }: { a: Ajuda; secao: number }) {
     return (
       <ul class="ajuda-pontos">
         {a.ensina.map((p) => (
-          <li key={p}>{p}</li>
+          <li key={p}>
+            <Misto texto={p} />
+          </li>
         ))}
       </ul>
     );
@@ -73,8 +84,12 @@ function Corpo({ a, secao }: { a: Ajuda; secao: number }) {
     <div class="ajuda-perguntas">
       {[...a.perguntas, APROFUNDAR].map((q) => (
         <div key={q.p}>
-          <h3>{q.p}</h3>
-          <p>{q.r}</p>
+          <h3>
+            <Misto texto={q.p} />
+          </h3>
+          <p>
+            <Misto texto={q.r} />
+          </p>
         </div>
       ))}
     </div>
@@ -103,7 +118,7 @@ export function HelpPanel() {
       <div class="ajuda-painel" role="dialog" aria-modal="true" aria-labelledby="ajuda-titulo" onClick={(e) => e.stopPropagation()}>
         <header class="ajuda-topo">
           <span class="ajuda-jp" lang="ja">
-            {a.jp}
+            <Furigana texto={a.jp} />
           </span>
           <h2 id="ajuda-titulo">{a.titulo}</h2>
           <button class="ghost" onClick={fecharAjuda} data-testid="ajuda-fechar">

@@ -17,7 +17,7 @@ import { etapaDa, registrarMissao } from './etapas';
 import { acharLicao, temJapones, type Passo, type Quadro } from './licoes';
 import { Marcado } from './Marcado';
 import { falaDaPergunta, falaDoQuadro, retornoFalado } from './retorno';
-import { Furigana } from '../core/Furigana';
+import { Furigana, Misto } from '../core/Furigana';
 
 function falar(trechos: readonly Trecho[]): void {
   if (trechos.length > 0) tocarSequencia(trechos);
@@ -33,7 +33,11 @@ function falaDoPasso(p: Passo | undefined): Trecho[] {
 function QuadroView({ q }: { q: Quadro }) {
   return (
     <div class="lc-conteudo">
-      {q.titulo && <h2 class="lc-titulo">{q.titulo}</h2>}
+      {q.titulo && (
+        <h2 class="lc-titulo">
+          <Misto texto={q.titulo} />
+        </h2>
+      )}
       {q.quem && <span class="lc-quem">{q.quem}</span>}
       {q.grande && (
         <div class="lc-grande" lang="ja">
@@ -41,18 +45,24 @@ function QuadroView({ q }: { q: Quadro }) {
         </div>
       )}
       {q.jp && <Marcado texto={q.jp} class={q.quem ? 'lc-fala' : 'lc-jp'} />}
-      {q.pt && <p class="lc-pt">{q.pt}</p>}
+      {q.pt && (
+        <p class="lc-pt">
+          <Misto texto={q.pt} />
+        </p>
+      )}
       {q.registro && <p class="lc-registro">{NOME_REGISTRO[q.registro]}</p>}
       {q.linhas.map((l, i) => (
         <p key={i} class="lc-linha">
-          {l}
+          <Misto texto={l} />
         </p>
       ))}
       {q.exemplos && (
         <ul class="lc-exemplos">
           {q.exemplos.map((ex, i) => (
             <li key={i}>
-              <Marcado texto={ex.jp} /> <span class="lc-ex-pt">{ex.pt}</span>
+              <Marcado texto={ex.jp} /> <span class="lc-ex-pt">
+                <Misto texto={ex.pt} />
+              </span>
             </li>
           ))}
         </ul>
@@ -63,7 +73,13 @@ function QuadroView({ q }: { q: Quadro }) {
 
 /** Opção de resposta: japonês com furigana ou português. */
 function Opcao({ texto }: { texto: string }) {
-  return temJapones(texto) ? <Marcado texto={texto} /> : <span>{texto}</span>;
+  return temJapones(texto) ? (
+    <Marcado texto={texto} />
+  ) : (
+    <span>
+      <Misto texto={texto} />
+    </span>
+  );
 }
 
 /**
@@ -231,7 +247,9 @@ export function LicaoTela() {
 
         {p?.tipo === 'pergunta' && (
           <div class="lc-conteudo">
-            <p class="lc-enunciado">{p.enunciado}</p>
+            <p class="lc-enunciado">
+              <Misto texto={p.enunciado} />
+            </p>
             {p.frase && <Marcado texto={a.resposta && p.fraseCompleta ? p.fraseCompleta : p.frase} class="lc-jp" />}
             <div class="lc-opcoes">
               {a.opcoes.map((o, i) => {
@@ -245,7 +263,7 @@ export function LicaoTela() {
             </div>
             {a.resposta && (
               <p class={a.resposta.certa ? 'lc-retorno bom' : 'lc-retorno'} role="status">
-                {a.resposta.certa ? 'Isso.' : 'A resposta é a marcada.'} {p.explicacao}
+                {a.resposta.certa ? 'Isso.' : 'A resposta é a marcada.'} {p.explicacao && <Misto texto={p.explicacao} />}
               </p>
             )}
           </div>
@@ -253,7 +271,9 @@ export function LicaoTela() {
 
         {p?.tipo === 'ordem' && (
           <div class="lc-conteudo">
-            <p class="lc-enunciado">Monte a frase: {p.enunciado}</p>
+            <p class="lc-enunciado">
+              Monte a frase: <Misto texto={p.enunciado} />
+            </p>
             <div class="lc-montada" lang="ja">
               {a.montada.length === 0 ? <span class="muted">…</span> : a.montada.map((b) => <Marcado key={b} texto={p.blocos[b] as string} />)}
             </div>
@@ -270,7 +290,11 @@ export function LicaoTela() {
                 </button>
               ))}
             </div>
-            {a.montagemPronta && p.explicacao && <p class="lc-retorno bom">{p.explicacao}</p>}
+            {a.montagemPronta && p.explicacao && (
+              <p class="lc-retorno bom">
+                <Misto texto={p.explicacao} />
+              </p>
+            )}
           </div>
         )}
 

@@ -8,10 +8,12 @@
 import { createPortal } from 'preact/compat';
 import { useEffect, useLayoutEffect, useRef } from 'preact/hooks';
 import { chaveDoAlvo, mesmoAlvo, type Alvo } from '../../content/aprofundar/alvo';
-import { fichaDe } from '../../content/aprofundar/fichas';
+import { fichaDe, type Ficha } from '../../content/aprofundar/fichas';
 import { app, commit, screen } from '../app';
 import { ajudaAberta, aprofundarAberto, emCampoDeTexto } from '../help/ajuda';
+import { Furigana } from '../Furigana';
 import { Icone } from '../Icone';
+import { hasKanji } from '../kana';
 import { teclaDe } from '../teclas';
 import { abrirAprofundar, estudoLeve, fecharAprofundar, naTela, oferta, ouvirRespostas, pilha, recentes, TEMPO_DE_ESTUDO_MS, trocarPara, voltar } from './estado';
 import { CorpoFicha, pararDeTocar, tocar } from './Ficha';
@@ -64,7 +66,10 @@ function Oferta({ alvo }: { alvo: Alvo }) {
       <button onMouseDown={(e) => e.preventDefault()} onClick={() => abrirAprofundar(alvo)}>
         <Icone nome="book-open" />
         <span>
-          Aprofundar <strong lang="ja">{f.grande}</strong>
+          Aprofundar{' '}
+          <strong lang="ja">
+            <Grande f={f} />
+          </strong>
         </span>
         <kbd>F4</kbd>
       </button>
@@ -73,6 +78,11 @@ function Oferta({ alvo }: { alvo: Alvo }) {
       </button>
     </div>
   );
+}
+
+/** O topo da ficha com a leitura em cima. Kanji que não se lê sozinho (só em palavra) fica sem. */
+function Grande({ f }: { f: Ficha }) {
+  return f.alvo.t === 'kanji' && !f.leitura ? <>{f.grande}</> : <Furigana texto={f.grande} leitura={f.leitura} />;
 }
 
 function Lista({ titulo, alvos, atual }: { titulo: string; alvos: readonly Alvo[]; atual?: Alvo }) {
@@ -86,7 +96,9 @@ function Lista({ titulo, alvos, atual }: { titulo: string; alvos: readonly Alvo[
         const on = !!atual && mesmoAlvo(a, atual);
         return (
           <button key={chaveDoAlvo(a)} class={on ? 'on' : ''} aria-current={on ? 'true' : undefined} onClick={() => trocarPara(a)}>
-            <span lang="ja">{f.grande}</span>
+            <span lang="ja">
+              <Grande f={f} />
+            </span>
             <small>{f.tipo}</small>
           </button>
         );
@@ -137,9 +149,10 @@ function Painel() {
             {f ? (
               <>
                 <span class="apr-grande" lang="ja">
-                  {f.grande}
+                  <Grande f={f} />
                 </span>
-                {f.leitura && (
+                {/* Com kanji, a leitura já vai em cima; sem kanji (kana), ela é o romaji. */}
+                {f.leitura && !hasKanji(f.grande) && (
                   <span class="apr-leitura" lang="ja">
                     {f.leitura}
                   </span>
