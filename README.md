@@ -1,6 +1,6 @@
 # Kotoba Arcade
 
-Fliperama de jogos para aprender japonês, feito pensando em quem tem TDAH. A regra da casa é simples: primeiro tem que ser um jogo bom. O estudo acontece por dentro dele.
+Curso de japonês para quem fala português, feito pensando em quem tem TDAH. Está virando um curso linear, no formato dos cursos de escola, com jogos por cima para praticar. O plano está em [docs/curso.md](docs/curso.md). O contexto para continuar o trabalho está em [AGENTS.md](AGENTS.md).
 
 Por cima dos jogos fica a **Jornada** (tecla `J` no fliperama): um mapa em quadros de mangá com o caminho do zero até trabalhar no Japão. Cada passo é uma missão curta, uma lição em quadrinhos ou um dos jogos abaixo só com o conteúdo daquela parte. O Enter do fliperama continua abrindo o jogo da vez.
 
