@@ -47,6 +47,6 @@ Frases mais curtas, sem "como" repetido, uma ideia por frase.
 
 ## Imagens
 
-Cada objeto tem uma ilustração do estúdio de imagens (`scripts/imagens/kana.json`, ver docs/imagens.md), em mangá e em cor. A letra é desenhada por cima, no meio. Sem a letra, a imagem vira a pergunta. Objeto sem ilustração aprovada cai num desenho simples em SVG (`src/games/kanaimagens/Imagem.tsx`).
+Cada objeto tem uma ilustração colorida do estúdio de imagens, feita no Anima Turbo (prompts em `scripts/imagens/gerar-kana.py`, que escreve `scripts/imagens/kana.json`; ver docs/imagens.md). A imagem mostra o objeto do mnemônico, sem nada escrito. A letra é desenhada por cima, no meio. Sem a letra, a imagem vira a pergunta. Objeto sem ilustração aprovada cai num desenho simples em SVG (`src/games/kanaimagens/Imagem.tsx`).
 
 Tenten e maru aparecem como uma marca vermelha no canto (dois traços ou uma bolinha). Nos combinados, a imagem do kana pequeno aparece num quadrinho no canto: きゃ é a chave com o iate pequeno. っ e ゃ são a imagem da letra grande, encolhida.

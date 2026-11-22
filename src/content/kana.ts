@@ -141,7 +141,7 @@ const KATAKANA: Base[] = [
   ['タ', 'tábua no bico', 'O bico de ク com uma tábua atravessada no meio. "Ta" de tábua.', 'martelo 102 98', ['タオル', 'タオル', 'toalha']],
   ['チ', 'mergulho', 'O mergulhador de ち, agora de chapéu, pulando: "Tchibum!".', 'onda 60 112; gota 102 40 .7', ['チーズ', 'チーズ', 'queijo'], 'tchi, como "tia" falado no Rio'],
   ['ツ', 'tsunami', 'Duas gotas lado a lado em cima e uma onda que cai de cima. "Tsu" de tsunami.', 'barco 104 104 .8; onda 22 108 .7', ['ツアー', 'ツアー', 'excursão'], 'tsu, com o t e o s colados'],
-  ['テ', 'antena de TV', 'Uma antena de TV antiga no telhado. "Te" de テレビ, televisão.', 'casa 60 108 .9; som 104 26 .7', ['テレビ', 'テレビ', 'televisão'], 'te, sem virar "tchi"'],
+  ['テ', 'antena de TV', 'Uma TV antiga com a antena em cima: os traços de cima são a antena. "Te" de テレビ, televisão.', 'casa 60 108 .9; som 104 26 .7', ['テレビ', 'テレビ', 'televisão'], 'te, sem virar "tchi"'],
   ['ト', 'tronco', 'Um tronco com um galho para a direita, e o pica-pau batendo: "toc, toc".', 'passaro 100 30 .8; grama 60 110 .7', ['トイレ', 'トイレ', 'banheiro']],
   ['ナ', 'nadador', 'O nadador de な sem a onda: uma cruz de perna torta. "Na" de nadar.', 'onda 60 112; gota 102 36 .7', ['ナイフ', 'ナイフ', 'faca']],
   ['ニ', 'número dois', 'Dois traços: o número dois, 二, que se lê に, "ni".', 'dado 102 98', ['テニス', 'テニス', 'tênis (esporte)'], 'ni, sem virar "nhi"'],
