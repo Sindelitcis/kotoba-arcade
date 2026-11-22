@@ -1231,7 +1231,10 @@ input[type='text'], input:not([type]) { color: var(--text); }
 .ap-corpo { display: grid; grid-template-columns: minmax(0, 220px) 1fr; gap: 24px; align-items: center; }
 .ap-corpo:not(:has(.ap-visual)) { grid-template-columns: 1fr; text-align: center; }
 .ap-visual { display: grid; place-items: center; aspect-ratio: 1; background: var(--surface-2); border-radius: var(--r-m); overflow: hidden; -webkit-mask: var(--pincel-borda) center / 100% 100% no-repeat; mask: var(--pincel-borda) center / 100% 100% no-repeat; }
-.ap-visual img { width: 100%; height: 100%; object-fit: contain; }
+/* Com imagem, a caixa segue o formato dela: a arte vertical do KanjiMon (384×688) num quadrado
+   esticava até a altura natural e perdia o topo e o pé (e2e/apresentacao-arte.spec.ts). */
+.ap-visual:has(> img) { display: block; aspect-ratio: auto; }
+.ap-visual img { display: block; width: 100%; height: auto; max-height: min(380px, 55vh); object-fit: contain; }
 .ap-texto { display: grid; gap: 8px; justify-items: start; }
 .ap-corpo:not(:has(.ap-visual)) .ap-texto { justify-items: center; }
 .ap-grande { font: 700 3.4rem/1.5 var(--f-jp); color: var(--text); }
