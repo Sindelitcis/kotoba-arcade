@@ -104,5 +104,18 @@
   "obaasan": 11003,
   "gakusei": 10001,
   "tenin": 10001
- }
+ },
+ "furos": [
+  "obaasan",
+  "kazoku",
+  "sensei",
+  "isha",
+  "kangoshi",
+  "keisatsukan",
+  "kaishain",
+  "otokonoko",
+  "onnanoko",
+  "otokonohito",
+  "ojiisan"
+ ]
 }

@@ -31,6 +31,7 @@ Formato da lista (JSON):
       "largura": 1024, "altura": 1024,         tamanho da geração
       "saida": 384,                            lado maior do WebP final
       "recorte": true,                         tira o fundo branco (fica transparente)
+      "furos": ["isu"],                        itens com fundo aparecendo por dentro (entre ripas, pernas)
       "estilo": "...", "negativo": "...",      somados ao prompt de cada item
       "modelo_rotulo": "an illustration of {}", frase do CLIP
       "distratores": ["a person", ...],        rótulos extras que a imagem NÃO pode parecer
@@ -592,8 +593,14 @@ def revisar(lista: dict, so: set[str] | None = None, perguntar=perguntar_visao) 
 # ---------------------------------------------------------------- exportar
 
 
-def recortar(img):
-    """Tira o fundo claro ligado à borda (flood fill) e devolve RGBA recortado no objeto."""
+def recortar(img, furos: bool = False):
+    """Tira o fundo claro ligado à borda (flood fill) e devolve RGBA recortado no objeto.
+
+    `furos`: o fundo que aparece por dentro do objeto (entre as ripas de uma cadeira, entre as pernas,
+    no meio de uma alça) também sai. Esse fundo não encosta na borda da imagem, então o flood fill
+    não chega nele e sobrava branco ali. Fica ligado só no item que pede ("furos": true na lista),
+    porque objeto branco (arroz, papel, prato) também tem área clara fechada, e essa não pode sumir.
+    """
     import numpy as np
     from PIL import Image, ImageFilter
 
@@ -602,7 +609,8 @@ def recortar(img):
     # Cor do fundo = mediana da borda. O fundo nem sempre sai branco puro (às vezes cinza claro ou bege).
     borda = np.concatenate([rgb[0], rgb[-1], rgb[:, 0], rgb[:, -1]])
     cor_fundo = np.median(borda, axis=0)
-    claro = np.abs(rgb - cor_fundo).max(axis=2) <= 30
+    dif = np.abs(rgb - cor_fundo).max(axis=2)
+    claro = dif <= 30
     fundo = np.zeros((h, w), dtype=bool)
     fila = deque()
     for x in range(w):
@@ -622,6 +630,8 @@ def recortar(img):
             if 0 <= ny < h and 0 <= nx < w and claro[ny, nx] and not fundo[ny, nx]:
                 fundo[ny, nx] = True
                 fila.append((ny, nx))
+    if furos:
+        fundo |= furos_fechados(claro & ~fundo, dif, minimo=max(16, h * w // 4000))
     alfa = Image.fromarray(np.where(fundo, 0, 255).astype("uint8"), "L")
     # Borda macia de 1 px, sem halo branco.
     alfa = alfa.filter(ImageFilter.MinFilter(3)).filter(ImageFilter.GaussianBlur(0.7))
@@ -630,6 +640,38 @@ def recortar(img):
     caixa = alfa.point(lambda v: 255 if v > 8 else 0).getbbox()
     return rgba.crop(caixa) if caixa else rgba
 
+
+
+def furos_fechados(claro, dif, minimo: int):
+    """Áreas claras soltas por dentro do objeto, com pelo menos `minimo` pixels (as menores são brilho).
+
+    Só conta área lisa, quase da cor exata do fundo (diferença média até 4). Parte branca do objeto
+    (pena de galinha, pano, papel) tem sombra e textura, passa disso e fica.
+    """
+    import numpy as np
+
+    h, w = claro.shape
+    visto = np.zeros((h, w), dtype=bool)
+    out = np.zeros((h, w), dtype=bool)
+    for y0, x0 in zip(*np.nonzero(claro)):
+        if visto[y0, x0]:
+            continue
+        visto[y0, x0] = True
+        fila = deque([(y0, x0)])
+        area = []
+        while fila:
+            y, x = fila.popleft()
+            area.append((y, x))
+            for dy, dx in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                ny, nx = y + dy, x + dx
+                if 0 <= ny < h and 0 <= nx < w and claro[ny, nx] and not visto[ny, nx]:
+                    visto[ny, nx] = True
+                    fila.append((ny, nx))
+        if len(area) >= minimo:
+            ys, xs = list(zip(*area))
+            if dif[ys, xs].mean() <= 4:
+                out[ys, xs] = True
+    return out
 
 
 def salvar_webp(img, destino: pathlib.Path, qualidade: int, limite: int) -> int:
@@ -662,7 +704,8 @@ def exportar(lista: dict, repo: pathlib.Path, relatorio: dict) -> list[str]:
             faltando.append(iid)
             continue
         img = Image.open(out / f"{chave}.png")
-        img = recortar(img) if lista.get("recorte") else img.convert("RGB")
+        furos = iid in lista.get("furos", [])
+        img = recortar(img, furos) if lista.get("recorte") else img.convert("RGB")
         if lista.get("corte_altura"):
             # Retrato: só da cintura para cima.
             img = img.crop((0, 0, img.width, int(img.height * lista["corte_altura"])))

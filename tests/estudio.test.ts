@@ -223,3 +223,48 @@ print(json.dumps([sem_boa, estudio.escolhidas(lista, estudio.ler_relatorio(out))
   });
 });
 
+
+const TEM_NUMPY = TEM_PIL && (() => {
+  try {
+    execFileSync(PY!, ['-c', 'import numpy'], { stdio: 'ignore' });
+    return true;
+  } catch {
+    return false;
+  }
+})();
+
+describe.runIf(TEM_NUMPY)('estúdio: recorte com fundo por dentro do objeto', () => {
+  // Bug: a cadeira de ripas ficava com fundo branco entre as ripas, porque o recorte só apagava o
+  // fundo ligado à borda da imagem.
+  it('com "furos", o fundo fechado entre as ripas sai; sem, fica (objeto branco não pode virar buraco)', () => {
+    const r = py(`
+from PIL import Image, ImageDraw
+img = Image.new("RGB", (120, 120), (255, 255, 255))
+d = ImageDraw.Draw(img)
+d.rectangle((20, 20, 100, 100), outline=(90, 50, 20), width=6)   # moldura do encosto
+for x in (45, 70):
+    d.rectangle((x, 20, x + 5, 100), fill=(90, 50, 20))          # ripas
+com = estudio.recortar(img, True)
+sem = estudio.recortar(img)
+a = lambda im, x, y: im.getpixel((x - 20, y - 20))[3] > 128
+print(json.dumps([a(sem, 33, 60), a(com, 33, 60), a(com, 60, 60), a(com, 47, 60), list(com.size)]))`);
+    // Entre as ripas: opaco sem a opção, transparente com ela; a ripa continua opaca.
+    expect(r).toEqual([true, false, false, true, [81, 81]]);
+  });
+
+  it('com "furos", parte branca do objeto (com sombra) fechada por contorno não some', () => {
+    const r = py(`
+from PIL import Image, ImageDraw
+img = Image.new("RGB", (120, 120), (255, 255, 255))
+d = ImageDraw.Draw(img)
+d.rectangle((20, 20, 100, 100), fill=(238, 238, 238), outline=(40, 40, 40), width=4)   # pano branco sombreado
+com = estudio.recortar(img, True)
+print(json.dumps(com.getpixel((40, 40))[3] > 128))`);
+    expect(r).toBe(true);
+  });
+
+  it('a lista de objetos pede "furos" para a cadeira', () => {
+    const r = py(`print(json.dumps("isu" in estudio.ler_lista(${JSON.stringify(join(RAIZ, 'scripts', 'imagens', 'objetos.json'))}).get("furos", [])))`);
+    expect(r).toBe(true);
+  });
+});
