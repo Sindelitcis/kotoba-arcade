@@ -1,4 +1,4 @@
-import { MEMORIA_UNICA, PARAR, SAVE, semNovidade, VOLTOU } from './comum';
+import { ANTES_DE_COBRAR, MEMORIA_UNICA, PARAR, SAVE, semNovidade, TECLAS_APRESENTA, VOLTOU } from './comum';
 import type { Ajuda } from './tipos';
 
 export const KANABEAT: Ajuda = {
@@ -7,6 +7,7 @@ export const KANABEAT: Ajuda = {
   jp: 'かなビート',
   objetivo: ['Digitar a leitura de kana e palavras no tempo da música.', 'Cada música dura perto de um minuto. Não tem game over: a música sempre vai até o fim.'],
   passos: [
+    'Antes da música, os kana ou palavras novos aparecem um por um, com som e o que querem dizer. A música só começa depois.',
     'As notas vêm da direita para a esquerda, até a linha.',
     'Digite a leitura em romaji. Ex.: か → ka, ねこ → neko.',
     'Digitar quando a nota está em cima da linha vale mais. Mas basta digitar antes de ela passar.',
@@ -17,6 +18,7 @@ export const KANABEAT: Ajuda = {
     { teclas: ['A–Z'], faz: 'Digitar a leitura em romaji' },
     { teclas: ['Backspace'], faz: 'Apagar o que foi digitado' },
     { teclas: ['Espaço'], faz: 'Pausar. Na pausa, qualquer tecla volta' },
+    TECLAS_APRESENTA,
     { teclas: ['Esc'], faz: 'Sair para o fliperama' },
     { teclas: ['Enter'], faz: 'No fim: próxima música' },
     { teclas: ['1', '2', '3'], faz: 'No fim: próxima em Hiragana, Katakana ou Palavras' },
@@ -31,7 +33,7 @@ export const KANABEAT: Ajuda = {
     { nome: 'Música', texto: 'Uma faixa de verdade, com o nome em cima. O jogo escolhe a que tem o andamento mais perto do BPM e ajusta a velocidade. As notas caem na batida dela.' },
     { nome: 'Nota destacada', texto: 'A da vez. Você sempre digita a mais antiga que ainda não passou.' },
     { nome: 'Leitura em cima', texto: 'Em palavra com kanji, a leitura vai por cima (ex.: 山 com やま). Some quando a leitura já está firme.' },
-    { nome: 'Romaji embaixo', texto: 'Só no primeiro contato com o kana. Depois some.' },
+    { nome: 'Romaji embaixo', texto: 'Nas notas em prática, de kana ou palavra que você acabou de conhecer. Elas também ganham uma batida a mais e não zeram o combo se passarem. Depois o romaji some.' },
     { nome: 'Perfeito, Bom, Valeu, Passou', texto: 'Quão perto da linha você terminou de digitar. Passou é nota que foi embora sem resposta.' },
     { nome: 'S, A, B, C', texto: 'A nota da música. S pede 93% de precisão e nenhuma nota perdida.' },
   ],
@@ -39,9 +41,10 @@ export const KANABEAT: Ajuda = {
     'Digitar a leitura obriga a lembrar, não só reconhecer.',
     'A ajuda some conforme você aprende: primeiro o romaji, depois a leitura em cima do kanji.',
     'A velocidade se ajusta a você. Ninguém é expulso: errou muito, a próxima vem mais lenta.',
-    'As notas que passaram aparecem no fim, para olhar e ouvir de novo.',
+    'As notas que passaram aparecem no fim, para olhar e ouvir de novo. As de prática voltam numa apresentação rápida antes do resultado.',
   ],
   perguntas: [
+    ANTES_DE_COBRAR,
     { p: 'Abrir a ajuda pausa a música?', r: 'Pausa. Quando fechar, a tela de pausa fica esperando. Aperte qualquer tecla para voltar.' },
     { p: 'Posso digitar em kana?', r: 'Aqui não. O Kana Beat é para treinar o romaji no teclado. Para digitar em kana, use o KanjiMon ou a Conversa.' },
     VOLTOU,

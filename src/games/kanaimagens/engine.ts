@@ -1,8 +1,10 @@
 /**
  * Regras do Kana em imagens, sem tela.
  *
- * Uma rodada tem até RODADA perguntas. Kana novo chega primeiro numa apresentação
- * (imagem, letra e som) e só depois é cobrado, com a imagem ajudando. Conforme a carta
+ * Uma rodada tem até RODADA perguntas. Kana novo chega primeiro na apresentação comum
+ * (core/ensino.ts: imagem, letra, som e a frase para lembrar) e só depois é perguntado. Enquanto
+ * está em prática, a pergunta tem duas ou três alternativas, a imagem fica na tela e errar
+ * não zera o combo. Conforme a carta
  * firma na memória, a pergunta fica mais seca: imagem → letra, letra → imagem, pares que
  * confundem e, por fim, só o som. Palavras inteiras em katakana aparecem quando todos os
  * kana delas já foram vistos. Erro não para nada: a resposta certa aparece com a imagem,
@@ -19,12 +21,14 @@ import {
   kanaItem,
   type KanaItem,
   type PalavraKatakana,
+  type Escrita,
 } from '../../content/kana';
 import { levelInfo } from '../../core/progress';
 import { pickNext } from '../../core/picker';
 import { shuffle, type Rng } from '../../core/rng';
 import type { Profile } from '../../core/save';
-import { masteryLevel, review, type CardState } from '../../core/srs';
+import { apresentar, avaliar, emPratica, foiApresentado, notaDaPratica, opcoesPara } from '../../core/ensino';
+import { masteryLevel, type CardState } from '../../core/srs';
 
 export type Modo = 'apresenta' | 'imagem-letra' | 'letra-imagem' | 'pares' | 'som' | 'relampago' | 'leitura';
 
@@ -40,7 +44,7 @@ export const MODOS: readonly { modo: Exclude<Modo, 'leitura'>; nome: string; tec
 
 /** Modos em que o som é a pista: toca logo que a pergunta aparece, e R repete antes de responder. */
 export function somEhPista(modo: Modo): boolean {
-  return modo === 'apresenta' || modo === 'som' || modo === 'pares';
+  return modo === 'som' || modo === 'pares';
 }
 
 /** Perguntas por rodada (sem contar as apresentações). */
@@ -112,7 +116,7 @@ export interface Pergunta {
   certa: number;
   /** O que a voz fala (na apresentação e no "só pelo som", logo que aparece). */
   fala: string;
-  /** Kana que entrou nesta rodada: a imagem fica na tela até a pessoa acertar uma vez. */
+  /** Kana em prática (core/ensino.ts): a imagem fica na tela e errar não zera o combo. */
   novo?: boolean;
 }
 
@@ -134,7 +138,7 @@ export function parMinimo(k: KanaItem): string {
   return w.replace(k.char, grande);
 }
 
-function sorteiaOpcoes(rng: Rng, certa: Opcao, outras: Opcao[], n = 4): { opcoes: Opcao[]; certa: number } {
+export function sorteiaOpcoes(rng: Rng, certa: Opcao, outras: Opcao[], n = 4): { opcoes: Opcao[]; certa: number } {
   const opcoes = shuffle(rng, [certa, ...outras.slice(0, n - 1)]);
   return { opcoes, certa: opcoes.indexOf(certa) };
 }
@@ -160,8 +164,8 @@ export function distratores(alvo: KanaItem, vistos: ReadonlySet<string>, rng: Rn
   return out;
 }
 
-export function perguntaDe(modo: Modo, alvo: KanaItem, vistos: ReadonlySet<string>, rng: Rng): Pergunta {
-  if (modo === 'apresenta') return { modo, alvo, opcoes: [], certa: -1, fala: alvo.fala };
+/** `n`: quantas alternativas (na prática, duas ou três). */
+export function perguntaDe(modo: Modo, alvo: KanaItem, vistos: ReadonlySet<string>, rng: Rng, n = 4): Pergunta {
   if (dentroDePalavra(alvo)) {
     // っ, ー e os pequenos: ouça a palavra e escolha a grafia certa.
     const certa: Opcao = { texto: alvo.exemplo.kana };
@@ -177,11 +181,11 @@ export function perguntaDe(modo: Modo, alvo: KanaItem, vistos: ReadonlySet<strin
   }
   if (modo === 'leitura') {
     const outras = distratores(alvo, vistos, rng).map((k) => ({ texto: k.romaji }));
-    const s = sorteiaOpcoes(rng, { texto: alvo.romaji }, outras);
+    const s = sorteiaOpcoes(rng, { texto: alvo.romaji }, outras, n);
     return { modo, alvo, ...s, fala: alvo.fala };
   }
   const outras = distratores(alvo, vistos, rng).map((item) => ({ item }));
-  const s = sorteiaOpcoes(rng, { item: alvo }, outras);
+  const s = sorteiaOpcoes(rng, { item: alvo }, outras, n);
   return { modo, alvo, ...s, fala: alvo.fala };
 }
 
@@ -207,9 +211,19 @@ export function modoPara(alvo: KanaItem, card: CardState | undefined, vistos: Re
   return 'som';
 }
 
-/** Ids dos lotes abertos, na ordem. */
-export function idsAbertos(save: KanaImagensSave): string[] {
-  return LOTES.slice(0, save.abertos).flatMap((l) => l.ids);
+/** Escrita de um lote: a do primeiro kana dele (os lotes não misturam). */
+const escritaDoLote = (l: { ids: readonly string[] }): Escrita => kanaItem(l.ids[0]!).escrita;
+
+/**
+ * Ids dos lotes abertos, na ordem. Com `escrita` (missão da Jornada), só os lotes dela;
+ * se nenhum lote dela abriu ainda, o primeiro dela, que entra pela apresentação como qualquer novo.
+ */
+export function idsAbertos(save: KanaImagensSave, escrita?: Escrita): string[] {
+  const abertos = LOTES.slice(0, save.abertos);
+  if (!escrita) return abertos.flatMap((l) => l.ids);
+  const dela = abertos.filter((l) => escritaDoLote(l) === escrita);
+  const lotes = dela.length > 0 ? dela : LOTES.filter((l) => escritaDoLote(l) === escrita).slice(0, 1);
+  return lotes.flatMap((l) => l.ids);
 }
 
 /** Já viu: tem carta na memória (em qualquer jogo, inclusive no Kana Beat). */
@@ -237,6 +251,8 @@ export interface RodadaDeps {
   save: KanaImagensSave;
   rng: Rng;
   now: () => number;
+  /** Missão da Jornada: só hiragana ou só katakana. */
+  escrita?: Escrita;
 }
 
 export type Evento =
@@ -261,6 +277,8 @@ export interface Resumo {
 
 export class Rodada {
   readonly fila: Pergunta[] = [];
+  /** Os kana novos estão sendo apresentados (antes da primeira pergunta). */
+  apresentando = false;
   indice = 0;
   /** Perguntas de verdade (sem apresentações) já respondidas. */
   feitas = 0;
@@ -285,10 +303,31 @@ export class Rodada {
   ) {
     this.vistos = vistosDe(deps.cards);
     if (!modoFixo) this.apresentarNovos();
-    this.completar();
+    // Com novos na tela, o resto da fila espera a apresentação (só sai pergunta de kana apresentado).
+    if (!this.apresentando) this.completar();
     // Treino sem nada para perguntar: a tela nem deixa começar, mas a rodada não quebra.
-    if (this.fila.length === 0) this.fim = true;
+    if (this.fila.length === 0 && !this.apresentando) this.fim = true;
     this.mostradaEm = deps.now();
+  }
+
+  /** A apresentação acabou: os kana novos viram cartas e começa a primeira pergunta. */
+  apresentou(): void {
+    if (!this.apresentando) return;
+    apresentar(this.deps.cards, this.novos.map((k) => k.carta), this.deps.now());
+    this.apresentando = false;
+    this.completar();
+    this.mostradaEm = this.deps.now();
+  }
+
+  /** Pergunta do kana na fase em que ele está: na prática, a imagem por perto e menos alternativas. */
+  private perguntaPara(modo: Modo, alvo: KanaItem): Pergunta {
+    const { cards, rng } = this.deps;
+    const novo = this.novos.includes(alvo) || emPratica(cards, alvo.carta);
+    const n = novo ? opcoesPara(cards, alvo.carta, 4) : 4;
+    const comImagem = modo === 'imagem-letra' || modo === 'letra-imagem' || dentroDePalavra(alvo);
+    // No treino de um modo só, o modo fica; o apoio é ter menos alternativas.
+    const p = perguntaDe(novo && !comImagem && !this.modoFixo ? 'imagem-letra' : modo, alvo, this.vistos, rng, n);
+    return novo ? { ...p, novo: true } : p;
   }
 
   get atual(): Pergunta {
@@ -297,21 +336,19 @@ export class Rodada {
 
   private apresentarNovos(): void {
     const { save, cards } = this.deps;
-    const novos = idsAbertos(save)
+    const novos = idsAbertos(save, this.deps.escrita)
       .filter((id) => !this.vistos.has(id))
       .slice(0, NOVOS_POR_RODADA)
       .map(kanaItem);
     // Muita coisa ainda mole na memória: segura as novidades, como o resto do fliperama.
     const moles = KANA_IMAGENS.filter((k) => cards[k.carta] && masteryLevel(cards[k.carta]) <= 1).length;
     const cabem = Math.max(0, Math.min(novos.length, 12 - moles));
-    for (const k of novos.slice(0, Math.max(cabem, this.vistos.size === 0 ? 1 : 0))) {
-      this.novos.push(k);
-      this.fila.push(perguntaDe('apresenta', k, this.vistos, this.deps.rng));
-    }
-    // Ensina antes de cobrar: cada novo é perguntado logo depois, com a imagem por perto.
+    for (const k of novos.slice(0, Math.max(cabem, this.vistos.size === 0 ? 1 : 0))) this.novos.push(k);
+    if (this.novos.length > 0) this.apresentando = true;
+    // Ensina antes de cobrar: cada novo é perguntado logo depois da apresentação, com a imagem por perto.
+    for (const k of this.novos) this.vistos.add(k.id);
     for (const k of this.novos) {
-      this.vistos.add(k.id);
-      this.fila.push({ ...perguntaDe(dentroDePalavra(k) ? 'som' : 'imagem-letra', k, this.vistos, this.deps.rng), novo: true });
+      this.fila.push(this.perguntaPara(dentroDePalavra(k) ? 'som' : 'imagem-letra', k));
       this.recentes.push(k.carta);
     }
   }
@@ -319,8 +356,8 @@ export class Rodada {
   /** Enche a fila até RODADA perguntas, escolhendo pela memória espaçada. */
   private completar(): void {
     const { cards, rng, now } = this.deps;
-    const naFila = () => this.fila.filter((p) => p.modo !== 'apresenta').length;
-    const pool = idsAbertos(this.deps.save)
+    const naFila = () => this.fila.length;
+    const pool = idsAbertos(this.deps.save, this.deps.escrita)
       .filter((id) => this.vistos.has(id))
       .map((id) => kanaItem(id))
       .filter((k) => this.serve(k));
@@ -350,7 +387,7 @@ export class Rodada {
       const alvo = pool.find((k) => k.carta === escolha.key) as KanaItem;
       this.recentes.push(alvo.carta);
       const modo = this.modoFixo ?? modoPara(alvo, cards[alvo.carta], this.vistos, rng);
-      this.fila.push(perguntaDe(modo, alvo, this.vistos, rng));
+      this.fila.push(this.perguntaPara(modo, alvo));
     }
   }
 
@@ -377,17 +414,15 @@ export class Rodada {
     return out;
   }
 
-  /** Apresentação vista: segue para a próxima. */
+  /** Pergunta respondida: segue para a próxima. */
   seguir(): Evento[] {
-    if (this.fim) return [];
-    const p = this.atual;
-    if (p.modo !== 'apresenta' && this.respondida === null) return [];
+    if (this.fim || this.apresentando || this.respondida === null) return [];
     return this.avancar();
   }
 
   responder(i: number): Evento[] {
     const p = this.atual;
-    if (this.fim || p.modo === 'apresenta' || this.respondida !== null || i < 0 || i >= p.opcoes.length) return [];
+    if (this.fim || this.apresentando || this.respondida !== null || i < 0 || i >= p.opcoes.length) return [];
     const { cards, save, profile, now } = this.deps;
     const ms = now() - this.mostradaEm;
     const certo = i === p.certa;
@@ -395,13 +430,14 @@ export class Rodada {
     this.feitas++;
     const ev: Evento[] = [];
     if (p.alvo) {
-      // Com a imagem por perto, acertar ainda é com ajuda: a memória anota como difícil.
-      const hinted = p.modo === 'imagem-letra' || p.modo === 'letra-imagem' || !!p.novo;
-      cards[p.alvo.carta] = review(cards[p.alvo.carta], { correct: certo, ms, hinted }, now());
+      // Na prática, a imagem é a dica e acertar conta como bom. Depois, com a imagem por perto, é difícil.
+      const hinted = p.modo === 'imagem-letra' || p.modo === 'letra-imagem';
+      avaliar(cards, p.alvo.carta, p.novo ? notaDaPratica(certo, ms) : { correct: certo, ms, hinted }, now());
     }
     if (certo) {
       this.acertos++;
-      this.combo++;
+      // Na prática, o combo não conta (nem sobe, nem cai).
+      if (!p.novo) this.combo++;
       this.comboMax = Math.max(this.comboMax, this.combo);
       const rapido = ms < RAPIDO_MS;
       const antes = levelInfo(profile.xp).level;
@@ -418,12 +454,12 @@ export class Rodada {
         ev.push({ t: 'lote', titulo });
       }
     } else {
-      this.combo = 0;
+      if (!p.novo) this.combo = 0;
       ev.push({ t: 'erro', certa: p.certa });
       if (p.alvo) {
         if (!this.errados.some((k) => k.id === p.alvo?.id)) this.errados.push(p.alvo);
-        // Volta duas perguntas depois, com a imagem por perto de novo.
-        const volta = { ...perguntaDe(dentroDePalavra(p.alvo) ? 'som' : 'imagem-letra', p.alvo, this.vistos, this.deps.rng), novo: true };
+        // Volta duas perguntas depois, com a imagem por perto de novo (a carta voltou para a prática).
+        const volta = this.perguntaPara(dentroDePalavra(p.alvo) ? 'som' : 'imagem-letra', p.alvo);
         this.fila.splice(Math.min(this.fila.length, this.indice + 3), 0, volta);
       }
     }
@@ -534,7 +570,9 @@ export class TesteEntrada {
     const certo = op === p.certa;
     if (certo) this.acertosBloco++;
     const { cards, now } = this.deps;
-    if (p.alvo) cards[p.alvo.carta] = review(cards[p.alvo.carta], { correct: certo, ms: now() - this.mostradaEm }, now());
+    // Só dá nota a kana já apresentado: o que o teste encontra pela primeira vez entra pela apresentação
+    // (ou como sabido, se o bloco passar).
+    if (p.alvo && foiApresentado(cards, p.alvo.carta)) avaliar(cards, p.alvo.carta, { correct: certo, ms: now() - this.mostradaEm }, now());
     return certo;
   }
 
@@ -568,8 +606,13 @@ export class TesteEntrada {
     for (const li of b.lotes) {
       for (const id of (LOTES[li] as { ids: string[] }).ids) {
         const k = kanaItem(id);
-        // Quem já sabe não precisa da apresentação: a carta entra como lembrada.
-        if (!cards[k.carta]) cards[k.carta] = review(undefined, { correct: true }, now());
+        // Quem já sabe não precisa da apresentação nem da prática: a carta entra como fácil,
+        // direto na cobrança (ms 0 vira Easy no FSRS).
+        if (!cards[k.carta]) {
+          apresentar(cards, [k.carta], now());
+          avaliar(cards, k.carta, { correct: true, ms: 0 }, now());
+        }
+
         save.acertos[id] = ACERTOS_PARA_ABRIR;
       }
     }

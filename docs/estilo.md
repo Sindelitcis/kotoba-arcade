@@ -88,6 +88,7 @@ Os kanji que só o Kanji em peças usa ficam em arquivos à parte (`*-Pecas.woff
 - **Etiqueta** (`.hub-rotulo`, raridade, `済`): pílula pequena com fundo `-soft`.
 - **Segmento** (`.segmento`): botões com `aria-pressed` para escolhas curtas, como o tema.
 - **Atalho** (`kbd`): só aparece com mouse e teclado. Em tela de toque (`pointer: coarse`) some.
+- **Apresentação** (`.ap-cartao`, `src/core/Apresentacao.tsx`): o cartão de coisa nova, igual em todos os jogos. Em cima, os pontos (`.ap-pontos`: verde o que já passou, azul o da vez) e o tipo do item. No corpo, a imagem com borda de pincel (`.ap-visual`) ao lado do japonês grande (`.ap-grande`, com furigana em `rt`), o romaji, o significado em azul forte (`.ap-pt`), uma frase de explicação e um exemplo com filete de tinta à esquerda (`.ap-exemplo`). Embaixo, voltar, ouvir, a voz do português e o botão `.primary` de seguir. Item sem imagem fica centrado. Quando um erro na prática mostra o item de novo, o cartão vem em `.de-novo`, com o fundo `--surface-2`, para não parecer coisa nova.
 
 ## Pincel
 

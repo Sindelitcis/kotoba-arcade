@@ -1,5 +1,6 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { faseDe, foiApresentado } from '../src/core/ensino';
 import { describe, expect, it } from 'vitest';
 import { KANA } from '../src/content';
 import {
@@ -17,7 +18,7 @@ import type { Manifesto } from '../src/core/audio';
 import { kataToHira } from '../src/core/kana';
 import { seededRng } from '../src/core/rng';
 import { emptySave } from '../src/core/save';
-import { masteryLevel, review } from '../src/core/srs';
+import { masteryLevel, review, newCard } from '../src/core/srs';
 import { VOZ_PALAVRA } from '../src/core/vozes';
 import {
   ACERTOS_PARA_ABRIR,
@@ -186,11 +187,10 @@ function deps(seed = 1, now = T0) {
 function jogar(r: Rodada, acertar: (p: Pergunta) => boolean = () => true): Evento[] {
   const todos: Evento[] = [];
   for (let n = 0; n < 200 && !r.fim; n++) {
+    if (r.apresentando) r.apresentou();
     const p = r.atual;
-    if (p.modo !== 'apresenta') {
-      const ok = acertar(p);
-      todos.push(...r.responder(ok ? p.certa : (p.certa + 1) % p.opcoes.length));
-    }
+    const ok = acertar(p);
+    todos.push(...r.responder(ok ? p.certa : (p.certa + 1) % p.opcoes.length));
     todos.push(...r.seguir());
   }
   return todos;
@@ -207,18 +207,50 @@ describe('save', () => {
 });
 
 describe('rodada', () => {
-  it('primeiro contato ensina antes de cobrar: apresentação, depois a pergunta com imagem do mesmo kana', () => {
-    const r = new Rodada(deps());
-    expect(r.atual.modo).toBe('apresenta');
-    const apresentados = r.fila.filter((p) => p.modo === 'apresenta').map((p) => p.alvo?.char);
-    expect(apresentados).toEqual(['あ', 'い', 'う']);
-    expect(apresentados.length).toBeLessThanOrEqual(NOVOS_POR_RODADA);
-    const depois = r.fila.slice(3, 6);
+  it('primeiro contato ensina antes de cobrar: apresentação, depois a prática com imagem do mesmo kana', () => {
+    const d = deps();
+    const r = new Rodada(d);
+    expect(r.apresentando).toBe(true);
+    expect(r.novos.map((k) => k.char)).toEqual(['あ', 'い', 'う']);
+    expect(r.novos.length).toBeLessThanOrEqual(NOVOS_POR_RODADA);
+    // Antes de acabar a apresentação, nada responde e nada é gravado.
+    expect(r.responder(r.atual.certa)).toEqual([]);
+    expect(Object.keys(d.cards)).toHaveLength(0);
+    r.apresentou();
+    for (const k of r.novos) expect(foiApresentado(d.cards, k.carta)).toBe(true);
+    const depois = r.fila.slice(0, 3);
     expect(depois.map((p) => p.alvo?.char)).toEqual(['あ', 'い', 'う']);
     for (const p of depois) {
       expect(p.modo).toBe('imagem-letra');
       expect(p.novo).toBe(true);
+      expect(p.opcoes).toHaveLength(2);
     }
+  });
+
+  it('erro na prática não zera o combo', () => {
+    const d = deps();
+    d.save.abertos = LOTES.length;
+    for (const k of KANA_IMAGENS.slice(0, 6)) {
+      let c = review(newCard(0), { correct: true }, T0 - 200 * 86_400_000);
+      for (let i = 0; i < 5; i++) c = review(c, { correct: true }, c.due);
+      d.cards[k.carta] = { ...c, due: T0 - 1000 };
+    }
+    const r = new Rodada(d);
+    r.apresentou();
+    expect(r.atual.novo).toBe(true);
+    r.combo = 3;
+    r.responder((r.atual.certa + 1) % r.atual.opcoes.length);
+    expect(r.combo).toBe(3);
+    // Na cobrança, erro zera.
+    r.seguir();
+    let guarda = 0;
+    while (r.atual.novo && guarda++ < 20) {
+      r.responder(r.atual.certa);
+      r.seguir();
+    }
+    expect(r.atual.novo).toBeFalsy();
+    r.responder((r.atual.certa + 1) % r.atual.opcoes.length);
+    expect(r.combo).toBe(0);
   });
 
   it('acerto grava a carta compartilhada, soma XP e combo; a rodada acaba em RODADA perguntas', () => {
@@ -231,12 +263,13 @@ describe('rodada', () => {
     expect(d.cards['a:あ#reading']).toBeDefined();
     expect(d.profile.xp).toBeGreaterThan(0);
     expect(d.save.rodadas).toBe(1);
-    expect(r.comboMax).toBe(RODADA);
+    // Na prática o combo não conta: só as perguntas de cobrança somam.
+    expect(r.comboMax).toBe(r.fila.slice(0, r.feitas).filter((p) => !p.novo).length);
   });
 
   it('erro não para nada: mostra a certa e o kana volta em até três perguntas, com imagem', () => {
     const r = new Rodada(deps());
-    while (r.atual.modo === 'apresenta') r.seguir();
+    r.apresentou();
     const alvo = r.atual.alvo?.id;
     const ev = r.responder((r.atual.certa + 1) % r.atual.opcoes.length);
     expect(ev).toEqual([{ t: 'erro', certa: r.atual.certa }]);
@@ -247,7 +280,7 @@ describe('rodada', () => {
 
   it('responder duas vezes ou com número fora das opções não conta', () => {
     const r = new Rodada(deps());
-    while (r.atual.modo === 'apresenta') r.seguir();
+    r.apresentou();
     expect(r.responder(9)).toEqual([]);
     expect(r.responder(r.atual.certa)).not.toEqual([]);
     expect(r.responder(r.atual.certa)).toEqual([]);
@@ -257,9 +290,10 @@ describe('rodada', () => {
   it('com muita coisa mole na memória, a rodada não traz kana novo', () => {
     const d = deps();
     d.save.abertos = LOTES.length;
-    for (const k of KANA_IMAGENS.slice(0, 14)) d.cards[k.carta] = review(undefined, { correct: false }, T0);
+    for (const k of KANA_IMAGENS.slice(0, 14)) d.cards[k.carta] = review(newCard(0), { correct: false }, T0);
     const r = new Rodada(d);
-    expect(r.fila.some((p) => p.modo === 'apresenta')).toBe(false);
+    expect(r.apresentando).toBe(false);
+    expect(r.novos).toEqual([]);
   });
 
   it('o lote seguinte abre quando todo kana do último foi acertado de primeira duas vezes', () => {
@@ -326,7 +360,7 @@ describe('perguntas', () => {
     const k = char('し');
     const v = new Set([k.id]);
     expect(['imagem-letra', 'letra-imagem']).toContain(modoPara(k, undefined, v, seededRng(1)));
-    let card = undefined;
+    let card = newCard(T0);
     for (let i = 0; i < 6; i++) card = review(card, { correct: true }, T0 + i * 40 * 86_400_000);
     expect(masteryLevel(card)).toBeGreaterThanOrEqual(3);
     expect(modoPara(k, card, v, seededRng(1))).toBe('som');
@@ -342,13 +376,13 @@ describe('perguntas', () => {
   });
 
   it('o som toca sozinho só onde ele é a pista (senão entregaria a resposta)', () => {
-    expect(['apresenta', 'som', 'pares'].every((m) => somEhPista(m as never))).toBe(true);
+    expect(['som', 'pares'].every((m) => somEhPista(m as never))).toBe(true);
     expect(['imagem-letra', 'letra-imagem', 'relampago', 'leitura'].some((m) => somEhPista(m as never))).toBe(false);
   });
 
   it('treino de um modo só: só perguntas daquele modo', () => {
     const d = deps();
-    for (const k of KANA_IMAGENS.filter((x) => x.escrita === 'katakana' && x.grupo === 'basico')) d.cards[k.carta] = review(undefined, { correct: true }, T0);
+    for (const k of KANA_IMAGENS.filter((x) => x.escrita === 'katakana' && x.grupo === 'basico')) d.cards[k.carta] = review(newCard(0), { correct: true }, T0);
     d.save.abertos = LOTES.length;
     expect(Rodada.modosDisponiveis(d.cards).has('relampago')).toBe(true);
     for (const modo of ['letra-imagem', 'pares', 'relampago'] as const) {
@@ -378,6 +412,8 @@ describe('teste de entrada', () => {
     expect(d.save.teste).toBe(true);
     expect(KANA_IMAGENS.every((k) => d.cards[k.carta])).toBe(true);
     expect(new Rodada(d).fila.some((p) => p.modo === 'apresenta')).toBe(false);
+    // Passou no teste: vai direto para a cobrança, sem prática (quatro opções, sem dica).
+    expect(KANA_IMAGENS.every((k) => faseDe(d.cards, k.carta) === 'cobranca')).toBe(true);
   });
 
   it('quem não sabe para no primeiro bloco, em quatro perguntas, e nada conta como sabido', () => {

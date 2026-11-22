@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
+import { passarApresentacao } from './apoio';
 
 test.beforeEach(async ({ page }) => {
   await page.route('https://kanjimon.online/**', (route) => route.abort());
@@ -43,7 +44,9 @@ test('do fliperama à primeira resposta só no teclado: lição primeiro, com as
   await comecar(page);
   const licao = page.getByTestId('pc-licao');
   await expect(licao).toBeVisible();
-  await expect(licao.getByTestId('pc-historia')).not.toBeEmpty();
+  // A historinha das peças, com o português falado (Voz 1 ou Voz 2).
+  await expect(licao.locator('.ap-explica')).not.toBeEmpty();
+  await expect(licao.getByTestId('ap-voz')).toBeVisible();
   // Traços do KanjiVG: o kanji é desenho, não letra.
   await expect(licao.locator('svg.pc-kanji path').first()).toBeVisible();
   await page.keyboard.press('Enter');
@@ -94,6 +97,8 @@ test('uma rodada inteira termina no resumo e o progresso fica salvo', async ({ p
 test('modo intruso (tecla 3): seis kanji e um diferente, com a diferença explicada', async ({ page }) => {
   await abrir(page);
   await comecar(page, '3');
+  // Kanji nunca visto ganha lição antes, em qualquer modo.
+  if (await page.getByTestId('pc-licao').isVisible()) await passarApresentacao(page);
   await expect(page.getByTestId('pc-quadro')).toHaveAttribute('data-modo', 'intruso');
   await expect(page.locator('[data-testid="pc-opcao"]')).toHaveCount(6);
   // Kanji grande o bastante para ver a diferença de um traço (antes saía com 17 px).
@@ -128,6 +133,7 @@ test('em tela baixa, a explicação rola para dentro da tela depois da resposta'
   await page.setViewportSize({ width: 800, height: 560 });
   await abrir(page);
   await comecar(page, '4');
+  if (await page.getByTestId('pc-licao').isVisible()) await passarApresentacao(page);
   const i = await certa(page);
   await page.keyboard.press(String(((i + 1) % 4) + 1));
   await expect(page.getByTestId('pc-seguir')).toBeInViewport();

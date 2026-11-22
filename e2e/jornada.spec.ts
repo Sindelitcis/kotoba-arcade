@@ -42,11 +42,42 @@ test('missão de jogo abre o jogo recortado e a saída volta para a Jornada', as
   await page.keyboard.press('j');
   await page.keyboard.press('2');
   const missoes = page.getByTestId('jn-missao');
-  await expect(missoes.first()).toContainText('Kana Beat');
+  // Ensinar antes de cobrar, entre os jogos: o kana com imagem vem antes do Kana Beat.
+  await expect(missoes.nth(0)).toContainText('Kana em imagens');
+  await expect(missoes.nth(1)).toContainText('Kana Beat');
+  await page.keyboard.press('ArrowDown');
   await page.keyboard.press('Enter');
-  await expect(page.locator('.kb-track')).toBeVisible();
+  await expect(page.locator('.kb-track, [data-testid="kb-apresenta"]').first()).toBeVisible();
   await page.keyboard.press('Escape');
-  await expect(page.getByTestId('jn-missao').first()).toContainText('feita 1×');
+  await expect(page.getByTestId('jn-missao').nth(1)).toContainText('feita 1×');
+});
+
+test('missão de katakana no Kana em imagens apresenta katakana, não o あ', async ({ page }) => {
+  await page.keyboard.press('j');
+  await page.keyboard.press('2');
+  const missoes = page.getByTestId('jn-missao');
+  await expect(missoes.nth(3)).toContainText('Kana em imagens: katakana');
+  for (let i = 0; i < 3; i++) await page.keyboard.press('ArrowDown');
+  await page.keyboard.press('Enter');
+  await expect(page.getByTestId('ki-menu')).toBeVisible();
+  await page.keyboard.press('Enter');
+  const cartao = page.getByTestId('apresentacao');
+  await expect(page.getByTestId('ki-apresenta')).toBeVisible();
+  await expect(cartao.locator('svg[data-kana="ア"]')).toBeVisible();
+  await expect(cartao.locator('svg[data-kana="あ"]')).toHaveCount(0);
+});
+
+test('as primeiras palavras: a Cena Viva da missão abre no lugar dela, apresentando as coisas', async ({ page }) => {
+  await page.keyboard.press('j');
+  await page.keyboard.press('2');
+  const missoes = page.getByTestId('jn-missao');
+  await expect(missoes.nth(5)).toContainText('Cena Viva: o nome das coisas');
+  await expect(missoes.nth(6)).toContainText('Memória');
+  for (let i = 0; i < 5; i++) await page.keyboard.press('ArrowDown');
+  await page.keyboard.press('Enter');
+  await page.keyboard.press('Enter');
+  await expect(page.getByTestId('apresentacao')).toBeVisible();
+  await expect(page.getByTestId('cn-progresso')).toContainText('コンビニ');
 });
 
 test('Esc na lição volta para a Jornada sem contar a missão', async ({ page }) => {

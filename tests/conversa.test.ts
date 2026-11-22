@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { cardKey } from '../src/content';
 import { seededRng } from '../src/core/rng';
 import { emptySave } from '../src/core/save';
-import { review } from '../src/core/srs';
+import { review, newCard } from '../src/core/srs';
 import {
   acharTermos,
   CENAS,
@@ -25,6 +25,8 @@ import {
   palavrasEmFoco,
   paraJapones,
   proximaCena,
+  apresentarTermos,
+  termosParaApresentar,
   XP_FIM,
   XP_PASSO,
   XP_TURNO,
@@ -83,12 +85,17 @@ function fakeAi(replies: (string | Error)[], tokens?: (texto: string) => Token[]
   return { ai, calls, schemas };
 }
 
-function setup(replies: (string | Error)[], opts: { cena?: string; tokens?: (t: string) => Token[] } = {}) {
+/** Uma conversa começando. Como na tela, as palavras da cena já foram apresentadas antes (`ver: false` pula isso). */
+function setup(replies: (string | Error)[], opts: { cena?: string; tokens?: (t: string) => Token[]; ver?: boolean } = {}) {
   const data = emptySave(T0);
   const save = emptyConversaSave();
   let t = T0;
   const fake = fakeAi(replies, opts.tokens);
-  const conversa = new Conversa(getCena(opts.cena ?? 'pedido'), {
+  const cena = getCena(opts.cena ?? 'pedido');
+  const apresentadas = opts.ver === false ? [] : termosParaApresentar(cena, data.cards);
+  apresentarTermos(data.cards, apresentadas, T0);
+  const conversa = new Conversa(cena, {
+    apresentadas,
     cards: data.cards,
     profile: data.profile,
     save,
@@ -256,9 +263,12 @@ describe('conferência da resposta do modelo', () => {
 describe('o que vai para o modelo', () => {
   it('o prompt traz o papel, os passos e as palavras que o jogador conhece', () => {
     const data = emptySave(T0);
-    data.cards[cardKey('w:駅', 'meaning')] = review(undefined, { correct: true }, T0);
+    data.cards[cardKey('w:駅', 'meaning')] = review(newCard(0), { correct: true }, T0);
     const conhecidas = palavrasConhecidas(data.cards, T0);
     expect(conhecidas.map((t) => t.jp)).toEqual(['駅']);
+    // Só palavra apresentada vira foco da conversa.
+    expect(palavrasEmFoco(cafe, data.cards, T0, seededRng(1)).map((t) => t.jp)).toEqual([]);
+    apresentarTermos(data.cards, termosParaApresentar(cafe, data.cards), T0);
     const foco = palavrasEmFoco(cafe, data.cards, T0, seededRng(1));
     expect(foco).toHaveLength(3);
     const prompt = montarPrompt(cafe, conhecidas, foco);
@@ -400,7 +410,7 @@ describe('conversa', () => {
   it('palavra que o jogador já conhecia e usou sozinho aparece em "usadas" e avança na memória', async () => {
     const s = setup([json({})]);
     const key = cardKey('w:ください', 'meaning');
-    s.data.cards[key] = review(undefined, { correct: true }, T0 - 86_400_000);
+    s.data.cards[key] = review(newCard(0), { correct: true }, T0 - 86_400_000);
     await s.conversa.dizer('koohii wo kudasai');
     expect(s.data.cards[key]!.reps).toBe(2);
     expect(s.conversa.resumo().usadas.map((t) => t.jp)).toContain('ください');

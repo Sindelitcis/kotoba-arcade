@@ -2,7 +2,10 @@ import { describe, expect, it } from 'vitest';
 import { cardKey, getWord, parseCardKey } from '../src/content';
 import { seededRng } from '../src/core/rng';
 import { emptySave } from '../src/core/save';
-import { review } from '../src/core/srs';
+import { DAY, review, newCard, type CardState } from '../src/core/srs';
+import { KANJI, WORDS } from '../src/content';
+import { foiApresentado } from '../src/core/ensino';
+
 import {
   buildMap,
   EFFECTS,
@@ -21,13 +24,28 @@ import {
 
 const T0 = new Date('2026-11-16T12:00:00').getTime();
 
-function setup(seed = 1, relic?: RelicId) {
+/** Deixa firmes (em cobrança) todos os kanji e palavras, nas duas habilidades. */
+function firmarTudo(cards: Record<string, CardState>): void {
+  let c: CardState = review(newCard(0), { correct: true }, T0 - 400 * DAY);
+  for (let i = 0; i < 6; i++) c = review(c, { correct: true }, c.due);
+  const firme = { ...c, due: T0 + 30 * DAY };
+  for (const k of KANJI) for (const skill of ['meaning', 'recall'] as const) cards[cardKey(k.id, skill)] = { ...firme };
+  for (const w of WORDS) for (const skill of ['meaning', 'reading'] as const) cards[cardKey(w.id, skill)] = { ...firme };
+}
+
+/**
+ * Uma run começando. `firme`: tudo já em cobrança (errar enfraquece a carta). Sem ele, o
+ * baralho é de itens novos, e a apresentação deles já foi vista, como na tela.
+ */
+function setup(seed = 1, relic?: RelicId, firme = false) {
   const data = emptySave(T0);
   const save = emptyRoguelikeSave();
+  if (firme) firmarTudo(data.cards);
   let t = T0;
   const run = new Run({ cards: data.cards, profile: data.profile, save, rng: seededRng(seed), now: () => t });
   if (relic) run.relics.splice(0, run.relics.length, relic);
   const events = run.start();
+  run.apresentou();
   return { data, save, run, events, tick: (ms: number) => (t += ms) };
 }
 
@@ -69,7 +87,8 @@ function autoplay(run: Run, tick: (ms: number) => void, correct: () => boolean, 
   const all: RunEvent[] = [];
   for (let i = 0; i < max && run.phase !== 'over'; i++) {
     tick(5000);
-    if (run.phase === 'map') all.push(...run.choose(0));
+    if (run.phase === 'apresenta') all.push(...run.apresentou());
+    else if (run.phase === 'map') all.push(...run.choose(0));
     else if (run.phase === 'combat') all.push(...(run.canPlay ? playCard(run, sensibleCard(run), correct()) : run.endTurn()));
     else if (run.phase === 'reward') all.push(...run.takeReward(0));
     else if (run.phase === 'rest') all.push(...run.rest('heal'));
@@ -122,41 +141,66 @@ describe('começo da run', () => {
 });
 
 describe('cartas e perguntas', () => {
-  it('carta nunca vista ensina antes de perguntar, e responder vale como acerto com ajuda', () => {
+  it('antes do primeiro combate, os itens novos do baralho são apresentados; nada é perguntado antes', () => {
+    const data = emptySave(T0);
+    const run = new Run({ cards: data.cards, profile: data.profile, save: emptyRoguelikeSave(), rng: seededRng(1), now: () => T0 });
+    run.start();
+    expect(run.phase).toBe('apresenta');
+    const itens = [...new Set(run.deck.map((c) => c.itemId))];
+    expect(run.apresentando).toEqual(itens);
+    expect(run.enemy).toBeNull();
+    expect(run.playCard(0)).toEqual([]);
+    expect(Object.keys(data.cards)).toHaveLength(0);
+    run.apresentou();
+    expect(run.phase).toBe('combat');
+    for (const c of run.deck) expect(foiApresentado(data.cards, cardKey(c.itemId, 'meaning'))).toBe(true);
+    expect(run.stats.newItems).toHaveLength(itens.length);
+  });
+
+  it('carta em prática pergunta com apoio; acertar vale, mas não como rápida', () => {
     const { run, data } = setup();
     const card = run.hand[0] as RunCard;
     const [ask] = run.playCard(0);
     expect(ask?.t).toBe('ask');
     expect(run.phase).toBe('question');
-    expect(run.question!.teach).toBeDefined();
+    expect(run.question!.apoio).toBe(true);
+    expect(run.question!.choices).toHaveLength(2);
     const key = run.question!.card;
     expect(parseCardKey(key).itemId).toBe(card.itemId);
     const events = run.answer(run.question!.answer, 800);
     expect(played(events).correct).toBe(true);
-    // Primeiro contato não conta como resposta rápida.
     expect(played(events).fast).toBe(false);
     expect(data.cards[key]?.reps).toBe(1);
-    expect(run.stats.newItems).toHaveLength(1);
   });
 
-  it('a segunda vez que a carta aparece pergunta sem ensinar', () => {
-    const { run, data } = setup();
-    data.cards[cardKey('k:一', 'meaning')] = review(undefined, { correct: true, hinted: true }, T0);
-    const i = run.hand.findIndex((c) => c.itemId === 'k:一');
-    const again = i >= 0 ? i : (run.hand.push(run.deck.find((c) => c.itemId === 'k:一') as RunCard), run.hand.length - 1);
-    run.playCard(again);
-    expect(run.question!.teach).toBeUndefined();
-    expect(run.question!.kind).toBe('kanji-meaning');
+  it('na prática, errar não enfraquece a carta nem zera o combo', () => {
+    const { run } = setup(3, 'cha');
+    run.combo = 2;
+    const i = handIndex(run, 'attack');
+    const hp = run.enemy!.hp;
+    const miss = played(playCard(run, i, false));
+    expect(miss.pratica).toBe(true);
+    expect(miss.correct).toBe(false);
+    expect(miss.amount).toBe(EFFECTS.attack.strong);
+    expect(run.enemy!.hp).toBe(hp - EFFECTS.attack.strong);
+    expect(run.combo).toBe(2);
+  });
+
+  it('carta firme pergunta sem apoio, com as quatro alternativas', () => {
+    const { run } = setup(1, undefined, true);
+    run.playCard(0);
+    expect(run.question!.apoio).toBe(false);
+    expect(run.question!.choices).toHaveLength(4);
   });
 
   it('acertar solta o efeito forte e errar solta o fraco, mostrando a resposta', () => {
-    const a = setup(3, 'cha');
+    const a = setup(3, 'cha', true);
     const hpA = a.run.enemy!.hp;
     const hit = played(playCard(a.run, handIndex(a.run, 'attack'), true));
     expect(hit.amount).toBe(EFFECTS.attack.strong);
     expect(a.run.enemy!.hp).toBe(hpA - EFFECTS.attack.strong);
 
-    const b = setup(3, 'cha');
+    const b = setup(3, 'cha', true);
     const hpB = b.run.enemy!.hp;
     const index = handIndex(b.run, 'attack');
     b.run.playCard(index);
@@ -170,16 +214,17 @@ describe('cartas e perguntas', () => {
 
   it('cada resposta registra a revisão na carta certa', () => {
     const { run, data } = setup(3, 'cha');
+    const antes = Object.keys(data.cards);
     run.playCard(0);
     const key = run.question!.card;
     run.answer('errado', 4000);
     expect(data.cards[key]?.reps).toBe(1);
-    expect(Object.keys(data.cards)).toEqual([key]);
+    // As outras só foram apresentadas: nenhuma nota.
+    for (const k of antes) if (k !== key) expect(data.cards[k]!.reps).toBe(0);
   });
 
   it('resposta rápida dá bônus e lenta não tira nada', () => {
-    const { run, data } = setup(3, 'cha');
-    for (const c of run.deck) data.cards[cardKey(c.itemId, 'meaning')] = review(undefined, { correct: true, hinted: true }, T0);
+    const { run } = setup(3, 'cha', true);
     const fast = played(playCard(run, handIndex(run, 'attack'), true, 1000));
     expect(fast.fast).toBe(true);
     expect(fast.amount).toBe(EFFECTS.attack.strong + 2);
@@ -229,7 +274,7 @@ describe('relíquias', () => {
   });
 
   it('leque: três acertos seguidos dão escudo', () => {
-    const { run } = setup(3, 'leque');
+    const { run } = setup(3, 'leque', true);
     const events: RunEvent[] = [];
     for (let i = 0; i < 3; i++) events.push(...playCard(run, handIndex(run, 'block'), true));
     expect(events.some((e) => e.t === 'relic' && e.relic === 'leque')).toBe(true);
@@ -237,7 +282,7 @@ describe('relíquias', () => {
   });
 
   it('amuleto: carta errada sai com metade da força', () => {
-    const { run } = setup(3, 'amuleto');
+    const { run } = setup(3, 'amuleto', true);
     const miss = played(playCard(run, handIndex(run, 'attack'), false));
     expect(miss.amount).toBe(Math.ceil(EFFECTS.attack.strong / 2));
   });
@@ -281,13 +326,31 @@ describe('recompensa, descanso e loja', () => {
     // 30 kanji recém-vistos: todos ainda em aprendizado.
     for (let i = 0; i < 30; i++) {
       const id = `k:${'一二三四五六七八九十百千万円日月火水木金土山川田人口目耳手足'[i]}`;
-      busy.data.cards[cardKey(id, 'meaning')] = review(undefined, { correct: true, hinted: true }, T0);
+      busy.data.cards[cardKey(id, 'meaning')] = review(newCard(0), { correct: true, hinted: true }, T0);
     }
     for (let i = 0; i < 200 && busy.run.phase !== 'reward'; i++) {
       if (busy.run.canPlay) playCard(busy.run, 0, true);
       else busy.run.endTurn();
     }
     expect(busy.run.reward!.offers.filter((o) => busy.run.isNew(o.itemId))).toHaveLength(0);
+  });
+
+  it('carta nova ganha na recompensa é apresentada antes do combate seguinte', () => {
+    const s = winFirst();
+    const i = s.run.reward!.offers.findIndex((o) => s.run.isNew(o.itemId));
+    expect(i).toBeGreaterThanOrEqual(0);
+    const item = s.run.reward!.offers[i]!.itemId;
+    s.run.takeReward(i);
+    for (let n = 0; n < 50 && s.run.phase !== 'apresenta'; n++) {
+      if (s.run.phase === 'map') s.run.choose(Math.max(0, s.run.options.indexOf('combat')));
+      else if (s.run.phase === 'rest') s.run.rest('heal');
+      else if (s.run.phase === 'shop') s.run.leaveShop();
+      else break;
+    }
+    expect(s.run.phase).toBe('apresenta');
+    expect(s.run.apresentando).toEqual([item]);
+    s.run.apresentou();
+    expect(foiApresentado(s.data.cards, cardKey(item, 'meaning'))).toBe(true);
   });
 
   it('escolher uma carta aumenta o baralho e leva ao mapa; pular não aumenta', () => {
@@ -309,7 +372,8 @@ describe('recompensa, descanso e loja', () => {
     const s = winFirst();
     s.run.takeReward(null);
     for (let i = 0; i < 400 && s.run.floor < 2; i++) {
-      if (s.run.phase === 'map') s.run.choose(0);
+      if (s.run.phase === 'apresenta') s.run.apresentou();
+      else if (s.run.phase === 'map') s.run.choose(0);
       else if (s.run.phase === 'reward') s.run.takeReward(null);
       else if (s.run.canPlay) playCard(s.run, 0, true);
       else s.run.endTurn();
@@ -367,16 +431,31 @@ describe('run inteira', () => {
     }
   });
 
-  it('errando tudo, a run acaba em derrota e o estudo continua registrado', () => {
-    const { run, save, tick, data } = setup(5);
-    const events = autoplay(run, tick, () => false);
-    expect(events.at(-1)).toEqual({ t: 'over', won: false });
-    expect(run.won).toBe(false);
+  it('errou na cobrança: a carta sai fraca, e o item volta para a prática (sem castigo de novo)', () => {
+    const { run } = setup(5, 'cha', true);
+    const i = handIndex(run, 'attack');
+    const item = run.hand[i]!.itemId;
+    const miss = played(playCard(run, i, false));
+    expect(miss.pratica).toBe(false);
+    expect(miss.amount).toBe(EFFECTS.attack.weak);
+    const outra = run.hand.findIndex((c) => c.itemId === item);
+    const j = outra >= 0 ? outra : (run.hand.push(run.deck.find((c) => c.itemId === item && c.uid !== miss.card.uid) ?? miss.card), run.hand.length - 1);
+    run.energy = ENERGY;
+    run.playCard(j);
+    expect(run.question!.apoio).toBe(true);
+  });
+
+  it('a vida zerada encerra a run em derrota, e depois nada mais acontece', () => {
+    const { run, save } = setup(5);
+    let last: RunEvent[] = [];
+    for (let i = 0; i < 50 && run.phase !== 'over'; i++) {
+      run.hp = 1;
+      run.block = 0;
+      last = run.endTurn();
+    }
+    expect(last.at(-1)).toEqual({ t: 'over', won: false });
     expect(run.hp).toBe(0);
     expect(save.wins).toBe(0);
-    expect(Object.keys(data.cards).length).toBeGreaterThan(0);
-    expect(run.stats.wrong).toBeGreaterThan(0);
-    // Depois do fim, nada mais acontece.
     expect(run.endTurn()).toEqual([]);
     expect(run.playCard(0)).toEqual([]);
   });
@@ -396,7 +475,9 @@ describe('run inteira', () => {
     const { run, tick } = setup(2);
     for (let i = 0; i < 2000 && run.phase !== 'over'; i++) {
       tick(5000);
-      if (run.phase === 'map') run.choose(Math.max(0, run.options.indexOf('elite')));
+      if (run.phase === 'apresenta') run.apresentou();
+      else if (run.phase === 'map') run.choose(Math.max(0, run.options.indexOf('elite')));
+
       else if (run.phase === 'reward') {
         if (run.enemy?.kind === 'elite') {
           expect(run.reward!.relic).toBeDefined();

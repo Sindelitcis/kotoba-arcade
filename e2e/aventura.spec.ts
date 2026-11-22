@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
+import { passarApresentacao } from './apoio';
 
 test.beforeEach(async ({ page }) => {
   await page.route('https://kanjimon.online/**', (route) => route.abort());
@@ -10,12 +11,18 @@ async function openGame(page: Page) {
   await expect(page.getByTestId('av-menu')).toBeVisible();
 }
 
-/** Enter na lista de cenas abre a cena da vez. Repete se a tecla chegar antes de a tela estar pronta. */
-async function startScene(page: Page) {
+/**
+ * Enter na lista de cenas abre a cena da vez (repete se a tecla chegar antes de a tela estar pronta).
+ * Palavra nova da cena é apresentada antes da primeira fala; devolve quantas foram.
+ */
+async function startScene(page: Page): Promise<number> {
   await expect(async () => {
     if (await page.getByTestId('av-menu').isVisible()) await page.keyboard.press('Enter');
-    await expect(page.getByTestId('av-stage')).toBeVisible({ timeout: 500 });
+    await expect(page.getByTestId('av-stage').or(page.getByTestId('av-apresenta'))).toBeVisible({ timeout: 500 });
   }).toPass();
+  const n = (await page.getByTestId('av-apresenta').isVisible()) ? await passarApresentacao(page) : 0;
+  await expect(page.getByTestId('av-stage')).toBeVisible();
+  return n;
 }
 
 /** Segue a conversa até aparecer uma escolha. */
@@ -45,7 +52,10 @@ test('do fliperama para a primeira fala só no teclado, e palavra nova já vem c
     await page.keyboard.press('a');
     await expect(page.getByTestId('av-menu')).toBeVisible({ timeout: 500 });
   }).toPass();
-  await startScene(page);
+  // Jogador novo: as palavras novas da cena (até 5) vêm antes da primeira fala.
+  const n = await startScene(page);
+  expect(n).toBeGreaterThanOrEqual(3);
+  expect(n).toBeLessThanOrEqual(5);
   await expect(page.getByTestId('av-narra')).toContainText('Narita');
   await page.keyboard.press('Enter');
   await expect(page.getByTestId('av-who')).toHaveText('Fiscal da imigração');

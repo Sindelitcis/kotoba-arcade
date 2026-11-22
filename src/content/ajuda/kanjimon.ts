@@ -1,4 +1,4 @@
-import { MEMORIA_UNICA, PARAR, SAVE, semNovidade, VOLTOU } from './comum';
+import { ANTES_DE_COBRAR, MEMORIA_UNICA, PARAR, SAVE, semNovidade, TECLAS_APRESENTA, VOLTOU } from './comum';
 import type { Ajuda } from './tipos';
 
 export const KANJIMON: Ajuda = {
@@ -10,9 +10,11 @@ export const KANJIMON: Ajuda = {
     'Quebrou todos os selos, a carta é sua e vai para a KanjiDex.',
   ],
   passos: [
+    'Kanji novo chega antes, numa apresentação: o desenho, a leitura, o que quer dizer (falado em português) e uma palavra de exemplo. Enter passa para o próximo.',
     'Aparece um KanjiMon. As bolinhas embaixo da carta são os selos.',
     'Responda a pergunta. Com opções, clique ou aperte 1 a 4. Quando pedir para digitar, escreva a leitura em romaji ou kana e aperte Enter. Ex.: 一人 → hitori ou ひとり.',
-    'Acertou: um selo quebra. Errou: você perde um coração e a mesma pergunta volta logo depois da próxima.',
+    'Acertou: um selo quebra. Errou: a resposta certa aparece e a pergunta volta logo depois.',
+    'Kanji que você acabou de conhecer vem em prática: com dica, duas opções e sem digitar. Ali, errar não tira coração nem combo. Depois que você acerta, ele passa a ser cobrado: aí um erro tira um coração.',
     'Quebrou todos os selos: captura. Ganha moedas e XP.',
     'A cada 5 capturas vem um baú, com moedas, um coração de volta e às vezes um booster grátis. É um bom ponto para parar.',
     'Acabaram os 5 corações, a caçada termina. Tudo o que você capturou continua seu.',
@@ -21,25 +23,27 @@ export const KANJIMON: Ajuda = {
     { teclas: ['1', '2', '3', '4'], faz: 'Escolher a resposta' },
     { teclas: ['Enter'], faz: 'Mandar a resposta digitada; seguir depois de captura, baú ou fim' },
     { teclas: ['Espaço'], faz: 'Seguir depois de captura, baú ou fim' },
+    TECLAS_APRESENTA,
     { teclas: ['Esc'], faz: 'Sair para o fliperama' },
   ],
   elementos: [
-    { nome: 'Corações (♥)', texto: 'Cinco por caçada. Cada erro tira um. O baú devolve um.' },
-    { nome: 'Combo', texto: 'Acertos seguidos. Quanto maior, mais moedas e XP na captura (até o dobro, com 10 seguidos). Um erro zera.' },
+    { nome: 'Corações (♥)', texto: 'Cinco por caçada. Cada erro fora da prática tira um. O baú devolve um.' },
+    { nome: 'Combo', texto: 'Acertos seguidos. Quanto maior, mais moedas e XP na captura (até o dobro, com 10 seguidos). Um erro fora da prática zera.' },
     { nome: 'Trilha do baú', texto: 'Os cinco pontinhos ao lado da palavra baú. Cada captura enche um.' },
     { nome: 'Selos', texto: 'As bolinhas embaixo da carta. Cheia é selo inteiro; vazia já foi quebrada.' },
     { nome: 'Raridade', texto: 'Comum (2 selos), Rara (3), Super Rara (3) e Ultra Rara (4). Mais rara paga mais. Se passar 25 encontros sem Super Rara ou Ultra Rara, a próxima vem Super Rara garantida.' },
-    { nome: 'NOVO', texto: 'Kanji que você nunca viu. A primeira pergunta vem com aula: significado, uma historinha e a resposta destacada.' },
+    { nome: 'Prática', texto: 'Aparece em cima da pergunta de um kanji que você acabou de conhecer. Tem dica e só duas opções, e errar não custa nada.' },
     { nome: '？ no lugar do kanji', texto: 'Pergunta ao contrário: você vê o significado e acha o kanji. Só aparece depois que o significado já está pegando.' },
-    { nome: 'Resposta rápida', texto: 'Acertou em menos de 2,5 segundos, ganha 2 moedas a mais. Resposta lenta não perde nada.' },
+    { nome: 'Resposta rápida', texto: 'Acertou em menos de 2,5 segundos, ganha 2 moedas a mais. Resposta lenta não perde nada. Na prática, o tempo não conta.' },
   ],
   ensina: [
-    'Primeiro contato não tem como errar: o kanji novo chega com o significado e a resposta destacada. A cobrança vem depois, quando lembrar já dá trabalho.',
+    'Primeiro o jogo mostra, depois pergunta. Kanji novo chega numa apresentação, vira prática com dica e só depois é cobrado com coração e tempo.',
     'A pergunta muda conforme você melhora: reconhecer o significado, ler uma palavra (山道 → やまみち), achar o kanji pelo significado e, por fim, digitar a leitura.',
     'No máximo uma palavra nova por encontro, para não entupir.',
-    'O que você errou volta logo depois, sem a aula. É aí que a memória firma.',
+    'O que você errou volta logo depois. É aí que a memória firma.',
   ],
   perguntas: [
+    ANTES_DE_COBRAR,
     VOLTOU,
     semNovidade('no KanjiMon, 6 kanji ainda aprendendo ao mesmo tempo'),
     { p: 'Posso digitar em kana em vez de romaji?', r: 'Pode. ひとり e hitori valem igual. Um errinho de digitação conta como acerto, e o jogo mostra a forma certa.' },

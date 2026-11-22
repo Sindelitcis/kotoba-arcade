@@ -21,7 +21,7 @@ describe('alternativas sem segunda resposta certa', () => {
   it('"O que significa?" não oferece outro significado do mesmo kanji', () => {
     for (const k of KANJI) {
       for (let seed = 0; seed < 30; seed++) {
-        const q = kanjiMeaningQuestion(k, seededRng(seed), false);
+        const q = kanjiMeaningQuestion(k, seededRng(seed));
         const outras = q.choices.filter((c) => c !== q.answer);
         for (const c of outras) expect(k.pt, `${k.kanji} também significa ${c}`).not.toContain(c);
       }

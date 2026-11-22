@@ -6,7 +6,13 @@
  * As instruções saem desses dados, então toda instrução tem resposta, e os testes conferem
  * que a resposta é exatamente o conjunto de objetos que a frase descreve.
  *
+ * Antes de qualquer pergunta, as coisas da cena são apresentadas (core/ensino.ts): imagem,
+ * nome, voz e significado. Coisa nunca apresentada não vira pergunta. Enquanto a palavra está
+ * em prática, a pergunta mostra a imagem e o significado, só as coisas já apresentadas podem
+ * ser clicadas e errar não tira pontos nem combo: a coisa certa é apresentada de novo.
+ *
  * Etapas, do N5 ao N3:
+ *   nome      これは傘です (a coisa brilha, escolha o nome dela)
  *   achar     傘はどこ？
  *   cor       赤い傘はどこ？
  *   tamanho   大きいかばんはどこ？
@@ -23,7 +29,8 @@ import { pickNext } from '../../core/picker';
 import { levelInfo } from '../../core/progress';
 import { pick, shuffle, type Rng } from '../../core/rng';
 import type { Profile } from '../../core/save';
-import { review, type CardState } from '../../core/srs';
+import { apresentar, avaliar, emPratica, foiApresentado, notaDaPratica, novidades } from '../../core/ensino';
+import type { CardState, Outcome } from '../../core/srs';
 
 // ───────── Dados da cena ─────────
 
@@ -101,7 +108,10 @@ export const kanaDe = (s: readonly Seg[]) => s.map((x) => x.r ?? x.t).join('');
  * (falar a frase toda entregaria a resposta). Nada montado ainda = nada a dizer.
  */
 export function falaDaTarefa(t: Tarefa, montadas: number): string | null {
+  // "nome": a pergunta; a frase com o nome é a resposta, dita depois do acerto.
+  if (t.marcada) return textoDe(PERGUNTA_NOME);
   if (!t.pecas) return textoDe(t.segs);
+
   return montadas > 0 ? textoDe(t.pecas.certas.slice(0, montadas)) : null;
 }
 
@@ -135,11 +145,12 @@ const ORDINAL_KANA = ['', 'いちばんめ', 'にばんめ', 'さんばんめ', 
 
 // ───────── Tarefas ─────────
 
-export const ETAPAS = ['achar', 'cor', 'tamanho', 'lugar', 'contar', 'acao', 'denso', 'descrever'] as const;
+export const ETAPAS = ['nome', 'achar', 'cor', 'tamanho', 'lugar', 'contar', 'acao', 'denso', 'descrever'] as const;
 export type Etapa = (typeof ETAPAS)[number];
 
 export const ETAPA_INFO: Readonly<Record<Etapa, { titulo: string; nivel: string; licao: string; exemplo: readonly Seg[]; exemploPt: string }>> = {
-  achar: { titulo: 'Ache o objeto', nivel: 'N5', licao: 'Clique no que a frase pede. Palavra nova aparece brilhando, com o nome e a voz.', exemplo: [seg('傘', 'かさ'), { t: 'はどこ？' }], exemploPt: 'Onde está o guarda-chuva?' },
+  nome: { titulo: 'O nome das coisas', nivel: 'N5', licao: 'これは〜です quer dizer "isto é ~". A coisa marcada brilha; escolha o nome dela.', exemplo: [{ t: 'これは' }, seg('傘', 'かさ'), { t: 'です。' }], exemploPt: 'Isto é um guarda-chuva.' },
+  achar: { titulo: 'Onde está?', nivel: 'N5', licao: 'O nome da coisa + はどこ？ pergunta onde ela está. はどこ quer dizer "onde está". Ouça a pergunta e clique na coisa.', exemplo: [seg('傘', 'かさ'), { t: 'はどこ？' }], exemploPt: 'Onde está o guarda-chuva?' },
   cor: { titulo: 'Cores', nivel: 'N5', licao: 'A cor vem antes da coisa, como em "vermelho guarda-chuva": 赤い傘. Os adjetivos de cor terminam em い.', exemplo: [seg('赤い', 'あかい'), seg('傘', 'かさ'), { t: 'はどこ？' }], exemploPt: 'Onde está o guarda-chuva vermelho?' },
   tamanho: { titulo: 'Grande e pequeno', nivel: 'N5', licao: '大きい (おおきい) é grande, 小さい (ちいさい) é pequeno. Também vêm antes da coisa.', exemplo: [seg('大きい', 'おおきい'), { t: 'かばんはどこ？' }], exemploPt: 'Onde está a bolsa grande?' },
   lugar: { titulo: 'Onde está', nivel: 'N5', licao: 'O japonês diz o lugar primeiro: 机の上の本 é "o livro de cima da mesa". 上 em cima, 下 embaixo, 横 ao lado, 前 na frente, 中 dentro.', exemplo: [seg('机', 'つくえ'), { t: 'の' }, seg('上', 'うえ'), { t: 'の' }, seg('本', 'ほん'), { t: 'はどこ？' }], exemploPt: 'Onde está o livro em cima da mesa?' },
@@ -159,7 +170,12 @@ export interface Tarefa {
   palavras: Word[];
   /** Em "descrever": as peças na ordem certa e as que sobram. */
   pecas?: { certas: Seg[]; sobras: Seg[] };
+  /** Em "nome": a coisa marcada; a resposta é escolher a palavra dela. */
+  marcada?: string;
 }
+
+/** A pergunta da etapa "nome": これはなんですか？ (o que é isto?). */
+export const PERGUNTA_NOME: Seg[] = [{ t: 'これはなんですか？' }];
 
 const PERGUNTA: Seg = { t: 'はどこ？' };
 
@@ -200,6 +216,14 @@ export function tarefas(l: Lugar, etapa: Etapa): Tarefa[] {
   const pp = porPalavra(l);
   const objetos = l.coisas.filter((c) => !ehPessoa(c));
   const ids = (cs: readonly Coisa[]) => cs.map((c) => c.id);
+
+  if (etapa === 'nome') {
+    for (const [, cs] of pp) {
+      if (ehPessoa(cs[0]!)) continue;
+      const w = palavraDe(cs[0]!);
+      out.push({ etapa, segs: [{ t: 'これは' }, segW(w), { t: 'です。' }], alvo: [cs[0]!.id], palavras: [w], marcada: cs[0]!.id });
+    }
+  }
 
   if (etapa === 'achar') {
     for (const [, cs] of pp) {
@@ -404,10 +428,12 @@ export interface CenaSave {
   lugares: Record<string, number>;
   rounds: number;
   best: number;
+  /** 1: a lista de etapas já começa em "nome" (save antigo começava em "achar"). */
+  ordem: number;
 }
 
 export function emptyCenaSave(): CenaSave {
-  return { etapas: 1, acertos: {}, licoes: [], lugares: {}, rounds: 0, best: 0 };
+  return { etapas: 1, acertos: {}, licoes: [], lugares: {}, rounds: 0, best: 0, ordem: 1 };
 }
 
 const isCount = (x: unknown): x is number => typeof x === 'number' && Number.isFinite(x) && x >= 0;
@@ -427,6 +453,11 @@ export function ensureCenaSave(games: Record<string, unknown>): CenaSave {
   }
   const s = atual as Record<string, unknown>;
   s.etapas = isCount(s.etapas) && s.etapas >= 1 ? Math.min(ETAPAS.length, Math.floor(s.etapas)) : 1;
+  // Save de antes da etapa "nome": quem já tinha aberto etapas não perde nenhuma.
+  if (s.ordem !== 1) {
+    if ((s.etapas as number) > 1 || (isCount(s.rounds) && s.rounds > 0)) s.etapas = Math.min(ETAPAS.length, (s.etapas as number) + 1);
+    s.ordem = 1;
+  }
   s.acertos = tabela(s.acertos);
   s.lugares = tabela(s.lugares);
   s.licoes = Array.isArray(s.licoes) ? s.licoes.filter((x): x is string => typeof x === 'string' && (ETAPAS as readonly string[]).includes(x)) : [];
@@ -460,6 +491,8 @@ export function lugarSugerido(lugares: readonly Lugar[], save: CenaSave): Lugar 
 export type Evento =
   | { t: 'certo'; coisa: string; rapido: boolean; combo: number }
   | { t: 'outra'; coisa: string; nome: Seg[] }
+  /** Errou na prática: o jogo mostra a palavra certa de novo, na hora. */
+  | { t: 'de-novo'; palavra: Word }
   | { t: 'peca'; seg: Seg; completa: boolean }
   | { t: 'volta'; seg: Seg }
   | { t: 'abre'; etapa: Etapa }
@@ -487,14 +520,33 @@ export interface Deps {
   rng: Rng;
 }
 
-export type Fase = 'licao' | 'pergunta' | 'feita' | 'fim';
+/** apresenta: as coisas novas da cena; licao: a estrutura da etapa nova; pergunta; feita; fim. */
+export type Fase = 'apresenta' | 'licao' | 'pergunta' | 'feita' | 'fim';
+
+/** Alternativas da etapa "nome": duas na prática, quatro na cobrança. */
+export const OPCOES_NOME_PRATICA = 2;
+export const OPCOES_NOME = 4;
+
+/** As palavras da cena, na ordem em que as etapas usam (a ordem de ensino). */
+export function palavrasDaCena(l: Lugar, etapas: readonly Etapa[]): Word[] {
+  const out: Word[] = [];
+  for (const e of etapas) for (const t of tarefas(l, e)) for (const w of t.palavras) if (!out.some((o) => o.id === w.id)) out.push(w);
+  return out;
+}
 
 export class CenaRound {
   fase: Fase = 'pergunta';
   indice = 0;
-  tarefa!: Tarefa;
-  /** A tarefa ensina: palavra nunca vista ou primeira vez na etapa. O alvo brilha. */
-  ensina = false;
+  /** Só existe depois da apresentação: antes dela, nenhuma palavra está pronta para virar tarefa. */
+  private atual: Tarefa | null = null;
+  /** Palavras apresentadas no começo desta rodada. */
+  readonly apresentadas: Word[] = [];
+  /**
+   * Prática com apoio: alguma palavra da tarefa ainda está em prática, ou a etapa acabou de
+   * ser ensinada. A pergunta mostra a imagem e o significado, só o que já foi apresentado
+   * pode ser clicado, e errar não tira pontos nem combo.
+   */
+  apoio = false;
   /** Cliques errados nesta tarefa. */
   erros = 0;
   /** Coisas já clicadas por engano (mostram o nome). */
@@ -502,6 +554,8 @@ export class CenaRound {
   /** Em "descrever": peças já encaixadas e a bandeja. */
   montadas: Seg[] = [];
   bandeja: Seg[] = [];
+  /** Em "nome": as palavras para escolher. */
+  opcoes: Word[] = [];
   pontos = 0;
   combo = 0;
   bestCombo = 0;
@@ -515,33 +569,81 @@ export class CenaRound {
   private usadas = new Set<string>();
 
   constructor(private deps: Deps) {
-    this.proxima();
+    const { lugar, cards } = deps;
+    const todas = new Map(palavrasDaCena(lugar, ETAPAS).map((w) => [chave(w), w]));
+    for (const k of novidades(palavrasDaCena(lugar, this.etapasDoSave).map(chave), cards)) this.apresentadas.push(todas.get(k)!);
+    if (this.apresentadas.length > 0) this.fase = 'apresenta';
+    else this.proxima();
   }
 
   get lugar(): Lugar {
     return this.deps.lugar;
   }
 
-  get etapasAbertas(): Etapa[] {
-    return ETAPAS.slice(0, this.deps.save.etapas).filter((e) => tarefas(this.deps.lugar, e).length > 0);
+  private get etapasDoSave(): Etapa[] {
+    return ETAPAS.slice(0, this.deps.save.etapas);
   }
 
-  /** Brilha: o alvo, quando a tarefa ensina ou depois de dois enganos. */
+  get etapasAbertas(): Etapa[] {
+    return this.etapasDoSave.filter((e) => tarefas(this.deps.lugar, e).length > 0);
+  }
+
+  /** A apresentação acabou: as palavras viram cartas (apresentadas) e começa a primeira pergunta. */
+  apresentou(): void {
+    if (this.fase !== 'apresenta') return;
+    const { cards, now } = this.deps;
+    apresentar(cards, this.apresentadas.map(chave), now());
+    for (const w of this.apresentadas) if (!this.novas.includes(w)) this.novas.push(w);
+    this.proxima();
+  }
+
+  /** A coisa já foi apresentada. */
+  conhecida(id: string): boolean {
+    const c = achaCoisa(this.deps.lugar, id);
+    return !!c && foiApresentado(this.deps.cards, chave(palavraDe(c)));
+  }
+
+  /** Dá para clicar: na prática, só no que já foi apresentado (menos coisa para chutar). */
+  clicavel(id: string): boolean {
+    return !this.apoio || this.conhecida(id);
+  }
+
+  /** A tarefa da vez. Pedir durante a apresentação é erro do chamador (a tela não mostra tarefa ali). */
+  get tarefa(): Tarefa {
+    if (!this.atual) throw new Error('Cena Viva: ainda não há tarefa, a apresentação não acabou');
+    return this.atual;
+  }
+
+  /** Já há tarefa (a apresentação acabou). */
+  get temTarefa(): boolean {
+    return this.atual !== null;
+  }
+
+  /** Brilha: a coisa marcada da etapa "nome"; o alvo, depois de um engano na prática ou dois na cobrança. */
   brilha(id: string): boolean {
-    return (this.ensina || this.erros >= BRILHA_DEPOIS) && this.tarefa.alvo.includes(id) && this.fase === 'pergunta';
+    if (this.fase !== 'pergunta') return false;
+    if (this.tarefa.marcada) return this.tarefa.marcada === id;
+    return this.erros >= (this.apoio ? 1 : BRILHA_DEPOIS) && this.tarefa.alvo.includes(id);
+  }
+
+  /** A tarefa só vale se todas as palavras dela já foram apresentadas. */
+  pronta(t: Tarefa): boolean {
+    return t.palavras.every((w) => foiApresentado(this.deps.cards, chave(w)));
   }
 
   /** Sorteia a etapa (a mais nova aberta com mais peso) e a tarefa, escolhendo a palavra pelo pickNext. */
   private sortear(): Tarefa {
     const { lugar, rng, cards, now, save } = this.deps;
-    const abertas = this.etapasAbertas;
+    const abertas = this.etapasAbertas.filter((e) => tarefas(lugar, e).some((t) => this.pronta(t)));
+    if (abertas.length === 0) throw new Error(`Cena Viva sem tarefa pronta em ${lugar.id}`);
     const nova = abertas[abertas.length - 1]!;
     let etapa: Etapa = rng() < 0.55 || abertas.length === 1 ? nova : pick(rng, abertas);
     // A primeira tarefa de uma etapa nunca vista é dela, e vem com lição.
     const semLicao = abertas.find((e) => !save.licoes.includes(e));
     if (semLicao) etapa = semLicao;
-    let lista = tarefas(lugar, etapa).filter((t) => !this.usadas.has(textoDe(t.segs)));
-    if (lista.length === 0) lista = tarefas(lugar, etapa);
+    const prontas = tarefas(lugar, etapa).filter((t) => this.pronta(t));
+    let lista = prontas.filter((t) => !this.usadas.has(textoDe(t.segs)));
+    if (lista.length === 0) lista = prontas;
     // A palavra vem da memória compartilhada: o que venceu antes, novidade com calma.
     const porChave = new Map<string, Tarefa[]>();
     for (const t of lista) {
@@ -554,21 +656,32 @@ export class CenaRound {
 
   private proxima(): void {
     const t = this.sortear();
-    this.tarefa = t;
+    this.atual = t;
     this.usadas.add(textoDe(t.segs));
     this.erros = 0;
     this.tentadas = [];
     this.montadas = [];
     this.bandeja = t.pecas ? shuffle(this.deps.rng, [...t.pecas.certas, ...t.pecas.sobras]) : [];
     const { cards, save } = this.deps;
-    const palavraNova = t.palavras.some((w) => !cards[chave(w)]);
     const etapaNova = !save.licoes.includes(t.etapa);
-    this.ensina = palavraNova || etapaNova;
+    this.apoio = etapaNova || t.palavras.some((w) => emPratica(cards, chave(w)));
+    this.opcoes = t.marcada ? this.opcoesDoNome(t) : [];
     this.fase = etapaNova ? 'licao' : 'pergunta';
     this.desde = this.deps.now();
   }
 
-  /** Fechou a lição da etapa: vai para a pergunta (que ainda ensina, com o alvo brilhando). */
+  /** Alternativas da etapa "nome": outras palavras já apresentadas da cena, sem repetir o som. */
+  private opcoesDoNome(t: Tarefa): Word[] {
+    const certa = t.palavras[0]!;
+    const n = this.apoio ? OPCOES_NOME_PRATICA : OPCOES_NOME;
+    const outras = shuffle(
+      this.deps.rng,
+      palavrasDaCena(this.deps.lugar, ['nome']).filter((w) => w.id !== certa.id && w.kana !== certa.kana && foiApresentado(this.deps.cards, chave(w))),
+    ).slice(0, n - 1);
+    return shuffle(this.deps.rng, [certa, ...outras]);
+  }
+
+  /** Fechou a lição da etapa: vai para a pergunta (ainda na prática). */
   comecar(): void {
     if (this.fase !== 'licao') return;
     if (!this.deps.save.licoes.includes(this.tarefa.etapa)) this.deps.save.licoes.push(this.tarefa.etapa);
@@ -579,17 +692,33 @@ export class CenaRound {
   /** Clique numa coisa da cena. */
   clicar(id: string): Evento[] {
     const ev: Evento[] = [];
-    if (this.fase !== 'pergunta' || this.tarefa.pecas) return ev;
+    if (this.fase !== 'pergunta' || this.tarefa.pecas || this.tarefa.marcada) return ev;
     const coisa = achaCoisa(this.deps.lugar, id);
-    if (!coisa) return ev;
+    if (!coisa || !this.clicavel(id)) return ev;
     if (this.tarefa.alvo.includes(id)) {
       this.acertou(ev, id);
       return ev;
     }
     // Errou: sem tela de erro. A coisa clicada diz o próprio nome, e isso também ensina.
-    this.errou();
     if (!this.tentadas.includes(id)) this.tentadas.push(id);
     ev.push({ t: 'outra', coisa: id, nome: nomeDe(coisa) });
+    this.errou(ev);
+    return ev;
+  }
+
+  /** Etapa "nome": escolhe a palavra `i` das alternativas. */
+  escolher(i: number): Evento[] {
+    const ev: Evento[] = [];
+    const t = this.tarefa;
+    if (this.fase !== 'pergunta' || !t.marcada) return ev;
+    const w = this.opcoes[i];
+    if (!w) return ev;
+    if (w.id === t.palavras[0]!.id) this.acertou(ev, t.marcada);
+    else {
+      this.errou(ev);
+      // A errada sai da lista: na próxima tentativa sobra menos para chutar.
+      this.opcoes = this.opcoes.filter((o) => o !== w);
+    }
     return ev;
   }
 
@@ -609,12 +738,12 @@ export class CenaRound {
       if (completa) this.acertou(ev, t.alvo[0]!);
       return ev;
     }
-    this.errou();
     ev.push({ t: 'volta', seg: s });
+    this.errou(ev);
     return ev;
   }
 
-  /** A próxima peça certa (para brilhar depois de dois enganos). */
+  /** A próxima peça certa (para brilhar depois de um engano na prática ou dois na cobrança). */
   get pecaCerta(): number {
     const t = this.tarefa;
     if (!t.pecas) return -1;
@@ -622,39 +751,43 @@ export class CenaRound {
     return esperada ? this.bandeja.findIndex((s) => s.t === esperada.t) : -1;
   }
 
-  private errou(): void {
+  private errou(ev: Evento[]): void {
     this.erros++;
-    this.combo = 0;
-    if (this.erros === 1 && !this.ensina) {
-      for (const w of this.tarefa.palavras) this.notar(w, { correct: false });
+    if (this.erros === 1) for (const w of this.tarefa.palavras) this.notar(w, { correct: false });
+    if (this.apoio) {
+      // Na prática, errar não custa nada: o jogo mostra a palavra de novo.
+      if (this.erros === 1) ev.push({ t: 'de-novo', palavra: this.tarefa.palavras[this.tarefa.palavras.length - 1]! });
+      return;
     }
+    this.combo = 0;
   }
 
   private notas = new Set<string>();
-  private notar(w: Word, o: { correct: boolean; ms?: number; hinted?: boolean }): void {
+  private notar(w: Word, o: Outcome): void {
     const k = chave(w);
     if (this.notas.has(k)) return;
     this.notas.add(k);
-    const { cards, now } = this.deps;
-    if (!cards[k] && !this.novas.includes(w)) this.novas.push(w);
-    cards[k] = review(cards[k], o, now());
+    avaliar(this.deps.cards, k, o, this.deps.now());
   }
 
   private acertou(ev: Evento[], id: string): void {
     const ms = this.deps.now() - this.desde;
     const limpo = this.erros === 0;
-    const ajudado = this.ensina || this.erros >= BRILHA_DEPOIS;
-    const rapido = limpo && !this.ensina && ms < RAPIDO_MS * (this.tarefa.pecas ? 3 : 1);
+    const rapido = limpo && !this.apoio && ms < RAPIDO_MS * (this.tarefa.pecas ? 3 : 1);
     this.feitas++;
-    if (limpo) {
+    if (this.apoio) {
+      // Prática: pontos fixos, e o combo não mexe.
+      this.pontos += Math.floor(PONTOS / 2);
+    } else if (limpo) {
       this.combo++;
       this.bestCombo = Math.max(this.bestCombo, this.combo);
       this.pontos += PONTOS + (rapido ? PONTOS_RAPIDO : 0) + Math.min(this.combo - 1, 5);
     } else this.pontos += Math.floor(PONTOS / 2);
-    for (const w of this.tarefa.palavras) this.notar(w, { correct: true, ms, hinted: ajudado });
+    const ajudado = this.erros >= BRILHA_DEPOIS;
+    for (const w of this.tarefa.palavras) this.notar(w, this.apoio ? notaDaPratica(true, ms) : { correct: true, ms, hinted: ajudado });
     ev.push({ t: 'certo', coisa: id, rapido, combo: this.combo });
     const s = this.deps.save;
-    if (limpo && !this.ensina) {
+    if (limpo && !this.apoio) {
       this.dePrimeira++;
       const e = this.tarefa.etapa;
       s.acertos[e] = (s.acertos[e] ?? 0) + 1;

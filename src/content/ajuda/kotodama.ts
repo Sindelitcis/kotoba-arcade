@@ -1,4 +1,4 @@
-import { MEMORIA_UNICA, SAVE, semNovidade, VOLTOU } from './comum';
+import { ANTES_DE_COBRAR, MEMORIA_UNICA, SAVE, semNovidade, TECLAS_APRESENTA, VOLTOU } from './comum';
 import type { Ajuda } from './tipos';
 
 export const KOTODAMA: Ajuda = {
@@ -11,9 +11,11 @@ export const KOTODAMA: Ajuda = {
     'Uma run leva de 5 a 10 minutos.',
   ],
   passos: [
-    'A run começa direto num combate. Você tem 3 de energia por turno e 5 cartas na mão.',
+    'Antes do combate, as cartas com kanji ou palavra que você ainda não viu são apresentadas: imagem, som e o que quer dizer. Enter passa para a próxima.',
+    'No combate, você tem 3 de energia por turno e 5 cartas na mão.',
     'Escolha uma carta (clique ou o número dela). Cada carta custa 1 de energia.',
     'Responda a pergunta sobre o kanji ou a palavra da carta. Acertou: efeito forte. Errou: fraco, mas sai.',
+    'Carta que você acabou de conhecer vem em prática: a pergunta tem dica e duas opções, e mesmo errando a carta sai forte. Errou, ela aparece de novo para você olhar.',
     'Sem energia ou sem jogada boa, termine o turno. O inimigo faz o que mostrou em cima dele.',
     'Venceu: escolha uma carta nova para o baralho ou pule.',
     'No mapa, onde tem dois caminhos, você escolhe: combate, elite, descanso ou loja.',
@@ -26,9 +28,11 @@ export const KOTODAMA: Ajuda = {
     { teclas: ['0', 'P'], faz: 'Recompensa: pular a carta nova' },
     { teclas: ['1', '2'], faz: 'Descanso: 1 cura, 2 afia' },
     { teclas: ['Enter'], faz: 'Loja: sair. Fim da run: nova run' },
+    TECLAS_APRESENTA,
     { teclas: ['Esc'], faz: 'Sair para o fliperama' },
   ],
   elementos: [
+    { nome: 'Prática', texto: 'Aparece na pergunta de uma carta que você acabou de conhecer. Errar ali não enfraquece a carta nem zera o combo.' },
     { nome: 'Golpe', texto: 'Dano no inimigo. 9 se acertar, 3 se errar. O escudo do inimigo absorve antes.' },
     { nome: 'Escudo', texto: 'Segura dano neste turno. 8 se acertar, 3 se errar. Zera no começo do seu turno.' },
     { nome: 'Cura', texto: 'Recupera vida. 6 se acertar, 2 se errar.' },
@@ -44,10 +48,11 @@ export const KOTODAMA: Ajuda = {
   ],
   ensina: [
     'Cada jogada é uma pergunta de verdade sobre o kanji ou a palavra. Quem decide o golpe é a sua memória.',
-    'Errar não trava o jogo: a carta sai fraca e a resposta certa aparece.',
+    'Primeiro o jogo mostra a carta nova, depois treina com apoio, e só então cobra. Errar não trava o jogo: a resposta certa aparece.',
     'As cartas novas que o jogo oferece seguem a memória: primeiro o que precisa revisar, depois novidade. Palavra só entra depois que os kanji dela já apareceram.',
   ],
   perguntas: [
+    ANTES_DE_COBRAR,
     { p: 'Perdi a run. Perdi o que estudei?', r: 'Não. Cada resposta já foi gravada na memória. Só a run, o ouro e as relíquias acabam.' },
     { p: 'Por que a carta não joga?', r: 'Falta energia. Termine o turno para recarregar.' },
     VOLTOU,

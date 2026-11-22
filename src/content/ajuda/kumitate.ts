@@ -1,4 +1,4 @@
-import { MEMORIA_UNICA, PARAR, SAVE, VOLTOU } from './comum';
+import { ANTES_DE_COBRAR, MEMORIA_UNICA, PARAR, SAVE, TECLAS_APRESENTA, VOLTOU } from './comum';
 import type { Ajuda } from './tipos';
 
 export const KUMITATE: Ajuda = {
@@ -11,17 +11,18 @@ export const KUMITATE: Ajuda = {
   ],
   passos: [
     'Enter começa uma rodada.',
+    'Ponto de gramática novo chega antes, numa lição curta: o que ele faz, um exemplo com as peças marcadas e o áudio, em japonês e em português. Enter segue.',
     'Leia o pedido em português. Ex.: "Eu bebo café."',
     'Escolha a peça da bandeja para o buraco da vez: clique ou aperte o número dela.',
     'A ponta de verbo transforma o verbo na hora. Ex.: 飲む (のむ, beber) + ました vira 飲みました (bebi).',
     'Peça que não serve volta para a bandeja com o motivo. Depois de duas erradas, a certa brilha.',
     'Frase pronta: Enter vai para a próxima. Depois da sexta, vem o resumo.',
-    'Ponto de gramática novo chega com uma lição curta e um exemplo antes de ser cobrado.',
   ],
   teclas: [
     { teclas: ['1', '2', '3', '4'], faz: 'Encaixar a peça da bandeja' },
     { teclas: ['Enter', 'Espaço'], faz: 'Começar; seguir depois da lição ou da frase pronta; outra rodada' },
     { teclas: ['R'], faz: 'Ouvir a frase (ou o exemplo da lição)' },
+    TECLAS_APRESENTA,
     { teclas: ['Esc'], faz: 'Voltar ao menu; no menu, ao fliperama' },
   ],
   elementos: [
@@ -37,8 +38,10 @@ export const KUMITATE: Ajuda = {
     'O próximo ponto destrava depois que você encaixa o anterior de primeira 3 vezes.',
     'Cada ponto é uma carta na memória espaçada. Ponto que você erra volta antes.',
     'Não tem vida nem tempo. Errar só mostra o motivo.',
+    'Ponto que você acabou de ver fica em prática: a peça certa já brilha e errar não zera o combo nem tira pontos.',
   ],
   perguntas: [
+    ANTES_DE_COBRAR,
     { p: 'Por que não aparece ponto novo?', r: 'O próximo só abre depois de você acertar o atual de primeira 3 vezes. Siga jogando as rodadas.' },
     { p: 'Por que に e へ servem no mesmo buraco?', r: 'Para indicar destino (行きます, いきます, ir), as duas funcionam. O jogo aceita qualquer uma.' },
     VOLTOU,

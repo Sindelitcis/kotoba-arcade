@@ -1,4 +1,4 @@
-import { MEMORIA_UNICA, PARAR, SAVE, VOLTOU } from './comum';
+import { ANTES_DE_COBRAR, MEMORIA_UNICA, PARAR, SAVE, TECLAS_APRESENTA, VOLTOU } from './comum';
 import type { Ajuda } from './tipos';
 
 export const AVENTURA: Ajuda = {
@@ -12,6 +12,7 @@ export const AVENTURA: Ajuda = {
   ],
   passos: [
     'Enter abre a próxima cena da história. Ou escolha uma cena pelo número.',
+    'Antes da primeira fala, até 5 palavras novas da cena são apresentadas, com imagem, som e o que querem dizer. Enter passa para a próxima.',
     'Leia ou ouça a fala. Enter segue.',
     'Quando for a sua vez, escolha a resposta com 1, 2, 3…',
     'Não tem tela de erro. Se a pessoa não entende, ela estranha ou repete, e a conversa continua.',
@@ -26,6 +27,7 @@ export const AVENTURA: Ajuda = {
     { teclas: ['R'], faz: 'Ouvir de novo' },
     { teclas: ['D'], faz: 'Abrir o Diário' },
     { teclas: ['↑', '↓'], faz: 'Diário: escolher a frase' },
+    TECLAS_APRESENTA,
     { teclas: ['Esc'], faz: 'Voltar ao menu de cenas; no menu, ao fliperama' },
   ],
   elementos: [
@@ -37,12 +39,14 @@ export const AVENTURA: Ajuda = {
     { nome: 'Diário', texto: 'Todas as falas que você já viveu, para reler e ouvir.' },
   ],
   ensina: [
+    'Você conhece as palavras novas antes de a cena começar. Na primeira passada elas ainda não valem nota: só depois a cena cobra.',
     'A ajuda some quando você já sabe. Primeiro leitura e significado, depois só a leitura, depois nada.',
     'Pedir leitura ou significado não é errar. Mas conta como ajuda, e a palavra volta mais cedo.',
     'Responder de primeira, sem ajuda, firma a palavra. Travar a conversa faz ela voltar logo.',
     'Com todas as cenas concluídas, o Enter abre a cena com as palavras mais perto de serem esquecidas.',
   ],
   perguntas: [
+    ANTES_DE_COBRAR,
     { p: 'E se eu escolher a resposta errada?', r: 'A pessoa estranha ou repete, e você tenta de novo. Não tem game over.' },
     { p: 'Por que a palavra perdeu a leitura em cima?', r: 'Porque ela já firmou. Se travar, aperte F que a leitura volta naquela fala.' },
     VOLTOU,

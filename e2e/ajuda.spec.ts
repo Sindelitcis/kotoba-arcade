@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
+import { chavesDosKana, chavesDosKanji, firmarCartas } from './apoio';
 
 const SHOTS = process.env.SHOTS_DIR;
 
@@ -7,6 +8,8 @@ test.beforeEach(async ({ page }) => {
   await page.route('https://kanjimon.online/**', (route) => route.abort());
   await page.route('http://127.0.0.1:8791/**', (route) => route.abort());
   await page.goto('/');
+  // Quem já estudou: os jogos abrem direto, sem a apresentação de coisa nova (que tem teste próprio abaixo).
+  await firmarCartas(page, [...chavesDosKanji(), ...chavesDosKana()]);
   await expect(page.getByTestId('play-now')).toBeVisible();
 });
 
@@ -132,6 +135,25 @@ test('com a ajuda aberta, as teclas não chegam ao jogo', async ({ page }) => {
   await expect(page.getByTestId('prompt')).toHaveText(prompt);
   await expect(page.locator('.choice.right, .choice.wrong')).toHaveCount(0);
   await expect(page.locator('.hearts .heart.on')).toHaveCount(5);
+});
+
+test('com a ajuda aberta por cima da apresentação de coisa nova, as teclas não chegam a ela', async ({ page }) => {
+  // Jogador novo: o KanjiMon começa apresentando os kanji.
+  await page.evaluate(() => localStorage.clear());
+  await page.reload();
+  await page.keyboard.press('c');
+  const cartao = page.getByTestId('apresentacao');
+  await expect(cartao).toBeVisible();
+  const item = await cartao.getAttribute('data-item');
+  await page.keyboard.press('?');
+  await expect(painel(page)).toBeVisible();
+  await painel(page).getByRole('button', { name: /Perguntas comuns/ }).click();
+  await expect(painel(page)).toContainText('Por que o jogo mostra as coisas antes de perguntar?');
+  for (const k of ['Enter', 'Space', 'ArrowRight', 'v']) await page.keyboard.press(k);
+  await page.keyboard.press('Escape');
+  await expect(painel(page)).toBeHidden();
+  await expect(cartao).toHaveAttribute('data-item', item!);
+  await expect(page.getByTestId('apresentacao')).toBeVisible();
 });
 
 test('no fliperama, a letra de um jogo com a ajuda aberta não abre o jogo', async ({ page }) => {

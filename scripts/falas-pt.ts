@@ -1,6 +1,7 @@
 /**
  * Todo o português falado: as aulas do modo Ouvir, a lição falada do Kumitate, a narração
- * da Aventura, o retorno das perguntas da Jornada e as fichas do Aprofundar.
+ * da Aventura, o retorno das perguntas da Jornada, as fichas do Aprofundar e o significado
+ * falado das apresentações de item novo (src/content/ensino.ts).
  *
  * `scripts/gravar-vozes-pt.mjs` grava esta lista nas duas vozes, em `public/vozes-pt/voz1/`
  * e `public/vozes-pt/voz2/` (ver docs/vozes.md).
@@ -12,6 +13,7 @@ import { LICOES_FALADAS } from '../src/games/gramatica/falado';
 import { COURSE } from '../src/games/gramatica/pontos';
 import { FRASES_DE_RETORNO } from '../src/jornada/retorno';
 import { falasPtDaFicha, fichaDe, todosOsAlvos } from '../src/content/aprofundar/fichas';
+import { falasPtDoEnsino } from '../src/content/ensino';
 
 export interface FalaPt {
   /** Exatamente o texto do trecho `{ tipo: 'pt' }`. */
@@ -33,6 +35,7 @@ export function listarFalasPt(): FalaPt[] {
       const f = fichaDe(a);
       return f ? falasPtDaFicha(f).map((texto) => ({ texto, origem: `aprofundar/${a.t}` })) : [];
     }),
+    ...falasPtDoEnsino().map((texto) => ({ texto, origem: 'ensino/significado' })),
   ];
   const vistas = new Set<string>();
   return todas.filter((f) => {

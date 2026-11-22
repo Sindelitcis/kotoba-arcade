@@ -1,8 +1,11 @@
 import { expect, test, type Page } from '@playwright/test';
+import { chavesDosKana, chavesDosKanji, firmarCartas } from './apoio';
 
 test.beforeEach(async ({ page }) => {
   await page.route('https://kanjimon.online/**', (route) => route.abort());
   await page.goto('/');
+  // Quem já estudou: a caçada cobra direto (o brilho do combo só sobe fora da prática).
+  await firmarCartas(page, [...chavesDosKanji(), ...chavesDosKana()]);
 });
 
 test('as três fontes carregam: português, japonês e o kanji de estudo', async ({ page }) => {

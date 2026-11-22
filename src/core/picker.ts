@@ -3,9 +3,13 @@
  * "sem pilha de revisão": nada de contador de atrasadas. Quem volta depois
  * de dias fora recebe primeiro o que mais vale a pena rever, as novidades
  * pausam sozinhas enquanto há muita coisa mole, e sempre tem o que jogar.
+ *
+ * Só sai carta de item já apresentado (core/ensino.ts). "Novidade" aqui é o item que foi
+ * apresentado e ainda não foi perguntado; o que nunca foi apresentado não sai nunca.
  */
+import { foiApresentado } from './ensino';
 import type { Rng } from './rng';
-import { isDue, isLearning, isYoung, retrievability, type CardState } from './srs';
+import { isDue, isLearning, isYoung, retrievability, State, type CardState } from './srs';
 
 export type PickReason = 'learning' | 'due' | 'new' | 'practice';
 
@@ -37,13 +41,15 @@ export function pickNext(
   const newRatio = opts.newRatio ?? 0.3;
   const recent = new Set(opts.recent ?? []);
 
-  let usable = pool.filter((k) => !recent.has(k));
-  if (usable.length === 0) usable = pool.slice();
+  const prontas = pool.filter((k) => foiApresentado(cards, k));
+  let usable = prontas.filter((k) => !recent.has(k));
+  if (usable.length === 0) usable = prontas.slice();
   if (usable.length === 0) return null;
 
   const seen: string[] = [];
   const fresh: string[] = [];
-  for (const k of usable) (cards[k] ? seen : fresh).push(k);
+  const perguntada = (k: string) => !!cards[k] && cards[k].state !== State.New;
+  for (const k of usable) (perguntada(k) ? seen : fresh).push(k);
 
   // 1. O que está em aprendizado e já venceu volta primeiro (é o que fixa na sessão).
   const learningDue = seen
@@ -56,7 +62,7 @@ export function pickNext(
     .sort((a, b) => retrievability(cards[a], now) - retrievability(cards[b], now));
 
   // A contagem de "jovens" e de vencidas olha o baralho todo, não só o que sobrou do filtro.
-  const all = pool.filter((k) => cards[k]);
+  const all = prontas.filter(perguntada);
   const young = all.filter((k) => isYoung(cards[k] as CardState)).length;
   const backlog = all.filter((k) => isDue(cards[k] as CardState, now)).length;
   const canIntroduce = fresh.length > 0 && young < maxYoung && backlog < backlogPause;

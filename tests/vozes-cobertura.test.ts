@@ -12,7 +12,7 @@ import { listarFalas } from '../scripts/falas';
 import type { Manifesto } from '../src/core/audio';
 import { seededRng } from '../src/core/rng';
 import { emptySave } from '../src/core/save';
-import { DAY, review } from '../src/core/srs';
+import { DAY, review, newCard } from '../src/core/srs';
 import { VOZ_PADRAO, VOZ_PALAVRA } from '../src/core/vozes';
 import { CENAS } from '../src/games/conversa/engine';
 import { cardOf, emptyGramaticaSave, exampleView, fits, GramaticaRound, plainSentence } from '../src/games/gramatica/engine';
@@ -47,9 +47,11 @@ const CHAMADAS: Record<string, string[]> = {
     'speakWord(f.texto)', // nome da coisa clicada: falaDoNome, palavra das figuras
     'speak(f.texto)', // pessoa (読んでいる人): cena() em scripts/falas.ts
     'speak(textoDe(t.pecas.certas))', // frase de "descrever" pronta
+    'speak(textoDe(t.segs))', // etapa "nome": a resposta inteira (これは傘です), de falaDoNome em scripts/falas.ts
     'speak(fala)', // pedido lido sozinho: falaDaTarefa
     'speak(fala)', // tecla R: falaDaTarefa, inclusive pela metade
     'speak(fala)', // botão de ouvir de novo: falaDaTarefa
+    'speak(fala)', // a apresentação "de novo" fechou: repete o pedido (falaDaTarefa)
   ],
   'src/games/conversa/ConversaGame.tsx': [
     'speak(linha.jp, VOZ_CONVERSA[cena.personagem.voz])', // abertura gravada; resposta do modelo vem do servidor local
@@ -68,8 +70,6 @@ const CHAMADAS: Record<string, string[]> = {
   // Kanji em peças: kanji sozinho e palavra de exemplo, os dois de KANJI_PECAS (scripts/falas.ts, origem pecas/).
   'src/games/pecas/PecasGame.tsx': ['speak(p.jp, VOZ_PALAVRA, p.kana)', 'speakKanji(k.kanji, leituraOficial(k))'],
   'src/games/memoria/MemoriaGame.tsx': [
-    'speakWord(novas[0].word.kana)', // lição: palavras das figuras
-    'speakWord(f.word.kana)',
     'speakWord(e.fala)', // carta de palavra aberta
     'speakWord(e.figura.word.kana)', // par feito
     'speakWord(ultimaFala.current)', // tecla R
@@ -141,7 +141,7 @@ describe('cobertura das vozes a partir dos jogos', () => {
       const save = emptyGramaticaSave();
       save.unlocked = 1 + Math.floor(rng() * COURSE.points.length);
       // Pontos já vistos mudam quais buracos abrem.
-      for (const p of COURSE.points) if (rng() < 0.5) data.cards[cardOf(p.id)] = review(undefined, { correct: true }, T0 - DAY);
+      for (const p of COURSE.points) if (rng() < 0.5) data.cards[cardOf(p.id)] = review(newCard(0), { correct: true }, T0 - DAY);
       const round = new GramaticaRound({ course: COURSE, cards: data.cards, profile: data.profile, save, lookup: findWord, now: () => T0, rng });
       for (let frase = 0; frase < 6 && round.phase !== 'end'; frase++) {
         if (round.phase === 'lesson') {

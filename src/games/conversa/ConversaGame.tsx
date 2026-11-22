@@ -33,10 +33,18 @@ import {
   type Motor,
   type Saude,
 } from './cliente';
-import { CENAS, Conversa, proximaCena, type Cena, type Dica, type Evento, type Linha, type Resumo, type Ruby } from './engine';
+import { apresentarTermos, CENAS, Conversa, proximaCena, termosParaApresentar, type Cena, type Dica, type Evento, type Linha, type Resumo, type Ruby, type Termo } from './engine';
+import { Apresentacao } from '../../core/Apresentacao';
+import { cardKey } from '../../content';
+import { itemDaPalavra, type ItemNovo } from '../../content/ensino';
 import { gravar, type Gravacao } from './microfone';
 
-type Fase = 'procurando' | 'senha' | 'desligado' | 'pc-fora' | 'menu' | 'conversa' | 'resumo';
+type Fase = 'procurando' | 'senha' | 'desligado' | 'pc-fora' | 'menu' | 'apresenta' | 'conversa' | 'resumo';
+
+/** O termo da cena como apresentação. */
+export function itemDoTermo(t: Termo): ItemNovo {
+  return itemDaPalavra(t, cardKey(t.id, 'meaning'));
+}
 
 function RubyText({ ruby }: { ruby: readonly Ruby[] }) {
   return (
@@ -68,6 +76,8 @@ export function ConversaGame() {
   const conversa = useRef<Conversa | null>(null);
   const cliente = useRef<Cliente>(criarCliente());
   const [senha, setSenha] = useState('');
+  /** A cena escolhida e o vocabulário novo dela, enquanto a apresentação está na tela. */
+  const [antes, setAntes] = useState<{ cena: Cena; termos: Termo[] } | null>(null);
   const [senhaAviso, setSenhaAviso] = useState('');
   const [entrando, setEntrando] = useState(false);
   const [motor, setMotor] = useState<Motor>(lerMotor());
@@ -264,7 +274,26 @@ export function ConversaGame() {
     requestAnimationFrame(() => listaEl.current?.lastElementChild?.scrollIntoView({ block: 'nearest' }));
   };
 
+  /** Vocabulário novo primeiro; sem nada novo, a conversa começa direto. */
   const comecar = (cena: Cena) => {
+    const termos = termosParaApresentar(cena, app.data.cards);
+    if (termos.length > 0) {
+      setAntes({ cena, termos });
+      setFase('apresenta');
+      return;
+    }
+    conversar(cena);
+  };
+
+  const apresentou = () => {
+    if (!antes) return;
+    apresentarTermos(app.data.cards, antes.termos, Date.now());
+    commit();
+    setAntes(null);
+    conversar(antes.cena, antes.termos);
+  };
+
+  const conversar = (cena: Cena, apresentadas: readonly Termo[] = []) => {
     const c = new Conversa(cena, {
       cards: app.data.cards,
       profile: app.data.profile,
@@ -272,6 +301,7 @@ export function ConversaGame() {
       rng: Math.random,
       now: () => Date.now(),
       ai: cliente.current,
+      apresentadas,
     });
     conversa.current = c;
     setTexto('');
@@ -375,6 +405,15 @@ export function ConversaGame() {
       if (tecla === 'Escape') {
         e.preventDefault();
         go('hub');
+      }
+      return;
+    }
+    // Apresentação na tela: as teclas são dela (core/Apresentacao.tsx).
+    if (fase === 'apresenta') {
+      if (tecla === 'Escape') {
+        e.preventDefault();
+        setAntes(null);
+        setFase('menu');
       }
       return;
     }
@@ -589,8 +628,28 @@ export function ConversaGame() {
     );
   }
 
+  if (fase === 'apresenta' && antes) {
+    return (
+      <main class="cv" data-testid="cv" data-phase="apresenta">
+        <header class="km-top">
+          <button class="ghost" onClick={() => setFase('menu')}>
+            Voltar <kbd>Esc</kbd>
+          </button>
+          <span class="muted">
+            {antes.cena.titulo}: palavras para a conversa
+          </span>
+          <span />
+        </header>
+        <div data-testid="cv-apresenta">
+          <Apresentacao key={antes.cena.id} itens={antes.termos.map(itemDoTermo)} onFim={apresentou} fim="Começar a conversa" />
+        </div>
+      </main>
+    );
+  }
+
   if (fase === 'menu') {
     const save = conversaSave();
+
     const sugerida = cenaSugerida(save);
     return (
       <main class="cv" data-testid="cv" data-phase="menu">

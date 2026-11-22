@@ -9,6 +9,11 @@ import { burstFrom, FX_COR, onomato, pulse } from '../../core/fx';
 import type { Question } from '../../core/questions';
 import { teclaDe } from '../../core/teclas';
 import { alvosDasCartas, useAprofundar } from '../../core/aprofundar/estado';
+import { Apresentacao } from '../../core/Apresentacao';
+import { artUrl } from '../kanjimon/art';
+import { cardKey, getKanji, getWord } from '../../content';
+import { acharPalavra } from '../../content/escola';
+import { itemDaPalavra, itemNovoDe, type ItemNovo } from '../../content/ensino';
 import { EFFECTS, effectText, faceOf, NODES, RELICS, REST_HEAL, Run, SHARPEN, type Intent, type RunCard, type RunEvent } from './engine';
 
 interface Asking {
@@ -25,6 +30,28 @@ const COLORS: Record<string, string[]> = {
   heal: [FX_COR.bom],
   draw: [FX_COR.raro],
 };
+
+/** A carta como apresentação: a ficha do item (o kanji vem com a arte dele). */
+export function itemDaCarta(itemId: string): ItemNovo {
+  const chave = cardKey(itemId, 'meaning');
+  if (itemId.startsWith('k:')) {
+    const k = getKanji(itemId);
+    const img = artUrl(k, 'c');
+    return (
+      itemNovoDe(chave, { img }) ?? {
+        chaves: [chave],
+        alvo: { t: 'kanji', c: k.kanji },
+        tipo: 'Kanji',
+        grande: k.kanji,
+        leitura: k.reading,
+        pt: k.pt[0] ?? '',
+        img,
+        falas: [{ tipo: 'jp', fala: { texto: k.kanji, voz: 'palavra', kana: k.reading } }],
+      }
+    );
+  }
+  return itemDaPalavra(acharPalavra(itemId) ?? getWord(itemId), chave);
+}
 
 function newRun(): Run {
   const run = new Run({
@@ -55,6 +82,8 @@ export function RoguelikeGame() {
   const [asking, setAsking] = useState<Asking | null>(null);
   const [typed, setTyped] = useState('');
   const [note, setNote] = useState('');
+  /** Errou na prática: o item aparece de novo antes de seguir. */
+  const [deNovo, setDeNovo] = useState<ItemNovo | null>(null);
   const shownAt = useRef(0);
   const timer = useRef<number | undefined>(undefined);
   const enemyEl = useRef<HTMLDivElement>(null);
@@ -143,13 +172,19 @@ export function RoguelikeGame() {
       ? `${what}. Repare na vogal longa: ${q.answer}`
       : played.correct
         ? `${what}${played.fast ? ' (rápido!)' : ''}`
-        : `${what} (efeito fraco)`;
+        : played.pratica
+          ? `${what}. Prática: a carta saiu inteira. Veja de novo.`
+          : `${what} (efeito fraco)`;
     setAsking({ ...asking, feedback: { ok: played.correct, chosen: input, note } });
     react(events);
     timer.current = window.setTimeout(
       () => {
         setAsking(null);
         setTyped('');
+        if (played.pratica && !played.correct) {
+          setDeNovo(itemDaCarta(asking.card.itemId));
+          return;
+        }
         // Sem carta para jogar, o turno passa sozinho.
         if (run.phase === 'combat' && !run.canPlay) {
           react(run.endTurn());
@@ -167,6 +202,21 @@ export function RoguelikeGame() {
     setNote('');
     commit();
     redraw();
+  };
+
+  /** Fechou o "olhe de novo": segue o combate (e passa a vez se não há o que jogar). */
+  const fecharDeNovo = () => {
+    setDeNovo(null);
+    if (run.phase === 'combat' && !run.canPlay) {
+      react(run.endTurn());
+      commit();
+    }
+    redraw();
+  };
+
+  /** Os itens novos do baralho foram apresentados: começa o combate. */
+  const apresentou = () => {
+    act(run.apresentou());
   };
 
   const restart = () => {
@@ -193,6 +243,8 @@ export function RoguelikeGame() {
         leave();
         return;
       }
+      // Apresentação na tela: as teclas são dela (core/Apresentacao.tsx).
+      if (deNovo || run.phase === 'apresenta') return;
       const digit = /^[0-9]$/.test(tecla) ? Number(tecla) : -1;
       const confirm = tecla === 'Enter' || tecla === ' ';
       if (asking) {
@@ -266,6 +318,19 @@ export function RoguelikeGame() {
           Sair <kbd>Esc</kbd>
         </button>
       </header>
+
+      {run.phase === 'apresenta' && (
+        <section class="rg-apresenta" data-testid="rg-apresenta">
+          <p class="muted center">Cartas novas no baralho. Conheça antes de lutar.</p>
+          <Apresentacao key={run.apresentando.join()} itens={run.apresentando.map(itemDaCarta)} onFim={apresentou} fim="Lutar" />
+        </section>
+      )}
+
+      {deNovo && (
+        <div class="rg-ask" data-testid="rg-de-novo">
+          <Apresentacao key={deNovo.chaves[0]} itens={[deNovo]} modo="de-novo" onFim={fecharDeNovo} fim="Voltar à luta" />
+        </div>
+      )}
 
       {inCombat && (
         <section class="rg-combat" ref={fieldEl}>
@@ -441,15 +506,19 @@ export function RoguelikeGame() {
         <div class="rg-ask" data-testid="rg-ask">
           <div class="question">
             <div class={`rg-playing e-${asking.card.effect}`}>
-              {EFFECTS[asking.card.effect].name}: acertou, {effectText(asking.card.effect, run.strongAmount(asking.card))}; errou, sai fraco
+              {q.apoio
+                ? `${EFFECTS[asking.card.effect].name}: ${effectText(asking.card.effect, run.strongAmount(asking.card))}`
+                : `${EFFECTS[asking.card.effect].name}: acertou, ${effectText(asking.card.effect, run.strongAmount(asking.card))}; errou, sai fraco`}
             </div>
-            {q.teach && !feedback && (
-              <div class="teach" data-testid="teach">
-                <b>{q.teach.title}</b>
-                {q.teach.lines.map((l) => (
-                  <span key={l}>{l}</span>
-                ))}
-              </div>
+            {q.apoio && !feedback && (
+              <>
+                <span class="ap-pratica" data-testid="rg-pratica">
+                  Prática: errar aqui não enfraquece a carta
+                </span>
+                <span class="ap-dica" data-testid="rg-dica">
+                  {q.dica}
+                </span>
+              </>
             )}
             <div key={q.prompt} class={`prompt ${q.kind}`} data-testid="prompt">
               {q.prompt}
@@ -489,7 +558,8 @@ export function RoguelikeGame() {
                     if (c === q.answer) cls += ' right';
                     else if (c === feedback.chosen) cls += ' wrong';
                     else cls += ' dim';
-                  } else if (q.teach && c === q.answer) cls += ' hint';
+                  }
+
                   return (
                     <button key={c} class={cls} onClick={() => submit(c)} data-answer={c === q.answer ? 'yes' : undefined}>
                       <kbd>{i + 1}</kbd>

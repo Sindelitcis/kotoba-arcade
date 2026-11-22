@@ -1214,6 +1214,58 @@ input[type='text'], input:not([type]) { color: var(--text); }
   .av-line { font-size: 1.6rem; padding: 2px 18px 6px; }
 }
 
+/* ───────── Apresentação de item novo (core/Apresentacao.tsx) ─────────
+ * Um item por vez, sem pergunta: o foco da tela é a escrita grande. */
+.ap-cartao { display: grid; gap: 18px; padding: 24px clamp(16px, 4vw, 32px); background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-l); box-shadow: var(--sh-2); max-width: 760px; width: 100%; margin-inline: auto; }
+.ap-cartao.de-novo { background: var(--surface-2); }
+.ap-topo { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.ap-tipo { margin-left: auto; color: var(--text-3); font-size: 0.85rem; }
+.ap-pontos { list-style: none; display: flex; gap: 6px; margin: 0; padding: 0; }
+.ap-pontos li { width: 10px; height: 10px; border-radius: 50%; background: var(--surface-3); }
+.ap-pontos li.visto { background: var(--ok); }
+.ap-pontos li.agora { background: var(--brand); }
+.ap-corpo { display: grid; grid-template-columns: minmax(0, 220px) 1fr; gap: 24px; align-items: center; }
+.ap-corpo:not(:has(.ap-visual)) { grid-template-columns: 1fr; text-align: center; }
+.ap-visual { display: grid; place-items: center; aspect-ratio: 1; background: var(--surface-2); border-radius: var(--r-m); overflow: hidden; -webkit-mask: var(--pincel-borda) center / 100% 100% no-repeat; mask: var(--pincel-borda) center / 100% 100% no-repeat; }
+.ap-visual img { width: 100%; height: 100%; object-fit: contain; }
+.ap-texto { display: grid; gap: 8px; justify-items: start; }
+.ap-corpo:not(:has(.ap-visual)) .ap-texto { justify-items: center; }
+.ap-grande { font: 700 3.4rem/1.5 var(--f-jp); color: var(--text); }
+.ap-grande.kanji { font: 600 5rem/1.3 var(--f-kanji); }
+.ap-grande.longo { font-size: 2.2rem; }
+.ap-grande rt { font: 600 0.34em/1 var(--f-jp); color: var(--text-2); }
+.ap-grande.kanji rt { font-size: 0.26em; }
+.ap-romaji { font: 700 1.1rem/1 var(--f-texto); color: var(--text-2); letter-spacing: 0.04em; }
+.ap-pt { margin: 0; font: 800 1.5rem/1.3 var(--f-texto); color: var(--brand-text); }
+.ap-explica { margin: 0; color: var(--text-2); max-width: 46ch; }
+.ap-exemplo { margin: 4px 0 0; display: grid; gap: 2px; padding: 10px 14px; border-left: 3px solid var(--tinta); background: var(--surface-2); border-radius: var(--r-s); }
+.ap-ex-jp { font: 700 1.15rem/1.5 var(--f-jp); }
+.ap-ex-kana { font: 500 0.9rem/1.4 var(--f-jp); color: var(--text-3); }
+.ap-ex-pt { color: var(--text-2); font-size: 0.92rem; }
+.ap-acoes { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.ap-acoes .primary { margin-left: auto; }
+.ap-voz { font-size: 0.85rem; }
+/* Cena Viva na prática: o que ainda não foi apresentado fica apagado e não clica. */
+.cn-coisa.apagada { opacity: 0.35; filter: grayscale(0.7); pointer-events: none; }
+.cn-opcoes { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+.cn-opcoes .gr-block { display: grid; justify-items: center; gap: 2px; }
+.cn-opcoes small { color: var(--text-3); font-size: 0.8rem; }
+.cn-dica { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: center; }
+.cn-dica-item { display: inline-flex; align-items: center; gap: 6px; }
+.cn-dica img { width: 36px; height: 36px; object-fit: contain; }
+/* Prática com apoio: a etiqueta diz que errar aqui não custa nada. */
+
+.ap-pratica { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: var(--r-pill); background: var(--ok-soft); color: var(--ok-text); font: 700 0.78rem/1 var(--f-texto); }
+.ap-dica { margin: 0; padding: 8px 12px; border-radius: var(--r-s); background: var(--brand-soft); color: var(--brand-text); font-size: 0.92rem; }
+@media (max-width: 560px) {
+  .ap-corpo { grid-template-columns: 1fr; justify-items: center; text-align: center; }
+  .ap-visual { width: min(200px, 60vw); }
+  .ap-texto { justify-items: center; }
+  .ap-grande { font-size: 2.6rem; }
+  .ap-grande.kanji { font-size: 4rem; }
+  .ap-acoes .primary { margin-left: 0; flex-basis: 100%; }
+}
+
 /* ───────── Pincel ─────────
  * O traço pintado do visual antigo, mais leve, por cima do Sora (docs/estilo.md, "Pincel").
  * Tudo parado: o filtro #pincel (index.html) só deixa a linha irregular, não treme.
@@ -1241,7 +1293,7 @@ body {
 /* Quadro: canto quase reto e uma linha de pincel no lugar da borda fina. */
 .koma, .panel, .play-now, .tile, .arena, .kb-track, .rg-side, .av-stage, .gr-board, .gr-lesson, .cv-cena,
 .pc-quadro, .me-quadro, .ki-quadro, .lc-quadro, .cn-cena, .jn-etapa, .ouvir-faixa, .modal-box, .jornada-faixa,
-.km-top, .jn-topo, .lc-topo, .me-licao, .rg-ask .question, .ajuda-painel,
+.km-top, .jn-topo, .lc-topo, .me-licao, .rg-ask .question, .ajuda-painel, .ap-cartao,
 .cv[data-phase='senha'] > .av-panel, .cv[data-phase='desligado'] > .av-panel {
   position: relative;
   border-color: transparent;
@@ -1250,7 +1302,7 @@ body {
 .koma::after, .panel::after, .play-now::after, .tile::after, .arena::after, .kb-track::after, .rg-side::after, .av-stage::after,
 .gr-board::after, .gr-lesson::after, .cv-cena::after, .pc-quadro::after, .me-quadro::after, .ki-quadro::after, .lc-quadro::after,
 .cn-cena::after, .jn-etapa::after, .ouvir-faixa::after, .modal-box::after, .jornada-faixa::after,
-.km-top::after, .jn-topo::after, .lc-topo::after, .me-licao::after, .rg-ask .question::after, .ajuda-painel::after,
+.km-top::after, .jn-topo::after, .lc-topo::after, .me-licao::after, .rg-ask .question::after, .ajuda-painel::after, .ap-cartao::after,
 .cv[data-phase='senha'] > .av-panel::after, .cv[data-phase='desligado'] > .av-panel::after {
   content: '';
   position: absolute;

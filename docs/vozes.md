@@ -165,3 +165,13 @@ npm run vozes-pt:voz2
 ```
 
 Passa pela trava da placa: o Kokoro roda na CPU e o Whisper que confere roda na placa (na CPU, cada fala levava mais de um minuto de processador). O Python fica em `D:\KotobaArcade\voz\pt-livre\venv` (kokoro, faster-whisper, num2words; `PT_VOZ2_PYTHON` troca). Para cada texto: gera, o Whisper ouve, e se ele ouvir duas palavras ou mais diferentes, gera de novo a 0,9 e a 1,0 e fica a melhor. Corta o silêncio, deixa em -18 LUFS e grava mp3 mono de 48 kbps em `public/vozes-pt/voz2/`. O que o Whisper ouviu fica em `trabalho/conferidas-pt-voz2.json`, e as dúvidas em `trabalho/duvidas-pt-voz2.json`.
+
+## Apresentação de coisa nova
+
+Todo jogo apresenta o que é novo antes de perguntar (`src/core/Apresentacao.tsx`, ver `src/core/ensino.ts`). A carta toca o japonês na gravação de sempre e, logo depois, o significado em português: "Quer dizer prateleira." A frase sai de `frasePtDoSignificado` (`src/content/ensino.ts`): pega o primeiro sentido, tira parênteses, escreve número por extenso e troca ordinal por palavra (2ª feira vira segunda-feira, 1ª vez vira primeira vez). Se sobrar algarismo, romaji ou japonês, a carta não fala o português; `tests/significado.test.ts` confere.
+
+A lista entra em `scripts/falas-pt.ts` com a origem `ensino/significado` e é gravada nas duas vozes como o resto. A tecla V na apresentação troca entre Voz 1 e Voz 2, e a escolha vai para Ajustes.
+
+A Cena Viva tem duas falas próprias em japonês na etapa "nome": a pergunta これはなんですか？ e, depois do acerto, a frase com o nome (これは棚です。). As duas vêm de `scripts/falas.ts`, na voz da まお.
+
+As dúvidas do Whisper nessas falas são, quase todas, palavra japonesa dita em português (udon, edamame, takoyaki, curry), que ele escreve como acha que é. A voz está certa nesses casos.

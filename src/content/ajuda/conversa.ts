@@ -1,4 +1,4 @@
-import { MEMORIA_UNICA, SAVE } from './comum';
+import { ANTES_DE_COBRAR, MEMORIA_UNICA, SAVE, TECLAS_APRESENTA } from './comum';
 import type { Ajuda } from './tipos';
 
 export const CONVERSA: Ajuda = {
@@ -13,6 +13,7 @@ export const CONVERSA: Ajuda = {
   passos: [
     'Na primeira vez, digite a senha da Conversa e aperte Enter. Com a IA do seu PC ligada, ela entra no lugar da nuvem e não pede senha. A linha "IA: Automático · Nuvem · Meu PC" escolhe qual usar.',
     'Escolha uma situação pelo número, ou Enter para a sugerida.',
+    'Antes de conversar, as palavras novas da situação aparecem uma por uma, com som e o que querem dizer.',
     'O personagem fala com voz e com a leitura por cima dos kanji.',
     'Responda: Espaço (com o campo vazio) liga o microfone, ou digite em romaji ou kana e aperte Enter. Ex.: koohii wo kudasai ou コーヒーをください.',
     'Travou? Tab dá uma dica. Na segunda vez, vêm duas respostas prontas.',
@@ -25,6 +26,7 @@ export const CONVERSA: Ajuda = {
     { teclas: ['Tab'], faz: 'Pedir dica' },
     { teclas: ['F1'], faz: 'Traduzir a última fala do personagem' },
     { teclas: ['F3'], faz: 'Ouvir de novo a última fala' },
+    TECLAS_APRESENTA,
     { teclas: ['Esc'], faz: 'Encerrar a conversa; voltar ao menu; sair para o fliperama' },
   ],
   elementos: [
@@ -39,8 +41,10 @@ export const CONVERSA: Ajuda = {
     'O personagem fala no seu nível e puxa as palavras que você já está aprendendo.',
     'As palavras novas do resumo entram na memória e aparecem nos outros jogos.',
     'Errar não para a conversa. O personagem entende o que dá e segue.',
+    'Palavra que aparece na conversa sem ter sido apresentada conta só como primeiro contato, sem nota.',
   ],
   perguntas: [
+    ANTES_DE_COBRAR,
     { p: 'Por que pede senha?', r: 'A IA da nuvem tem uma cota grátis por dia. A senha garante que só você gasta essa cota. Depois de entrar, o navegador lembra por 30 dias.' },
     { p: 'Apareceu que a cota de hoje acabou.', r: 'A nuvem grátis tem um limite por dia, que zera às 21h (horário de Brasília). Até lá, os outros jogos funcionam. Com a IA do seu PC (escolha "Meu PC"), não tem limite.' },
     { p: 'Por que a voz do personagem às vezes muda?', r: 'As falas fixas tocam a gravação. O resto usa a voz japonesa do navegador, porque a nuvem grátis não tem voz em japonês. Com a IA do seu PC, a voz vem do AivisSpeech, uma para cada personagem.' },

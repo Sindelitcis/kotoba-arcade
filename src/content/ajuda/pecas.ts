@@ -1,4 +1,4 @@
-import { MEMORIA_UNICA, PARAR, SAVE, semNovidade, VOLTOU } from './comum';
+import { ANTES_DE_COBRAR, MEMORIA_UNICA, PARAR, SAVE, semNovidade, TECLAS_APRESENTA, VOLTOU } from './comum';
 import type { Ajuda } from './tipos';
 
 export const PECAS: Ajuda = {
@@ -11,7 +11,8 @@ export const PECAS: Ajuda = {
   ],
   passos: [
     'Enter começa uma rodada misturada. As teclas 1 a 5 do menu começam uma rodada de um modo só.',
-    'Kanji novo chega com uma lição: as peças pintadas, o nome de cada uma, a historinha, a leitura e uma palavra. Depois vem a pergunta.',
+    'Kanji novo chega com uma lição: as peças pintadas, o nome de cada uma, a historinha, a leitura e uma palavra, com o português falado. Depois vem a pergunta.',
+    'Kanji que você acabou de ver fica em prática: errar não zera o combo nem tira pontos, e a explicação aparece de novo.',
     'Responda com o número da alternativa (ou clique).',
     'Depois de cada resposta aparece a explicação, certa ou não. Enter segue.',
     'No modo Montar, escolha as peças uma por uma. Peça que não está no kanji volta para a bandeja. Depois de duas, a certa brilha.',
@@ -20,6 +21,7 @@ export const PECAS: Ajuda = {
     { teclas: ['Enter', 'Espaço'], faz: 'Começar; seguir depois da lição ou da resposta; outra rodada' },
     { teclas: ['1', '2', '3', '4', '5', '6'], faz: 'Responder (no menu, 1 a 5 escolhem o modo)' },
     { teclas: ['R'], faz: 'Ouvir a leitura do kanji ou da palavra' },
+    TECLAS_APRESENTA,
     { teclas: ['Esc'], faz: 'Voltar ao menu; no menu, ao fliperama' },
   ],
   elementos: [
@@ -41,6 +43,7 @@ export const PECAS: Ajuda = {
     'Não tem vida nem tempo. Errar só mostra a explicação.',
   ],
   perguntas: [
+    ANTES_DE_COBRAR,
     { p: 'De onde vêm as peças e os desenhos?', r: 'Dos dados abertos KanjiVG (traços) e KRADFILE/KANJIDIC2 (peças e leituras). Os nomes, as imagens e as historinhas foram escritos à mão para o jogo.' },
     { p: 'Por que a peça tem um desenho diferente do kanji?', r: 'Muita peça muda de forma quando entra num kanji: 人 vira 亻, 水 vira 氵, 手 vira 扌. É a mesma ideia.' },
     semNovidade('seis kanji'),

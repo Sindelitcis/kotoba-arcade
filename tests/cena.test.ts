@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { seededRng } from '../src/core/rng';
+import { foiApresentado } from '../src/core/ensino';
 import { emptySave } from '../src/core/save';
-import { review, type CardState } from '../src/core/srs';
+import { review, type CardState, newCard } from '../src/core/srs';
 import {
   ACERTOS_PARA_ABRIR,
   CenaRound,
@@ -48,10 +49,12 @@ const SALA: Lugar = {
   ],
 };
 
-/** Responde a tarefa certa (todas as etapas, inclusive montar frase). */
+/** Vê a apresentação e a lição (se houver) e responde a tarefa certa (todas as etapas). */
 function responder(r: CenaRound) {
+  r.apresentou();
   r.comecar();
   const t = r.tarefa;
+  if (t.marcada) return r.escolher(r.opcoes.indexOf(t.palavras[0]!));
   if (t.pecas) {
     const ev = [];
     for (const s of t.pecas.certas) ev.push(...r.peca(r.bandeja.findIndex((b) => b.t === s.t)));
@@ -61,7 +64,7 @@ function responder(r: CenaRound) {
 }
 
 function firme(): CardState {
-  let c = review(undefined, { correct: true }, 0);
+  let c = review(newCard(0), { correct: true }, 0);
   while (c.stability < 5) c = review(c, { correct: true }, c.due);
   return c;
 }
@@ -76,6 +79,8 @@ function rodada(lugar: Lugar, seed = 1, etapas = 1, todasVistas = false) {
   }
   let t = 1_000_000;
   const r = new CenaRound({ lugar, cards: data.cards, profile: data.profile, save, now: () => (t += 2000), rng: seededRng(seed) });
+  // Com tudo visto, o que sobrar de palavra (cores, contadores) é apresentado de uma vez.
+  if (todasVistas) r.apresentou();
   return { r, data, save };
 }
 
@@ -222,22 +227,82 @@ describe('Cena Viva: os oito lugares', () => {
 });
 
 describe('Cena Viva: rodada', () => {
-  it('jogador novo: começa com a lição de "achar" e o alvo brilha', () => {
-    const { r } = rodada(LUGARES[0]!);
+  it('jogador novo: primeiro as coisas da cena, uma a uma; depois a lição de "isto é"; só então a pergunta', () => {
+    const { r, data } = rodada(LUGARES[0]!);
+    expect(r.fase).toBe('apresenta');
+    expect(r.apresentadas.length).toBeGreaterThanOrEqual(3);
+    expect(r.apresentadas.length).toBeLessThanOrEqual(5);
+    expect(Object.keys(data.cards)).toHaveLength(0);
+    // Nada responde antes da apresentação acabar, e ainda não há tarefa (a tela não pode pedir uma).
+    expect(r.clicar(LUGARES[0]!.coisas[0]!.id)).toEqual([]);
+    expect(r.temTarefa).toBe(false);
+    expect(() => r.tarefa).toThrow(/apresentação/);
+    r.apresentou();
+    for (const w of r.apresentadas) expect(foiApresentado(data.cards, chave(w))).toBe(true);
     expect(r.fase).toBe('licao');
-    expect(r.tarefa.etapa).toBe('achar');
+    expect(r.tarefa.etapa).toBe('nome');
     r.comecar();
     expect(r.fase).toBe('pergunta');
-    expect(r.ensina).toBe(true);
-    for (const id of r.tarefa.alvo) expect(r.brilha(id)).toBe(true);
+    expect(r.apoio).toBe(true);
+    expect(r.tarefa.marcada).toBeTruthy();
+    expect(r.brilha(r.tarefa.marcada!)).toBe(true);
+    expect(r.opcoes).toHaveLength(2);
+    expect(r.opcoes).toContain(r.tarefa.palavras[0]);
   });
 
-  it('clique errado: a coisa diz o nome, combo zera, sem tela de erro; dois enganos fazem o alvo brilhar', () => {
-    const { r, data } = rodada(SALA, 3, 1, true);
+  it('a primeira etapa é só o nome das coisas; "onde está" só abre depois', () => {
+    expect(ETAPAS[0]).toBe('nome');
+    expect(ETAPAS[1]).toBe('achar');
+    const { r, save } = rodada(LUGARES[1]!, 2);
+    for (let i = 0; i < TAREFAS_POR_RODADA; i++) {
+      responder(r);
+      expect(r.tarefa.etapa).toBe('nome');
+      r.seguir();
+      if (r.fase === 'fim') break;
+    }
+    expect(save.etapas).toBe(1);
+  });
+
+  it('nenhuma pergunta usa palavra que não foi apresentada', () => {
+    for (let seed = 1; seed < 12; seed++) {
+      const { r, data } = rodada(LUGARES[seed % LUGARES.length]!, seed, 1 + (seed % 4));
+      for (let i = 0; i < TAREFAS_POR_RODADA && r.fase !== 'fim'; i++) {
+        responder(r);
+        for (const w of r.tarefa.palavras) expect(foiApresentado(data.cards, chave(w)), w.jp).toBe(true);
+        r.seguir();
+      }
+    }
+  });
+
+  it('erro na prática não tira pontos nem combo: mostra a palavra de novo e o alvo já brilha', () => {
+    const { r } = rodada(SALA, 3, 2);
+    r.apresentou();
+    r.comecar();
+    expect(r.apoio).toBe(true);
+    const combo = r.combo;
+    const pontos = r.pontos;
+    const t = r.tarefa;
+    const ev = t.marcada ? r.escolher(r.opcoes.findIndex((w) => w !== t.palavras[0])) : r.clicar(SALA.coisas.find((c) => !t.alvo.includes(c.id) && r.clicavel(c.id))!.id);
+    expect(ev.some((e) => e.t === 'de-novo')).toBe(true);
+    expect(r.combo).toBe(combo);
+    expect(r.pontos).toBe(pontos);
+    if (t.marcada) expect(r.opcoes).toHaveLength(1);
+    else expect(r.brilha(t.alvo[0]!)).toBe(true);
+  });
+
+  it('na cobrança, clique errado: a coisa diz o nome, combo zera, sem tela de erro; dois enganos fazem o alvo brilhar', () => {
+    const { r, data } = rodada(SALA, 3, 2, true);
+    let guarda = 0;
+    while (r.tarefa.etapa !== 'achar' && guarda++ < 30) {
+      responder(r);
+      r.seguir();
+    }
     expect(r.fase).toBe('pergunta');
+    expect(r.apoio).toBe(false);
     const outra = SALA.coisas.find((c) => !r.tarefa.alvo.includes(c.id))!;
     const ev = r.clicar(outra.id);
     expect(ev[0]).toMatchObject({ t: 'outra', coisa: outra.id });
+    expect(r.combo).toBe(0);
     expect(r.fase).toBe('pergunta');
     const w = r.tarefa.palavras[0]!;
     expect(data.cards[chave(w)]!.lapses).toBe(1);
@@ -261,9 +326,9 @@ describe('Cena Viva: rodada', () => {
     expect(data.profile.coins).toBeGreaterThan(0);
   });
 
-  it(`${ACERTOS_PARA_ABRIR} acertos de primeira abrem a etapa seguinte, que chega com lição`, () => {
+  it(`${ACERTOS_PARA_ABRIR} acertos de primeira na cobrança abrem a etapa seguinte, que chega com lição`, () => {
     const { r, save } = rodada(SALA, 5, 1, true);
-    save.licoes = ['achar'];
+    save.licoes = ['nome'];
     let abriu = false;
     for (let i = 0; i < ACERTOS_PARA_ABRIR; i++) {
       const ev = responder(r);
@@ -273,8 +338,19 @@ describe('Cena Viva: rodada', () => {
     expect(abriu).toBe(true);
     expect(save.etapas).toBe(2);
     // A próxima tarefa é a da etapa nova, com lição.
-    expect(r.tarefa.etapa).toBe('cor');
+    expect(r.tarefa.etapa).toBe('achar');
     expect(r.fase).toBe('licao');
+  });
+
+  it('acerto na prática não conta para abrir a etapa seguinte', () => {
+    const { r, save } = rodada(SALA, 5, 1);
+    for (let i = 0; i < ACERTOS_PARA_ABRIR; i++) {
+      const praticando = r.fase === 'apresenta' || r.apoio;
+      const ev = responder(r);
+      if (praticando) expect(ev.some((e) => e.t === 'abre')).toBe(false);
+      r.seguir();
+    }
+    expect(save.acertos.nome ?? 0).toBeLessThan(ACERTOS_PARA_ABRIR);
   });
 
   it('descrever: peça errada volta, a certa encaixa; a frase completa acerta', () => {
@@ -311,6 +387,19 @@ describe('Cena Viva: rodada', () => {
         r.seguir();
       }
     }
+  });
+
+  it('save de antes da etapa "nome" não perde etapa nenhuma; save novo começa no nome', () => {
+    const antigo = ensureCenaSave({ cena: { etapas: 2, rounds: 4, acertos: {}, lugares: {}, licoes: ['achar', 'cor'], best: 0 } });
+    expect(antigo.etapas).toBe(3);
+    expect(antigo.ordem).toBe(1);
+    // Rodar de novo não soma outra vez.
+    expect(ensureCenaSave({ cena: antigo }).etapas).toBe(3);
+    const jogouUmaVez = ensureCenaSave({ cena: { etapas: 1, rounds: 1 } });
+    expect(jogouUmaVez.etapas).toBe(2);
+    const novo = ensureCenaSave({});
+    expect(novo.etapas).toBe(1);
+    expect(ETAPAS[novo.etapas - 1]).toBe('nome');
   });
 
   it('o lugar sugerido é o menos jogado', () => {

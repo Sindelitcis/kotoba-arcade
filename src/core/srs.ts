@@ -74,13 +74,18 @@ export function gradeFor(o: Outcome): Grade {
 export type OuvinteRevisao = (depois: CardState, outcome: Outcome, nova: boolean) => void;
 export const ouvintesDeRevisao = new Set<OuvinteRevisao>();
 
-export function review(card: CardState | undefined, outcome: Outcome, now: number): CardState {
-  const base = card ?? newCard(now);
+/**
+ * Nota de uma resposta. Exige a carta: item sem carta nunca foi apresentado e não pode ser
+ * cobrado. Os jogos chamam `avaliar()` (core/ensino.ts), que confere isso.
+ */
+export function review(card: CardState, outcome: Outcome, now: number): CardState {
+  if (!card) throw new Error('review sem carta: o item não foi apresentado');
+  const base = card;
   // Relógio do computador pode andar para trás (fuso, ajuste de hora). O FSRS não aceita
   // revisão "antes" da anterior, então a revisão nunca acontece antes da última registrada.
   const when = Math.max(now, base.last_review ?? now);
   const depois = fromCard(scheduler.next(toCard(base), new Date(when), gradeFor(outcome)).card);
-  for (const fn of ouvintesDeRevisao) fn(depois, outcome, !card);
+  for (const fn of ouvintesDeRevisao) fn(depois, outcome, base.reps === 0);
   return depois;
 }
 

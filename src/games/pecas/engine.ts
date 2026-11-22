@@ -10,6 +10,11 @@
  *
  * Regras de TDAH do fliperama: kanji novo chega com lição antes de ser cobrado (ou com as
  * peças nomeadas, no modo 4), errar só mostra a resposta, e não há vida nem tempo.
+ *
+ * Ensinar antes de cobrar (core/ensino.ts): a lição apresenta o kanji. No modo 4 e nas
+ * palavras de dois kanji, a própria tela (as peças com o nome, a leitura de cada kanji) é a
+ * apresentação, e a pergunta já nasce como prática. Enquanto o kanji está em prática, errar
+ * não zera o combo nem tira pontos.
  */
 import { cardKey, type Skill } from '../../content';
 import { LEITURAS } from '../../content/leituras';
@@ -17,7 +22,8 @@ import { pickNext } from '../../core/picker';
 import { levelInfo } from '../../core/progress';
 import { shuffle, type Rng } from '../../core/rng';
 import type { Profile } from '../../core/save';
-import { masteryLevel, review, type CardState } from '../../core/srs';
+import { apresentar, avaliar, emPratica, foiApresentado, notaDaPratica } from '../../core/ensino';
+import { masteryLevel, type CardState } from '../../core/srs';
 import { KANJI_PECAS, kanjiPeca, PARECIDOS, type KanjiPeca } from './dados';
 
 export type Modo = 'peca' | 'montar' | 'intruso' | 'adivinhar' | 'composto';
@@ -258,9 +264,16 @@ export class PecasRound {
   private escolherKanji(filtro: (k: KanjiPeca) => boolean): KanjiPeca {
     const { cards, now, rng } = this.deps;
     const lista = KANJI_PECAS.filter(filtro);
-    const pool = (lista.length > 0 ? lista : KANJI_PECAS).map(cartaPecas);
+    const base = lista.length > 0 ? lista : KANJI_PECAS;
+    const pool = base.map(cartaPecas);
     const pick = pickNext(pool, cards, now(), rng, { recent: this.recentes, maxYoung: MAX_JOVENS });
-    const key = pick?.key ?? (pool[0] as string);
+    // Kanji novo (com lição) quando não há o que praticar, quando só sobrou o que acabou de
+    // aparecer, ou às vezes no meio das revisões; com três ainda em prática, espera.
+    const novo = base.find((k) => !this.visto(k));
+    const praticando = pool.filter((k) => this.deps.cards[k] && emPratica(cards, k)).length;
+    const repetiria = !!pick && this.recentes.includes(pick.key);
+    const cabeNovo = !!novo && praticando < 3 && (!pick || pick.reason === 'practice' || repetiria || rng() < 0.3);
+    const key = cabeNovo && novo ? cartaPecas(novo) : (pick?.key ?? (pool[0] as string));
     this.recentes = [...this.recentes, key].slice(-4);
     return kanjiPeca(key.slice(2, key.lastIndexOf('#'))) as KanjiPeca;
   }
@@ -279,7 +292,8 @@ export class PecasRound {
       const bons = ineditos.filter((k) => this.adivinhavelCom(k, conhecidas));
       const lista = bons.length > 0 ? bons : ineditos;
       const k = lista.length > 0 ? (lista[Math.floor(rng() * Math.min(lista.length, 5))] as KanjiPeca) : this.escolherKanji(() => true);
-      return this.perguntaAdivinhar(k, false);
+      // Só dá para adivinhar sem lição quando as peças já são conhecidas.
+      return this.perguntaAdivinhar(k, !this.visto(k) && !this.adivinhavelCom(k, conhecidas));
     }
     if (modo !== 'misto') {
       const k = this.escolherKanji((x) => this.viavel(modo, x));
@@ -287,7 +301,7 @@ export class PecasRound {
     }
 
     const k = this.escolherKanji(() => true);
-    if (!cards[cartaPecas(k)]) {
+    if (!this.visto(k)) {
       // Novidade: com as peças todas conhecidas, adivinha pelas peças; senão, lição antes.
       if (this.adivinhavel(k)) return this.perguntaAdivinhar(k, false);
       return this.abrir(k, pecasDoKanji(k).length >= 1 ? 'peca' : 'adivinhar');
@@ -299,9 +313,9 @@ export class PecasRound {
     return this.abrir(k, m);
   }
 
-  /** Monta a pergunta do modo para o kanji. Kanji nunca visto ganha lição antes. */
+  /** Monta a pergunta do modo para o kanji. Kanji nunca visto ganha lição antes (em todos os modos). */
   private abrir(k: KanjiPeca, m: Modo): void {
-    const licao = !this.visto(k) && m !== 'intruso';
+    const licao = !this.visto(k);
     switch (m) {
       case 'peca':
         this.perguntaPeca(k, licao);
@@ -310,7 +324,7 @@ export class PecasRound {
         this.perguntaMontar(k, licao);
         break;
       case 'intruso':
-        this.perguntaIntruso(k);
+        this.perguntaIntruso(k, licao);
         break;
       case 'adivinhar':
         this.perguntaAdivinhar(k, licao);
@@ -353,7 +367,7 @@ export class PecasRound {
     this.iniciar({ modo: 'montar', k, licao, bandeja, precisa, colocadas: [], erros: 0, brilha: null });
   }
 
-  private perguntaIntruso(k: KanjiPeca): void {
+  private perguntaIntruso(k: KanjiPeca, licao = false): void {
     const { rng } = this.deps;
     const pares = PARECIDOS.filter((p) => p.a === k.kanji || p.b === k.kanji);
     const par = pares[Math.floor(rng() * pares.length)] as (typeof PARECIDOS)[number];
@@ -362,7 +376,7 @@ export class PecasRound {
     const [maioria, diferente] = rng() < 0.5 ? [k, outro] : [outro, k];
     const certa = Math.floor(rng() * 6);
     const grade = Array.from({ length: 6 }, (_, i) => (i === certa ? diferente.kanji : maioria.kanji));
-    this.iniciar({ modo: 'intruso', k, licao: false, maioria, diferente, grade, certa, diferenca: par.diferenca });
+    this.iniciar({ modo: 'intruso', k, licao, maioria, diferente, grade, certa, diferenca: par.diferenca });
   }
 
   private perguntaAdivinhar(k: KanjiPeca, licao: boolean): void {
@@ -383,10 +397,15 @@ export class PecasRound {
     const lista = k ? COMPOSTOS.filter((c) => c.kanji.includes(k)) : COMPOSTOS;
     const pool = lista.map(cartaComposto);
     const pick = pickNext(pool, cards, now(), rng, { recent: this.recentes, maxYoung: MAX_JOVENS });
-    const key = pick?.key ?? (pool[0] as string);
+    // Palavra nova: de preferência uma com os dois kanji já vistos.
+    const novas = lista.filter((c) => !foiApresentado(cards, cartaComposto(c)));
+    const nova = novas.find((c) => c.kanji.every((x) => this.visto(x))) ?? novas[0];
+    const key = (pick && pick.reason !== 'practice') || !nova ? (pick?.key ?? (pool[0] as string)) : cartaComposto(nova);
     this.recentes = [...this.recentes, key].slice(-4);
     const palavra = lista[pool.indexOf(key)] as Composto;
     const opcoes = shuffle(rng, opcoesDeLeitura(palavra, rng));
+    // A tela mostra a leitura de cada kanji: é a apresentação da palavra.
+    apresentar(cards, [key], now());
     this.iniciar({ modo: 'composto', k: k ?? palavra.kanji[0], licao: false, palavra, opcoes, certa: opcoes.indexOf(palavra.kana) });
   }
 
@@ -395,6 +414,7 @@ export class PecasRound {
   /** Sai da lição para a pergunta, ou da resposta para a próxima. */
   seguir(): Evento[] {
     if (this.fase === 'licao') {
+      apresentar(this.deps.cards, [cartaPecas(this.pergunta.k)], this.deps.now());
       this.fase = 'pergunta';
       this.inicio = this.deps.now();
       return [];
@@ -424,7 +444,7 @@ export class PecasRound {
     if (p.colocadas.includes(peca)) return [];
     if (!p.precisa.includes(peca)) {
       p.erros++;
-      if (this.combo > 0) this.combo = 0;
+      if (this.combo > 0 && !this.pratica) this.combo = 0;
       if (p.erros >= ERROS_ATE_BRILHAR) {
         const falta = p.precisa.find((x) => !p.colocadas.includes(x)) as string;
         p.brilha = p.bandeja.indexOf(falta);
@@ -441,24 +461,34 @@ export class PecasRound {
     return this.fechar(p.erros === 0);
   }
 
+  /** A carta da pergunta da vez ainda está em prática: errar não custa combo nem pontos. */
+  get pratica(): boolean {
+    const p = this.pergunta;
+    if (p.licao) return true;
+    return emPratica(this.deps.cards, p.modo === 'composto' ? cartaComposto(p.palavra) : cartaPecas(p.k));
+  }
+
   private fechar(certo: boolean): Evento[] {
     const { cards, now, profile } = this.deps;
     const p = this.pergunta;
     const t = now();
     const ms = t - this.inicio;
-    const rapido = certo && ms < RAPIDO_MS && !p.licao;
+    const novo = !this.visto(p.k);
+    // Kanji nunca visto no modo 4: as peças com o nome na tela são a apresentação dele.
+    if (p.modo === 'adivinhar' && novo) apresentar(cards, [cartaPecas(p.k)], t);
+    const pratica = this.pratica;
+    const rapido = certo && ms < RAPIDO_MS && !pratica;
     this.acertou = certo;
     this.fase = 'revela';
-    const novo = !this.visto(p.k);
-    const ajuda = p.licao || (p.modo === 'adivinhar' && novo) || (p.modo === 'montar' && p.erros >= ERROS_ATE_BRILHAR);
-    const outcome = { correct: certo, ms, hinted: ajuda };
+    const ajuda = p.modo === 'montar' && p.erros >= ERROS_ATE_BRILHAR;
+    const outcome = pratica ? notaDaPratica(certo, ms) : { correct: certo, ms, hinted: ajuda };
     if (p.modo === 'composto') {
-      cards[cartaComposto(p.palavra)] = review(cards[cartaComposto(p.palavra)], outcome, t);
+      avaliar(cards, cartaComposto(p.palavra), outcome, t);
     } else {
-      if (novo) this.novos.push(p.k.kanji);
-      cards[cartaPecas(p.k)] = review(cards[cartaPecas(p.k)], outcome, t);
+      if (novo || p.licao) this.novos.push(p.k.kanji);
+      avaliar(cards, cartaPecas(p.k), outcome, t);
       // Montar e adivinhar cobram o significado: a memória de significado é a mesma do KanjiMon.
-      if (p.modo === 'montar' || p.modo === 'adivinhar') cards[cartaSignificado(p.k)] = review(cards[cartaSignificado(p.k)], outcome, t);
+      if (p.modo === 'montar' || p.modo === 'adivinhar') avaliar(cards, cartaSignificado(p.k), outcome, t);
     }
 
     const events: Evento[] = [];
@@ -470,10 +500,10 @@ export class PecasRound {
       this.ganhar(XP_ACERTO, events);
       events.unshift(p.modo === 'montar' ? { t: 'pronto', combo: this.combo } : { t: 'acerto', combo: this.combo, rapido });
     } else {
-      this.combo = 0;
-      // Montar com erro no meio ainda termina o kanji: vale metade.
+      if (!pratica) this.combo = 0;
+      // Montar com erro no meio ainda termina o kanji: vale metade (na prática, inteiro).
       if (p.modo === 'montar') {
-        this.pontos += PONTOS_ACERTO / 2;
+        this.pontos += pratica ? PONTOS_ACERTO : PONTOS_ACERTO / 2;
         events.unshift({ t: 'pronto', combo: 0 });
       } else events.unshift({ t: 'erro' });
     }

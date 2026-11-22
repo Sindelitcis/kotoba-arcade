@@ -9,7 +9,11 @@ import { acertou, cor, corStyle, errou, zerar } from '../../core/cor';
 import { figuraUrl } from '../../core/figuras';
 import { onomato } from '../../core/fx';
 import { teclaDe } from '../../core/teclas';
-import { MemoriaRound, QUADROS, type Carta, type Evento, type Resumo } from './engine';
+import { Apresentacao } from '../../core/Apresentacao';
+import { itemDaPalavra, type ItemNovo } from '../../content/ensino';
+import { chave } from './engine';
+import { FIGURAS_MEMORIA, MemoriaRound, QUADROS, type Carta, type Evento, type Resumo } from './engine';
+import { foco, recortar } from '../../core/foco';
 
 type Modo = 'menu' | 'rodada' | 'resumo';
 
@@ -68,32 +72,9 @@ function CartaView({ c, i, onClick, brilha, escolhida }: { c: Carta; i: number; 
   );
 }
 
-function Licao({ novas, onGo }: { novas: Figura[]; onGo: () => void }) {
-  useEffect(() => {
-    if (novas[0]) void speakWord(novas[0].word.kana);
-  }, [novas]);
-  return (
-    <section class="me-licao" data-testid="me-licao">
-      <span class="gr-tag">Palavras novas</span>
-      <p class="muted">Olhe cada uma e ouça. Depois elas entram no quadro.</p>
-      <ul>
-        {novas.map((f) => (
-          <li key={f.img}>
-            <button class="me-nova" onClick={() => void speakWord(f.word.kana)} title="Ouvir">
-              <img src={figuraUrl(f.img)} alt="" draggable={false} />
-              <span class="me-nova-jp" lang="ja">
-                <Escrita w={f.word} leitura />
-              </span>
-              <span class="me-nova-pt">{f.word.pt}</span>
-            </button>
-          </li>
-        ))}
-      </ul>
-      <button class="primary" onClick={onGo} data-testid="me-comecar">
-        Começar o quadro <kbd>Enter</kbd>
-      </button>
-    </section>
-  );
+/** A figura como apresentação: imagem, palavra, voz e significado. */
+export function itemDaFigura(f: Figura): ItemNovo {
+  return itemDaPalavra(f.word, chave(f.word), { img: figuraUrl(f.img) });
 }
 
 export function MemoriaGame() {
@@ -110,13 +91,17 @@ export function MemoriaGame() {
   const rodadaRef = useRef<MemoriaRound | null>(null);
   const [resumo, setResumo] = useState<Resumo | null>(null);
   const [nota, setNota] = useState('');
+  /** Confundiu na prática: a palavra aparece de novo. */
+  const [deNovo, setDeNovo] = useState<ItemNovo | null>(null);
+  const deNovoRef = useRef<ItemNovo | null>(null);
+  deNovoRef.current = deNovo;
   const ultimaFala = useRef<string | null>(null);
   const fechar = useRef<number | null>(null);
   const r = rodadaRef.current;
   // Aprofundar: as palavras dos pares já feitos (e as novas apresentadas); no fim, as novas e as que subiram.
   useAprofundar(
     modo === 'rodada' && r
-      ? [...r.quadro.novas, ...r.quadro.cartas.filter((c) => c.feita && c.lado === 'palavra').map((c) => c.figura)].map((f) => ({ t: 'palavra', id: f.word.id }) as const)
+      ? r.quadro?.cartas.filter((c) => c.feita && c.lado === 'palavra').map((c) => ({ t: 'palavra', id: c.figura.word.id }) as const) ?? []
       : modo === 'resumo' && resumo
         ? [...resumo.novas, ...resumo.subiram].map((f) => ({ t: 'palavra', id: f.word.id }) as const)
         : [],
@@ -124,7 +109,9 @@ export function MemoriaGame() {
 
   const comecar = () => {
     zerar();
-    rodadaRef.current = new MemoriaRound({ cards: app.data.cards, profile: app.data.profile, save, now: () => Date.now(), rng: Math.random });
+    // Missão da Jornada: só as figuras das palavras dela.
+    const figuras = recortar(FIGURAS_MEMORIA, foco.value?.palavras, (f) => f.word.id);
+    rodadaRef.current = new MemoriaRound({ cards: app.data.cards, profile: app.data.profile, save, now: () => Date.now(), rng: Math.random, figuras });
     setResumo(null);
     setNota('');
     setModo('rodada');
@@ -150,6 +137,8 @@ export function MemoriaGame() {
         errou();
         sfx.miss();
         onomato('erro', document.querySelector(`[data-carta="${e.cartas[1]}"]`), 'neutro', 0.7);
+      } else if (e.t === 'de-novo') {
+        setDeNovo(itemDaFigura(e.figura));
       } else if (e.t === 'sobe') setNota(`${e.figura.word.kana}: ${e.nivel === 1 ? 'agora em kanji' : 'agora só no som'}`);
       else if (e.t === 'quadro') {
         sfx.chest();
@@ -188,8 +177,9 @@ export function MemoriaGame() {
   const seguir = () => {
     const rr = rodadaRef.current;
     if (!rr) return;
-    if (rr.fase === 'licao') {
-      rr.comecar();
+    if (rr.fase === 'apresenta') {
+      rr.apresentou();
+      commit();
       redesenhar();
     } else if (rr.fase === 'pausa') {
       zerar();
@@ -236,6 +226,8 @@ export function MemoriaGame() {
       }
       const rr = rodadaRef.current;
       if (!rr) return;
+      // Apresentação na tela: as teclas são dela (core/Apresentacao.tsx).
+      if (tecla !== 'Escape' && (rr.fase === 'apresenta' || deNovoRef.current)) return;
       if (tecla === 'Escape') parar();
       else if (tecla.toLowerCase() === 'r' && rr.fase !== 'jogo') {
         if (ultimaFala.current) void speakWord(ultimaFala.current);
@@ -250,6 +242,23 @@ export function MemoriaGame() {
   });
 
   const fundo = { '--cena': `url("${figuraUrl(FUNDO)}")` };
+
+  if (modo === 'rodada' && r && r.fase === 'apresenta') {
+    return (
+      <main class="me">
+        <header class="km-top">
+          <button class="ghost" onClick={parar}>
+            Parar <kbd>Esc</kbd>
+          </button>
+          <div class="gr-progress">Palavras novas antes do quadro</div>
+          <span />
+        </header>
+        <div data-testid="me-licao">
+          <Apresentacao itens={r.apresentadas.map(itemDaFigura)} onFim={seguir} fim="Começar o quadro" />
+        </div>
+      </main>
+    );
+  }
 
   if (modo === 'rodada' && r) {
     const q = r.quadro;
@@ -267,12 +276,18 @@ export function MemoriaGame() {
           </div>
           <span class="gr-note" data-testid="me-nota">{nota}</span>
         </header>
-        {r.fase === 'licao' ? (
-          <Licao novas={q.novas} onGo={seguir} />
+        {deNovo ? (
+          <Apresentacao key={deNovo.chaves[0]} itens={[deNovo]} modo="de-novo" onFim={() => setDeNovo(null)} fim="Voltar ao quadro" />
         ) : (
           <section class="me-quadro" data-testid="me-quadro" style={{ ...fundo, ...corStyle(cor.value) }}>
+            {q.apoio && (
+              <span class="ap-pratica" data-testid="me-pratica">
+                Prática: confundir aqui não tira nada
+              </span>
+            )}
             <p class="me-dica">
               {q.parecidas
+
                 ? 'Palavras que soam parecido. Ouça com calma.'
                 : q.modo === 'memoria'
                   ? 'Cartas viradas: ache cada imagem e a palavra dela.'

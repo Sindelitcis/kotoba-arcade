@@ -6,12 +6,13 @@
  *   e a tecla segue; não tem tela de erro nem segunda chance obrigatória.
  * - Montar a frase: cada número põe o próximo bloco. Bloco fora de ordem volta; depois
  *   de duas voltas, o certo brilha.
- * - Memória: palavra ou kanji que nunca apareceu antes entra só como apresentado (nota
- *   "com ajuda", nunca ruim), a mesma regra da Aventura e do Kumitate. O que já tinha
- *   carta ganha nota boa ou ruim pela primeira resposta.
+ * - Memória (core/ensino.ts): o quadro apresenta a palavra ou o kanji, e só depois vem a
+ *   pergunta dele. Item ainda em prática ganha a nota da prática e errar não zera o combo;
+ *   o que já está firme ganha nota boa ou ruim pela primeira resposta.
  */
 import { shuffle, type Rng } from '../core/rng';
-import { review, type CardState } from '../core/srs';
+import { apresentar, avaliar, emPratica, notaDaPratica } from '../core/ensino';
+import type { CardState } from '../core/srs';
 import type { Licao, Passo, Pergunta } from './licoes';
 
 export interface AndamentoDeps {
@@ -97,6 +98,8 @@ export class Andamento {
   /** Vai para o próximo passo. Devolve false se o passo atual ainda pede resposta. */
   avancar(): boolean {
     if (!this.podeSeguir) return false;
+    const atual = this.passo;
+    if (atual?.tipo === 'quadro' && atual.carta) apresentar(this.deps.cards, [atual.carta], this.deps.now());
     this.i++;
     this.preparar();
     return true;
@@ -107,7 +110,7 @@ export class Andamento {
     if (p?.tipo !== 'pergunta' || this.resposta) return null;
     const certa = opcao === p.correta;
     this.resposta = { escolhida: opcao, certa };
-    this.contar(certa);
+    this.contar(certa, !!p.carta && emPratica(this.deps.cards, p.carta));
     if (p.carta) this.memorizar(p, certa);
     return this.resposta;
   }
@@ -129,18 +132,18 @@ export class Andamento {
     return 'pronta';
   }
 
-  private contar(certa: boolean): void {
+  /** Na prática, errar não zera o combo. */
+  private contar(certa: boolean, pratica = false): void {
     if (certa) {
       this.acertos++;
       this.combo++;
-    } else this.combo = 0;
+    } else if (!pratica) this.combo = 0;
   }
 
   private memorizar(p: Pergunta, certa: boolean): void {
     const { cards, now } = this.deps;
     const key = p.carta as string;
-    const antes = cards[key];
-    cards[key] = antes ? review(antes, { correct: certa }, now()) : review(undefined, { correct: true, hinted: true }, now());
+    avaliar(cards, key, emPratica(cards, key) ? notaDaPratica(certa) : { correct: certa }, now());
   }
 }
 

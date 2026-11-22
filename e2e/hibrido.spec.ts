@@ -1,4 +1,5 @@
 import { expect, test, type Page, type Route } from '@playwright/test';
+import { passarApresentacao } from './apoio';
 
 // Modo híbrido: PC ligado e sessão na nuvem. O texto vem da nuvem; ouvir, furigana e voz, do PC.
 const PC = 'http://127.0.0.1:8791';
@@ -53,6 +54,8 @@ test('PC ligado e sessão na nuvem: texto da nuvem, furigana do PC; cota acaba e
   await expect(page.getByTestId('cv-onde')).toContainText('texto na nuvem (gemma-4-26b-a4b-it)');
   await expect(page.getByTestId('cv-onde')).toContainText('furigana e voz no seu PC');
   await page.keyboard.press('Enter');
+  // Antes de conversar, as palavras novas da situação.
+  await passarApresentacao(page);
   await expect(page.getByTestId('cv')).toHaveAttribute('data-phase', 'conversa');
 
   await dizer(page, 'koohii o kudasai');
@@ -79,6 +82,8 @@ test('nuvem com erro no meio: o PC responde aquela fala e a seguinte volta para 
   await preparar(page, [500, 200]);
   await abrirMenu(page);
   await page.keyboard.press('Enter');
+  // Antes de conversar, as palavras novas da situação.
+  await passarApresentacao(page);
   await dizer(page, 'koohii o kudasai');
   await expect(page.getByTestId('cv-modelo')).toContainText('porque a nuvem não respondeu');
   await dizer(page, 'ikura desu ka');
@@ -91,6 +96,8 @@ test('PC ligado sem sessão na nuvem: tudo no PC, com o convite para entrar', as
   await expect(page.getByTestId('cv-onde')).toContainText('no seu PC (gemma4:12b)');
   await expect(page.getByTestId('cv-entrar-nuvem')).toBeVisible();
   await page.keyboard.press('Enter');
+  // Antes de conversar, as palavras novas da situação.
+  await passarApresentacao(page);
   await dizer(page, 'koohii o kudasai');
   await expect(page.getByTestId('cv-npc').last()).toContainText('ＰＣ');
   expect(pedidos.nuvem).not.toContain('/conversa');

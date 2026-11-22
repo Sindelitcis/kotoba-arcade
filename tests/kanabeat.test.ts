@@ -2,7 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { kanaToRomaji, matchTyping } from '../src/core/kana';
 import { seededRng } from '../src/core/rng';
 import { emptySave } from '../src/core/save';
-import { review } from '../src/core/srs';
+import { DAY, review, newCard, type CardState } from '../src/core/srs';
+import { cardKey, KANA, WORDS } from '../src/content';
+import { foiApresentado } from '../src/core/ensino';
 import {
   beatsFor,
   BPM_MAX,
@@ -19,10 +21,23 @@ import {
 
 const T0 = new Date('2026-11-15T12:00:00').getTime();
 
-function setup(mode: Mode = 'hiragana', bpm = 60, count?: number, seed = 1) {
+/** Deixa firmes (em cobrança) as `n` primeiras cartas do modo. */
+function firmar(cards: Record<string, CardState>, mode: Mode, n: number): void {
+  const ids = mode === 'palavras' ? WORDS.map((w) => cardKey(w.id, 'reading')) : KANA.map((k) => (mode === 'hiragana' ? cardKey(k.id, 'reading') : cardKey(`ak:${k.kata}`, 'reading')));
+  for (const k of ids.slice(0, n)) {
+    let c: CardState = review(newCard(0), { correct: true }, T0 - 300 * DAY);
+    for (let i = 0; i < 6; i++) c = review(c, { correct: true }, c.due);
+    cards[k] = { ...c, due: T0 + 30 * DAY };
+  }
+}
+
+/** A fase pronta para tocar: `firmes` cartas já em cobrança e a apresentação dos novos já vista. */
+function setup(mode: Mode = 'hiragana', bpm = 60, count?: number, seed = 1, firmes = 0) {
   const data = emptySave(T0);
   const save = ensureKanaBeatSave(data.games);
+  firmar(data.cards, mode, firmes);
   const stage = new Stage({ cards: data.cards, profile: data.profile, save, rng: seededRng(seed), now: () => T0 }, mode, bpm, count);
+  stage.apresentou();
   return { data, save, stage };
 }
 
@@ -54,8 +69,8 @@ describe('montagem da fase', () => {
     }
   });
 
-  it('a mesma carta aparece no máximo duas vezes por fase e nunca duas seguidas', () => {
-    const { stage } = setup('hiragana', 60, 40, 3);
+  it('com muita coisa conhecida, a mesma carta aparece no máximo duas vezes e nunca duas seguidas', () => {
+    const { stage } = setup('hiragana', 60, 40, 3, 20);
     const counts = new Map<string, number>();
     stage.notes.forEach((n, i) => {
       counts.set(n.card, (counts.get(n.card) ?? 0) + 1);
@@ -64,13 +79,36 @@ describe('montagem da fase', () => {
     expect(Math.max(...counts.values())).toBeLessThanOrEqual(2);
   });
 
-  it('carta nunca vista vem com romaji de apoio; carta conhecida não', () => {
-    const { data, save } = setup();
-    const first = new Stage({ cards: data.cards, profile: data.profile, save, rng: seededRng(1), now: () => T0 }, 'hiragana', 60, 5);
-    expect(first.notes[0]!.hint).toBe('a');
-    data.cards[first.notes[0]!.card] = review(undefined, { correct: true }, T0);
-    const second = new Stage({ cards: data.cards, profile: data.profile, save, rng: seededRng(1), now: () => T0 + 120_000 }, 'hiragana', 60, 5);
-    expect(second.notes.find((n) => n.card === first.notes[0]!.card)?.hint).toBeUndefined();
+  it('jogador novo: os kana novos são apresentados antes da música, e a música só tem eles', () => {
+    const data = emptySave(T0);
+    const save = ensureKanaBeatSave(data.games);
+    const stage = new Stage({ cards: data.cards, profile: data.profile, save, rng: seededRng(1), now: () => T0 }, 'hiragana', 60, 12);
+    expect(stage.apresentando).toBe(true);
+    expect(stage.novos.map((c) => c.text)).toEqual(['あ', 'い', 'う', 'え']);
+    // Antes da apresentação acabar, nada toca e nada é gravado.
+    expect(stage.key('a', stage.notes[0]!.time)).toEqual([]);
+    expect(stage.update(stage.endTime + 10_000)).toEqual([]);
+    expect(Object.keys(data.cards)).toHaveLength(0);
+    stage.apresentou();
+    for (const c of stage.novos) expect(foiApresentado(data.cards, c.card)).toBe(true);
+    for (const n of stage.notes) {
+      expect(stage.novos.map((c) => c.card)).toContain(n.card);
+      expect(n.pratica).toBe(true);
+    }
+    // Poucos conhecidos: cada um volta mais vezes, mas nunca dois seguidos.
+    stage.notes.forEach((n, i) => i > 0 && expect(n.card).not.toBe(stage.notes[i - 1]!.card));
+  });
+
+  it('nota em prática vem com romaji de apoio e uma batida a mais de folga; carta firme não', () => {
+    const { stage } = setup('hiragana', 60, 5);
+    expect(stage.notes[0]!.hint).toBe('a');
+    const [a, b] = stage.notes;
+    expect(b!.time - a!.time).toBe(2 * stage.beatMs);
+    const firme = setup('hiragana', 60, 5, 1, 999).stage;
+    for (const n of firme.notes) {
+      expect(n.pratica).toBe(false);
+      expect(n.hint).toBeUndefined();
+    }
   });
 
   it('palavras mostram a leitura por cima e o significado', () => {
@@ -92,7 +130,7 @@ describe('montagem da fase', () => {
 
 describe('tocando', () => {
   it('digitar em cima da batida é Perfeito e aumenta o combo', () => {
-    const { stage } = setup();
+    const { stage } = setup('hiragana', 60, undefined, 1, 999);
     const n = stage.notes[0]!;
     const events = typeNote(stage, n, n.time);
     expect(events.at(-1)).toMatchObject({ t: 'hit', judge: 'perfect', combo: 1 });
@@ -115,13 +153,35 @@ describe('tocando', () => {
   });
 
   it('deixar a nota passar conta como perdida, zera o combo e registra o erro na memória', () => {
-    const { stage, data } = setup();
+    const { stage, data } = setup('hiragana', 60, undefined, 1, 999);
     const [a, b] = stage.notes;
     typeNote(stage, a!, a!.time);
+    expect(stage.combo).toBe(1);
+    const reps = data.cards[b!.card]!.reps;
     const events = stage.update(b!.time + stage.beatMs * 2);
-    expect(events[0]).toMatchObject({ t: 'miss', note: { id: b!.id } });
+    expect(events[0]).toMatchObject({ t: 'miss', note: { id: b!.id }, pratica: false });
     expect(stage.combo).toBe(0);
-    expect(data.cards[b!.card]?.reps).toBe(1);
+    expect(data.cards[b!.card]?.reps).toBe(reps + 1);
+  });
+
+  it('nota de prática perdida não zera o combo; acertada também não soma', () => {
+    const { stage, data } = setup('hiragana', 60, 20, 1, 10);
+    const pratica = stage.notes.filter((n) => n.pratica);
+    expect(pratica.length).toBeGreaterThan(0);
+    stage.combo = 4;
+    for (const n of stage.notes) {
+      if (n === pratica[0]) break;
+      n.state = 'hit';
+    }
+    const p = pratica[0]!;
+    typeNote(stage, p, p.time);
+    expect(stage.combo).toBe(4);
+    const q = pratica.find((n) => n.state === 'pending')!;
+    for (const n of stage.notes) if (n !== q && n.time < q.time && n.state === 'pending') n.state = 'hit';
+    const ev = stage.update(q.time + stage.beatMs * 2);
+    expect(ev.find((e) => e.t === 'miss')).toMatchObject({ pratica: true });
+    expect(stage.combo).toBe(4);
+    expect(data.cards[q.card]!.lapses + data.cards[q.card]!.reps).toBeGreaterThan(0);
   });
 
   it('tecla errada recomeça a nota sem perder a vez', () => {

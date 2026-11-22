@@ -3,13 +3,20 @@
  * No combate, cada carta da mão é um kanji ou uma palavra com um efeito. Jogar
  * a carta abre uma pergunta sobre o item: acertou, o efeito sai forte; errou,
  * sai fraco. Morrer encerra a run, mas o que foi estudado fica na memória.
+ *
+ * Ensinar antes de cobrar (core/ensino.ts): carta de item que nunca foi visto entra no
+ * baralho, mas antes do combate seguinte o item é apresentado com calma. Enquanto o item
+ * está em prática, a pergunta tem menos alternativas e uma dica, e errar não enfraquece a
+ * carta nem zera o combo: o jogo mostra o item de novo.
  */
 import { cardKey, getKanji, getWord, KANJI, parseCardKey, WORDS, type Word } from '../../content';
 import { acharPalavra } from '../../content/escola';
 import { foco } from '../../core/foco';
 import { pickNext } from '../../core/picker';
+import { apresentar, avaliar, foiApresentado, notaDaPratica } from '../../core/ensino';
 import { levelInfo } from '../../core/progress';
 import {
+  apoiar,
   checkAnswer,
   kanjiMeaningQuestion,
   kanjiRecallQuestion,
@@ -20,7 +27,7 @@ import {
 } from '../../core/questions';
 import { pick, shuffle, weighted, type Rng } from '../../core/rng';
 import type { Profile } from '../../core/save';
-import { isYoung, masteryLevel, retrievability, review, type CardState } from '../../core/srs';
+import { isYoung, masteryLevel, retrievability, type CardState } from '../../core/srs';
 
 export const MAX_HP = 40;
 export const ENERGY = 3;
@@ -183,6 +190,8 @@ export interface Reward {
 
 export type RunEvent =
   | { t: 'enter'; node: NodeKind }
+  /** Itens novos do baralho: a tela apresenta antes do combate. */
+  | { t: 'apresenta'; itens: string[] }
   | { t: 'ask'; question: Question }
   | {
       t: 'play';
@@ -195,6 +204,8 @@ export type RunEvent =
       damage: number;
       combo: number;
       answer: string;
+      /** Item em prática: errar não enfraqueceu a carta nem zerou o combo. */
+      pratica: boolean;
     }
   | { t: 'relic'; relic: RelicId; note: string }
   | { t: 'enemy'; intent: Intent; damage: number; blocked: number }
@@ -254,7 +265,10 @@ export class Run {
   turn = 0;
   floor = 0;
   won = false;
-  phase: 'map' | 'combat' | 'question' | 'reward' | 'rest' | 'shop' | 'over' = 'map';
+  phase: 'map' | 'apresenta' | 'combat' | 'question' | 'reward' | 'rest' | 'shop' | 'over' = 'map';
+  /** Itens do baralho sendo apresentados antes do combate (fase 'apresenta'). */
+  apresentando: string[] = [];
+  private combateDepois: Enemy['kind'] | null = null;
   readonly map: NodeKind[][];
   /** Nó escolhido em cada andar já visitado. */
   readonly path: number[] = [];
@@ -301,8 +315,9 @@ export class Run {
     return e ? (e.pattern[e.step % e.pattern.length] as Intent) : {};
   }
 
+  /** Nunca foi apresentado: entra no baralho e é apresentado antes do próximo combate. */
   isNew(itemId: string): boolean {
-    return !this.deps.cards[meaningKey(itemId)];
+    return !foiApresentado(this.deps.cards, meaningKey(itemId));
   }
 
   costOf(): number {
@@ -323,9 +338,10 @@ export class Run {
   }
 
   /**
-   * Escolhe itens para cartas novas. Quem decide é o `pickNext`: primeiro o que
-   * precisa de revisão, depois novidade, e novidade pausa quando há muita coisa mole.
-   * Palavra só entra depois que os kanji dela já apareceram.
+   * Escolhe itens para cartas novas. Entre os já apresentados, quem decide é o `pickNext`
+   * (primeiro o que precisa de revisão). Item nunca visto entra como novidade, na ordem do
+   * conteúdo, e novidade pausa quando há muita coisa mole. Palavra só entra depois que os
+   * kanji dela já apareceram.
    */
   private pickItems(slots: Slot[], maxNew: number): string[] {
     const { cards, rng, now } = this.deps;
@@ -353,9 +369,13 @@ export class Run {
         if (anySeen.length > 0) pool = anySeen;
       }
       const chosen = pickNext(pool, cards, now(), rng, { maxYoung: MAX_YOUNG, newRatio: 0.5 });
-      if (!chosen) continue;
-      if (!cards[chosen.key]) fresh++;
-      out.push(parseCardKey(chosen.key).itemId);
+      // Novidade pausada, mas nada já visto sobrou para a carta: vem uma nova (será apresentada).
+      const novos = fresh < allowNew || !chosen ? ids.map(meaningKey).filter((k) => !foiApresentado(cards, k)) : [];
+      const novo = novos[0] !== undefined && (!chosen || chosen.reason === 'practice' || rng() < 0.5) ? novos[0] : null;
+      const key = novo ?? chosen?.key;
+      if (!key) continue;
+      if (novo) fresh++;
+      out.push(parseCardKey(key).itemId);
     }
     return out;
   }
@@ -393,7 +413,33 @@ export class Run {
     this.phase = 'map';
   }
 
+  /** Itens do baralho que ainda não foram apresentados, na ordem em que entraram. */
+  private naoApresentados(): string[] {
+    const ids = [...new Set(this.deck.map((c) => c.itemId))];
+    return ids.filter((id) => this.isNew(id));
+  }
+
+  /** A apresentação acabou: os itens viram prática e o combate começa. */
+  apresentou(): RunEvent[] {
+    if (this.phase !== 'apresenta' || !this.combateDepois) return [];
+    const { cards, now } = this.deps;
+    apresentar(cards, this.apresentando.map(meaningKey), now());
+    for (const id of this.apresentando) this.stats.newItems.push(faceOf(id).jp);
+    this.apresentando = [];
+    const kind = this.combateDepois;
+    this.combateDepois = null;
+    this.startCombat(kind);
+    return [];
+  }
+
   private startCombat(kind: Enemy['kind']): void {
+    const novos = this.naoApresentados();
+    if (novos.length > 0) {
+      this.apresentando = novos;
+      this.combateDepois = kind;
+      this.phase = 'apresenta';
+      return;
+    }
     const { rng } = this.deps;
     const def = pick(rng, ENEMIES[kind]);
     const hp = def.hp + this.floor * 3;
@@ -439,8 +485,8 @@ export class Run {
   }
 
   /**
-   * A pergunta de uma carta muda com a memória do item: primeiro contato ensina,
-   * depois vem a habilidade ainda não vista, e por fim a mais fraca das duas.
+   * A pergunta de uma carta muda com a memória do item: primeiro o significado (com apoio,
+   * enquanto em prática), depois a habilidade ainda não vista, e por fim a mais fraca das duas.
    */
   private questionFor(card: RunCard): Question {
     const { cards, rng, now } = this.deps;
@@ -451,10 +497,10 @@ export class Run {
     const make = (useOther: boolean): Question => {
       if (id.startsWith('k:')) {
         const k = getKanji(id);
-        return useOther ? kanjiRecallQuestion(k, rng) : kanjiMeaningQuestion(k, rng, !meaning);
+        return apoiar(useOther ? kanjiRecallQuestion(k, rng) : kanjiMeaningQuestion(k, rng), cards);
       }
       const w = palavra(id);
-      return useOther ? wordReadingQuestion(w, rng, masteryLevel(cards[other]) >= 3) : wordMeaningQuestion(w, rng, !meaning);
+      return apoiar(useOther ? wordReadingQuestion(w, rng, masteryLevel(cards[other]) >= 3) : wordMeaningQuestion(w, rng), cards);
     };
     // O caminho inverso (e a leitura) só entram depois de o significado ter sido visto de verdade.
     const ready = !!meaning && meaning.reps >= (id.startsWith('k:') ? 2 : 1);
@@ -489,8 +535,8 @@ export class Run {
     const { cards, now, save } = this.deps;
     const result = checkAnswer(q, input);
     const correct = result !== 'wrong';
-    cards[q.card] = review(cards[q.card], { correct, ms, hinted: !!q.teach || result === 'close' }, now());
-    if (q.teach) this.stats.newItems.push(faceOf(card.itemId).jp);
+    const pratica = !!q.apoio;
+    avaliar(cards, q.card, pratica ? notaDaPratica(correct, ms) : { correct, ms, hinted: result === 'close' }, now());
 
     const events: RunEvent[] = [];
     this.energy -= this.costOf();
@@ -501,9 +547,14 @@ export class Run {
     this.phase = 'combat';
 
     const strong = this.strongAmount(card);
-    const fast = correct && ms < FAST_MS && !q.teach;
+    const fast = correct && ms < FAST_MS && !pratica;
     let amount: number;
-    if (correct) {
+    if (pratica) {
+      // Prática: a carta sai inteira e o combo fica como estava, certo ou errado.
+      if (correct) this.stats.correct++;
+      else this.stats.wrong++;
+      amount = strong;
+    } else if (correct) {
       this.combo++;
       this.stats.correct++;
       this.stats.bestCombo = Math.max(this.stats.bestCombo, this.combo);
@@ -530,12 +581,13 @@ export class Run {
       this.hp = Math.min(this.maxHp, this.hp + amount);
     } else {
       this.draw(amount);
-      if (correct) this.energy++;
+      if (correct || pratica) this.energy++;
     }
     this.discard.push(card);
-    events.push({ t: 'play', card, correct, close: result === 'close', fast, amount, damage, combo: this.combo, answer: q.answer });
+    events.push({ t: 'play', card, correct, close: result === 'close', fast, amount, damage, combo: this.combo, answer: q.answer, pratica });
 
-    if (correct && this.has('leque') && this.combo % 3 === 0) {
+    if (correct && !pratica && this.has('leque') && this.combo % 3 === 0) {
+
       this.block += 4;
       events.push({ t: 'relic', relic: 'leque', note: '+4 de escudo' });
     }

@@ -4,6 +4,10 @@
  * pelo personagem é um modelo de IA rodando no PC do jogador, que chega aqui
  * por uma interface (`AiClient`): o texto que pedimos a ele e a conferência do
  * que ele devolve ficam neste arquivo, e os testes usam um cliente falso.
+ *
+ * Ensinar antes de cobrar (core/ensino.ts): antes da conversa, o vocabulário novo da cena
+ * é apresentado (`termosParaApresentar`). Palavra que aparece na conversa sem ter sido
+ * apresentada só é apresentada ali (primeiro contato), sem nota.
  */
 import { cardKey, WORDS } from '../../content';
 import { DAILY_WORDS } from '../../content/vida';
@@ -12,7 +16,8 @@ import { pickNext } from '../../core/picker';
 import { levelInfo } from '../../core/progress';
 import type { Rng } from '../../core/rng';
 import type { Profile } from '../../core/save';
-import { isDue, review, type CardState } from '../../core/srs';
+import { apresentar, avaliar, foiApresentado, NOVOS_MAX, novidades } from '../../core/ensino';
+import { isDue, type CardState } from '../../core/srs';
 
 /** Quantas vezes o jogador fala antes de o personagem se despedir. */
 export const MAX_TURNOS = 10;
@@ -605,6 +610,25 @@ export function palavrasConhecidas(cards: Readonly<Record<string, CardState>>, n
     .slice(0, max);
 }
 
+/** O vocabulário da cena que ainda não foi apresentado (até cinco), na ordem da cena. */
+export function termosParaApresentar(cena: Cena, cards: Readonly<Record<string, CardState>>): Termo[] {
+  const chaves = novidades(
+    cena.vocabulario.map((t) => cardKey(t.id, 'meaning')),
+    cards,
+    { max: NOVOS_MAX },
+  );
+  return cena.vocabulario.filter((t) => chaves.includes(cardKey(t.id, 'meaning')));
+}
+
+/** A apresentação acabou: o vocabulário vira prática. */
+export function apresentarTermos(cards: Record<string, CardState>, termos: readonly Termo[], now: number): void {
+  apresentar(
+    cards,
+    termos.map((t) => cardKey(t.id, 'meaning')),
+    now,
+  );
+}
+
 /** Até três palavras da cena para o personagem puxar: o que venceu primeiro, depois novidade. */
 export function palavrasEmFoco(cena: Cena, cards: Readonly<Record<string, CardState>>, now: number, rng: Rng): Termo[] {
   const pool = cena.vocabulario.map((t) => cardKey(t.id, 'meaning'));
@@ -710,6 +734,8 @@ export interface ConversaDeps {
   rng: Rng;
   now: () => number;
   ai: AiClient;
+  /** Palavras apresentadas logo antes da conversa: entram no resumo como novas. */
+  apresentadas?: readonly Termo[];
 }
 
 const RESERVA: Resposta = {
@@ -750,6 +776,7 @@ export class Conversa {
   ) {
     const now = deps.now();
     this.foco = palavrasEmFoco(cena, deps.cards, now, deps.rng);
+    this.novas.push(...(deps.apresentadas ?? []));
     this.esquema = esquemaDa(cena);
     this.dicaTexto = cena.primeiraDica;
     this.sugestoes = cena.primeiras;
@@ -786,8 +813,8 @@ export class Conversa {
     const events: Evento[] = [];
     for (const t of acharTermos(fala, leitura)) {
       const key = cardKey(t.id, 'meaning');
-      if (cards[key] || cards[cardKey(t.id, 'reading')]) continue;
-      cards[key] = review(undefined, { correct: true, hinted: true }, now());
+      if (foiApresentado(cards, key)) continue;
+      apresentar(cards, [key], now());
       this.revistas.add(t.id);
       this.novas.push(t);
       events.push({ t: 'nova', termo: t });
@@ -803,8 +830,10 @@ export class Conversa {
       if (this.revistas.has(t.id)) continue;
       this.revistas.add(t.id);
       const key = cardKey(t.id, 'meaning');
-      const nova = !cards[key] && !cards[cardKey(t.id, 'reading')];
-      cards[key] = review(cards[key], { correct: true, hinted: comAjuda || nova }, now());
+      const nova = !foiApresentado(cards, key);
+      // Usou sozinho uma palavra nunca vista: é o primeiro contato, sem nota.
+      if (nova) apresentar(cards, [key], now());
+      else avaliar(cards, key, { correct: true, hinted: comAjuda }, now());
       if (nova) {
         this.novas.push(t);
         events.push({ t: 'nova', termo: t });

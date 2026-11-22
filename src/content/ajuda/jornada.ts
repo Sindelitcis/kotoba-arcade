@@ -25,13 +25,14 @@ export const JORNADA: Ajuda = {
     { nome: 'Etapas', texto: 'Fundamentos, Kana, Expressões de sobrevivência, N5, N4, Trabalho e dia a dia, N3. Cada quadro diz quantas missões tem e quanto tempo leva no total.' },
     { nome: 'Próxima missão', texto: 'A primeira que você ainda não fez, na ordem do mapa. É só uma sugestão: qualquer missão pode ser feita a qualquer hora.' },
     { nome: 'Lição em quadrinhos', texto: 'Uma ideia por quadro, Enter avança, e uma pergunta logo depois do que foi ensinado.' },
-    { nome: 'Missão de jogo', texto: 'Abre o KanjiMon, o Kana Beat, o Kotodama, a Aventura, o Kumitate ou a Conversa só com os kanji, palavras ou pontos daquela missão. Saiu do jogo, volta para a Jornada.' },
+    { nome: 'Missão de jogo', texto: 'Abre um jogo do arcade só com os kanji, kana, palavras ou pontos daquela missão. Saiu do jogo, volta para a Jornada.' },
     { nome: '済', texto: 'Missão feita. O número diz quantas vezes. Refazer conta de novo e nunca atrapalha.' },
     { nome: 'Vem depois', texto: 'Temas que ainda não têm conteúdo no arcade, com a fonte (nível do JLPT ou tópico do Marugoto). O N3 ainda é só isso.' },
   ],
   ensina: [
     'O conteúdo das lições veio da escola-japones: regra em uma frase, exemplos, erros comuns e o momento certo de usar cada expressão.',
     'Primeiro a lição apresenta, depois o jogo treina com o mesmo conteúdo. As palavras e kanji entram na mesma memória dos outros jogos.',
+    'Os jogos também vêm na ordem de ensinar: o kana com imagem antes do Kana Beat, a Cena Viva (o nome das coisas) antes da Memória com as mesmas coisas, e o KanjiMon depois, no N5.',
     'Nada fica trancado e não existe contador de atraso. Ficar dias sem abrir não apaga nem atrasa nada.',
   ],
   perguntas: [

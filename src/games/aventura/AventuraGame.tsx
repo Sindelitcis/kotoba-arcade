@@ -12,6 +12,11 @@ import { hasKanji } from '../../core/kana';
 import { foco } from '../../core/foco';
 import { tocarSequencia } from '../../core/sequencia';
 import { teclaDe } from '../../core/teclas';
+import { Apresentacao } from '../../core/Apresentacao';
+import { cardKey } from '../../content';
+import { itemDaPalavra, type ItemNovo } from '../../content/ensino';
+import { figuraDaPalavra } from '../../content/imagens';
+import { figuraUrl } from '../../core/figuras';
 import { SCENES, SPEAKERS } from './cenas';
 import { diaryEntries, isUnlocked, PLAYER, ScenePlay, suggestScene, type PlayEvent, type Scene, type SceneSummary, type Shown, type TokenView } from './engine';
 
@@ -22,6 +27,14 @@ function falarQuadro(shown: Shown): void {
 }
 
 type Mode = 'menu' | 'play' | 'summary' | 'diary';
+
+/** Palavra da cena como apresentação (com a figura dela, quando tem). */
+export function itemDaAventura(id: string): ItemNovo | null {
+  const w = findWord(id);
+  if (!w) return null;
+  const f = figuraDaPalavra(w.id);
+  return itemDaPalavra(w, cardKey(id, 'meaning'), f ? { img: figuraUrl(f.img) } : {});
+}
 
 function whoName(who: string | undefined): string {
   if (!who) return '';
@@ -173,8 +186,15 @@ export function AventuraGame() {
   // A voz acompanha o que entra na tela.
   const seq = mode === 'play' && play ? play.seq : -1;
   useEffect(() => {
-    if (mode === 'play' && play) falarQuadro(play.shown);
+    if (mode === 'play' && play && play.apresentando.length === 0) falarQuadro(play.shown);
   }, [mode, play, seq]);
+
+  /** As palavras novas da cena foram apresentadas: começa a primeira fala. */
+  const apresentou = () => {
+    playRef.current?.apresentou();
+    commit();
+    redraw();
+  };
 
   useEffect(() => {
     if (mode !== 'diary') return;
@@ -204,6 +224,8 @@ export function AventuraGame() {
         const p = playRef.current;
         if (!p) return;
         if (tecla === 'Escape') setMode('menu');
+        // Apresentação na tela: as outras teclas são dela (core/Apresentacao.tsx).
+        else if (p.apresentando.length > 0) return;
         else if (key === 'f') {
           p.askReading();
           redraw();
@@ -239,8 +261,29 @@ export function AventuraGame() {
     return () => removeEventListener('keydown', onKey);
   });
 
+  if (mode === 'play' && play && play.apresentando.length > 0) {
+    const itens = play.apresentando.flatMap((id) => itemDaAventura(id) ?? []);
+    return (
+      <main class="av">
+        <header class="km-top">
+          <button class="ghost" onClick={() => setMode('menu')}>
+            Sair <kbd>Esc</kbd>
+          </button>
+          <div class="av-place">
+            <b>{play.scene.title}</b> · palavras desta cena
+          </div>
+          <span />
+        </header>
+        <div data-testid="av-apresenta">
+          <Apresentacao key={play.scene.id} itens={itens} onFim={apresentou} fim="Começar a cena" />
+        </div>
+      </main>
+    );
+  }
+
   if (mode === 'play' && play) {
     const s = play.shown;
+
     const mine = s.who === PLAYER;
     return (
       <main class="av">

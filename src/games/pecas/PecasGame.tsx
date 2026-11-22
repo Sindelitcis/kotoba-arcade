@@ -8,8 +8,10 @@ import { acertou, cor, corStyle, errou, zerar } from '../../core/cor';
 import { onomato } from '../../core/fx';
 import { teclaDe } from '../../core/teclas';
 import { VOZ_PALAVRA } from '../../core/vozes';
+import { Apresentacao } from '../../core/Apresentacao';
+import { itemNovoDe, type ItemNovo } from '../../content/ensino';
 import { KANJI_PECAS, peca, type KanjiPeca, type Palavra } from './dados';
-import { leituraOficial, MODOS, PecasRound, pecasDoKanji, ROUND_SIZE, vistos, type Evento, type Modo, type Pergunta, type Resumo } from './engine';
+import { cartaPecas, cartaSignificado, leituraOficial, MODOS, PecasRound, pecasDoKanji, ROUND_SIZE, vistos, type Evento, type Modo, type Pergunta, type Resumo } from './engine';
 import '../../assets/fontes/pecas.css';
 import { carregarTracos, CORES_PECA, elementosDe, KanjiDesenho, PecaDesenho, tracos } from './Tracos';
 
@@ -51,35 +53,60 @@ function CartaPeca({ p, cor: c, mostrarNome = true }: { p: string; cor?: string;
   );
 }
 
-/** O kanji com as peças pintadas e a conta "peça + peça = significado". */
-function Explicacao({ k, falar = true }: { k: KanjiPeca; falar?: boolean }) {
+/** O kanji como apresentação: a ficha dele, com a história das peças como explicação. */
+export function itemDaLicao(k: KanjiPeca): ItemNovo {
+  const base = itemNovoDe(cartaSignificado(k));
+  const leitura = leituraOficial(k);
+  return {
+    ...(base ?? {
+      alvo: { t: 'kanji', c: k.kanji },
+      tipo: 'Kanji',
+      grande: k.kanji,
+      leitura,
+      pt: k.pt.join(', '),
+      falas: [{ tipo: 'jp', fala: { texto: k.kanji, voz: 'palavra', kana: leitura } }],
+    }),
+    chaves: [cartaPecas(k)],
+    explicacao: k.historia,
+  };
+}
+
+/** A conta das peças: o kanji com as peças pintadas, "peça + peça = significado". */
+function Conta({ k }: { k: KanjiPeca }) {
   const ps = pecasDoKanji(k);
   return (
-    <div class="pc-explica" data-testid="pc-explica">
-      <div class="pc-explica-topo">
-        <KanjiDesenho kanji={k.kanji} pintar={ps} class="medio" />
-        <div class="pc-conta">
-          {ps.length > 0 ? (
-            <>
-              {ps.map((p, i) => (
-                <span key={p} class="pc-conta-item">
-                  {i > 0 && <span class="pc-mais">+</span>}
-                  <CartaPeca p={p} cor={CORES_PECA[i % CORES_PECA.length]} />
-                </span>
-              ))}
-              <span class="pc-mais">=</span>
-            </>
-          ) : (
-            <span class="pc-conta-item">
-              <span class="pc-imagem grande" aria-hidden="true">
-                {peca(k.kanji).imagem}
+    <div class="pc-explica-topo">
+      <KanjiDesenho kanji={k.kanji} pintar={ps} class="medio" />
+      <div class="pc-conta">
+        {ps.length > 0 ? (
+          <>
+            {ps.map((p, i) => (
+              <span key={p} class="pc-conta-item">
+                {i > 0 && <span class="pc-mais">+</span>}
+                <CartaPeca p={p} cor={CORES_PECA[i % CORES_PECA.length]} />
               </span>
-              <span class="pc-mais">=</span>
+            ))}
+            <span class="pc-mais">=</span>
+          </>
+        ) : (
+          <span class="pc-conta-item">
+            <span class="pc-imagem grande" aria-hidden="true">
+              {peca(k.kanji).imagem}
             </span>
-          )}
-          <b class="pc-significado">{k.pt.join(', ')}</b>
-        </div>
+            <span class="pc-mais">=</span>
+          </span>
+        )}
+        <b class="pc-significado">{k.pt.join(', ')}</b>
       </div>
+    </div>
+  );
+}
+
+/** O kanji com as peças pintadas e a conta "peça + peça = significado". */
+function Explicacao({ k, falar = true }: { k: KanjiPeca; falar?: boolean }) {
+  return (
+    <div class="pc-explica" data-testid="pc-explica">
+      <Conta k={k} />
       <p class="pc-historia" data-testid="pc-historia">
         {k.historia}
       </p>
@@ -239,12 +266,7 @@ export function PecasGame() {
     else falarKanji(p.k);
   };
 
-  // A lição fala o kanji assim que aparece: primeiro contato é ver, ouvir e entender.
-  const fase = tela === 'rodada' && rodada ? rodada.fase : '';
-  const indice = rodada?.indice ?? -1;
-  useEffect(() => {
-    if (fase === 'licao' && rodada) falarKanji(rodada.pergunta.k);
-  }, [fase, indice]);
+  // A lição (core/Apresentacao.tsx) fala o kanji assim que aparece.
 
   // Sair da tela devolve o quadro ao traço.
   useEffect(() => () => zerar(), []);
@@ -269,7 +291,9 @@ export function PecasGame() {
         if (tecla === 'Escape') {
           zerar();
           setTela('menu');
-        } else if (tecla.toLowerCase() === 'r') ouvir();
+        } else if (r.fase === 'licao') return;
+        else if (tecla.toLowerCase() === 'r') ouvir();
+
         else if (r.fase === 'pergunta') {
           if (numero) responder(numero - 1);
         } else if (confirma) seguir();
@@ -441,11 +465,7 @@ export function PecasGame() {
 function Licao({ p, onSeguir }: { p: Pergunta; onSeguir: () => void }) {
   return (
     <div class="pc-licao" data-testid="pc-licao">
-      <span class="gr-tag">Kanji novo</span>
-      <Explicacao k={p.k} />
-      <button class="primary" onClick={onSeguir} data-testid="pc-entendi">
-        Entendi <kbd>Enter</kbd>
-      </button>
+      <Apresentacao key={p.k.kanji} itens={[itemDaLicao(p.k)]} onFim={onSeguir} fim="Entendi" visual={() => <Conta k={p.k} />} />
     </div>
   );
 }

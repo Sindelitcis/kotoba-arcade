@@ -1,4 +1,5 @@
 import { expect, test, type Page, type Route } from '@playwright/test';
+import { passarApresentacao } from './apoio';
 
 // A Conversa na nuvem (Cloudflare) com o servidor simulado: aqui o e2e roda no vite preview, sem as Functions.
 const json = (route: Route, body: unknown, status = 200) => route.fulfill({ status, contentType: 'application/json', body: JSON.stringify(body) });
@@ -103,6 +104,8 @@ test('com sessão, a conversa vai pela nuvem; cota do dia acabou vira aviso amig
   await page.keyboard.press('Enter');
   await expect(page.getByTestId('cv')).toHaveAttribute('data-phase', 'menu');
   await page.keyboard.press('Enter');
+  // Antes de conversar, as palavras novas da situação.
+  await passarApresentacao(page);
   await expect(page.getByTestId('cv')).toHaveAttribute('data-phase', 'conversa');
   // Na nuvem o microfone também funciona (Whisper no Workers AI).
   await expect(page.getByTestId('cv-mic')).toBeEnabled();

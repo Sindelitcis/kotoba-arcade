@@ -3,6 +3,11 @@
  * tempo da batida; o jogador digita a leitura. Digitar em cima da batida
  * vale mais, mas basta digitar antes da nota passar. Não existe "game over":
  * a música sempre termina, e a nota final diz como foi.
+ *
+ * Ensinar antes de cobrar (core/ensino.ts): kana ou palavra que nunca foi vista não cai na
+ * música. Antes de tocar, os novos da fase são apresentados com calma (`apresentando`).
+ * Nota de item em prática vem com o romaji por cima, um tempo a mais de folga, e perder
+ * essa nota não zera o combo.
  */
 import { cardKey, KANA, WORDS } from '../../content';
 import { acharPalavra } from '../../content/escola';
@@ -11,7 +16,8 @@ import { kanaToRomaji, matchTyping } from '../../core/kana';
 import { pickNext } from '../../core/picker';
 import type { Rng } from '../../core/rng';
 import type { Profile } from '../../core/save';
-import { masteryLevel, review, type CardState } from '../../core/srs';
+import { apresentar, avaliar, emPratica, foiApresentado, notaDaPratica, novidades } from '../../core/ensino';
+import { masteryLevel, newCard, review, type CardState } from '../../core/srs';
 
 export type Mode = 'hiragana' | 'katakana' | 'palavras';
 export const MODES: Mode[] = ['palavras', 'hiragana', 'palavras', 'katakana'];
@@ -66,8 +72,10 @@ export interface Note {
   kana: string;
   /** Leitura em kana por cima do kanji; some quando a leitura já está firme. */
   furigana?: string;
-  /** Romaji de apoio, só no primeiro contato com a carta. */
+  /** Romaji de apoio, enquanto o item está em prática. */
   hint?: string;
+  /** Item em prática: perder a nota não zera o combo. */
+  pratica: boolean;
   /** Significado, para palavras. */
   pt?: string;
   /** Momento em que a nota cruza a linha, em ms desde o início. */
@@ -79,7 +87,7 @@ export interface Note {
 export type BeatEvent =
   | { t: 'type'; ok: boolean; buffer: string }
   | { t: 'hit'; note: Note; judge: Judge; combo: number; points: number }
-  | { t: 'miss'; note: Note }
+  | { t: 'miss'; note: Note; pratica: boolean }
   | { t: 'end'; result: StageResult };
 
 export interface StageResult {
@@ -111,7 +119,7 @@ export interface StageDeps {
 
 const POINTS: Record<Judge, number> = { perfect: 100, good: 70, ok: 40 };
 
-interface Candidate {
+export interface Candidate {
   card: string;
   text: string;
   kana: string;
@@ -149,6 +157,10 @@ export class Stage {
   slips = 0;
   finished = false;
   result: StageResult | null = null;
+  /** Itens novos desta fase, apresentados antes da música. */
+  readonly novos: readonly Candidate[];
+  /** A apresentação ainda está na tela: a música não começou. */
+  apresentando: boolean;
 
   constructor(
     private readonly deps: StageDeps,
@@ -163,34 +175,59 @@ export class Stage {
     const byCard = new Map(all.map((c) => [c.card, c]));
     const used = new Map<string, number>();
     const recent: string[] = [];
-    // Simula o baralho para o seletor não escolher sempre a mesma carta nova.
+    this.novos = novidades(
+      all.map((c) => c.card),
+      cards,
+    ).map((k) => byCard.get(k) as Candidate);
+    const novas = new Set(this.novos.map((c) => c.card));
+    this.apresentando = this.novos.length > 0;
+    // Simula o baralho para o seletor não escolher sempre a mesma carta nova. Os novos da
+    // fase contam como apresentados: a apresentação vem antes da música.
     const scratch: Record<string, CardState> = { ...cards };
+    apresentar(scratch, [...novas], now());
     let time = this.leadMs + this.beatMs;
+    // Com poucos itens conhecidos (o começo), cada um pode voltar mais vezes na música.
+    const conhecidos = all.filter((c) => foiApresentado(scratch, c.card)).length;
+    const repete = conhecidos < 10 ? 4 : 2;
     for (let i = 0; i < count; i++) {
-      const pool = all.map((c) => c.card).filter((k) => (used.get(k) ?? 0) < 2);
-      const chosen = pickNext(pool, scratch, now(), rng, { recent, maxYoung: mode === 'palavras' ? 8 : 24, newRatio: 0.5 });
-      if (!chosen) break;
+      const pool = all.map((c) => c.card).filter((k) => (used.get(k) ?? 0) < repete);
+      const chosen = pickNext(pool, scratch, now(), rng, { recent: recent.slice(-Math.max(1, Math.min(6, conhecidos - 1))), maxYoung: mode === 'palavras' ? 8 : 24, newRatio: 0.5 });
+      // Só sobrou a mesma da nota anterior: a música acaba aqui, sem repetir em seguida.
+      if (!chosen || chosen.key === recent.at(-1)) break;
       const c = byCard.get(chosen.key) as Candidate;
       used.set(c.card, (used.get(c.card) ?? 0) + 1);
       recent.push(c.card);
       if (recent.length > 6) recent.shift();
-      const fresh = !cards[c.card];
-      if (!scratch[c.card]) scratch[c.card] = review(undefined, { correct: true, hinted: true }, now());
-      const showReading = mode === 'palavras' && masteryLevel(cards[c.card]) < 3;
+      const pratica = novas.has(c.card) || emPratica(cards, c.card);
+      scratch[c.card] = review(scratch[c.card] ?? newCard(now()), { correct: true, hinted: true }, now());
+      const showReading = mode === 'palavras' && (pratica || masteryLevel(cards[c.card]) < 3);
       this.notes.push({
         id: i,
         card: c.card,
         text: c.text,
         kana: c.kana,
         furigana: showReading ? c.kana : undefined,
-        hint: fresh ? kanaToRomaji(c.kana).replace(/'/g, '') : undefined,
+        hint: pratica ? kanaToRomaji(c.kana).replace(/'/g, '') : undefined,
+        pratica,
         pt: c.pt,
         time,
         state: 'pending',
       });
-      time += beatsFor(c.kana) * this.beatMs + (mode === 'palavras' ? this.beatMs : 0);
+      // Nota de prática ganha uma batida a mais de folga.
+      time += beatsFor(c.kana) * this.beatMs + (mode === 'palavras' ? this.beatMs : 0) + (pratica ? this.beatMs : 0);
     }
     this.endTime = time + this.beatMs;
+  }
+
+  /** A apresentação acabou: os novos viram prática e a música pode começar. */
+  apresentou(): void {
+    if (!this.apresentando) return;
+    apresentar(
+      this.deps.cards,
+      this.novos.map((c) => c.card),
+      this.deps.now(),
+    );
+    this.apresentando = false;
   }
 
   /** A nota que o jogador está digitando: a pendente mais antiga. */
@@ -209,16 +246,16 @@ export class Stage {
 
   /** Avança o tempo: marca como perdida a nota que passou da linha. */
   update(t: number): BeatEvent[] {
-    if (this.finished) return [];
+    if (this.finished || this.apresentando) return [];
     const events: BeatEvent[] = [];
     for (const n of this.notes) {
       if (n.state !== 'pending') continue;
       if (t <= n.time + this.missWindow()) break;
       n.state = 'miss';
-      this.combo = 0;
+      if (!n.pratica) this.combo = 0;
       this.buffer = '';
-      this.deps.cards[n.card] = review(this.deps.cards[n.card], { correct: false }, this.deps.now());
-      events.push({ t: 'miss', note: n });
+      avaliar(this.deps.cards, n.card, { correct: false }, this.deps.now());
+      events.push({ t: 'miss', note: n, pratica: n.pratica });
     }
     if (!this.target && t >= Math.min(this.endTime, (this.notes[this.notes.length - 1]?.time ?? 0) + this.beatMs)) {
       events.push({ t: 'end', result: this.finish() });
@@ -228,7 +265,7 @@ export class Stage {
 
   /** Uma tecla. Só vale para a nota da vez, e só depois que ela apareceu. */
   key(ch: string, t: number): BeatEvent[] {
-    if (this.finished) return [];
+    if (this.finished || this.apresentando) return [];
     const events = this.update(t);
     const note = this.target;
     if (!note || note.time - this.leadMs > t) return events;
@@ -256,11 +293,12 @@ export class Stage {
     note.state = 'hit';
     note.judge = judge;
     this.buffer = '';
-    this.combo++;
+    // Nota de prática não mexe no combo (nem para cima, nem para baixo).
+    if (!note.pratica) this.combo++;
     this.maxCombo = Math.max(this.maxCombo, this.combo);
     const points = Math.round(POINTS[judge] * (1 + Math.min(this.combo, 20) / 20));
     this.score += points;
-    this.deps.cards[note.card] = review(this.deps.cards[note.card], { correct: true, hinted: !!note.hint }, this.deps.now());
+    avaliar(this.deps.cards, note.card, note.pratica ? notaDaPratica(true) : { correct: true }, this.deps.now());
     events.push({ t: 'hit', note, judge, combo: this.combo, points });
     if (!this.target) events.push({ t: 'end', result: this.finish() });
     return events;

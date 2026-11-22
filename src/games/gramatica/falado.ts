@@ -4,7 +4,8 @@
  * com o texto escrito; isto é o que toca quando a lição aparece e na tecla R.
  */
 import type { Trecho } from '../../core/sequencia';
-import { exampleView, type Course, type Point } from './engine';
+import type { ItemNovo } from '../../content/ensino';
+import { cardOf, exampleView, type Course, type Point } from './engine';
 
 export interface LicaoFalada {
   explicacao: string;
@@ -93,7 +94,25 @@ export function textoDoExemplo(course: Course, point: Point): string {
 }
 
 /** A lição inteira em trechos: explicação, peça, sentido do exemplo e o exemplo. */
+/** A lição do ponto como apresentação (core/Apresentacao.tsx): a peça, o porquê e o exemplo. */
+export function itemDaLicao(course: Course, point: Point): ItemNovo {
+  const kana = exampleView(course, point)
+    .map((w) => (w.reading ?? w.text) + w.tail)
+    .join('');
+  return {
+    chaves: [cardOf(point.id)],
+    alvo: { t: 'gramatica', id: point.id },
+    tipo: 'Peça nova',
+    grande: point.blocks.join(' · '),
+    pt: point.title,
+    explicacao: point.lesson,
+    exemplo: { jp: textoDoExemplo(course, point), kana, pt: point.example.pt },
+    falas: licaoFalada(course, point),
+  };
+}
+
 export function licaoFalada(course: Course, point: Point): Trecho[] {
+
   const l = LICOES_FALADAS[point.id];
   if (!l) throw new Error(`peça sem lição falada: ${point.id}`);
   const kana = exampleView(course, point)

@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
+import { chavesDosKanji, firmarCartas, passarApresentacao } from './apoio';
 
 test.beforeEach(async ({ page }) => {
   // As artes vêm de outro site; nos testes ficam de fora para não depender de rede.
@@ -6,15 +7,30 @@ test.beforeEach(async ({ page }) => {
   await page.goto('/');
 });
 
-/** Entra na caçada pelo botão grande (o atalho Enter tem teste próprio). */
-async function startHunt(page: Page) {
+/** Entra na caçada pelo botão grande (o atalho Enter tem teste próprio) e passa pela apresentação. */
+async function startHunt(page: Page): Promise<number> {
   await page.getByTestId('play-now').click();
+  const n = await passarApresentacao(page);
   await expect(page.getByTestId('enemy-kanji')).toBeVisible();
+  return n;
+}
+
+/** Tudo já firme, de quem já estudou: a caçada cobra direto, sem apresentação nem prática. */
+async function firmarTudo(page: Page) {
+  await page.getByTestId('play-now').click();
+  await passarApresentacao(page);
+  await page.keyboard.press('Escape');
+  await firmarCartas(page, chavesDosKanji());
 }
 
 /** Responde certo e fecha avisos até aparecer o aviso com o título pedido. */
 async function playUntilOverlay(page: Page, title: string) {
   for (let i = 0; i < 200; i++) {
+    if (await page.getByTestId('apresentacao').isVisible()) {
+      await page.keyboard.press('Enter');
+      await page.waitForTimeout(80);
+      continue;
+    }
     const heading = page.locator('.overlay h2');
     if (await heading.isVisible()) {
       if ((await heading.innerText()) === title) return;
@@ -29,22 +45,34 @@ async function playUntilOverlay(page: Page, title: string) {
   throw new Error(`não chegou em "${title}"`);
 }
 
-test('do fliperama para a caçada com uma tecla, e a primeira carta ensina antes de perguntar', async ({ page }) => {
+test('do fliperama para a caçada com uma tecla: primeiro os kanji novos são apresentados, depois a prática', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'Kotoba Arcade' })).toBeVisible();
   // Um Enter só, logo que a página abre. O ouvinte ligava depois da pintura e esse Enter se perdia.
   await page.keyboard.press('Enter');
-  await expect(page.getByTestId('enemy-kanji')).toHaveText('一');
-  await expect(page.getByTestId('teach')).toContainText('一 = um');
+  const cartao = page.getByTestId('apresentacao');
+  await expect(cartao).toHaveAttribute('data-item', 'k:一#meaning');
+  await expect(cartao).toContainText('um');
+  // Nada de pergunta enquanto apresenta.
+  await expect(page.getByTestId('enemy-kanji')).toHaveCount(0);
+  const n = await passarApresentacao(page);
+  expect(n).toBeGreaterThanOrEqual(3);
+  expect(n).toBeLessThanOrEqual(5);
+  await expect(page.getByTestId('enemy-kanji')).toBeVisible();
+  // Prática: dica, duas opções, sem digitar.
+  await expect(page.getByTestId('km-pratica')).toBeVisible();
+  await expect(page.getByTestId('km-dica')).not.toBeEmpty();
+  await expect(page.locator('.choice')).toHaveCount(2);
   await expect(page.getByTestId('hearts').locator('.heart.on')).toHaveCount(5);
 });
 
 test('acertar quebra os selos, captura a carta e paga moedas', async ({ page }) => {
-  await startHunt(page);
+  const apresentados = await startHunt(page);
   await playUntilOverlay(page, 'Capturado!');
   await expect(page.locator('.overlay')).toContainText('carta nova');
   await page.keyboard.press('Escape');
   await expect(page.getByTestId('coins')).not.toHaveText('0');
-  await expect(page.getByTestId('kanji-seen')).toHaveText('1');
+  // Os apresentados já contam como vistos.
+  await expect(page.getByTestId('kanji-seen')).toHaveText(String(apresentados));
 });
 
 test('acertar com o mouse em cima da resposta ainda mostra o verde do acerto e a palavra ドン', async ({ page }) => {
@@ -55,11 +83,30 @@ test('acertar com o mouse em cima da resposta ainda mostra o verde do acerto e a
   await expect(page.locator('.onomato')).toHaveText(/ドン|ズバッ/);
 });
 
-test('errar tira um coração e mostra a resposta certa', async ({ page }) => {
+test('na prática, errar não tira coração nem combo: o kanji aparece de novo', async ({ page }) => {
   await startHunt(page);
+  await expect(page.getByTestId('km-pratica')).toBeVisible();
+  const combo = await page.locator('.combo').innerText();
+  await page.locator('.choice:not([data-answer])').first().click();
+  await expect(page.locator('.echo')).toContainText('Prática: não perdeu nada');
+  await expect(page.getByTestId('hearts').locator('.heart.on')).toHaveCount(5);
+  await expect(page.locator('.combo')).toHaveText(combo);
+  // O item volta numa apresentação rápida.
+  await expect(page.getByTestId('apresentacao')).toBeVisible();
+  await passarApresentacao(page);
+  await expect(page.getByTestId('hearts').locator('.heart.on')).toHaveCount(5);
+});
+
+test('na cobrança, errar tira um coração e mostra a resposta certa', async ({ page }) => {
+  await firmarTudo(page);
+  await page.getByTestId('play-now').click();
+  await expect(page.getByTestId('enemy-kanji')).toBeVisible();
+  await expect(page.getByTestId('apresentacao')).toHaveCount(0);
+  await expect(page.getByTestId('km-pratica')).toHaveCount(0);
+  expect(await page.locator('.choice').count()).toBeGreaterThanOrEqual(3);
   await page.locator('.choice:not([data-answer])').first().click();
   await expect(page.getByTestId('hearts').locator('.heart.on')).toHaveCount(4);
-  await expect(page.locator('.echo')).toContainText('Era: um');
+  await expect(page.locator('.echo')).toContainText('Era:');
 });
 
 test('teclas 1 a 4 respondem', async ({ page }) => {
@@ -71,12 +118,12 @@ test('teclas 1 a 4 respondem', async ({ page }) => {
 });
 
 test('o progresso continua depois de recarregar a página', async ({ page }) => {
-  await startHunt(page);
+  const apresentados = await startHunt(page);
   await playUntilOverlay(page, 'Capturado!');
   await page.reload();
-  await expect(page.getByTestId('kanji-seen')).toHaveText('1');
+  await expect(page.getByTestId('kanji-seen')).toHaveText(String(apresentados));
   await page.keyboard.press('d');
-  await expect(page.locator('.dex-tile:not(.unseen)')).toHaveCount(1);
+  await expect(page.locator('.dex-tile:not(.unseen)')).toHaveCount(apresentados);
 });
 
 test('baú a cada 5 capturas, e Esc no baú volta ao fliperama', async ({ page }) => {

@@ -7,6 +7,9 @@ import { acertou, cor, corStyle, errou, zerar } from '../../core/cor';
 import { burstFrom, onomato, pulse } from '../../core/fx';
 import { teclaDe } from '../../core/teclas';
 import { alvosDasCartas, useAprofundar } from '../../core/aprofundar/estado';
+import { Apresentacao } from '../../core/Apresentacao';
+import { itemNovoDe, type ItemNovo } from '../../content/ensino';
+import { getKanji, parseCardKey } from '../../content';
 import { artUrl, RARITY_COLORS } from './art';
 import { CHEST_EVERY, Hunt, MAX_HEARTS, RARITY, type Enemy, type HuntEvent, type Question } from './engine';
 
@@ -43,8 +46,16 @@ function newHunt(): Hunt {
   });
 }
 
-function snapshot(h: Hunt): View {
+function snapshot(h: Hunt): View | null {
+  if (!h.enemy) return null;
   return { enemy: { ...h.enemy }, question: h.question, hearts: h.hearts, combo: h.combo, sinceChest: h.sinceChest };
+}
+
+/** O item como apresentação. Kanji leva a arte da carta comum dele. */
+export function itemDaCaca(chave: string): ItemNovo | null {
+  const { itemId } = parseCardKey(chave);
+  const img = itemId.startsWith('k:') ? artUrl(getKanji(itemId), 'c') : undefined;
+  return itemNovoDe(chave, img ? { img } : {});
 }
 
 export function KanjiMonGame() {
@@ -54,7 +65,73 @@ export function KanjiMonGame() {
     hunt.current.start();
   }
   const h = hunt.current;
-  const [view, setView] = useState<View>(() => snapshot(h));
+  const [, setGeracao] = useState(0);
+  const reiniciar = (nova: Hunt) => {
+    hunt.current = nova;
+    setGeracao((n) => n + 1);
+  };
+  const [apres, setApres] = useState<string[] | null>(() => (h.phase === 'apresenta' ? [...h.apresentando] : null));
+  const [view, setView] = useState<View | null>(() => snapshot(h));
+  /** Errou na prática: o item aparece de novo antes de seguir. */
+  const [deNovo, setDeNovo] = useState<ItemNovo | null>(null);
+  const fimDaApresentacao = () => {
+    const current = hunt.current as Hunt;
+    current.apresentou();
+    commit();
+    setApres(null);
+    setView(snapshot(current));
+    if (current.phase === 'apresenta') setApres([...current.apresentando]);
+  };
+  if (apres || !view) {
+    const itens = (apres ?? []).map(itemDaCaca).filter((x): x is ItemNovo => !!x);
+    return (
+      <main class="km">
+        <header class="km-top">
+          <div class="gr-progress">Antes de caçar: conheça {itens.length > 1 ? 'os novos' : 'o novo'}</div>
+          <button class="ghost" onClick={() => go('hub')}>
+            Sair <kbd>Esc</kbd>
+          </button>
+        </header>
+        <div data-testid="km-apresenta">
+          <Apresentacao key={(apres ?? []).join()} itens={itens} onFim={fimDaApresentacao} fim="Caçar" />
+        </div>
+        <SairComEsc />
+      </main>
+    );
+  }
+  return <Cacada h={h} view={view} setView={setView} setApres={setApres} deNovo={deNovo} setDeNovo={setDeNovo} reiniciar={reiniciar} />;
+}
+
+/** Na apresentação, Esc ainda sai do jogo (as outras teclas são da apresentação). */
+function SairComEsc() {
+  useLayoutEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (teclaDe(e) === 'Escape') {
+        e.preventDefault();
+        commit();
+        go('hub');
+      }
+    };
+    addEventListener('keydown', onKey);
+    return () => removeEventListener('keydown', onKey);
+  }, []);
+  return null;
+}
+
+interface PropsCacada {
+  h: Hunt;
+  view: View;
+  setView: (v: View | null | ((v: View | null) => View | null)) => void;
+  setApres: (a: string[] | null) => void;
+  deNovo: ItemNovo | null;
+  setDeNovo: (i: ItemNovo | null) => void;
+  reiniciar: (h: Hunt) => void;
+}
+
+function Cacada({ h, view, setView: setViewOu, setApres, deNovo, setDeNovo, reiniciar }: PropsCacada) {
+  const hunt = useRef<Hunt>(h);
+  hunt.current = h;
+  const setView = (f: View | ((v: View) => View)) => setViewOu((v) => (typeof f === 'function' ? (v ? f(v) : v) : f));
   const [feedback, setFeedback] = useState<Feedback | null>(null);
   const [overlays, setOverlays] = useState<Overlay[]>([]);
   const [typed, setTyped] = useState('');
@@ -72,9 +149,14 @@ export function KanjiMonGame() {
   /** Mostra a próxima pergunta (ou o próximo KanjiMon) e libera a resposta. */
   const advance = () => {
     const current = hunt.current as Hunt;
-    const next = snapshot(current);
-    setView(next);
     setFeedback(null);
+    if (current.phase === 'apresenta') {
+      setViewOu(snapshot(current));
+      setApres([...current.apresentando]);
+      return;
+    }
+    const next = snapshot(current) as View;
+    setView(next);
     setTyped('');
     shownAt.current = performance.now();
     locked.current = false;
@@ -98,6 +180,7 @@ export function KanjiMonGame() {
     speak(asked.speak, VOZ_PALAVRA, asked.speakKana);
 
     const hit = events.find((e): e is Extract<HuntEvent, { t: 'hit' }> => e.t === 'hit');
+    const pratica = events.find((e): e is Extract<HuntEvent, { t: 'de-novo' }> => e.t === 'de-novo');
     const queue: Overlay[] = [];
     for (const e of events) {
       if (e.t === 'capture' || e.t === 'levelup' || e.t === 'chest' || e.t === 'over') queue.push(e);
@@ -122,6 +205,11 @@ export function KanjiMonGame() {
         sinceChest: captured ? v.sinceChest + 1 : v.sinceChest,
         enemy: { ...v.enemy, seals: hit.sealsLeft },
       }));
+    } else if (pratica) {
+      // Prática: sem tremer, sem perder coração. Depois da resposta certa, o item aparece de novo.
+      sfx.miss();
+      onomato('erro', cardEl.current);
+      setFeedback({ ok: false, chosen: input, note: 'Prática: não perdeu nada. Veja de novo.' });
     } else {
       errou();
       sfx.miss();
@@ -134,7 +222,8 @@ export function KanjiMonGame() {
 
     timer.current = window.setTimeout(
       () => {
-        if (queue.length > 0) setOverlays(queue);
+        if (pratica) setDeNovo(itemDaCaca(pratica.card));
+        else if (queue.length > 0) setOverlays(queue);
         else advance();
       },
       hit ? (hit.close ? MISS_DELAY : HIT_DELAY) : MISS_DELAY,
@@ -146,11 +235,13 @@ export function KanjiMonGame() {
     if (!overlay) return;
     if (overlay.t === 'over') {
       zerar();
-      hunt.current = newHunt();
-      hunt.current.start();
+      const nova = newHunt();
+      nova.start();
       setOverlays([]);
-      setView(snapshot(hunt.current));
       setFeedback(null);
+      setViewOu(snapshot(nova));
+      if (nova.phase === 'apresenta') setApres([...nova.apresentando]);
+      reiniciar(nova);
       shownAt.current = performance.now();
       locked.current = false;
       return;
@@ -162,6 +253,11 @@ export function KanjiMonGame() {
       if (current.phase === 'chest') current.continue();
       advance();
     }
+  };
+
+  const fecharDeNovo = () => {
+    setDeNovo(null);
+    advance();
   };
 
   const leave = () => {
@@ -202,6 +298,8 @@ export function KanjiMonGame() {
         leave();
         return;
       }
+      // Apresentação de novo na tela: as teclas são dela (core/Apresentacao.tsx).
+      if (deNovo) return;
       if (overlay) {
         if (tecla === 'Enter' || tecla === ' ') {
           e.preventDefault();
@@ -267,14 +365,19 @@ export function KanjiMonGame() {
           </div>
         </div>
 
+        {deNovo ? (
+          <Apresentacao key={deNovo.chaves[0]} itens={[deNovo]} modo="de-novo" onFim={fecharDeNovo} fim="Voltar à caçada" />
+        ) : (
         <div class="question">
-          {q.teach && !feedback && (
-            <div class="teach" data-testid="teach">
-              <b>{q.teach.title}</b>
-              {q.teach.lines.map((l) => (
-                <span key={l}>{l}</span>
-              ))}
-            </div>
+          {q.apoio && !feedback && (
+            <>
+              <span class="ap-pratica" data-testid="km-pratica">
+                Prática: errar aqui não tira coração
+              </span>
+              <p class="ap-dica" data-testid="km-dica">
+                {q.dica}
+              </p>
+            </>
           )}
           <div key={q.prompt} class={`prompt ${q.kind}`} data-testid="prompt">
             {q.prompt}
@@ -314,7 +417,7 @@ export function KanjiMonGame() {
                   if (c === q.answer) cls += ' right';
                   else if (c === feedback.chosen) cls += ' wrong';
                   else cls += ' dim';
-                } else if (q.teach && c === q.answer) cls += ' hint';
+                }
                 return (
                   <button key={c} class={cls} onClick={() => submit(c)} data-answer={c === q.answer ? 'yes' : undefined}>
                     <kbd>{i + 1}</kbd>
@@ -335,7 +438,9 @@ export function KanjiMonGame() {
             )}
           </div>
         </div>
+        )}
       </section>
+
 
       {overlay?.t === 'capture' && (
         <div class="overlay win" onClick={dismiss}>

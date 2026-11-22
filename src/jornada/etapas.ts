@@ -16,9 +16,11 @@ import { KANJI } from '../content';
 import { palavrasDoTema, TEMAS } from '../content/escola';
 import type { Cena } from '../core/arte';
 import type { FocoJogo } from '../core/foco';
+import { palavrasDaCena } from '../games/cena/engine';
+import { LUGARES } from '../games/cena/lugares';
 import { GRUPOS_EXPRESSOES, GRUPOS_KANJI, LICOES } from './licoes';
 
-export type TelaJogo = 'kanjimon' | 'kanabeat' | 'roguelike' | 'aventura' | 'gramatica' | 'conversa';
+export type TelaJogo = 'kanjimon' | 'kanabeat' | 'roguelike' | 'aventura' | 'gramatica' | 'conversa' | 'kanaimagens' | 'cena' | 'memoria';
 
 export type Acao = { tipo: 'licao'; licao: string } | { tipo: 'jogo'; tela: TelaJogo; foco: FocoJogo };
 
@@ -59,6 +61,9 @@ export const NOME_JOGO: Record<TelaJogo, string> = {
   aventura: 'Aventura',
   gramatica: 'Kumitate',
   conversa: 'Conversa',
+  kanaimagens: 'Kana em imagens',
+  cena: 'Cena Viva',
+  memoria: 'Memória',
 };
 
 /** Duração de uma partida de cada jogo, em minutos. */
@@ -69,9 +74,15 @@ export const MINUTOS_JOGO: Record<TelaJogo, number> = {
   aventura: 5,
   gramatica: 5,
   conversa: 4,
+  kanaimagens: 4,
+  cena: 5,
+  memoria: 4,
 };
 
 const licaoPorId = new Map(LICOES.map((l) => [l.id, l]));
+
+/** Lugares da Cena Viva que abrem as primeiras palavras, na ordem da Jornada. */
+const PRIMEIRAS_PALAVRAS = LUGARES.slice(0, 2);
 
 function licao(id: string): Missao {
   const l = licaoPorId.get(id);
@@ -163,12 +174,25 @@ export const ETAPAS: readonly Etapa[] = [
     cena: 'kanabeat-dotonbori',
     trilhas: [
       {
+        // Ensinar antes de cobrar, também entre os jogos: primeiro o kana com a imagem
+        // (apresentação e prática), depois o Kana Beat, que cobra no ritmo.
         titulo: 'Ler e digitar',
         missoes: [
+          jogo('kanaimagens:hiragana', 'kanaimagens', 'hiragana', { kana: 'hiragana' }),
           jogo('kana:hiragana', 'kanabeat', 'hiragana', { kana: 'hiragana' }),
           licao('sons'),
+          jogo('kanaimagens:katakana', 'kanaimagens', 'katakana', { kana: 'katakana' }),
           jogo('kana:katakana', 'kanabeat', 'katakana', { kana: 'katakana' }),
         ],
+      },
+      {
+        // As primeiras palavras: a Cena Viva apresenta as coisas e pergunta o nome (これは〜です);
+        // a Memória treina as mesmas palavras. O KanjiMon vem no N5, com os kanji.
+        titulo: 'Primeiras palavras',
+        missoes: PRIMEIRAS_PALAVRAS.flatMap((l) => [
+          jogo(`cena:${l.id}`, 'cena', `o nome das coisas: ${l.pt}`, { lugar: l.id }),
+          jogo(`memoria:${l.id}`, 'memoria', `as coisas: ${l.pt}`, { palavras: palavrasDaCena(l, ['nome']).map((w) => w.id) }),
+        ]),
       },
     ],
     depois: [],

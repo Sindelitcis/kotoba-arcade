@@ -4,7 +4,9 @@
  */
 import { cardKey, KANJI, WORDS, type Kanji, type Word } from '../content';
 import { compareReading, kanaToRomaji, type ReadingMatch } from './kana';
+import { cortarOpcoes, emPratica, opcoesPara } from './ensino';
 import { shuffle, type Rng } from './rng';
+import type { CardState } from './srs';
 
 export type QuestionKind = 'kanji-meaning' | 'kanji-recall' | 'word-reading' | 'word-meaning';
 
@@ -20,8 +22,10 @@ export interface Question {
   answer: string;
   /** Resposta por digitação (leitura em romaji ou kana) em vez de escolha. */
   typing: boolean;
-  /** Primeiro contato: a tela ensina antes de perguntar. */
-  teach?: { title: string; lines: string[] };
+  /** Dica que aparece na prática (sem entregar a resposta). */
+  dica: string;
+  /** Prática com apoio (core/ensino.ts): menos alternativas, dica na tela, errar não custa. */
+  apoio?: boolean;
   /**
    * O que falar em voz alta depois da resposta: a chave da gravação. Na carta de kanji é o
    * próprio kanji (a gravação diz a leitura dele sozinho); na palavra, o kana.
@@ -59,11 +63,10 @@ function choicesFor(rng: Rng, answer: string, near: string[], far: readonly stri
   return shuffle(rng, [answer, ...distractors(rng, answer, near, far, alsoRight)]);
 }
 
-export function kanjiMeaningQuestion(k: Kanji, rng: Rng, isNew: boolean): Question {
+export function kanjiMeaningQuestion(k: Kanji, rng: Rng): Question {
   const idx = KANJI.indexOf(k);
   const answer = k.pt[0] as string;
   const near = neighbors(KANJI, idx, 6).map((o) => o.pt[0] as string);
-  const example = k.words[0] as Word;
   return {
     kind: 'kanji-meaning',
     card: cardKey(k.id, 'meaning'),
@@ -72,9 +75,7 @@ export function kanjiMeaningQuestion(k: Kanji, rng: Rng, isNew: boolean): Questi
     choices: choicesFor(rng, answer, near, KANJI.map((o) => o.pt[0] as string), (v) => k.pt.includes(v)),
     answer,
     typing: false,
-    teach: isNew
-      ? { title: `${k.kanji} = ${k.pt.join(', ')}`, lines: [k.story, ...readingLines(k), `Exemplo: ${example.jp} (${example.kana}) · ${example.pt}`] }
-      : undefined,
+    dica: k.story,
     ...kanjiVoice(k),
   };
 }
@@ -92,6 +93,7 @@ export function kanjiRecallQuestion(k: Kanji, rng: Rng): Question {
     choices: choicesFor(rng, k.kanji, neighbors(KANJI, idx, 6).map((o) => o.kanji), KANJI.map((o) => o.kanji), (v) => sameMeaning.has(v)),
     answer: k.kanji,
     typing: false,
+    dica: readingLines(k)[0] as string,
     ...kanjiVoice(k),
   };
 }
@@ -118,7 +120,7 @@ function wordNeighbors(w: Word): Word[] {
   return neighbors(WORDS, WORDS.indexOf(w), 9);
 }
 
-export function wordMeaningQuestion(w: Word, rng: Rng, isNew: boolean): Question {
+export function wordMeaningQuestion(w: Word, rng: Rng): Question {
   return {
     kind: 'word-meaning',
     card: cardKey(w.id, 'meaning'),
@@ -128,7 +130,7 @@ export function wordMeaningQuestion(w: Word, rng: Rng, isNew: boolean): Question
     choices: choicesFor(rng, w.pt, wordNeighbors(w).map((o) => o.pt), WORDS.map((o) => o.pt)),
     answer: w.pt,
     typing: false,
-    teach: isNew ? { title: `${w.jp} = ${w.pt}`, lines: [`Lê-se ${w.kana} (${w.romaji})`] } : undefined,
+    dica: `Lê-se ${w.kana}.`,
     speak: w.kana,
     speakKana: w.kana,
     echo: echoOf(w),
@@ -150,13 +152,24 @@ export function wordReadingQuestion(w: Word, rng: Rng, typing: boolean): Questio
     choices: choicesFor(rng, w.kana, near, far.length >= 4 ? far : WORDS.map((o) => o.kana)),
     answer: w.kana,
     typing,
+    dica: `Começa com ${[...w.kana][0]}.`,
     speak: w.kana,
     speakKana: w.kana,
     echo: echoOf(w),
   };
 }
 
+/**
+ * Pergunta de item ainda em prática: duas ou três alternativas, dica na tela e nada de
+ * digitar. Item já firme volta como veio.
+ */
+export function apoiar(q: Question, cards: Readonly<Record<string, CardState>>): Question {
+  if (!emPratica(cards, q.card)) return { ...q, apoio: false };
+  return { ...q, apoio: true, typing: false, ask: q.ask.startsWith('Digite') ? 'Como se lê?' : q.ask, choices: cortarOpcoes(q.choices, q.answer, opcoesPara(cards, q.card, q.choices.length)) };
+}
+
 /** Confere a resposta. Para digitação, vogal longa errada vale como "quase". */
+
 export function checkAnswer(q: Question, input: string): ReadingMatch {
   if (q.typing) return compareReading(input, q.answer);
   return input === q.answer ? 'exact' : 'wrong';

@@ -9,6 +9,9 @@ import { camadaAberta, useAoAbrirAjuda, useAoFecharCamada } from '../../core/hel
 import { teclaDe } from '../../core/teclas';
 import { burst, FX_COR, onomato, pulse } from '../../core/fx';
 import { kanaToRomaji } from '../../core/kana';
+import { Apresentacao } from '../../core/Apresentacao';
+import { parseCardKey } from '../../content';
+import { itemDaPalavra, itemNovoDe, type ItemNovo } from '../../content/ensino';
 import { MODE_NAMES, modeForPlay, Stage, type BeatEvent, type Judge, type Mode, type StageResult } from './engine';
 import { startMusic, type Music } from './music';
 import { LICENCA_URL, TRACKS } from './tracks';
@@ -23,6 +26,11 @@ const JUDGE_COLORS: Record<Judge, string[]> = {
   good: [FX_COR.bom, FX_COR.marca],
   ok: [FX_COR.marca],
 };
+
+/** A nota como apresentação: a ficha do kana ou da palavra. */
+export function itemDaNota(n: { card: string; text: string; kana: string; pt?: string }): ItemNovo {
+  return itemNovoDe(n.card) ?? itemDaPalavra({ id: parseCardKey(n.card).itemId, jp: n.text, kana: n.kana, pt: n.pt ?? '' }, n.card);
+}
 
 interface Run {
   stage: Stage;
@@ -59,6 +67,10 @@ export function KanaBeatGame() {
   const [started, setStarted] = useState(false);
   const [credits, setCredits] = useState(false);
   const [wrong, setWrong] = useState('');
+  /** Os novos da fase estão sendo apresentados: a música espera. */
+  const [apres, setApres] = useState(run.current.stage.apresentando);
+  /** No fim, as notas de prática que passaram aparecem de novo antes do resultado. */
+  const [revisao, setRevisao] = useState<ItemNovo[] | null>(null);
   const inputEl = useRef<HTMLInputElement>(null);
   const trackEl = useRef<HTMLDivElement>(null);
   const lineEl = useRef<HTMLDivElement>(null);
@@ -83,16 +95,19 @@ export function KanaBeatGame() {
         setJudge((j) => ({ text: JUDGE_TEXT[e.judge], cls: e.judge, n: j.n + 1 }));
         if (e.note.pt) speakWord(e.note.kana);
       } else if (e.t === 'miss') {
-        errou();
+        if (!e.pratica) errou();
         sfx.miss();
         pulse(trackEl.current, 'flash-bad');
-        setJudge((j) => ({ text: `${JUDGE_TEXT.miss}: ${e.note.text} = ${kanaToRomaji(e.note.kana).replace(/'/g, '')}`, cls: 'miss', n: j.n + 1 }));
+        const leitura = `${e.note.text} = ${kanaToRomaji(e.note.kana).replace(/'/g, '')}`;
+        setJudge((j) => ({ text: e.pratica ? `${leitura} (prática: o combo fica)` : `${JUDGE_TEXT.miss}: ${leitura}`, cls: 'miss', n: j.n + 1 }));
       } else if (e.t === 'type') {
         if (!e.ok) setTypoAt(performance.now());
       } else if (e.t === 'end') {
         (run.current as Run).music.stop();
         commit();
         setResult(e.result);
+        const pratica = e.result.missed.filter((n) => n.pratica);
+        if (pratica.length > 0) setRevisao(pratica.map(itemDaNota));
         if (e.result.grade === 'S' || e.result.record) {
           sfx.levelup();
           requestAnimationFrame(() => onomato('nivel', document.querySelector('.kb-grade'), 'festa', 1.3));
@@ -105,6 +120,7 @@ export function KanaBeatGame() {
   const current = run.current;
   useEffect(() => {
     const r = current;
+    if (apres) return;
     let alive = true;
     void r.music.ready.then(() => {
       if (!alive || run.current !== r || r.t0 !== null) return;
@@ -115,7 +131,14 @@ export function KanaBeatGame() {
     return () => {
       alive = false;
     };
-  }, [current]);
+  }, [current, apres]);
+
+  /** A apresentação dos novos acabou: a música começa. */
+  const apresentou = () => {
+    stage.apresentou();
+    commit();
+    setApres(false);
+  };
 
   // Laço do jogo
   useEffect(() => {
@@ -175,6 +198,8 @@ export function KanaBeatGame() {
     setStarted(false);
     setCredits(false);
     setJudge({ text: '', cls: '', n: 0 });
+    setRevisao(null);
+    setApres(run.current.stage.apresentando);
   };
 
   const leave = () => {
@@ -201,6 +226,8 @@ export function KanaBeatGame() {
         leave();
         return;
       }
+      // Apresentação na tela: as teclas são dela (core/Apresentacao.tsx).
+      if (apres || revisao) return;
       if (result) {
         if (key === 'Enter' || key === ' ') {
           e.preventDefault();
@@ -251,7 +278,7 @@ export function KanaBeatGame() {
   // A caixa de digitar fica sempre com o foco enquanto a música toca. O teclado japonês do
   // Windows (IME) e algumas extensões só entregam as teclas a um campo de texto; com o foco
   // num campo marcado como do jogo, toda tecla chega, e clicar em qualquer lugar não atrapalha.
-  const playing = !result && !paused && !credits;
+  const playing = !result && !paused && !credits && !apres;
   useLayoutEffect(() => {
     if (playing && !camadaAberta.value && document.activeElement !== inputEl.current) inputEl.current?.focus({ preventScroll: true });
   });
@@ -354,6 +381,19 @@ export function KanaBeatGame() {
         </p>
       </section>
 
+      {apres && (
+        <div class="overlay kb-apresenta" data-testid="kb-apresenta">
+          <p class="muted">Antes da música: {stage.novos.length > 1 ? 'os novos desta fase' : 'o novo desta fase'}.</p>
+          <Apresentacao itens={stage.novos.map(itemDaNota)} onFim={apresentou} fim="Tocar" />
+        </div>
+      )}
+
+      {revisao && (
+        <div class="overlay kb-apresenta" data-testid="kb-de-novo">
+          <Apresentacao itens={revisao} modo="de-novo" onFim={() => setRevisao(null)} fim="Ver o resultado" />
+        </div>
+      )}
+
       {paused && !result && (
         <div class="overlay" onClick={() => setPause(false)}>
           <h2 class="big">Pausado</h2>
@@ -361,8 +401,9 @@ export function KanaBeatGame() {
         </div>
       )}
 
-      {result && (
-        <div class={result.grade === 'S' || result.record ? 'overlay win' : 'overlay'}>
+      {result && !revisao && (
+        <div class={
+result.grade === 'S' || result.record ? 'overlay win' : 'overlay'}>
           <div class={`kb-grade g-${result.grade}`} data-testid="grade">
             {result.grade}
           </div>

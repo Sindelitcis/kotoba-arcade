@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
+import { chavesDosKana, chavesDosKanji, firmarCartas, passarApresentacao } from './apoio';
 
 const SHOTS = process.env.SHOTS_DIR;
 
@@ -7,7 +8,26 @@ test.beforeEach(async ({ page }) => {
   await page.route('https://kanjimon.online/**', (route) => route.abort());
   await page.route('http://127.0.0.1:8791/**', (route) => route.abort());
   await page.goto('/');
+  // Quem já estudou: os jogos abrem direto, sem a apresentação (que tem teste próprio abaixo).
+  await firmarCartas(page, [...chavesDosKanji(), ...chavesDosKana()]);
   await expect(page.getByTestId('play-now')).toBeVisible();
+});
+
+test('na apresentação de coisa nova, o F4 abre a ficha do item da vez e Esc volta para ela', async ({ page }) => {
+  await page.evaluate(() => localStorage.clear());
+  await page.reload();
+  await page.keyboard.press('c');
+  const cartao = page.getByTestId('apresentacao');
+  await expect(cartao).toBeVisible();
+  const item = await cartao.getAttribute('data-item');
+  await page.keyboard.press('F4');
+  await expect(painel(page)).toBeVisible();
+  await expect(painel(page)).toContainText('一');
+  await page.keyboard.press('Escape');
+  await expect(painel(page)).toBeHidden();
+  await expect(cartao).toHaveAttribute('data-item', item!);
+  await passarApresentacao(page);
+  await expect(page.getByTestId('enemy-kanji')).toBeVisible();
 });
 
 const painel = (page: Page) => page.getByTestId('aprofundar');
@@ -116,7 +136,10 @@ test('o Aprofundar pausa o Kana Beat e, ao fechar, a música volta de onde parou
 
 test('na Aventura, a ficha da cena tem o vocabulário e uma frase para montar', async ({ page }) => {
   await page.keyboard.press('a');
+  await expect(page.getByTestId('av-menu')).toBeVisible();
   await page.keyboard.press('Enter');
+  // As palavras novas da cena vêm antes da primeira fala.
+  await passarApresentacao(page);
   await expect(page.getByTestId('av-stage')).toBeVisible();
   await page.keyboard.press('F4');
   await expect(painel(page)).toBeVisible();

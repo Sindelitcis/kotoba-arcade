@@ -12,7 +12,10 @@
  *  2 = só áudio.
  * Dois pares limpos seguidos sobem um nível; uma confusão desce um.
  *
- * Palavra nunca vista é apresentada antes do quadro (imagem, palavra e voz) e vale nota "com ajuda".
+ * Palavra nunca vista é apresentada no começo da rodada (core/ensino.ts: imagem, palavra, voz
+ * e significado) e só depois entra num quadro. Quadro com palavra ainda em prática fica aberto,
+ * com a palavra em kana, e confundir não tira combo nem pontos: a palavra é apresentada de novo.
+ * O quadro de memória (cartas viradas) só vem quando todas as palavras dele já passaram da prática.
  * Errar não tem tela de erro: a carta treme e o par certo brilha depois de duas confusões.
  */
 import { cardKey, type Word } from '../../content';
@@ -21,7 +24,8 @@ import { pickNext } from '../../core/picker';
 import { levelInfo } from '../../core/progress';
 import { shuffle, type Rng } from '../../core/rng';
 import type { Profile } from '../../core/save';
-import { review, type CardState } from '../../core/srs';
+import { apresentar, avaliar, emPratica, notaDaPratica, novidades } from '../../core/ensino';
+import type { CardState, Outcome } from '../../core/srs';
 
 // ───────── Save ─────────
 
@@ -74,8 +78,8 @@ export const QUADROS = [
   { modo: 'memoria', pares: 6 },
   { modo: 'rapido', pares: 6 },
 ] as const;
-/** No máximo tantas palavras novas por quadro (cada uma é apresentada antes). */
-export const NOVAS_POR_QUADRO = 2;
+/** Palavras novas apresentadas no começo da rodada, no máximo. */
+export const NOVAS_POR_RODADA = 4;
 /** Palavras no nível de áudio necessárias para aparecer o quadro de parecidas. */
 export const PARECIDAS_MIN = 4;
 /** Confusões com o mesmo par antes de ele brilhar. */
@@ -158,19 +162,19 @@ export interface Quadro {
   modo: Modo;
   parecidas: boolean;
   cartas: Carta[];
-  /** Figuras nunca vistas, apresentadas antes do quadro. */
-  novas: Figura[];
+  /** Quadro de prática: alguma palavra ainda está em prática. Cartas abertas, palavra em kana, errar não custa. */
+  apoio: boolean;
 }
 
 /** Monta as cartas de um quadro, embaralhadas. */
-export function montarQuadro(figs: readonly Figura[], modo: Modo, nivel: (w: Word) => number, rng: Rng, novas: readonly Figura[] = [], parecidas = false): Quadro {
+export function montarQuadro(figs: readonly Figura[], modo: Modo, nivel: (w: Word) => number, rng: Rng, apoio = false, parecidas = false): Quadro {
   const cartas: Carta[] = [];
   figs.forEach((f, par) => {
     const aberta = modo === 'rapido';
     cartas.push({ par, lado: 'img', figura: f, mostra: 'kana', aberta, feita: false, vista: false });
-    cartas.push({ par, lado: 'palavra', figura: f, mostra: mostraDe(f.word, nivel(f.word)), aberta, feita: false, vista: false });
+    cartas.push({ par, lado: 'palavra', figura: f, mostra: apoio ? 'kana' : mostraDe(f.word, nivel(f.word)), aberta, feita: false, vista: false });
   });
-  return { modo, parecidas, cartas: shuffle(rng, cartas), novas: [...novas] };
+  return { modo, parecidas, cartas: shuffle(rng, cartas), apoio };
 }
 
 /** Escolhe um grupo de figuras que se confundem entre si, entre as candidatas. */
@@ -196,6 +200,8 @@ export type Evento =
   | { t: 'abre'; carta: number; fala: string | null }
   | { t: 'par'; cartas: [number, number]; figura: Figura; rapido: boolean; combo: number }
   | { t: 'confusao'; cartas: [number, number] }
+  /** Confundiu na prática: o jogo mostra de novo a palavra da imagem escolhida. */
+  | { t: 'de-novo'; figura: Figura }
   | { t: 'sobe'; figura: Figura; nivel: number }
   | { t: 'quadro'; numero: number }
   | { t: 'nivel'; level: number }
@@ -222,12 +228,15 @@ export interface Deps {
   figuras?: readonly Figura[];
 }
 
-export type Fase = 'licao' | 'jogo' | 'pausa' | 'fim';
+/** apresenta: as palavras novas, antes do primeiro quadro. */
+export type Fase = 'apresenta' | 'jogo' | 'pausa' | 'fim';
 
 export class MemoriaRound {
-  fase: Fase = 'licao';
+  fase: Fase = 'jogo';
   numero = 0;
   quadro!: Quadro;
+  /** Palavras apresentadas no começo da rodada. */
+  readonly apresentadas: Figura[] = [];
   /** Cartas escolhidas e ainda sem par (no máximo uma; duas na memória enquanto mostram o erro). */
   escolha: number[] = [];
   pontos = 0;
@@ -245,8 +254,20 @@ export class MemoriaRound {
   private confusas = new Map<number, number>();
 
   constructor(private deps: Deps) {
+    const porChave = new Map(this.figs.map((f) => [chave(f.word), f]));
+    for (const k of novidades([...porChave.keys()], deps.cards, { max: NOVAS_POR_RODADA })) this.apresentadas.push(porChave.get(k)!);
+    this.novasRodada.push(...this.apresentadas);
+    if (this.apresentadas.length > 0) this.fase = 'apresenta';
+    else this.abrirQuadro();
+  }
+
+  /** A apresentação acabou: as palavras viram cartas e abre o primeiro quadro. */
+  apresentou(): void {
+    if (this.fase !== 'apresenta') return;
+    apresentar(this.deps.cards, this.apresentadas.map((f) => chave(f.word)), this.deps.now());
     this.abrirQuadro();
   }
+
 
   private get figs(): readonly Figura[] {
     return this.deps.figuras ?? FIGURAS_MEMORIA;
@@ -254,61 +275,51 @@ export class MemoriaRound {
 
   nivelDe = (w: Word): number => this.deps.save.nivel[w.id] ?? 0;
 
-  /** Escolhe as figuras do próximo quadro com o `pickNext` (memória compartilhada). */
-  private escolher(pares: number): { figs: Figura[]; novas: Figura[]; parecidas: boolean } {
+  /**
+   * Escolhe as figuras do próximo quadro com o `pickNext` (memória compartilhada). Só entra
+   * palavra já apresentada; com poucas apresentadas (começo do jogo), o quadro fica menor.
+   */
+  private escolher(pares: number): { figs: Figura[]; parecidas: boolean } {
     const { cards, now, rng } = this.deps;
     const t = now();
     const ultimo = this.numero === QUADROS.length - 1;
     if (ultimo) {
-      const firmes = this.figs.filter((f) => this.nivelDe(f.word) >= NIVEL_MAX && cards[chave(f.word)]);
+      const firmes = this.figs.filter((f) => this.nivelDe(f.word) >= NIVEL_MAX && cards[chave(f.word)] && !emPratica(cards, chave(f.word)));
       if (firmes.length >= PARECIDAS_MIN) {
         const g = grupoParecido(firmes, pares, rng);
-        if (g.length >= 3) return { figs: g, novas: [], parecidas: true };
+        if (g.length >= 3) return { figs: g, parecidas: true };
       }
     }
     const porChave = new Map(this.figs.map((f) => [chave(f.word), f]));
     const pool = [...porChave.keys()];
     const out: Figura[] = [];
-    const novas: Figura[] = [];
     // Só evita repetir dentro do quadro: palavra do quadro anterior pode (e deve) voltar para fixar.
     const recentes: string[] = [];
-    // Primeiro com o limite de novidades; se faltar palavra já vista (começo do jogo), completa com novas.
-    for (const limite of [NOVAS_POR_QUADRO, pares]) {
-      let tentativas = 0;
-      while (out.length < pares && tentativas++ < pares * 12) {
-        const sem = pool.filter((k) => !recentes.includes(k) && !out.some((f) => brigam(f, porChave.get(k)!)) && !(novas.length >= limite && !cards[k]));
-        if (sem.length === 0) break;
-        const p = pickNext(sem, cards, t, rng, { maxYoung: limite === pares ? Infinity : 10 });
-        if (!p) break;
-        const f = porChave.get(p.key)!;
-        recentes.push(p.key);
-        out.push(f);
-        if (!cards[p.key]) novas.push(f);
-      }
+    let tentativas = 0;
+    while (out.length < pares && tentativas++ < pares * 12) {
+      const sem = pool.filter((k) => !recentes.includes(k) && !out.some((f) => brigam(f, porChave.get(k)!)));
+      if (sem.length === 0) break;
+      const p = pickNext(sem, cards, t, rng, { maxYoung: Infinity });
+      if (!p) break;
+      recentes.push(p.key);
+      out.push(porChave.get(p.key)!);
     }
-    return { figs: out, novas, parecidas: false };
+    return { figs: out, parecidas: false };
   }
 
   private abrirQuadro(): void {
     const q = QUADROS[this.numero]!;
-    const { figs, novas, parecidas } = this.escolher(q.pares);
-    this.quadro = montarQuadro(figs, parecidas ? 'rapido' : q.modo, this.nivelDe, this.deps.rng, novas, parecidas);
+    const { figs, parecidas } = this.escolher(q.pares);
+    const apoio = figs.some((f) => emPratica(this.deps.cards, chave(f.word)));
+    // Palavra em prática: quadro aberto. Memória com cartas viradas só depois da prática.
+    this.quadro = montarQuadro(figs, parecidas || apoio ? 'rapido' : q.modo, this.nivelDe, this.deps.rng, apoio, parecidas);
     this.escolha = [];
     this.confusas.clear();
-    this.novasRodada.push(...novas.filter((f) => !this.novasRodada.includes(f)));
-    this.fase = novas.length > 0 ? 'licao' : 'jogo';
+    this.fase = 'jogo';
     this.desde = this.deps.now();
   }
 
-  /** Lição vista: começa o quadro. */
-  comecar(): void {
-    if (this.fase === 'licao') {
-      this.fase = 'jogo';
-      this.desde = this.deps.now();
-    }
-  }
-
-  /** A carta brilha: par de quem já se confundiu demais, ou palavra nova. */
+  /** A carta brilha: par de quem já se confundiu demais. */
   brilha(i: number): boolean {
     const c = this.quadro.cartas[i];
     if (!c || c.feita) return false;
@@ -370,41 +381,53 @@ export class MemoriaRound {
     if (q.modo === 'memoria') this.escolha = [j, i];
     else this.escolha = [];
     if (confusao) {
-      this.combo = 0;
       for (const x of [a, c]) {
         this.confusas.set(x.par, (this.confusas.get(x.par) ?? 0) + 1);
         this.notar(x.figura, { correct: false });
-        const s = this.deps.save;
-        s.nivel[x.figura.word.id] = descer(x.figura.word, this.nivelDe(x.figura.word));
-        s.seq[x.figura.word.id] = 0;
       }
       ev.push({ t: 'confusao', cartas: [j, i] });
+      if (q.apoio) {
+        // Prática: confundir não tira combo nem nível. A palavra da imagem aparece de novo.
+        ev.push({ t: 'de-novo', figura: (a.lado === 'img' ? a : c).figura });
+      } else {
+        this.combo = 0;
+        for (const x of [a, c]) {
+          const s = this.deps.save;
+          s.nivel[x.figura.word.id] = descer(x.figura.word, this.nivelDe(x.figura.word));
+          s.seq[x.figura.word.id] = 0;
+        }
+      }
     }
     return ev;
   }
 
-  private notar(f: Figura, o: { correct: boolean; ms?: number; hinted?: boolean }): void {
+  private notar(f: Figura, o: Outcome): void {
     const k = chave(f.word);
     if (this.notadas.has(k)) return;
     this.notadas.add(k);
-    const { cards, now } = this.deps;
-    cards[k] = review(cards[k], o, now());
+    avaliar(this.deps.cards, k, o, this.deps.now());
   }
 
   private acerto(a: Carta, cartas: [number, number], ev: Evento[]): void {
     const f = a.figura;
     const ms = this.deps.now() - this.desde;
-    const nova = this.quadro.novas.includes(f);
+    const apoio = this.quadro.apoio;
     const limpo = !this.confusas.has(a.par);
-    const rapido = limpo && !nova && ms < RAPIDO_MS;
-    this.combo++;
-    this.bestCombo = Math.max(this.bestCombo, this.combo);
+    const rapido = limpo && !apoio && ms < RAPIDO_MS;
     this.pares++;
     if (limpo) this.limpos++;
-    this.pontos += PONTOS_PAR + (rapido ? PONTOS_RAPIDO : 0) + Math.min(this.combo - 1, 5);
-    this.notar(f, { correct: true, ms, hinted: nova || this.brilhaPar(a.par) });
+    if (apoio) {
+      // Prática: pontos fixos, o combo não mexe.
+      this.pontos += Math.floor(PONTOS_PAR / 2);
+    } else {
+      this.combo++;
+      this.bestCombo = Math.max(this.bestCombo, this.combo);
+      this.pontos += PONTOS_PAR + (rapido ? PONTOS_RAPIDO : 0) + Math.min(this.combo - 1, 5);
+    }
+    this.notar(f, apoio && limpo ? notaDaPratica(true, ms) : { correct: true, ms, hinted: apoio || this.brilhaPar(a.par) });
     ev.push({ t: 'par', cartas, figura: f, rapido, combo: this.combo });
-    if (limpo && !nova) {
+    if (limpo && !apoio) {
+
       const s = this.deps.save;
       const id = f.word.id;
       s.seq[id] = (s.seq[id] ?? 0) + 1;

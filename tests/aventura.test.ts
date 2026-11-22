@@ -3,7 +3,7 @@ import { cardKey, WORDS } from '../src/content';
 import { DAILY_WORDS, findWord } from '../src/content/vida';
 import { isKana } from '../src/core/kana';
 import { emptySave } from '../src/core/save';
-import { DAY, review, State, type CardState } from '../src/core/srs';
+import { DAY, review, State, type CardState, newCard } from '../src/core/srs';
 import { SCENES, SPEAKERS } from '../src/games/aventura/cenas';
 import {
   COINS_FIRST_TIME,
@@ -29,18 +29,24 @@ import {
 const T0 = new Date('2026-11-16T12:00:00').getTime();
 const key = (jp: string) => cardKey(`w:${jp}`, 'meaning');
 
-function setup(scene: Scene = SCENES[0] as Scene) {
+/**
+ * Uma passada pela cena. `ver`: a apresentação das palavras novas já foi vista, como na tela.
+ * `firmes`: palavras (jp) que já estão em cobrança antes da cena começar.
+ */
+function setup(scene: Scene = SCENES[0] as Scene, ver = true, firmes: readonly string[] = []) {
   const data = emptySave(T0);
+  for (const jp of firmes) data.cards[key(jp)] = firm();
   const save = emptyAventuraSave();
   let t = T0;
   const deps = { cards: data.cards, profile: data.profile, save, lookup: findWord, now: () => t };
   const play = new ScenePlay(scene, deps);
+  if (ver) play.apresentou();
   return { data, save, play, deps, tick: (ms: number) => (t += ms) };
 }
 
 /** Carta já em revisão, vista pela última vez dez dias antes de T0. */
 function firm(): CardState {
-  let card = review(undefined, { correct: true }, T0 - 10 * DAY);
+  let card = review(newCard(0), { correct: true }, T0 - 10 * DAY);
   while (card.state !== State.Review) card = review(card, { correct: true }, card.due);
   return card;
 }
@@ -61,6 +67,7 @@ function pick(play: ScenePlay, r: Result): PlayEvent[] {
 /** Joga a cena inteira escolhendo sempre o que faz a conversa andar. */
 function playThrough(play: ScenePlay): PlayEvent[] {
   const events: PlayEvent[] = [];
+  play.apresentou();
   for (let i = 0; i < 400 && !play.finished; i++) {
     events.push(...toChoice(play));
     if (play.awaitingChoice) events.push(...pick(play, 'ok'));
@@ -217,7 +224,7 @@ describe('marcação das falas', () => {
 describe('ajuda por palavra', () => {
   it('some aos poucos: nova mostra tudo, jovem mostra a leitura, firme fica limpa', () => {
     expect(helpLevel(undefined)).toBe('full');
-    let card = review(undefined, { correct: true, hinted: true }, T0);
+    let card = review(newCard(0), { correct: true, hinted: true }, T0);
     expect(helpLevel(card)).toBe('reading');
     let t = T0;
     for (let i = 0; i < 12 && helpLevel(card) !== 'none'; i++) {
@@ -240,7 +247,7 @@ describe('ajuda por palavra', () => {
     const { data } = setup();
     const markup = '[電車|でんしゃ|=]です。';
     expect(lineView(markup, data.cards, findWord)[0]?.help).toBe('full');
-    data.cards[key('電車')] = review(undefined, { correct: true }, T0);
+    data.cards[key('電車')] = review(newCard(0), { correct: true }, T0);
     expect(lineView(markup, data.cards, findWord)[0]?.help).toBe('reading');
   });
 });
@@ -257,12 +264,30 @@ describe('uma cena em andamento', () => {
     expect(play.choose(9)).toEqual([]);
   });
 
-  it('primeiro contato apresenta a palavra e cria a carta, sem cobrar', () => {
-    const { play, data } = setup(MINI);
+  it('antes da primeira fala, as palavras novas da cena são apresentadas; nada anda antes disso', () => {
+    const { play, data } = setup(MINI, false);
+    expect(play.apresentando).toEqual(['w:こんにちは', 'w:どこ', 'w:から', 'w:来る', 'w:ブラジル']);
+    expect(play.advance()).toEqual([]);
+    expect(play.awaitingChoice).toBe(false);
+    expect(Object.keys(data.cards)).toHaveLength(0);
+    play.apresentou();
+    for (const id of ['こんにちは', 'どこ', 'から', '来る', 'ブラジル']) expect(data.cards[key(id)]?.reps, id).toBe(0);
+    // Apresentada e ainda não usada: leitura e significado na tela.
     expect(play.shown.tokens[0]?.help).toBe('full');
-    const events = play.advance();
-    expect(events).toEqual([{ t: 'new', words: [findWord('w:こんにちは')] }]);
-    expect(data.cards[key('こんにちは')]?.reps).toBe(1);
+    // Primeira passada: a palavra só foi apresentada, sem nota.
+    expect(play.advance()).toEqual([]);
+    expect(data.cards[key('こんにちは')]?.reps).toBe(0);
+  });
+
+  it('palavra que sobrou da apresentação é apresentada na própria fala, sem nota', () => {
+    const { play, data } = setup(MINI, false);
+    // Só a primeira foi apresentada antes; as outras chegam na fala.
+    play.apresentando = ['w:こんにちは'];
+    play.apresentou();
+    play.advance();
+    const events = pick(play, 'ok');
+    expect(events.some((e) => e.t === 'new')).toBe(true);
+    expect(data.cards[key('どこ')]?.reps).toBe(0);
   });
 
   it('entender a pergunta faz a história andar e registra as palavras ouvidas e ditas', () => {
@@ -299,23 +324,20 @@ describe('uma cena em andamento', () => {
     fresh.play.advance();
     pick(fresh.play, 'odd');
     expect(fresh.data.cards[key('どこ')]?.lapses).toBe(0);
-    expect(fresh.data.cards[key('どこ')]?.state).toBe(State.Learning);
+    expect(fresh.data.cards[key('どこ')]?.state).toBe(State.New);
 
-    const seen = setup(MINI);
-    seen.data.cards[key('どこ')] = firm();
+    const seen = setup(MINI, true, ['どこ']);
     seen.play.advance();
     pick(seen.play, 'odd');
     expect(seen.data.cards[key('どこ')]?.lapses).toBe(1);
     // A fala do jogador não era o problema: ブラジル só foi apresentada.
-    expect(seen.data.cards[key('ブラジル')]).toBeUndefined();
+    expect(seen.data.cards[key('ブラジル')]?.reps).toBe(0);
   });
 
   it('pedir leitura ou significado conta como ajuda na nota', () => {
-    const plain = setup(MINI);
-    plain.data.cards[key('こんにちは')] = firm();
+    const plain = setup(MINI, true, ['こんにちは']);
     plain.play.advance();
-    const helped = setup(MINI);
-    helped.data.cards[key('こんにちは')] = firm();
+    const helped = setup(MINI, true, ['こんにちは']);
     helped.play.askMeaning();
     expect(helped.play.shown.meaning).toBe(true);
     helped.play.advance();
@@ -327,8 +349,7 @@ describe('uma cena em andamento', () => {
 
   it('resposta rápida dá bônus e resposta lenta não pune', () => {
     const run = (ms: number) => {
-      const s = setup(MINI);
-      for (const jp of ['どこ', 'から', '来る', 'ブラジル', 'こんにちは']) s.data.cards[key(jp)] = firm();
+      const s = setup(MINI, true, ['どこ', 'から', '来る', 'ブラジル', 'こんにちは']);
       s.play.advance();
       s.tick(ms);
       pick(s.play, 'ok');
@@ -372,7 +393,8 @@ describe('uma cena em andamento', () => {
     if (second?.t !== 'end') throw new Error('sem resumo');
     expect(second.summary.firstTime).toBe(false);
     expect(second.summary.coins).toBe(COINS_SCENE);
-    expect(second.summary.newWords).toEqual([]);
+    // Só a palavra que ficou de fora da primeira apresentação (máximo de 5) é nova agora.
+    expect(second.summary.newWords.map((w) => w.jp)).toEqual(['すみません']);
     expect(save.done).toEqual(['mini']);
     expect(save.diary).toHaveLength(3);
     expect(save.plays).toBe(2);

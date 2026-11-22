@@ -6,12 +6,17 @@
  *
  * Cada ponto de gramática é uma carta da memória espaçada (`g:<ponto>#uso`), a
  * mesma dos outros jogos. Os textos de lição e as frases ficam em `pontos.ts`.
+ *
+ * Ensinar antes de cobrar (core/ensino.ts): ponto novo chega com a lição (fase 'lesson') e
+ * só depois vira frase. Enquanto o ponto está em prática, a peça certa brilha na bandeja e
+ * errar não zera o combo nem tira pontos: a peça só volta com o porquê.
  */
 import { pickNext } from '../../core/picker';
 import { levelInfo } from '../../core/progress';
 import { shuffle, type Rng } from '../../core/rng';
 import type { Profile } from '../../core/save';
-import { review, type CardState } from '../../core/srs';
+import { apresentar, avaliar, emPratica, foiApresentado, notaDaPratica } from '../../core/ensino';
+import type { CardState } from '../../core/srs';
 
 // ───────── Peças ─────────
 
@@ -499,9 +504,14 @@ export class GramaticaRound {
       rng,
       { maxYoung: 5, newRatio: 0.5, recent: this.recentPoints.slice(-1) },
     );
-    const point = pool.find((p) => pick && cardOf(p.id) === pick.key) ?? (pool[0] as Point);
+    // Ponto nunca visto entra (com a lição) quando não há o que praticar, ou às vezes no meio
+    // das revisões; com dois pontos ainda em prática, espera.
+    const novo = pool.find((p) => !foiApresentado(cards, cardOf(p.id)));
+    const praticando = pool.filter((p) => emPratica(cards, cardOf(p.id))).length;
+    const cabeNovo = !!novo && praticando < 2 && (!pick || pick.reason === 'practice' || (pick.reason === 'due' && rng() < 0.5));
+    const point = (cabeNovo ? novo : pool.find((p) => pick && cardOf(p.id) === pick.key)) ?? novo ?? (pool[0] as Point);
     this.recentPoints.push(cardOf(point.id));
-    const teach = !cards[cardOf(point.id)];
+    const teach = !foiApresentado(cards, cardOf(point.id));
     const choices = point.sentences.filter((s) => !this.recentSentences.includes(s.jp));
     const list = choices.length > 0 ? choices : point.sentences;
     const sentence = list[Math.floor(rng() * list.length)] as { jp: string; pt: string };
@@ -511,9 +521,14 @@ export class GramaticaRound {
     this.activeSince = now();
   }
 
-  /** Ponto já visto (tem carta) ou que é o desta frase. */
+  /** Ponto já visto (apresentado) ou que é o desta frase. */
   private known(point: Point, target: Point): boolean {
-    return point === target || !!this.deps.cards[cardOf(point.id)];
+    return point === target || foiApresentado(this.deps.cards, cardOf(point.id));
+  }
+
+  /** O ponto da frase ainda está em prática (ou acabou de ser apresentado). */
+  get pratica(): boolean {
+    return this.puzzle.teach || emPratica(this.deps.cards, cardOf(this.puzzle.point.id));
   }
 
   private build(point: Point, sentence: { jp: string; pt: string }, teach: boolean): Puzzle {
@@ -543,7 +558,8 @@ export class GramaticaRound {
         filled: isOpen ? null : answer,
         tried: [],
         tray: isOpen ? this.tray(p.role, point, rng) : [],
-        hint: isOpen && teach && point.roles.includes(p.role),
+        // Em prática, a peça certa do ponto brilha na bandeja.
+        hint: isOpen && (teach || emPratica(this.deps.cards, cardOf(point.id))) && point.roles.includes(p.role),
       };
       pieces.push({ k: 'slot', slot: slots.length });
       slots.push(slot);
@@ -576,9 +592,10 @@ export class GramaticaRound {
     return shuffle(rng, [...correct, ...distract]);
   }
 
-  /** Sai da lição e vai montar. */
+  /** Sai da lição e vai montar: o ponto passa a apresentado. */
   begin(): void {
     if (this.phase !== 'lesson') return;
+    apresentar(this.deps.cards, [cardOf(this.puzzle.point.id)], this.deps.now());
     this.phase = 'build';
     this.activeSince = this.deps.now();
   }
@@ -599,7 +616,7 @@ export class GramaticaRound {
       if (slot.tried.length >= HINT_AFTER) slot.hint = true;
       const text = whyNot(slot.role, block);
       this.puzzle.why = { block, text };
-      this.combo = 0;
+      if (!this.pratica) this.combo = 0;
       return [{ t: 'bounce', block, why: text }];
     }
     const events: RoundEvent[] = [];
@@ -618,7 +635,8 @@ export class GramaticaRound {
       this.score += SCORE_FIT + (fast ? SCORE_FAST : 0);
       this.gain(XP_FIT, events);
     } else {
-      this.score += Math.floor(SCORE_FIT / 2);
+      // Na prática, errar antes não tira pontos.
+      this.score += this.pratica ? SCORE_FIT : Math.floor(SCORE_FIT / 2);
     }
     events.unshift({ t: 'fit', block, fast, combo: this.combo });
     if (this.active < 0) events.push(...this.solve());
@@ -639,15 +657,17 @@ export class GramaticaRound {
     const t = now();
     for (const [p, slots] of byPoint) {
       const key = cardOf(p.id);
-      const clean = slots.every((s) => s.tried.length === 0 && !s.hint);
-      if (!cards[key]) {
-        // Primeiro contato ensina, não cobra.
-        cards[key] = review(undefined, { correct: true, hinted: true }, t);
-        this.learned.push(p);
+      const limpo = slots.every((s) => s.tried.length === 0);
+      const clean = limpo && slots.every((s) => !s.hint);
+      if (puzzle.teach && p === puzzle.point) this.learned.push(p);
+      if (emPratica(cards, key)) {
+        // Prática: a peça brilhou de dica; de primeira conta como bom.
+        avaliar(cards, key, notaDaPratica(limpo), t);
       } else {
         const ms = Math.max(...slots.map((s) => s.ms ?? 0));
-        cards[key] = review(cards[key], clean ? { correct: true, ms } : { correct: false }, t);
+        avaliar(cards, key, clean ? { correct: true, ms } : { correct: false }, t);
       }
+
       const wins = slots.filter((s) => s.tried.length === 0 && !s.hint).length;
       if (wins > 0) save.wins[p.id] = (save.wins[p.id] ?? 0) + wins;
     }

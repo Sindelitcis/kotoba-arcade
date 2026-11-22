@@ -6,7 +6,7 @@
  * O que foi estudado na ficha conta como revisão leve no FSRS (`estudoLeve`).
  */
 import { signal } from '@preact/signals';
-import { useLayoutEffect } from 'preact/hooks';
+import { useLayoutEffect, useState } from 'preact/hooks';
 import { alvoDaCarta, chaveDoAlvo, mesmoAlvo, type Alvo } from '../../content/aprofundar/alvo';
 import { fichaDe } from '../../content/aprofundar/fichas';
 import { ajudaAberta, aprofundarAberto, avisarAbertura, avisarFechamento } from '../help/ajuda';
@@ -32,20 +32,40 @@ function comFicha(alvos: readonly Alvo[]): Alvo[] {
 }
 
 /**
+ * Cada tela (ou camada por cima dela, como a apresentação de coisa nova) que diz o que mostra.
+ * Vale a que foi desenhada por último: ao fechar a camada, volta o que a tela de baixo disse.
+ * Antes, a camada que fechava apagava tudo e a ficha da cena da Aventura sumia.
+ */
+const camadas = new Map<number, Alvo[]>();
+let proximaCamada = 0;
+
+function publicar(): void {
+  const topo = Math.max(-1, ...camadas.keys());
+  naTela.value = camadas.get(topo) ?? [];
+}
+
+/**
  * O jogo diz o que está na tela. Mudou a pergunta, muda o que o Aprofundar abre.
  * `null` e lista vazia: nada para aprofundar agora (o painel mostra os recentes).
  */
 export function useAprofundar(alvos: Alvo | readonly Alvo[] | null | undefined): void {
   const lista = !alvos ? [] : Array.isArray(alvos) ? (alvos as readonly Alvo[]) : [alvos as Alvo];
   const chave = lista.map(chaveDoAlvo).join('|');
+  // A ordem de desenho: quem é desenhado depois (um filho, uma camada nova) fica por cima.
+  const [camada] = useState(() => proximaCamada++);
   useLayoutEffect(() => {
-    naTela.value = comFicha(lista);
-    return () => {
-      naTela.value = [];
-    };
+    camadas.set(camada, comFicha(lista));
+    publicar();
     // A chave resume a lista: o jogo pode criar o array de novo a cada desenho.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chave]);
+  useLayoutEffect(
+    () => () => {
+      camadas.delete(camada);
+      publicar();
+    },
+    [],
+  );
 }
 
 export function abrirAprofundar(alvo?: Alvo): void {

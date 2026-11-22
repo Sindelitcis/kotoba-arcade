@@ -7,13 +7,18 @@ import { foco } from '../src/core/foco';
 import { recortar } from '../src/core/foco';
 import { seededRng } from '../src/core/rng';
 import { emptySave } from '../src/core/save';
-import { review } from '../src/core/srs';
+import { review, newCard, State } from '../src/core/srs';
 import { SCENES } from '../src/games/aventura/cenas';
 import { CENAS } from '../src/games/conversa/engine';
 import { POINTS } from '../src/games/gramatica/pontos';
 import { emptyKanjimonSave, Hunt } from '../src/games/kanjimon/engine';
 import { ensureKanaBeatSave, Stage } from '../src/games/kanabeat/engine';
 import { emptyRoguelikeSave, Run } from '../src/games/roguelike/engine';
+import { emptyKanaImagensSave, idsAbertos, Rodada } from '../src/games/kanaimagens/engine';
+import { FIGURAS_MEMORIA, MemoriaRound, ensureMemoriaSave } from '../src/games/memoria/engine';
+import { palavrasDaCena } from '../src/games/cena/engine';
+import { LUGARES } from '../src/games/cena/lugares';
+import { KANA_IMAGENS } from '../src/content/kana';
 import { Andamento } from '../src/jornada/andamento';
 import {
   acharMissao,
@@ -123,7 +128,7 @@ describe('andamento da lição', () => {
     expect(a.avancar()).toBe(true);
   });
 
-  it('palavra nova entra como apresentada, mesmo errando; a que já tinha carta é avaliada', () => {
+  it('palavra nova é apresentada no quadro; errar logo depois é prática, sem virar esquecimento; a que já tinha carta é avaliada', () => {
     const { a, cards } = abrir();
     irAtePergunta(a);
     const p = a.passo;
@@ -133,13 +138,15 @@ describe('andamento da lição', () => {
     expect(cards[p.carta]?.lapses ?? 0).toBe(0);
 
     const base = emptySave(T0).cards;
-    const antes = review(undefined, { correct: true }, T0 - 86_400_000 * 3);
+    const antes = review(newCard(0), { correct: true }, T0 - 86_400_000 * 3);
     base[p.carta] = antes;
     const outra = new Andamento(licao, { cards: base, now: () => T0, rng: seededRng(1) });
     irAtePergunta(outra);
     outra.responder(p.erradas[0] as string);
     expect(base[p.carta]).toEqual(review(antes, { correct: false }, T0));
-    expect(cards[p.carta]).toEqual(review(undefined, { correct: true, hinted: true }, T0));
+    expect(cards[p.carta]?.reps).toBe(1);
+    expect(cards[p.carta]?.lapses).toBe(0);
+    expect(cards[p.carta]?.state).not.toBe(State.Review);
   });
 
   it('montar a frase: bloco errado volta, e depois de duas voltas o certo brilha', () => {
@@ -200,11 +207,14 @@ describe('mapa da Jornada', () => {
       }
       const f = m.acao.foco;
       for (const k of f.kanji ?? []) expect(kanji.has(k), `${m.id}: ${k}`).toBe(true);
-      for (const w of f.palavras ?? []) expect(acharPalavra(w), `${m.id}: ${w}`).toBeDefined();
+      // Palavra da escola ou figura da Memória e da Cena Viva.
+      for (const w of f.palavras ?? []) expect(acharPalavra(w) ?? FIGURAS_MEMORIA.find((x) => x.word.id === w), `${m.id}: ${w}`).toBeDefined();
       for (const p of f.pontos ?? []) expect(pontos.has(p), `${m.id}: ${p}`).toBe(true);
       if (f.cena) expect(SCENES.some((s) => s.id === f.cena), m.id).toBe(true);
       if (f.conversa) expect(CENAS.some((c) => c.id === f.conversa), m.id).toBe(true);
-      const recorte = (f.kanji?.length ?? 0) + (f.palavras?.length ?? 0) + (f.pontos?.length ?? 0) + (f.cena ? 1 : 0) + (f.conversa ? 1 : 0) + (f.kana ? 1 : 0);
+      if (f.lugar) expect(LUGARES.some((l) => l.id === f.lugar), m.id).toBe(true);
+      const recorte =
+        (f.kanji?.length ?? 0) + (f.palavras?.length ?? 0) + (f.pontos?.length ?? 0) + (f.cena ? 1 : 0) + (f.conversa ? 1 : 0) + (f.kana ? 1 : 0) + (f.lugar ? 1 : 0);
       expect(recorte, `${m.id} abre o jogo sem recorte`).toBeGreaterThan(0);
     }
   });
@@ -274,6 +284,10 @@ describe('jogos abertos por uma missão', () => {
     let t = T0;
     const hunt = new Hunt({ cards: data.cards, profile: data.profile, save: emptyKanjimonSave(), rng: seededRng(3), now: () => t });
     hunt.start();
+    // Só os kanji da missão são apresentados antes da caçada.
+    expect(hunt.apresentando.map((k) => k.replace(/#.*/, ''))).toEqual(expect.arrayContaining(ids));
+    expect(hunt.apresentando.every((k) => ids.some((id) => k.startsWith(`${id}#`)))).toBe(true);
+    hunt.apresentou();
     const vistos = new Set<string>();
     for (let i = 0; i < 6; i++) {
       vistos.add(hunt.enemy.kanji.id);
@@ -323,6 +337,58 @@ describe('jogos abertos por uma missão', () => {
     go('hub');
     expect(screen.value).toBe('hub');
     expect(jornadaSave().feitas[m.id]).toBe(1);
+  });
+
+  it('a Jornada põe os jogos na ordem de ensinar: Kana em imagens, Kana Beat, Cena Viva, Memória e só depois o KanjiMon', () => {
+    const ordem = MISSOES.flatMap((m, i) => (m.acao.tipo === 'jogo' ? [{ tela: m.acao.tela, i }] : []));
+    const primeira = (tela: string) => ordem.find((x) => x.tela === tela)!.i;
+    expect(primeira('kanaimagens')).toBeLessThan(primeira('kanabeat'));
+    expect(primeira('kanabeat')).toBeLessThan(primeira('cena'));
+    expect(primeira('cena')).toBeLessThan(primeira('memoria'));
+    expect(primeira('memoria')).toBeLessThan(primeira('kanjimon'));
+    // Katakana com imagem vem antes do Kana Beat de katakana.
+    const kata = (tela: string) => MISSOES.findIndex((m) => m.acao.tipo === 'jogo' && m.acao.tela === tela && m.acao.foco.kana === 'katakana');
+    expect(kata('kanaimagens')).toBeGreaterThan(-1);
+    expect(kata('kanaimagens')).toBeLessThan(kata('kanabeat'));
+  });
+
+  it('Kana em imagens da missão só apresenta e pergunta a escrita dela', () => {
+    for (const escrita of ['hiragana', 'katakana'] as const) {
+      const data = emptySave(T0);
+      const save = emptyKanaImagensSave();
+      const ids = new Set(idsAbertos(save, escrita));
+      expect(ids.size, escrita).toBeGreaterThan(0);
+      const r = new Rodada({ cards: data.cards, profile: data.profile, save, rng: seededRng(2), now: () => T0, escrita });
+      expect(r.apresentando).toBe(true);
+      expect(r.novos.length).toBeGreaterThan(0);
+      for (const k of r.novos) expect(ids.has(k.id), `${escrita}: ${k.id}`).toBe(true);
+    }
+    // Sem missão, continua do jeito de sempre: o primeiro lote (hiragana).
+    const kata = new Set(KANA_IMAGENS.filter((k) => k.escrita === 'katakana').map((k) => k.id));
+    expect(idsAbertos(emptyKanaImagensSave()).some((id) => kata.has(id))).toBe(false);
+    expect(idsAbertos(emptyKanaImagensSave(), 'katakana').every((id) => kata.has(id))).toBe(true);
+  });
+
+  it('Cena Viva e Memória das primeiras palavras usam o mesmo lugar: a Memória treina o que a cena apresentou', () => {
+    const cenas = MISSOES.filter((m) => m.acao.tipo === 'jogo' && m.acao.tela === 'cena');
+    expect(cenas.length).toBeGreaterThan(0);
+    for (const c of cenas) {
+      if (c.acao.tipo !== 'jogo') throw new Error();
+      const id = c.acao.foco.lugar;
+      const lugar = LUGARES.find((l) => l.id === id)!;
+      const mem = MISSOES.find((m) => m.id === `m:memoria:${lugar.id}`);
+      if (mem?.acao.tipo !== 'jogo') throw new Error(`falta a Memória de ${lugar.id}`);
+      expect(MISSOES.indexOf(mem)).toBeGreaterThan(MISSOES.indexOf(c));
+      const ids = mem.acao.foco.palavras!;
+      expect(ids).toEqual(palavrasDaCena(lugar, ['nome']).map((w) => w.id));
+      // A Memória da missão só monta com as figuras dessas palavras.
+      foco.value = { missao: mem.id, titulo: mem.titulo, ...mem.acao.foco };
+      const figuras = recortar(FIGURAS_MEMORIA, foco.value.palavras, (f) => f.word.id);
+      expect(figuras.length).toBeGreaterThan(0);
+      const data = emptySave(T0);
+      const r = new MemoriaRound({ cards: data.cards, profile: data.profile, save: ensureMemoriaSave(data.games), now: () => T0, rng: seededRng(1), figuras });
+      for (const f of r.apresentadas) expect(ids).toContain(f.word.id);
+    }
   });
 
   it('abrir uma lição não muda o "jogo da vez" do fliperama', () => {

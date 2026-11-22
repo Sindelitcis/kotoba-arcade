@@ -1,4 +1,4 @@
-import { MEMORIA_UNICA, PARAR, SAVE, VOLTOU } from './comum';
+import { ANTES_DE_COBRAR, MEMORIA_UNICA, PARAR, SAVE, TECLAS_APRESENTA, VOLTOU } from './comum';
 import type { Ajuda } from './tipos';
 
 export const MEMORIA: Ajuda = {
@@ -18,6 +18,7 @@ export const MEMORIA: Ajuda = {
     { teclas: ['1', '2', '3', '4', 'A–Z'], faz: 'Escolher a carta: a tecla está no canto dela (1 2 3 4, Q W E R, A S D F, Z X C V, como no teclado)' },
     { teclas: ['Enter', 'Espaço'], faz: 'Começar; seguir depois das palavras novas e entre os quadros; outra rodada' },
     { teclas: ['R'], faz: 'Ouvir de novo a última palavra (fora do quadro; dentro dele, escolha a carta de novo)' },
+    TECLAS_APRESENTA,
     { teclas: ['Esc'], faz: 'Parar a rodada (vale o que você fez); no menu, voltar ao fliperama' },
   ],
   elementos: [
@@ -34,6 +35,7 @@ export const MEMORIA: Ajuda = {
     'Na memória, abrir uma carta que você nunca viu não é erro. Só conta como confusão escolher uma carta que já estava à vista.',
   ],
   perguntas: [
+    ANTES_DE_COBRAR,
     { p: 'Por que a palavra agora aparece em kanji?', r: 'Porque você acertou ela duas vezes seguidas em kana. O kana aparece por cima depois que o par fecha.' },
     { p: 'Como ouço a palavra de novo no meio do quadro?', r: 'Escolha a carta de novo. Ela repete a voz.' },
     VOLTOU,

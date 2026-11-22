@@ -207,7 +207,7 @@ describe('revisão leve no FSRS', () => {
   beforeEach(() => esquecerSessao());
 
   function vencida(now: number): CardState {
-    let c = review(undefined, { correct: true }, now - 40 * DIA);
+    let c = review(newCard(0), { correct: true }, now - 40 * DIA);
     c = review(c, { correct: true }, now - 30 * DIA);
     return c;
   }
@@ -264,7 +264,7 @@ describe('ritmo de estudo', () => {
     const cards: Record<string, CardState> = {};
     const parar = ouvirRespostas(() => cards, () => 'estudo', () => true);
     try {
-      cards['k:山#meaning'] = review(undefined, { correct: false }, Date.now());
+      cards['k:山#meaning'] = review(newCard(0), { correct: false }, Date.now());
       await Promise.resolve();
       expect(recentes.value).toEqual([{ t: 'kanji', c: '山' }]);
       expect(oferta.value).toEqual({ t: 'kanji', c: '山' });
@@ -277,7 +277,7 @@ describe('ritmo de estudo', () => {
   it('a revisão leve não vira oferta nem recente', async () => {
     esquecerSessao();
     const now = Date.now();
-    let c = review(undefined, { correct: true }, now - 40 * DIA);
+    let c = review(newCard(0), { correct: true }, now - 40 * DIA);
     c = review(c, { correct: true }, now - 30 * DIA);
     const cards: Record<string, CardState> = { 'k:山#meaning': c };
     await Promise.resolve();
@@ -352,6 +352,30 @@ describe('painel do Aprofundar', () => {
       ),
     );
   }
+
+  it('camada por cima (a apresentação) vale enquanto está aberta; ao fechar, volta o que a tela disse', async () => {
+    function Camada({ alvo }: { alvo: Alvo }) {
+      useAprofundar(alvo);
+      return <p>camada</p>;
+    }
+    raiz = document.createElement('div');
+    raiz.id = 'app';
+    document.body.append(raiz);
+    const cena: Alvo = { t: 'kanji', c: '山' };
+    const novo: Alvo = { t: 'kanji', c: '川' };
+    const tela = (aberta: boolean) => (
+      <>
+        <Jogo alvos={[cena]} />
+        {aberta && <Camada alvo={novo} />}
+      </>
+    );
+    await act(() => render(tela(true), raiz));
+    expect(naTela.value).toEqual([novo]);
+    await act(() => render(tela(false), raiz));
+    expect(naTela.value).toEqual([cena]);
+    await act(() => render(null, raiz));
+    expect(naTela.value).toEqual([]);
+  });
 
   it('nada abre sozinho; o botão fica no canto', async () => {
     await montar([{ t: 'kanji', c: '山' }]);

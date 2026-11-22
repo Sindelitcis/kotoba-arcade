@@ -1,9 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { cardKey, KANJI } from '../src/content';
+import { foiApresentado } from '../src/core/ensino';
 import { readingMeter } from '../src/core/progress';
 import { seededRng } from '../src/core/rng';
 import { emptySave } from '../src/core/save';
-import { review, type CardState } from '../src/core/srs';
+import { review, State, type CardState, newCard } from '../src/core/srs';
 import { KANJI_PECAS, kanjiPeca, PARECIDOS, type KanjiPeca } from '../src/games/pecas/dados';
 import {
   cartaComposto,
@@ -67,11 +68,22 @@ function errar(r: PecasRound) {
   return r.responder((certa(p) + 1) % (p.modo === 'intruso' ? p.grade.length : p.opcoes.length));
 }
 
+/** Cartas de peças já em cobrança (firmes, não vencidas) para a lista. */
+function firmes(lista: readonly KanjiPeca[], t: number): Record<string, CardState> {
+  const cards: Record<string, CardState> = {};
+  for (const k of lista) {
+    let c = review(newCard(0), { correct: true }, t - 400 * 86_400_000);
+    while (c.state !== State.Review) c = review(c, { correct: true }, c.due);
+    cards[cartaPecas(k)] = { ...c, due: t + 30 * 86_400_000 };
+  }
+  return cards;
+}
+
 /** Cartas de quem já viu os kanji (revisados há um tempo). */
 function vistos(lista: readonly KanjiPeca[], t: number): Record<string, CardState> {
   const cards: Record<string, CardState> = {};
   for (const k of lista) {
-    let c = review(undefined, { correct: true }, t - 20 * 86_400_000);
+    let c = review(newCard(0), { correct: true }, t - 20 * 86_400_000);
     c = review(c, { correct: true }, t - 10 * 86_400_000);
     cards[cartaPecas(k)] = c;
   }
@@ -119,7 +131,7 @@ describe('primeiro contato ensina antes de cobrar', () => {
 });
 
 describe('rodada', () => {
-  it('acerto soma combo e pontos; erro só zera o combo e mostra a explicação', () => {
+  it('na prática, acerto soma combo e pontos; erro mostra a explicação sem zerar o combo', () => {
     const d = deps();
     const r = new PecasRound(d);
     const ev = acertar(r);
@@ -127,13 +139,50 @@ describe('rodada', () => {
     expect(r.fase).toBe('revela');
     expect(r.pontos).toBe(PONTOS_ACERTO); // depois de lição não vale bônus de rápido
     r.seguir();
+    if (r.fase === 'licao') r.seguir();
+    expect(r.pratica).toBe(true);
     const antes = r.pontos;
     const ev2 = errar(r);
     if (r.pergunta.modo !== 'montar') {
       expect(ev2[0]).toEqual({ t: 'erro' });
       expect(r.fase).toBe('revela');
       expect(r.pontos).toBe(antes);
-      expect(r.combo).toBe(0);
+      expect(r.combo).toBe(1);
+    }
+  });
+
+  it('na cobrança, erro zera o combo e mostra a explicação', () => {
+    const d = deps({ modo: 'peca' });
+    d.cards = firmes(KANJI_PECAS, d.clock.t);
+    const r = new PecasRound(d);
+    expect(r.pratica).toBe(false);
+    acertar(r);
+    expect(r.combo).toBe(1);
+    r.seguir();
+    const antes = r.pontos;
+    const ev = errar(r);
+    expect(ev[0]).toEqual({ t: 'erro' });
+    expect(r.fase).toBe('revela');
+    expect(r.pontos).toBe(antes);
+    expect(r.combo).toBe(0);
+  });
+
+  it('nenhuma pergunta cobra kanji que não foi apresentado', () => {
+    for (const modo of ['misto', 'peca', 'montar', 'intruso', 'adivinhar', 'composto'] as Modo[]) {
+      const d = deps({ modo });
+      const r = new PecasRound(d);
+      for (let i = 0; i < ROUND_SIZE && r.fase !== 'fim'; i++) {
+        if (r.fase === 'licao') r.seguir();
+        const p = r.pergunta;
+        // Adivinhar pelas peças já conhecidas é o jeito de apresentar o kanji: as peças foram vistas.
+        const pelasPecas = p.modo === 'adivinhar' && r.adivinhavel(p.k);
+        // No composto, o item é a palavra (a tela mostra a leitura de cada kanji ao abrir).
+        const visto = p.modo === 'composto' ? foiApresentado(d.cards, cartaComposto(p.palavra)) : Object.keys(d.cards).some((c) => c.startsWith(`${p.k.id}#`));
+        expect(visto || pelasPecas, `${modo} ${p.k.kanji}`).toBe(true);
+        acertar(r);
+        d.clock.t += 60_000;
+        r.seguir();
+      }
     }
   });
 
@@ -166,16 +215,19 @@ describe('rodada', () => {
     expect(r.seguir()).toEqual([]);
   });
 
-  it('o mesmo kanji não volta logo em seguida na mesma rodada', () => {
-    const d = deps();
-    const r = new PecasRound(d);
-    const vistosNaRodada: string[] = [];
-    for (let i = 0; i < 4; i++) {
-      vistosNaRodada.push(r.pergunta.k.kanji);
-      acertar(r);
-      r.seguir();
+  it('o mesmo kanji não volta logo em seguida na mesma rodada, nem para quem está começando', () => {
+    for (const seed of [1, 7, 13]) {
+      const d = deps({ rng: seededRng(seed) });
+      const r = new PecasRound(d);
+      const vistosNaRodada: string[] = [];
+      for (let i = 0; i < ROUND_SIZE && r.fase !== 'fim'; i++) {
+        vistosNaRodada.push(r.pergunta.k.kanji);
+        acertar(r);
+        r.seguir();
+      }
+      for (let i = 1; i < vistosNaRodada.length; i++) expect(vistosNaRodada[i], `seed ${seed}, pergunta ${i}`).not.toBe(vistosNaRodada[i - 1]);
+      expect(new Set(vistosNaRodada.slice(0, 3)).size).toBe(3);
     }
-    expect(new Set(vistosNaRodada).size).toBe(4);
   });
 });
 
@@ -328,7 +380,7 @@ describe('ligação com o resto do arcade', () => {
     expect(KANJI).toHaveLength(94);
     const t = Date.now();
     const cards = vistos(KANJI_PECAS.slice(0, 200), t);
-    cards[cartaSignificado(kanjiPeca('働')!)] = review(undefined, { correct: true }, t);
+    cards[cartaSignificado(kanjiPeca('働')!)] = review(newCard(0), { correct: true }, t);
     expect(() => readingMeter(cards)).not.toThrow();
   });
 });

@@ -3,7 +3,7 @@ import { KANJI, WORDS, getWord } from '../src/content';
 import { isKana } from '../src/core/kana';
 import { dayKey, levelInfo, markPlayed, readingMeter, recentDays } from '../src/core/progress';
 import { emptySave, exportSave, importSave, loadSave, memoryStore, SAVE_KEY, writeSave } from '../src/core/save';
-import { DAY, review } from '../src/core/srs';
+import { DAY, review, newCard } from '../src/core/srs';
 
 const T0 = new Date('2026-11-15T12:00:00').getTime();
 
@@ -18,7 +18,7 @@ describe('save', () => {
     const store = memoryStore();
     const s = emptySave(T0);
     s.profile.coins = 42;
-    s.cards['k:一#meaning'] = review(undefined, { correct: true }, T0);
+    s.cards['k:一#meaning'] = review(newCard(0), { correct: true }, T0);
     s.games.kanjimon = { dex: { '1_c': 2 } };
     writeSave(store, s, T0 + 5);
     expect(loadSave(store, T0 + 10)).toEqual(s);
@@ -91,7 +91,7 @@ describe('progresso', () => {
   it('medidor de leitura conta vistos e conhecidos', () => {
     const s = emptySave(T0);
     expect(readingMeter(s.cards).kanjiSeen).toBe(0);
-    s.cards['k:一#meaning'] = review(undefined, { correct: true }, T0);
+    s.cards['k:一#meaning'] = review(newCard(0), { correct: true }, T0);
     const m = readingMeter(s.cards);
     expect(m.kanjiSeen).toBe(1);
     expect(m.kanjiKnown).toBe(0);
@@ -143,7 +143,7 @@ describe('conteúdo', () => {
 describe('cartas estragadas no save', () => {
   it('carta com campo inválido é descartada e as boas ficam', () => {
     // Um backup editado à mão (ou de versão antiga) com "due" em texto quebrava o FSRS na hora da revisão.
-    const boa = review(undefined, { correct: true }, T0);
+    const boa = review(newCard(0), { correct: true }, T0);
     const texto = JSON.stringify({
       v: 1,
       cards: {
@@ -156,7 +156,7 @@ describe('cartas estragadas no save', () => {
     });
     const s = importSave(texto, T0);
     expect(Object.keys(s.cards)).toEqual(['k:一#meaning']);
-    expect(() => review(s.cards['k:一#meaning'], { correct: true }, T0 + DAY)).not.toThrow();
+    expect(() => review(s.cards['k:一#meaning']!, { correct: true }, T0 + DAY)).not.toThrow();
   });
 });
 

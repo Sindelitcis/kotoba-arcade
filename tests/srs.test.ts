@@ -1,14 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import { pickNext } from '../src/core/picker';
 import { seededRng } from '../src/core/rng';
-import { DAY, isKnown, isLearning, masteryLevel, review, retrievability, type CardState } from '../src/core/srs';
+import { DAY, isKnown, isLearning, masteryLevel, review, retrievability, type CardState, newCard } from '../src/core/srs';
 
 const T0 = new Date('2026-11-15T12:00:00').getTime();
 const MIN = 60_000;
 
 /** Responde certo até a carta sair do aprendizado. */
 function graduate(now: number): { card: CardState; now: number } {
-  let card = review(undefined, { correct: true }, now);
+  let card = review(newCard(0), { correct: true }, now);
   let t = now;
   for (let i = 0; i < 6 && isLearning(card); i++) {
     t = card.due;
@@ -19,7 +19,7 @@ function graduate(now: number): { card: CardState; now: number } {
 
 describe('srs', () => {
   it('carta nova entra em aprendizado e volta em minutos', () => {
-    const c = review(undefined, { correct: true }, T0);
+    const c = review(newCard(0), { correct: true }, T0);
     expect(isLearning(c)).toBe(true);
     expect(c.due - T0).toBeLessThanOrEqual(15 * MIN);
   });
@@ -74,8 +74,9 @@ describe('srs', () => {
 describe('pickNext', () => {
   const pool = Array.from({ length: 40 }, (_, i) => `c${i}`);
 
-  it('save vazio começa pela primeira carta do currículo', () => {
-    expect(pickNext(pool, {}, T0, seededRng(1))).toEqual({ key: 'c0', reason: 'new' });
+  it('carta nunca apresentada não sai; a apresentada e ainda não perguntada vem como novidade', () => {
+    expect(pickNext(pool, {}, T0, seededRng(1))).toBeNull();
+    expect(pickNext(pool, { c3: newCard(T0) }, T0, seededRng(1))).toEqual({ key: 'c3', reason: 'new' });
   });
 
   it('pool vazio devolve null', () => {
@@ -83,14 +84,14 @@ describe('pickNext', () => {
   });
 
   it('carta em aprendizado que venceu tem prioridade sobre novidade', () => {
-    const cards = { c0: review(undefined, { correct: true }, T0) };
+    const cards = { c0: review(newCard(0), { correct: true }, T0) };
     const later = cards.c0.due + 1;
     expect(pickNext(pool, cards, later, seededRng(1))).toEqual({ key: 'c0', reason: 'learning' });
   });
 
   it('para de trazer novidade quando há muita carta jovem', () => {
     const cards: Record<string, CardState> = {};
-    for (let i = 0; i < 8; i++) cards[`c${i}`] = review(undefined, { correct: true }, T0);
+    for (let i = 0; i < 8; i++) cards[`c${i}`] = review(newCard(0), { correct: true }, T0);
     const p = pickNext(pool, cards, T0 + 1000, seededRng(1));
     expect(p?.reason).toBe('learning');
     expect(cards[p?.key ?? '']).toBeDefined();
@@ -126,6 +127,8 @@ describe('pickNext', () => {
   it('intercala novidade com revisão quando há espaço', () => {
     const cards: Record<string, CardState> = {};
     for (let i = 0; i < 5; i++) cards[`c${i}`] = graduate(T0).card;
+    // Apresentadas e ainda não perguntadas: são as novidades.
+    for (let i = 5; i < 10; i++) cards[`c${i}`] = newCard(T0);
     const rng = seededRng(11);
     const reasons = new Set<string>();
     for (let i = 0; i < 60; i++) reasons.add(pickNext(pool, cards, T0 + 90 * DAY, rng)?.reason ?? 'null');

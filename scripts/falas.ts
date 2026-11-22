@@ -29,7 +29,7 @@ import { LICOES, type FalaQuadro } from '../src/jornada/licoes';
 import { AULAS } from '../src/aulas';
 import type { FalaJp } from '../src/core/sequencia';
 import { FIGURAS, IMAGEM_WORDS } from '../src/content/imagens';
-import { daCoisa, ETAPAS, falaDaTarefa, falaDoNome, nomeDe, tarefas, type Seg } from '../src/games/cena/engine';
+import { daCoisa, ETAPAS, falaDaTarefa, falaDoNome, nomeDe, PERGUNTA_NOME, tarefas, type Seg } from '../src/games/cena/engine';
 import { LUGARES } from '../src/games/cena/lugares';
 import { falasDaFicha, fichaDe, todosOsAlvos } from '../src/content/aprofundar/fichas';
 
@@ -328,6 +328,8 @@ function cena(): Fala[] {
         const n = t.pecas ? t.pecas.certas.length : 0;
         for (let m = 0; m <= n; m++) {
           if (!falaDaTarefa(t, m)) continue;
+          // "nome": a pergunta (これはなんですか？) antes, e a frase com o nome depois do acerto.
+          if (t.marcada) out.push(falaCena(PERGUNTA_NOME, origem));
           out.push(falaCena(t.pecas ? t.pecas.certas.slice(0, m) : t.segs, origem));
         }
       }

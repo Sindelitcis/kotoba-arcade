@@ -11,7 +11,10 @@ import { levelInfo } from '../../core/progress';
 import { checkAnswer, kanjiMeaningQuestion, kanjiRecallQuestion, wordMeaningQuestion, wordReadingQuestion, type Question } from '../../core/questions';
 import { pick, shuffle, weighted, type Rng } from '../../core/rng';
 import type { Profile } from '../../core/save';
-import { isDue, masteryLevel, retrievability, review, type CardState } from '../../core/srs';
+import { apresentar, avaliar, emPratica, faseDe, foiApresentado, notaDaPratica, novidades } from '../../core/ensino';
+import { apoiar } from '../../core/questions';
+import { isDue, masteryLevel, retrievability, type CardState } from '../../core/srs';
+
 
 export { checkAnswer, kanjiMeaningQuestion, kanjiRecallQuestion, wordMeaningQuestion, wordReadingQuestion };
 export type { Question, QuestionKind } from '../../core/questions';
@@ -83,8 +86,12 @@ export interface Enemy {
 
 export type HuntEvent =
   | { t: 'spawn'; enemy: Enemy }
+  /** Itens novos para apresentar antes de seguir (core/ensino.ts). */
+  | { t: 'apresenta'; chaves: string[] }
   | { t: 'hit'; fast: boolean; close: boolean; combo: number; sealsLeft: number }
   | { t: 'miss'; answer: string; hearts: number }
+  /** Errou na prática: sem perder coração nem combo; o item é apresentado de novo. */
+  | { t: 'de-novo'; answer: string; card: string }
   | { t: 'capture'; enemy: Enemy; newCard: boolean; coins: number; xp: number }
   | { t: 'levelup'; level: number }
   | { t: 'chest'; coins: number; booster: boolean; hearts: number }
@@ -109,22 +116,66 @@ export interface HuntStats {
 }
 
 const FAST_MS = 2500;
+/** Kanji novos apresentados por vez no começo da caçada. */
+export const KANJI_NOVOS = 3;
 
+/**
+ * Uma caçada. Começa apresentando até três kanji novos (o kanji, a leitura, o significado
+ * falado e uma frase). Só kanji apresentado aparece como KanjiMon; palavra nova de um kanji é
+ * apresentada antes do encontro dela. Enquanto o item está em prática, a pergunta tem duas ou
+ * três alternativas e uma dica, e errar não tira coração nem combo.
+ */
 export class Hunt {
   hearts = MAX_HEARTS;
   combo = 0;
   sinceChest = 0;
-  phase: 'question' | 'chest' | 'over' = 'question';
+  phase: 'apresenta' | 'question' | 'chest' | 'over' = 'question';
   enemy!: Enemy;
   question!: Question;
+  /** O que está sendo apresentado agora (fase 'apresenta'). */
+  apresentando: string[] = [];
   readonly stats: HuntStats = { captured: 0, correct: 0, wrong: 0, newKanji: [], coins: 0, xp: 0, bestCombo: 0 };
   private queue: Question[] = [];
   private recent: string[] = [];
+  /** Depois da apresentação: começa o encontro (true) ou só segue o que já estava na tela. */
+  private depois: 'spawn' | 'question' = 'spawn';
 
   constructor(private readonly deps: HuntDeps) {}
 
+  private get pool(): string[] {
+    // Missão da Jornada: só os kanji da etapa.
+    return recortar(KANJI, foco.value?.kanji, (k) => k.id).map((k) => cardKey(k.id, 'meaning'));
+  }
+
   start(): HuntEvent[] {
-    return [this.spawn()];
+    const novos = novidades(this.pool, this.deps.cards, { max: KANJI_NOVOS });
+    if (novos.length > 0) return [this.apresentar(novos, 'spawn')];
+    return this.encontro();
+  }
+
+  /** Começa um encontro. Com palavra nova nele, avisa que ela vai ser apresentada antes da pergunta. */
+  private encontro(): HuntEvent[] {
+    const ev = this.spawn();
+    return this.phase === 'apresenta' && ev.t === 'spawn' ? [ev, { t: 'apresenta', chaves: this.apresentando }] : [ev];
+  }
+
+  private apresentar(chaves: string[], depois: 'spawn' | 'question'): HuntEvent {
+    this.apresentando = chaves;
+    this.depois = depois;
+    this.phase = 'apresenta';
+    return { t: 'apresenta', chaves };
+  }
+
+  /** A apresentação acabou: os itens viram cartas e a caçada segue. */
+  apresentou(): HuntEvent[] {
+    if (this.phase !== 'apresenta') return [];
+    const { cards, now } = this.deps;
+    apresentar(cards, this.apresentando, now());
+    for (const k of this.apresentando) if (k.startsWith('k:')) this.stats.newKanji.push(getKanji(k.slice(0, k.lastIndexOf('#'))).kanji);
+    this.apresentando = [];
+    if (this.depois === 'spawn') return this.encontro();
+    this.phase = 'question';
+    return [];
   }
 
   private rollRarity(): Rarity {
@@ -137,38 +188,54 @@ export class Hunt {
 
   private spawn(): HuntEvent {
     const { cards, rng, now } = this.deps;
-    // Missão da Jornada: só os kanji da etapa.
-    const pool = recortar(KANJI, foco.value?.kanji, (k) => k.id).map((k) => cardKey(k.id, 'meaning'));
+    const pool = this.pool;
     const chosen = pickNext(pool, cards, now(), rng, { recent: this.recent, maxYoung: 6 });
-    const key = chosen?.key ?? (pool[0] as string);
+    if (!chosen) {
+      // Nada apresentado no recorte (missão nova): apresenta antes de caçar.
+      return this.apresentar(novidades(pool, cards, { max: KANJI_NOVOS }), 'spawn');
+    }
+    const key = chosen.key;
     const kanji = getKanji(key.slice(0, key.lastIndexOf('#')));
-    const isNew = !cards[key];
+    const isNew = emPratica(cards, key) && (cards[key]?.reps ?? 0) === 0;
     this.recent = [...this.recent, key].slice(-3);
     const rarity = this.rollRarity();
     const seals = RARITY[rarity].seals;
     this.enemy = { kanji, rarity, seals, maxSeals: seals, isNew };
-    this.queue = this.planQuestions(kanji, seals, isNew);
+    const { perguntas, novaPalavra } = this.planQuestions(kanji, seals);
+    this.queue = perguntas;
     this.question = this.queue.shift() as Question;
     this.phase = 'question';
+    if (novaPalavra) {
+      // A palavra nova do encontro é apresentada antes da pergunta dela.
+      this.apresentando = [cardKey(novaPalavra.id, 'meaning')];
+      this.depois = 'question';
+      this.phase = 'apresenta';
+    }
     return { t: 'spawn', enemy: this.enemy };
   }
 
-  /** Monta as perguntas do encontro: significado primeiro, depois palavras e o caminho inverso. */
-  private planQuestions(k: Kanji, seals: number, isNew: boolean): Question[] {
+  /**
+   * Monta as perguntas do encontro: significado primeiro, depois palavras e o caminho inverso.
+   * Palavra nunca apresentada só entra se o kanji já passou da prática, uma por encontro, e é
+   * apresentada antes. O caminho inverso (do significado para o kanji) só na cobrança.
+   */
+  private planQuestions(k: Kanji, seals: number): { perguntas: Question[]; novaPalavra: Word | null } {
     const { cards, rng, now } = this.deps;
     const t = now();
-    const out: Question[] = [kanjiMeaningQuestion(k, rng, isNew)];
+    const ap = (q: Question) => apoiar(q, cards);
+    const out: Question[] = [ap(kanjiMeaningQuestion(k, rng))];
     const usedWords = new Set<string>();
-    let taught = 0;
+    let novaPalavra: Word | null = null;
+    const kanjiFirme = faseDe(cards, cardKey(k.id, 'meaning')) === 'cobranca';
 
     const nextWordQuestion = (): Question | null => {
-      const options = k.words.filter((w) => !usedWords.has(w.id));
+      const options = k.words.filter((w) => !usedWords.has(w.id) && (foiApresentado(cards, cardKey(w.id, 'meaning')) || (kanjiFirme && !novaPalavra)));
       if (options.length === 0) return null;
       const score = (w: Word) => {
         const m = cards[cardKey(w.id, 'meaning')];
         const r = cards[cardKey(w.id, 'reading')];
         if (!m) return 2; // nova
-        if ((m && isDue(m, t)) || (r && isDue(r, t)) || !r) return 0; // precisa de atenção
+        if (isDue(m, t) || (r && isDue(r, t)) || !r) return 0; // precisa de atenção
         return 1 + Math.min(retrievability(m, t), retrievability(r, t));
       };
       const sorted = options.slice().sort((a, b) => score(a) - score(b));
@@ -177,30 +244,34 @@ export class Hunt {
       const m = cards[cardKey(w.id, 'meaning')];
       const r = cards[cardKey(w.id, 'reading')];
       if (!m) {
-        // No máximo uma palavra nova por encontro, e nenhuma se o kanji também é novo demais.
-        if (taught >= 1) return null;
-        taught++;
-        return wordMeaningQuestion(w, rng, true);
+        if (!foiApresentado(cards, cardKey(w.id, 'meaning'))) novaPalavra = w;
+        return wordMeaningQuestion(w, rng);
       }
+      // A leitura só depois do significado firmar.
+      if (emPratica(cards, cardKey(w.id, 'meaning'))) return wordMeaningQuestion(w, rng);
       if (!r) return wordReadingQuestion(w, rng, false);
       const weakerIsReading = retrievability(r, t) <= retrievability(m, t);
-      if (weakerIsReading) return wordReadingQuestion(w, rng, masteryLevel(r) >= 3);
-      return wordMeaningQuestion(w, rng, false);
+      if (weakerIsReading) return wordReadingQuestion(w, rng, masteryLevel(r) >= 3 && !emPratica(cards, cardKey(w.id, 'reading')));
+      return wordMeaningQuestion(w, rng);
     };
 
-    const recallReady = masteryLevel(cards[cardKey(k.id, 'meaning')]) >= 2;
     while (out.length < seals) {
-      const wantRecall = recallReady && out.length === seals - 1 && !out.some((q) => q.kind === 'kanji-recall');
-      const q = wantRecall ? kanjiRecallQuestion(k, rng) : (nextWordQuestion() ?? kanjiRecallQuestion(k, rng));
+      const wantRecall = kanjiFirme && out.length === seals - 1 && !out.some((q) => q.kind === 'kanji-recall');
+      const q = wantRecall ? kanjiRecallQuestion(k, rng) : nextWordQuestion();
+      if (!q) {
+        // Sem palavra que dê para perguntar ainda: o significado de novo, com as opções embaralhadas.
+        out.push(ap({ ...kanjiMeaningQuestion(k, rng) }));
+        continue;
+      }
       // Evita duas perguntas idênticas no mesmo encontro.
       if (out.some((o) => o.card === q.card)) {
-        const alt = k.words.find((w) => !out.some((o) => o.card === cardKey(w.id, 'reading')));
-        out.push(alt ? wordReadingQuestion(alt, rng, false) : kanjiMeaningQuestion(k, rng, false));
+        const alt = kanjiFirme ? k.words.find((w) => foiApresentado(cards, cardKey(w.id, 'meaning')) && !emPratica(cards, cardKey(w.id, 'meaning')) && !out.some((o) => o.card === cardKey(w.id, 'reading'))) : undefined;
+        out.push(ap(alt ? wordReadingQuestion(alt, rng, false) : kanjiMeaningQuestion(k, rng)));
       } else {
-        out.push(q);
+        out.push(ap(q));
       }
     }
-    return out;
+    return { perguntas: out, novaPalavra };
   }
 
   answer(input: string, ms: number): HuntEvent[] {
@@ -209,32 +280,41 @@ export class Hunt {
     const q = this.question;
     const result = checkAnswer(q, input);
     const correct = result !== 'wrong';
-    cards[q.card] = review(cards[q.card], { correct, ms, hinted: !!q.teach || result === 'close' }, now());
+    avaliar(cards, q.card, q.apoio ? notaDaPratica(correct, ms) : { correct, ms, hinted: result === 'close' }, now());
     const events: HuntEvent[] = [];
 
     if (!correct) {
+      this.stats.wrong++;
+      // A mesma pergunta volta depois da próxima, com as opções embaralhadas de novo.
+      const retry: Question = { ...apoiar(q, cards), choices: shuffle(this.deps.rng, apoiar(q, cards).choices) };
+      if (q.apoio) {
+        // Prática: errar não tira coração nem combo. O item aparece de novo, com calma.
+        events.push({ t: 'de-novo', answer: q.answer, card: q.card });
+        this.queue.splice(Math.min(1, this.queue.length), 0, retry);
+        this.question = this.queue.shift() as Question;
+        return events;
+      }
       this.combo = 0;
       this.hearts--;
-      this.stats.wrong++;
       events.push({ t: 'miss', answer: q.answer, hearts: this.hearts });
       if (this.hearts <= 0) {
         this.phase = 'over';
         events.push({ t: 'over' });
         return events;
       }
-      // A mesma pergunta volta depois da próxima, sem a aula e com as opções embaralhadas de novo.
-      const retry: Question = { ...q, teach: undefined, choices: shuffle(this.deps.rng, q.choices) };
       this.queue.splice(Math.min(1, this.queue.length), 0, retry);
       this.question = this.queue.shift() as Question;
       return events;
     }
 
-    this.combo++;
     this.stats.correct++;
-    this.stats.bestCombo = Math.max(this.stats.bestCombo, this.combo);
-    save.bestCombo = Math.max(save.bestCombo, this.combo);
+    if (!q.apoio) {
+      this.combo++;
+      this.stats.bestCombo = Math.max(this.stats.bestCombo, this.combo);
+      save.bestCombo = Math.max(save.bestCombo, this.combo);
+    }
     this.enemy.seals--;
-    const fast = ms < FAST_MS && !q.teach;
+    const fast = ms < FAST_MS && !q.apoio;
     if (fast) {
       profile.coins += 2;
       this.stats.coins += 2;
@@ -243,7 +323,8 @@ export class Hunt {
 
     const next = this.queue.shift();
     if (this.enemy.seals > 0 && next) {
-      this.question = next;
+      // A pergunta seguinte já sabe se o item continua em prática depois desta resposta.
+      this.question = apoiar(next, cards);
       return events;
     }
 
@@ -262,7 +343,6 @@ export class Hunt {
     this.stats.coins += coins;
     this.stats.xp += xp;
     this.stats.captured++;
-    if (e.isNew) this.stats.newKanji.push(e.kanji.kanji);
     events.push({ t: 'capture', enemy: e, newCard, coins, xp });
     const after = levelInfo(profile.xp).level;
     if (after > before) events.push({ t: 'levelup', level: after });
@@ -280,14 +360,27 @@ export class Hunt {
       events.push({ t: 'chest', coins: chestCoins, booster, hearts: this.hearts });
       return events;
     }
-    events.push(this.spawn());
+    events.push(...this.depoisDaCaptura());
     return events;
+  }
+
+  /** Depois da captura: kanji novo para apresentar (se a prática deixar), ou o próximo encontro. */
+  private depoisDaCaptura(): HuntEvent[] {
+    const pool = this.pool;
+    const { cards } = this.deps;
+    // Novidade só quando o que já foi apresentado saiu da prática.
+    const emTreino = pool.filter((k) => foiApresentado(cards, k) && emPratica(cards, k)).length;
+    if (emTreino === 0) {
+      const novos = novidades(pool, cards, { max: KANJI_NOVOS });
+      if (novos.length > 0) return [this.apresentar(novos, 'spawn')];
+    }
+    return this.encontro();
   }
 
   /** Depois do baú: segue a caçada. */
   continue(): HuntEvent[] {
     if (this.phase !== 'chest') return [];
-    return [this.spawn()];
+    return this.depoisDaCaptura();
   }
 }
 

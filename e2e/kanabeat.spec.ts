@@ -1,10 +1,17 @@
 import { expect, test, type Page } from '@playwright/test';
+import { chavesDosKana, chavesDosKanji, firmarCartas, passarApresentacao } from './apoio';
 
 const SHOTS = process.env.SHOTS_DIR;
 
-async function open(page: Page) {
+/**
+ * Abre o Kana Beat. Por padrão como quem já estudou tudo (as regras do ritmo valem para a cobrança);
+ * `novo`: jogador novo, que passa antes pela apresentação.
+ */
+async function open(page: Page, novo = false) {
   await page.goto('/');
+  if (!novo) await firmarCartas(page, [...chavesDosKanji(), ...chavesDosKana()]);
   await page.getByRole('button', { name: /Kana Beat/ }).click();
+  if (novo) await passarApresentacao(page);
   await expect(page.getByTestId('target-note')).toBeVisible();
 }
 
@@ -24,8 +31,33 @@ test('digitar a leitura na linha pontua e sobe o combo', async ({ page }) => {
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/kanabeat-jogo.png` });
 });
 
+test('jogador novo: as palavras são apresentadas antes da música, e a nota em prática traz o romaji', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: /Kana Beat/ }).click();
+  await expect(page.getByTestId('kb-apresenta')).toBeVisible();
+  // A música espera: nada anda enquanto apresenta.
+  await expect(page.getByTestId('score')).toHaveText('0');
+  const n = await passarApresentacao(page);
+  expect(n).toBeGreaterThanOrEqual(3);
+  expect(n).toBeLessThanOrEqual(5);
+  await expect(page.getByTestId('kb-apresenta')).toHaveCount(0);
+  await expect(page.getByTestId('target-note').locator('.kb-hint')).not.toBeEmpty();
+});
+
+test('na prática, deixar a nota passar não zera o combo', async ({ page }) => {
+  await open(page, true);
+  await hitTarget(page);
+  const combo = await page.locator('.combo').innerText();
+  // Deixa a próxima passar sem digitar nada.
+  const note = page.getByTestId('target-note');
+  const antes = await note.getAttribute('data-romaji');
+  await expect.poll(async () => (await note.getAttribute('data-romaji')) !== antes || !(await note.isVisible()), { timeout: 20_000 }).toBe(true);
+  await expect(page.locator('.kb-judge.miss')).toContainText('prática: o combo fica');
+  await expect(page.locator('.combo')).toHaveText(combo);
+});
+
 test('na nota, a leitura fica em cima da palavra e o significado embaixo', async ({ page }) => {
-  await open(page);
+  await open(page, true);
   const note = page.getByTestId('target-note');
   const furi = await note.locator('.kb-furi').boundingBox();
   const text = await note.locator('.kb-text').boundingBox();
@@ -129,7 +161,9 @@ test('a fase toca uma faixa de verdade e a tela de créditos mostra autor e lice
 
 test('a primeira tecla logo que o Kana Beat abre não se perde', async ({ page }) => {
   // O ouvinte de teclado ligava depois da pintura: um espaço apertado logo ao abrir não pausava.
+  // Quem já estudou tudo: a música começa direto, sem apresentação.
   await page.goto('/');
+  await firmarCartas(page, [...chavesDosKanji(), ...chavesDosKana()]);
   await expect(page.getByRole('heading', { name: 'Kotoba Arcade' })).toBeVisible();
   await page.evaluate(async () => {
     dispatchEvent(new KeyboardEvent('keydown', { key: 'k', code: 'KeyK', bubbles: true }));
@@ -181,4 +215,14 @@ test('letra errada aparece riscada na caixa', async ({ page }) => {
   const errada = romaji.startsWith('q') ? 'x' : 'q';
   await page.keyboard.press(errada);
   await expect(page.locator('.kb-wrong')).toHaveText(errada);
+});
+
+test('jogador novo: no fim, as notas de prática que passaram voltam numa apresentação antes do resultado', async ({ page }) => {
+  await page.clock.install();
+  await open(page, true);
+  await page.clock.runFor(180_000);
+  await expect(page.getByTestId('kb-de-novo')).toBeVisible();
+  await expect(page.getByTestId('grade')).toHaveCount(0);
+  await passarApresentacao(page);
+  await expect(page.getByTestId('grade')).toBeVisible();
 });

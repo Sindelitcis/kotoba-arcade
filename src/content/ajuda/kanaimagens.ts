@@ -1,4 +1,4 @@
-import { MEMORIA_UNICA, PARAR, SAVE, semNovidade, VOLTOU } from './comum';
+import { ANTES_DE_COBRAR, MEMORIA_UNICA, PARAR, SAVE, semNovidade, TECLAS_APRESENTA, VOLTOU } from './comum';
 import type { Ajuda } from './tipos';
 
 export const KANA_IMAGENS: Ajuda = {
@@ -24,6 +24,7 @@ export const KANA_IMAGENS: Ajuda = {
     { teclas: ['T'], faz: 'No menu: teste rápido para quem já lê' },
     { teclas: ['R'], faz: 'Ouvir de novo (no "só pelo som", antes de responder)' },
     { teclas: ['E'], faz: 'Ouvir a palavra de exemplo' },
+    TECLAS_APRESENTA,
     { teclas: ['Esc'], faz: 'Voltar ao menu; no menu, ao fliperama' },
   ],
   elementos: [
@@ -41,6 +42,7 @@ export const KANA_IMAGENS: Ajuda = {
     'Não tem vida nem tempo. Responder rápido só dá um pouco mais de XP.',
   ],
   perguntas: [
+    ANTES_DE_COBRAR,
     { p: 'Por que a imagem tem a letra por cima?', r: 'É o ponto da memória visual: ver o anzol e a letra し no mesmo lugar. Depois de algumas vezes você vê し e lembra do anzol, e daí do som.' },
     { p: 'Eu já leio kana. Preciso passar por tudo?', r: 'Não. Aperte T no menu. O teste mostra quatro letras de cada parte; acertou três, a parte inteira conta como sabida e só volta para revisar.' },
     { p: 'Por que ん aparece como "n, m ou ng"?', r: 'Porque o som muda conforme a letra seguinte: さんぽ soa "sampo", てんき soa "tenki" com um "ng".' },

@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { findWord } from '../src/content/vida';
+import { foiApresentado } from '../src/core/ensino';
 import { seededRng } from '../src/core/rng';
 import { emptySave } from '../src/core/save';
-import { DAY, review, State, type CardState } from '../src/core/srs';
+import { DAY, review, State, type CardState, newCard } from '../src/core/srs';
 import {
   ANSWERS,
   cardOf,
@@ -18,6 +19,7 @@ import {
   parseSentence,
   PARTICLES,
   plainSentence,
+  pointOfRole,
   ROLES,
   ROUND_SIZE,
   SCORE_FAST,
@@ -43,7 +45,7 @@ function setup(seed = 1, course: Course = COURSE) {
 
 /** Carta já firme, vista ontem, que ainda não venceu. */
 function firm(): CardState {
-  let card = review(undefined, { correct: true }, T0 - DAY);
+  let card = review(newCard(0), { correct: true }, T0 - DAY);
   while (card.state !== State.Review) card = review(card, { correct: true }, card.due);
   return card;
 }
@@ -203,13 +205,46 @@ describe('rodada', () => {
     expect(r.puzzle.why).toBeNull();
   });
 
-  it('primeiro contato não leva nota ruim, mesmo errando', () => {
+  it('primeiro contato é prática: errar não zera o combo, não tira pontos nem vira esquecimento', () => {
     const { round, deps } = setup();
-    wrongFirst(round());
+    const r = round();
+    expect(r.puzzle.teach).toBe(true);
+    expect(r.pratica).toBe(true);
+    r.combo = 3;
+    wrongFirst(r);
+    const gaps = r.puzzle.slots.filter((s) => s.open).length;
+    expect(r.combo).toBe(3);
+    expect(r.score).toBe(gaps * SCORE_FIT);
     const card = deps.cards[cardOf('wa')]!;
     expect(card.lapses).toBe(0);
     expect(card.reps).toBe(1);
-    expect(card).toEqual(review(undefined, { correct: true, hinted: true }, T0));
+    expect(card.state).not.toBe(State.Review);
+  });
+
+  it('antes da lição o ponto ainda não foi apresentado; a lição apresenta', () => {
+    const { round, deps } = setup();
+    const r = round();
+    expect(foiApresentado(deps.cards, cardOf('wa'))).toBe(false);
+    r.begin();
+    expect(foiApresentado(deps.cards, cardOf('wa'))).toBe(true);
+    expect(deps.cards[cardOf('wa')]!.reps).toBe(0);
+  });
+
+  it('nenhuma frase cobra ponto que não foi apresentado', () => {
+    for (let seed = 1; seed <= 12; seed++) {
+      const { round, deps, tick } = setup(seed);
+      const r = round();
+      for (let i = 0; i < 25; i++) {
+        r.begin();
+        for (const s of r.puzzle.slots.filter((x) => x.open)) {
+          const p = pointOfRole(COURSE, s.role);
+          expect(foiApresentado(deps.cards, cardOf(p.id)), p.id).toBe(true);
+        }
+        solve(r);
+        tick(10 * 60_000);
+        r.next();
+      }
+    }
   });
 
   it('depois do primeiro contato, errar conta na memória', () => {
@@ -225,16 +260,18 @@ describe('rodada', () => {
     expect(deps.cards[cardOf('wa')]).toEqual(review(before, { correct: false }, T0 + 60_000));
   });
 
-  it('resposta rápida ganha bônus e a lenta não perde nada', () => {
-    const fast = setup();
+  it('na cobrança, resposta rápida ganha bônus e a lenta não perde nada', () => {
+    const firmes = () => {
+      const s = setup();
+      for (const p of POINTS.slice(0, s.save.unlocked)) s.deps.cards[cardOf(p.id)] = firm();
+      return s;
+    };
+    const fast = firmes();
     const r1 = fast.round();
-    solve(r1);
-    r1.next();
+    expect(r1.pratica).toBe(false);
     solve(r1, () => fast.tick(1000));
-    const slow = setup();
+    const slow = firmes();
     const r2 = slow.round();
-    solve(r2);
-    r2.next();
     solve(r2, () => slow.tick(20_000));
     const gaps = r2.puzzle.slots.filter((s) => s.open).length;
     expect(r1.score - r2.score).toBe(gaps * SCORE_FAST);

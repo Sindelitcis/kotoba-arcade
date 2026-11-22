@@ -8,8 +8,11 @@ import { acertou, cor, corStyle, errou, zerar } from '../../core/cor';
 import { onomato } from '../../core/fx';
 import { masteryLevel } from '../../core/srs';
 import { teclaDe } from '../../core/teclas';
+import { foco } from '../../core/foco';
 import { BLOCOS, MODOS, RODADA, Rodada, somEhPista, TesteEntrada, type Evento, type Modo, type Pergunta, type Resumo, type ResultadoTeste } from './engine';
 import { Imagem } from './Imagem';
+import { Apresentacao } from '../../core/Apresentacao';
+import { itemNovoDe, type ItemNovo } from '../../content/ensino';
 import './kanaimagens.css';
 
 type Fase = 'menu' | 'rodada' | 'resumo' | 'teste' | 'teste-fim';
@@ -136,6 +139,17 @@ function Enunciado({ p }: { p: Pergunta }) {
   }
 }
 
+/** O kana como apresentação: a ficha dele, com o desenho do Kana em imagens. */
+export function itemDoKana(k: KanaItem): ItemNovo {
+  const item = itemNovoDe(k.carta);
+  if (!item) throw new Error(`kana sem ficha: ${k.id}`);
+  return item;
+}
+
+function desenhoDoKana(item: ItemNovo) {
+  return item.alvo.t === 'kana' ? <Imagem item={kanaItem(item.alvo.id)} letra={false} class="ki-grande" /> : null;
+}
+
 export function KanaImagensGame() {
   const save = kanaImagensSave();
   const [fase, setFaseState] = useState<Fase>('menu');
@@ -160,7 +174,7 @@ export function KanaImagensGame() {
   const rodada = fase === 'rodada' ? rodadaRef.current : null;
   const pergunta = rodada && !rodada.fim ? rodada.atual : null;
   useAprofundar(
-    pergunta?.alvo && (pergunta.modo === 'apresenta' || rodada?.respondida !== null)
+    pergunta?.alvo && rodada?.respondida !== null
       ? { t: 'kana', id: pergunta.alvo.id }
       : fase === 'resumo' && resumo
         ? [...resumo.errados, ...resumo.novos].map((k) => ({ t: 'kana', id: k.id }) as const)
@@ -173,7 +187,7 @@ export function KanaImagensGame() {
   };
   useEffect(() => limparTimer, []);
 
-  const deps = () => ({ cards: app.data.cards, profile: app.data.profile, save, rng: Math.random, now: () => Date.now() });
+  const deps = () => ({ cards: app.data.cards, profile: app.data.profile, save, rng: Math.random, now: () => Date.now(), escrita: foco.value?.kana });
 
   const comecar = (modo?: ModoTreino) => {
     limparTimer();
@@ -184,7 +198,17 @@ export function KanaImagensGame() {
     setAviso('');
     setFase('rodada');
     sfx.click();
-    falarAoMostrar(rodadaRef.current.atual);
+    if (!rodadaRef.current.apresentando) falarAoMostrar(rodadaRef.current.atual);
+  };
+
+  /** A apresentação dos kana novos acabou: começa a primeira pergunta. */
+  const apresentou = () => {
+    const r = rodadaRef.current;
+    if (!r) return;
+    r.apresentou();
+    commit();
+    redraw();
+    falarAoMostrar(r.atual);
   };
 
   const comecarTeste = () => {
@@ -310,13 +334,15 @@ export function KanaImagensGame() {
           setFase('menu');
           return;
         }
+        // Apresentação na tela: as teclas são dela (core/Apresentacao.tsx).
+        if (r.apresentando) return;
         const p = r.atual;
         // Antes de responder, R só repete o som onde o som é a pista; nos outros ele entregaria a resposta.
         if (tecla.toLowerCase() === 'r') {
           if (r.respondida !== null || somEhPista(p.modo)) ouvir(p.fala);
         }
-        else if (tecla.toLowerCase() === 'e' && p.alvo && (p.modo === 'apresenta' || r.respondida !== null)) ouvir(p.alvo.exemplo.kana);
-        else if (p.modo === 'apresenta' || r.respondida !== null) {
+        else if (tecla.toLowerCase() === 'e' && p.alvo && r.respondida !== null) ouvir(p.alvo.exemplo.kana);
+        else if (r.respondida !== null) {
           if (confirma) seguir();
         } else if (num) escolher(num - 1);
       } else if (f === 'resumo') {
@@ -337,6 +363,24 @@ export function KanaImagensGame() {
   });
 
   const r = rodadaRef.current;
+  if (fase === 'rodada' && r && !r.fim && r.apresentando) {
+    return (
+      <main class="ki">
+        <header class="km-top">
+          <button class="ghost" onClick={() => setFase('menu')}>
+            Sair <kbd>Esc</kbd>
+          </button>
+          <div class="gr-progress" data-testid="ki-progresso">
+            {r.novos.length === 1 ? 'Kana novo' : `${r.novos.length} kana novos`}
+          </div>
+          <span />
+        </header>
+        <div data-testid="ki-apresenta">
+          <Apresentacao itens={r.novos.map(itemDoKana)} onFim={apresentou} visual={desenhoDoKana} />
+        </div>
+      </main>
+    );
+  }
   if (fase === 'rodada' && r && !r.fim) {
     const p = r.atual;
     const respondeu = r.respondida !== null;
@@ -348,7 +392,7 @@ export function KanaImagensGame() {
             Sair <kbd>Esc</kbd>
           </button>
           <div class="gr-progress" data-testid="ki-progresso">
-            {p.modo === 'apresenta' ? 'Kana novo' : `Pergunta ${Math.min(RODADA, r.feitas + (respondeu ? 0 : 1))} de ${RODADA}`}
+            {`Pergunta ${Math.min(RODADA, r.feitas + (respondeu ? 0 : 1))} de ${RODADA}`}
             {r.combo > 1 && (
               <>
                 {' '}· combo <b>{r.combo}</b>
@@ -359,40 +403,34 @@ export function KanaImagensGame() {
         </header>
 
         <section class={`ki-quadro modo-${p.modo}`} data-testid="ki-quadro" data-modo={p.modo} style={corStyle(cor.value)}>
-          {p.modo === 'apresenta' && p.alvo ? (
-            <>
-              <span class="gr-tag">Kana novo</span>
-              <Licao k={p.alvo} />
-              <button class="primary" onClick={seguir} data-testid="ki-entendi">
-                Entendi <kbd>Enter</kbd>
+            {p.novo && !respondeu && (
+              <span class="ap-pratica" data-testid="ki-pratica">
+                Prática: errar aqui não zera o combo
+              </span>
+            )}
+            <Enunciado p={p} />
+
+            <Opcoes p={p} respondida={r.respondida} onEscolha={escolher} />
+            {errou && p.alvo && (
+              <div class="ki-volta" data-testid="ki-volta">
+                <p class="muted">Esta era a certa. Ela volta daqui a pouco.</p>
+                <Licao k={p.alvo} compacta />
+              </div>
+            )}
+            {errou && p.palavra && (
+              <p class="ki-volta" data-testid="ki-volta" lang="ja">
+                {p.palavra.kana} · {p.palavra.pt}
+              </p>
+            )}
+            {respondeu && (
+              <button class={errou ? 'primary' : 'ghost'} onClick={seguir} data-testid="ki-seguir">
+                Seguir <kbd>Enter</kbd>
               </button>
-            </>
-          ) : (
-            <>
-              <Enunciado p={p} />
-              <Opcoes p={p} respondida={r.respondida} onEscolha={escolher} />
-              {errou && p.alvo && (
-                <div class="ki-volta" data-testid="ki-volta">
-                  <p class="muted">Esta era a certa. Ela volta daqui a pouco.</p>
-                  <Licao k={p.alvo} compacta />
-                </div>
-              )}
-              {errou && p.palavra && (
-                <p class="ki-volta" data-testid="ki-volta" lang="ja">
-                  {p.palavra.kana} · {p.palavra.pt}
-                </p>
-              )}
-              {respondeu && (
-                <button class={errou ? 'primary' : 'ghost'} onClick={seguir} data-testid="ki-seguir">
-                  Seguir <kbd>Enter</kbd>
-                </button>
-              )}
-            </>
-          )}
+            )}
         </section>
 
         <footer class="av-keys">
-          {p.modo === 'apresenta' || respondeu ? (
+          {respondeu ? (
             <span>
               <kbd>Enter</kbd> seguir
             </span>
@@ -404,7 +442,7 @@ export function KanaImagensGame() {
           <span>
             <kbd>R</kbd> ouvir
           </span>
-          {p.alvo && (p.modo === 'apresenta' || respondeu) && (
+          {p.alvo && respondeu && (
             <span>
               <kbd>E</kbd> ouvir o exemplo
             </span>

@@ -52,6 +52,8 @@ export interface Quadro {
   fala?: FalaQuadro;
   /** Os exemplos falados, depois da `fala` (palavras com o kanji do quadro). */
   falasExemplos?: readonly FalaQuadro[];
+  /** Carta da memória que o quadro apresenta (core/ensino.ts): a pergunta dela vem depois. */
+  carta?: string;
 }
 
 export interface Pergunta {
@@ -383,7 +385,7 @@ function quadroPalavra(p: PalavraTema): Quadro {
     const par = porOrigem.get(id);
     if (par) linhas.push(`Não confunda com ${leituraContinua(par.palavra.jp)}: ${par.palavra.pt}.`);
   }
-  return { tipo: 'quadro', jp: palavra.jp, pt: palavra.pt, linhas, fala: falaDaPalavra(p) };
+  return { tipo: 'quadro', jp: palavra.jp, pt: palavra.pt, linhas, fala: falaDaPalavra(p), carta: p.word ? cardKey(p.word.id, 'meaning') : undefined };
 }
 
 function perguntaPalavra(p: PalavraTema, vizinhas: readonly PalavraTema[]): Pergunta {
@@ -470,6 +472,7 @@ function quadroKanji(k: KanjiEscola): Quadro {
     exemplos: k.exemplos,
     fala: falaDoKanji(k),
     falasExemplos: k.exemplos.map((ex) => falaComKanji(ex.jp)),
+    carta: doKanjiMon.has(k.char) ? cardKey(`k:${k.char}`, 'meaning') : undefined,
   };
 }
 

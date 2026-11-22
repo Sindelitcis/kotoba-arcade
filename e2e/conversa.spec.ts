@@ -1,4 +1,5 @@
 import { expect, test, type Page, type Route } from '@playwright/test';
+import { passarApresentacao } from './apoio';
 
 const SERVIDOR = 'http://127.0.0.1:8791';
 const SHOTS = process.env.SHOTS_DIR;
@@ -119,6 +120,13 @@ test('uma conversa digitada completa, do pedido ao resumo', async ({ page }) => 
   await abrir(page);
   await expect(page.getByTestId('cv')).toHaveAttribute('data-phase', 'menu');
   await page.keyboard.press('Enter');
+  // Antes de conversar, as palavras novas da situação, e ninguém fala ainda.
+  await expect(page.getByTestId('cv')).toHaveAttribute('data-phase', 'apresenta');
+  await expect(page.getByTestId('cv-apresenta')).toBeVisible();
+  await expect(page.getByTestId('cv-npc')).toHaveCount(0);
+  const n = await passarApresentacao(page);
+  expect(n).toBeGreaterThanOrEqual(3);
+  expect(n).toBeLessThanOrEqual(5);
   await expect(page.getByTestId('cv')).toHaveAttribute('data-phase', 'conversa');
   await expect(page.getByTestId('cv-npc').first()).toContainText('いらっしゃいませ');
   // Conversar é viver a cena: o café e a atendente, em cor de anime.
@@ -169,6 +177,8 @@ test('a dica vem em dois degraus: primeiro a ideia, depois respostas prontas', a
   await servidorFalso(page, []);
   await abrirMenu(page);
   await page.keyboard.press('Enter');
+  // Antes de conversar, as palavras novas da situação.
+  await passarApresentacao(page);
   await expect(page.getByTestId('cv')).toHaveAttribute('data-phase', 'conversa');
   await page.getByTestId('cv-text').focus();
   await page.keyboard.press('Tab');
@@ -186,6 +196,8 @@ test('o servidor cai no meio: a fala não se perde e dá para mandar de novo', a
   await servidorFalso(page, [503, resposta({ passos: ['pedir'], fala: 'はい、どうぞ。' })]);
   await abrirMenu(page);
   await page.keyboard.press('Enter');
+  // Antes de conversar, as palavras novas da situação.
+  await passarApresentacao(page);
   await page.getByTestId('cv-text').fill('koohii o kudasai');
   await page.keyboard.press('Enter');
   await expect(page.getByTestId('cv-note')).toContainText('não respondeu');
@@ -198,6 +210,8 @@ test('Esc no meio da conversa encerra com o resumo do que houve', async ({ page 
   await servidorFalso(page, [resposta({ passos: ['pedir'] })]);
   await abrirMenu(page);
   await page.keyboard.press('Enter');
+  // Antes de conversar, as palavras novas da situação.
+  await passarApresentacao(page);
   await dizer(page, 'koohii o kudasai');
   await page.keyboard.press('Escape');
   await expect(page.getByTestId('cv-summary')).toContainText('Conversa encerrada');

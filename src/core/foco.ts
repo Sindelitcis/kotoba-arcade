@@ -21,6 +21,8 @@ export interface FocoJogo {
   cena?: string;
   /** Situação da Conversa. */
   conversa?: string;
+  /** Lugar da Cena Viva. */
+  lugar?: string;
 }
 
 export interface Foco extends FocoJogo {

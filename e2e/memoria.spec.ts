@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
+import { passarApresentacao, seApresentar } from './apoio';
 
 const SHOTS = process.env.SHOTS_DIR;
 
@@ -32,27 +33,33 @@ test('do fliperama ao primeiro par só no teclado: lição primeiro, depois o pa
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/memoria-menu.png` });
   await page.keyboard.press('Enter');
   await expect(page.getByTestId('me-licao')).toBeVisible();
-  // Jogador novo: todas as palavras do primeiro quadro são apresentadas antes.
-  await expect(page.locator('.me-nova')).toHaveCount(4);
+  // Jogador novo: as palavras do primeiro quadro são apresentadas antes, de 3 a 5, e nada é cobrado.
+  await expect(page.getByTestId('me-quadro')).toHaveCount(0);
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/memoria-licao.png` });
-  await page.keyboard.press('Enter');
+  const n = await passarApresentacao(page);
+  expect(n).toBeGreaterThanOrEqual(3);
+  expect(n).toBeLessThanOrEqual(5);
   await expect(page.getByTestId('me-quadro')).toBeVisible();
+  await expect(page.getByTestId('me-pratica')).toBeVisible();
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/memoria-quadro.png` });
   const par = (await page.locator('.me-carta').first().getAttribute('data-par'))!;
   await fecharPar(page, par);
   await expect(page.locator(`.me-carta[data-par="${par}"].feita`)).toHaveCount(2);
 });
 
-test('carta errada não abre tela de erro: o quadro continua e o par certo ainda fecha', async ({ page }) => {
+test('na prática, carta errada não abre tela de erro nem tira nada: mostra a palavra de novo e o par certo ainda fecha', async ({ page }) => {
   await abrir(page);
   await page.keyboard.press('Enter');
-  await page.keyboard.press('Enter');
+  await passarApresentacao(page);
   const cartas = page.locator('.me-carta');
   const pares = await cartas.evaluateAll((els) => els.map((e) => [e.getAttribute('data-par'), e.getAttribute('data-lado')]));
   const img = pares.findIndex(([, l]) => l === 'img');
   const outra = pares.findIndex(([p, l]) => l === 'palavra' && p !== pares[img]![0]);
   await cartas.nth(img).click();
   await cartas.nth(outra).click();
+  // A palavra aparece de novo, por cima do quadro, e Enter volta para ele.
+  await expect(page.getByTestId('apresentacao')).toHaveAttribute('data-modo', 'de-novo');
+  await passarApresentacao(page);
   await expect(page.getByTestId('me-quadro')).toBeVisible();
   await expect(page.locator('.me-carta.feita')).toHaveCount(0);
   await fecharPar(page, pares[img]![0]!);
@@ -63,7 +70,7 @@ test('rodada inteira: três quadros com pausa entre eles, resumo e progresso sal
   await abrir(page);
   await page.keyboard.press('Enter');
   for (let q = 0; q < 3; q++) {
-    if (await page.getByTestId('me-licao').isVisible()) await page.keyboard.press('Enter');
+    await seApresentar(page);
     await expect(page.getByTestId('me-quadro')).toBeVisible();
     // Quadro de memória: as cartas começam viradas e a tecla abre.
     await resolverQuadro(page);
@@ -83,7 +90,7 @@ test('rodada inteira: três quadros com pausa entre eles, resumo e progresso sal
 test('Esc no meio para a rodada e mostra o que foi feito', async ({ page }) => {
   await abrir(page);
   await page.keyboard.press('Enter');
-  await page.keyboard.press('Enter');
+  await passarApresentacao(page);
   await fecharPar(page, (await page.locator('.me-carta').first().getAttribute('data-par'))!);
   await page.keyboard.press('Escape');
   await expect(page.getByTestId('me-resumo')).toBeVisible();
@@ -93,7 +100,11 @@ test('no celular, o quadro cabe na tela sem rolar para o lado', async ({ page })
   await page.setViewportSize({ width: 375, height: 812 });
   await abrir(page);
   await page.keyboard.press('Enter');
-  await page.keyboard.press('Enter');
+  // A apresentação também cabe na tela do celular.
+  await expect(page.getByTestId('apresentacao')).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
+  if (SHOTS) await page.screenshot({ path: `${SHOTS}/memoria-apresentacao-celular.png`, fullPage: true });
+  await passarApresentacao(page);
   await expect(page.getByTestId('me-quadro')).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/memoria-celular.png`, fullPage: true });

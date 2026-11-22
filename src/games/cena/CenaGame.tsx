@@ -7,10 +7,19 @@ import { acertou, cor, corStyle, errou, zerar } from '../../core/cor';
 import { figuraUrl, medida } from '../../core/figuras';
 import { onomato } from '../../core/fx';
 import { teclaDe } from '../../core/teclas';
+import { foco } from '../../core/foco';
+import { Apresentacao } from '../../core/Apresentacao';
+import { itemDaPalavra, type ItemNovo } from '../../content/ensino';
+import { figuraDaPalavra } from '../../content/imagens';
+import type { Word } from '../../content';
+import { itemDaEtapa } from './aulas';
 import {
   ACERTOS_PARA_ABRIR,
   CenaRound,
+  chave,
+  PERGUNTA_NOME,
   daCoisa,
+  palavraDe,
   ETAPA_INFO,
   ETAPAS,
   falaDaTarefa,
@@ -23,6 +32,7 @@ import {
   type Coisa,
   type Direcao,
   type Evento,
+  type CenaSave,
   type Lugar,
   type Resumo,
   type Seg,
@@ -72,10 +82,51 @@ function falarNome(nome: Seg[]): void {
   else void speak(f.texto);
 }
 
-function Cena({ r, cursor, onClick, mostrados }: { r: CenaRound; cursor: string | null; onClick: (id: string) => void; mostrados: Record<string, Seg[]> }) {
+/** A palavra como apresentação, com a figura dela. */
+export function itemDaCena(w: Word): ItemNovo {
+  const f = figuraDaPalavra(w.id);
+  return itemDaPalavra(w, chave(w), { img: f ? figuraUrl(f.img) : undefined });
+}
+
+/** A dica da prática: a imagem e o significado das palavras do pedido. */
+function Dica({ r }: { r: CenaRound }) {
+  return (
+    <p class="ap-dica cn-dica" data-testid="cn-dica">
+      {r.tarefa.palavras.map((w) => {
+        const f = figuraDaPalavra(w.id);
+        return (
+          <span key={w.id} class="cn-dica-item">
+            {f && <img src={figuraUrl(f.img)} alt="" draggable={false} />}
+            <span lang="ja">{w.jp}</span> = {w.pt}
+          </span>
+        );
+      })}
+    </p>
+  );
+}
+
+/**
+ * A cena com as coisas. `destaque`: na apresentação, a carta da palavra na tela; as coisas dela brilham.
+ * Antes de a apresentação acabar não há tarefa, então nada de alvo nem de marcada.
+ */
+function Cena({
+  r,
+  cursor,
+  onClick,
+  mostrados,
+  destaque = null,
+}: {
+  r: CenaRound;
+  cursor: string | null;
+  onClick: (id: string) => void;
+  mostrados: Record<string, Seg[]>;
+  destaque?: string | null;
+}) {
   const l = r.lugar;
   const prop = proporcao(l);
-  const alvoDescrever = r.tarefa.pecas ? r.tarefa.alvo[0] : null;
+  const t = r.temTarefa ? r.tarefa : null;
+  const alvoDescrever = t?.pecas ? t.alvo[0] : null;
+  const mostraTudo = r.fase === 'apresenta';
   return (
     <div class="cn-cena" data-testid="cn-cena" style={{ aspectRatio: String(prop), '--cena': `url("${figuraUrl(l.fundo)}")`, ...corStyle(cor.value) }}>
       {l.coisas.map((c) => {
@@ -84,10 +135,11 @@ function Cena({ r, cursor, onClick, mostrados }: { r: CenaRound; cursor: string 
           'cn-coisa',
           daCoisa(c).figura.tipo,
           cursor === c.id ? 'cursor' : '',
-          r.brilha(c.id) ? 'brilha' : '',
+          r.brilha(c.id) || (destaque !== null && chave(palavraDe(c)) === destaque) ? 'brilha' : '',
           alvoDescrever === c.id ? 'marcada' : '',
-          r.fase === 'feita' && r.tarefa.alvo.includes(c.id) ? 'certa' : '',
+          r.fase === 'feita' && t?.alvo.includes(c.id) ? 'certa' : '',
           r.tentadas.includes(c.id) ? 'tentada' : '',
+          !mostraTudo && !r.clicavel(c.id) ? 'apagada' : '',
         ]
           .filter(Boolean)
           .join(' ');
@@ -96,6 +148,7 @@ function Cena({ r, cursor, onClick, mostrados }: { r: CenaRound; cursor: string 
             key={c.id}
             class={cls}
             data-coisa={c.id}
+            data-alvo={t?.alvo.includes(c.id) ? 'sim' : undefined}
             aria-label={daCoisa(c).figura.word.pt}
             style={{ left: `${c.x - c.w / 2}%`, top: `${c.y - h}%`, width: `${c.w}%`, height: `${h}%`, zIndex: c.z ?? Math.round(c.y * 10) }}
             onClick={() => onClick(c.id)}
@@ -114,6 +167,11 @@ function Cena({ r, cursor, onClick, mostrados }: { r: CenaRound; cursor: string 
   );
 }
 
+/** O lugar da vez: o da missão da Jornada, se houver; senão o menos jogado. */
+function lugarDaVez(save: CenaSave): Lugar {
+  return LUGARES.find((l) => l.id === foco.value?.lugar) ?? lugarSugerido(LUGARES, save);
+}
+
 export function CenaGame() {
   const save = cenaSave();
   const [modo, setModoState] = useState<Modo>('menu');
@@ -126,11 +184,17 @@ export function CenaGame() {
   const [, setFrame] = useState(0);
   const redesenhar = () => setFrame((n) => n + 1);
   const rodadaRef = useRef<CenaRound | null>(null);
-  const lugarRef = useRef<Lugar>(lugarSugerido(LUGARES, save));
+  const lugarRef = useRef<Lugar>(lugarDaVez(save));
   const [resumo, setResumo] = useState<Resumo | null>(null);
   const [nota, setNota] = useState('');
   const cursorRef = useRef<string | null>(null);
   const [mostrados, setMostrados] = useState<Record<string, Seg[]>>({});
+  /** Errou na prática: a palavra certa aparece de novo, com a voz. */
+  const [deNovo, setDeNovo] = useState<ItemNovo | null>(null);
+  /** Na apresentação: a carta da palavra na tela, para a coisa brilhar na cena. */
+  const [destaque, setDestaque] = useState<string | null>(null);
+  const deNovoRef = useRef<ItemNovo | null>(null);
+  deNovoRef.current = deNovo;
   // Aprofundar: o lugar inteiro (vocabulário da cena e uma frase para montar).
   useAprofundar(modo === 'menu' ? null : { t: 'cena', id: `lugar:${lugarRef.current.id}` });
   const r = rodadaRef.current;
@@ -141,6 +205,7 @@ export function CenaGame() {
     rodadaRef.current = new CenaRound({ lugar: l, cards: app.data.cards, profile: app.data.profile, save, now: () => Date.now(), rng: Math.random });
     cursorRef.current = null;
     setMostrados({});
+    setDeNovo(null);
     setResumo(null);
     setNota('');
     setModo('rodada');
@@ -156,6 +221,9 @@ export function CenaGame() {
         onomato(e.rapido ? 'rapido' : 'acerto', document.querySelector(`[data-coisa="${e.coisa}"]`), 'bom', 0.9);
         const t = rodadaRef.current?.tarefa;
         if (t?.pecas) void speak(textoDe(t.pecas.certas));
+        else if (t?.marcada) void speak(textoDe(t.segs));
+      } else if (e.t === 'de-novo') {
+        setDeNovo(itemDaCena(e.palavra));
       } else if (e.t === 'outra') {
         errou();
         sfx.miss();
@@ -194,7 +262,11 @@ export function CenaGame() {
   const seguir = () => {
     const rr = rodadaRef.current;
     if (!rr) return;
-    if (rr.fase === 'licao') {
+    if (rr.fase === 'apresenta') {
+      rr.apresentou();
+      commit();
+      redesenhar();
+    } else if (rr.fase === 'licao') {
       rr.comecar();
       commit();
       redesenhar();
@@ -224,6 +296,13 @@ export function CenaGame() {
     const fala = fase === 'pergunta' && r ? falaDaTarefa(r.tarefa, 0) : null;
     if (fala) void speak(fala);
   }, [indice, fase === 'pergunta']);
+  /** A apresentação "de novo" fechou: repete a pergunta. */
+  const fecharDeNovo = () => {
+    setDeNovo(null);
+    const rr = rodadaRef.current;
+    const fala = rr && rr.fase === 'pergunta' ? falaDaTarefa(rr.tarefa, rr.montadas.length) : null;
+    if (fala) void speak(fala);
+  };
 
   useLayoutEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -251,6 +330,8 @@ export function CenaGame() {
       const rr = rodadaRef.current;
       if (!rr) return;
       if (tecla === 'Escape') return parar();
+      // Apresentação e lição na tela: as teclas são dela (core/Apresentacao.tsx).
+      if (rr.fase === 'apresenta' || rr.fase === 'licao' || deNovoRef.current) return;
       if (tecla.toLowerCase() === 'r') {
         const fala = falaDaTarefa(rr.tarefa, rr.montadas.length);
         if (fala) void speak(fala);
@@ -268,9 +349,15 @@ export function CenaGame() {
         reagir(rr.peca(digito - 1));
         return;
       }
+      if (rr.fase === 'pergunta' && rr.tarefa.marcada && digito) {
+        reagir(rr.escolher(digito - 1));
+        return;
+      }
       if (confirma) {
         e.preventDefault();
+        if (rr.fase === 'pergunta' && rr.tarefa.marcada) return;
         if (rr.fase === 'pergunta' && !rr.tarefa.pecas) {
+
           if (cursorRef.current) reagir(rr.clicar(cursorRef.current));
         } else seguir();
       }
@@ -280,35 +367,42 @@ export function CenaGame() {
   });
 
   if (modo === 'rodada' && r) {
+    const cabeca = (
+      <header class="km-top">
+        <button class="ghost" onClick={parar}>
+          Parar <kbd>Esc</kbd>
+        </button>
+        <div class="gr-progress" data-testid="cn-progresso">
+          <span lang="ja">{lugarRef.current.jp}</span> · {r.indice + 1} de {TAREFAS_POR_RODADA} · <b>{r.pontos}</b> pontos
+          {r.combo > 1 && <span class="combo on"> · combo {r.combo}</span>}
+        </div>
+        <span class="gr-note" data-testid="cn-nota">{nota}</span>
+      </header>
+    );
+    // Na apresentação ainda não há tarefa: só as coisas da cena, uma a uma, brilhando.
+    if (r.fase === 'apresenta') {
+      return (
+        <main class="cn">
+          {cabeca}
+          <Apresentacao itens={r.apresentadas.map(itemDaCena)} onFim={seguir} fim="Começar" onItem={(item) => setDestaque(item.chaves[0] ?? null)} />
+          <Cena r={r} cursor={null} onClick={() => undefined} mostrados={{}} destaque={destaque} />
+        </main>
+      );
+    }
     const t = r.tarefa;
-    const info = ETAPA_INFO[t.etapa];
     return (
       <main class="cn">
-        <header class="km-top">
-          <button class="ghost" onClick={parar}>
-            Parar <kbd>Esc</kbd>
-          </button>
-          <div class="gr-progress" data-testid="cn-progresso">
-            <span lang="ja">{lugarRef.current.jp}</span> · {r.indice + 1} de {TAREFAS_POR_RODADA} · <b>{r.pontos}</b> pontos
-            {r.combo > 1 && <span class="combo on"> · combo {r.combo}</span>}
-          </div>
-          <span class="gr-note" data-testid="cn-nota">{nota}</span>
-        </header>
+        {cabeca}
 
         {r.fase === 'licao' ? (
-          <section class="gr-lesson cn-licao" data-testid="cn-licao">
-            <span class="gr-tag">
-              {info.titulo} · {info.nivel}
-            </span>
-            <p>{info.licao}</p>
-            <p class="gr-example" lang="ja">
-              <Frase segs={info.exemplo} />
-            </p>
-            <p class="gr-goal">{info.exemploPt}</p>
-            <button class="primary" onClick={seguir} data-testid="cn-licao-ok">
-              Entendi <kbd>Enter</kbd>
-            </button>
-          </section>
+          <div data-testid="cn-licao">
+            <Apresentacao key={t.etapa} itens={[itemDaEtapa(t.etapa)]} onFim={seguir} fim="Entendi" />
+          </div>
+        ) : deNovo ? (
+          <>
+            <Apresentacao key={deNovo.chaves[0]} itens={[deNovo]} modo="de-novo" onFim={fecharDeNovo} fim="Tentar de novo" />
+            <Cena r={r} cursor={cursorRef.current} onClick={() => undefined} mostrados={mostrados} />
+          </>
         ) : (
           <>
             <section class="cn-pedido" data-testid="cn-pedido">
@@ -318,7 +412,31 @@ export function CenaGame() {
                 }} title="Ouvir de novo">
                 <kbd>R</kbd>
               </button>
-              {t.pecas ? (
+              {r.apoio && r.fase === 'pergunta' && (
+                <span class="ap-pratica" data-testid="cn-pratica">
+                  Prática: errar aqui não tira nada
+                </span>
+              )}
+              {t.marcada ? (
+                <div class="cn-nome-pergunta">
+                  <p class="cn-frase" lang="ja" data-testid="cn-frase">
+                    {r.fase === 'feita' ? <Frase segs={t.segs} /> : <Frase segs={PERGUNTA_NOME} />}
+                  </p>
+                  {r.fase === 'pergunta' && (
+                    <div class="cn-opcoes" data-testid="cn-opcoes">
+                      {r.opcoes.map((w, i) => (
+                        <button key={w.id} class="gr-block" onClick={() => reagir(r.escolher(i))} data-palavra={w.id} data-certa={w === t.palavras[0] ? 'sim' : undefined}>
+                          <kbd>{i + 1}</kbd>
+                          <span lang="ja">
+                            <Frase segs={[w.jp !== w.kana ? { t: w.jp, r: w.kana } : { t: w.jp }]} />
+                          </span>
+                          {r.apoio && <small>{w.pt}</small>}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ) : t.pecas ? (
                 <div class="cn-montar">
                   <p class="muted">Monte a frase sobre o que está marcado:</p>
                   <p class="cn-montada" lang="ja" data-testid="cn-montada">
@@ -343,7 +461,8 @@ export function CenaGame() {
                   <Frase segs={t.segs} />
                 </p>
               )}
-              {r.ensina && r.fase === 'pergunta' && !t.pecas && <p class="cn-ensina">Palavra nova: ela está brilhando na cena. Clique nela.</p>}
+              {r.apoio && r.fase === 'pergunta' && !t.marcada && <Dica r={r} />}
+
               {r.fase === 'feita' && (
                 <button class="primary" onClick={seguir} data-testid="cn-seguir">
                   {r.indice + 1 < TAREFAS_POR_RODADA ? 'Próxima' : 'Ver o resumo'} <kbd>Enter</kbd>
@@ -417,7 +536,7 @@ export function CenaGame() {
     );
   }
 
-  const sugerido = lugarSugerido(LUGARES, save);
+  const sugerido = lugarDaVez(save);
   lugarRef.current = sugerido;
   return (
     <main class="cn">

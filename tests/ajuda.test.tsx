@@ -4,10 +4,18 @@ import { render } from 'preact';
 import { act } from 'preact/test-utils';
 import { afterEach, describe, expect, it } from 'vitest';
 import { AJUDA, rotuloTeclas, SECOES, telaUsaF1 } from '../src/content/ajuda';
+import { ANTES_DE_COBRAR, TECLAS_APRESENTA } from '../src/content/ajuda/comum';
 import { abrirAjuda, ajudaAberta, fecharAjuda, secaoAjuda, teclaDeAjuda, useAoAbrirAjuda, type TelaAjuda } from '../src/core/help/ajuda';
 import { HelpButton } from '../src/core/help/HelpButton';
 
 const ler = (arquivo: string) => readFileSync(resolve('src', arquivo), 'utf8');
+
+/** O código da tela e, se ela usa a apresentação de coisa nova, o teclado dela também. */
+function teclado(arquivo: string): string {
+  const fonte = ler(arquivo);
+  return /from '(?:\.\.\/)+core\/Apresentacao'/.test(fonte) ? `${fonte}
+${ler('core/Apresentacao.tsx')}` : fonte;
+}
 
 /** Arquivo onde mora o teclado de cada tela. */
 const FONTE: Record<TelaAjuda, string> = {
@@ -85,7 +93,7 @@ describe('conteúdo da ajuda', () => {
 
   it('toda tecla citada na ajuda existe no código da tela', () => {
     for (const a of Object.values(AJUDA)) {
-      const fonte = ler(FONTE[a.tela]);
+      const fonte = teclado(FONTE[a.tela]);
       for (const linha of a.teclas) for (const t of linha.teclas) expect(existe(t, fonte), `${a.tela}: ${t}`).toBe(true);
     }
   });
@@ -100,6 +108,15 @@ describe('conteúdo da ajuda', () => {
     for (const [arquivo, citadas] of porArquivo) {
       expect(teclasNoCodigo(ler(arquivo)).length, arquivo).toBeGreaterThan(0);
       for (const t of teclasNoCodigo(ler(arquivo))) expect(citadas.has(comoNaAjuda(t)), `${arquivo}: ${t}`).toBe(true);
+    }
+  });
+
+  it('toda tela com apresentação de coisa nova explica as teclas dela e por que ela vem antes', () => {
+    const comApresentacao = Object.values(AJUDA).filter((a) => teclado(FONTE[a.tela]) !== ler(FONTE[a.tela]));
+    expect(comApresentacao.map((a) => a.tela).sort()).toEqual(['aventura', 'cena', 'conversa', 'gramatica', 'kanabeat', 'kanaimagens', 'kanjimon', 'memoria', 'pecas', 'roguelike']);
+    for (const a of comApresentacao) {
+      expect(a.teclas, a.tela).toContain(TECLAS_APRESENTA);
+      expect(a.perguntas, a.tela).toContain(ANTES_DE_COBRAR);
     }
   });
 

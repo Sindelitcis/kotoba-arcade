@@ -5,12 +5,18 @@
  * entendeu ou não vai para a memória espaçada, a mesma dos outros jogos.
  *
  * As cenas ficam em `cenas/`, só dados. Aqui não entra texto de história.
+ *
+ * Ensinar antes de cobrar (core/ensino.ts): antes da primeira fala, as palavras novas da
+ * cena são apresentadas com calma (`apresentando`). Palavra que ainda está em prática
+ * aparece com leitura e significado por cima. Palavra nova que sobrou da apresentação é
+ * apresentada ali mesmo, na fala, e só conta nota numa passada seguinte.
  */
 import { cardKey, type Word } from '../../content';
 import { hasKanji, isKana } from '../../core/kana';
 import { levelInfo } from '../../core/progress';
 import type { Profile } from '../../core/save';
-import { isYoung, retrievability, review, type CardState } from '../../core/srs';
+import { apresentar, avaliar, foiApresentado, itemDe, NOVOS_MAX, novidades } from '../../core/ensino';
+import { isYoung, retrievability, State, type CardState } from '../../core/srs';
 
 /** `ok`: a pessoa entendeu. `odd`: estranhou. `again`: o jogador pediu para repetir. */
 export type Result = 'ok' | 'odd' | 'again';
@@ -100,7 +106,8 @@ export function plainText(tokens: readonly { text: string }[]): string {
 export type Help = 'full' | 'reading' | 'none';
 
 export function helpLevel(card: CardState | undefined): Help {
-  if (!card) return 'full';
+  // Nunca vista, ou apresentada e ainda não usada: leitura e significado na tela.
+  if (!card || card.state === State.New) return 'full';
   return isYoung(card) ? 'reading' : 'none';
 }
 
@@ -244,6 +251,16 @@ export interface PlayDeps {
   now: () => number;
 }
 
+/** As palavras que a cena treina, na ordem em que aparecem nos nós. */
+export function palavrasDaCena(scene: Scene): string[] {
+  const ids: string[] = [];
+  for (const n of Object.values(scene.nodes)) {
+    const falas = n.kind === 'narra' ? [] : [n.jp ?? '', ...(n.kind === 'escolha' ? n.options.map((o) => o.jp) : [])];
+    for (const f of falas) for (const t of parseLine(f)) if (t.word && !ids.includes(t.word)) ids.push(t.word);
+  }
+  return ids;
+}
+
 /** Uma passada por uma cena. */
 export class ScenePlay {
   nodeId: string;
@@ -252,6 +269,8 @@ export class ScenePlay {
   seq = 0;
   finished = false;
   summary: SceneSummary | null = null;
+  /** Palavras novas apresentadas antes da primeira fala (a tela mostra enquanto houver). */
+  apresentando: string[];
 
   private shownAt: number;
   /** Depois de escolher, a tela mostra a fala do jogador; este é o nó que vem em seguida. */
@@ -274,11 +293,36 @@ export class ScenePlay {
   ) {
     this.nodeId = scene.start;
     this.shownAt = deps.now();
+    const conhecidas = palavrasDaCena(scene).filter((id) => deps.lookup(id));
+    this.apresentando = novidades(
+      conhecidas.map((id) => cardKey(id, 'meaning')),
+      deps.cards,
+      { max: NOVOS_MAX },
+    ).map(itemDe);
     this.shown = this.build(this.nodeId);
   }
 
+  /** A apresentação acabou: as palavras viram prática e a cena começa. */
+  apresentou(): void {
+    if (this.apresentando.length === 0) return;
+    const now = this.deps.now();
+    apresentar(
+      this.deps.cards,
+      this.apresentando.map((id) => cardKey(id, 'meaning')),
+      now,
+    );
+    for (const id of this.apresentando) {
+      this.fresh.add(id);
+      this.credited.add(id);
+    }
+    this.apresentando = [];
+    this.shownAt = now;
+    this.shown = this.build(this.nodeId);
+    this.seq++;
+  }
+
   get awaitingChoice(): boolean {
-    return !this.finished && this.pending === null && this.shown.kind === 'escolha';
+    return !this.finished && this.apresentando.length === 0 && this.pending === null && this.shown.kind === 'escolha';
   }
 
   private node(id: string): SceneNode {
@@ -329,8 +373,9 @@ export class ScenePlay {
 
   /**
    * Registra na memória o que aconteceu com as palavras de uma fala.
-   * Palavra nunca vista só é apresentada (primeiro contato ensina, não cobra) e
-   * não leva nota ruim nesta passada. Nota boa, uma por palavra por passada.
+   * Palavra nunca vista só é apresentada ali (com leitura e significado na tela) e não
+   * leva nota nesta passada, nem a apresentada antes da cena. Nota boa, uma por palavra
+   * por passada.
    */
   private touch(ids: readonly string[], correct: boolean, hinted: boolean, ms?: number): Word[] {
     const { cards, lookup } = this.deps;
@@ -338,22 +383,22 @@ export class ScenePlay {
     const learned: Word[] = [];
     for (const id of ids) {
       const key = cardKey(id, 'meaning');
-      const card = cards[key];
-      if (!card) {
-        cards[key] = review(undefined, { correct: true, hinted: true }, now);
+      if (!foiApresentado(cards, key)) {
+        apresentar(cards, [key], now);
         this.fresh.add(id);
         this.credited.add(id);
         const w = lookup(id);
         if (w) learned.push(w);
       } else if (!correct) {
         if (this.fresh.has(id)) continue;
-        cards[key] = review(card, { correct: false }, now);
+        avaliar(cards, key, { correct: false }, now);
         this.missed.add(id);
         this.credited.add(id);
       } else if (!this.credited.has(id)) {
-        cards[key] = review(card, { correct: true, hinted, ms }, now);
+        avaliar(cards, key, { correct: true, hinted, ms }, now);
         this.credited.add(id);
       }
+
     }
     return learned;
   }
@@ -374,7 +419,8 @@ export class ScenePlay {
 
   /** Segue a conversa: passa da narração, da fala ouvida ou da fala que o jogador acabou de dizer. */
   advance(): PlayEvent[] {
-    if (this.finished || this.awaitingChoice) return [];
+    // Com a apresentação na tela, a cena ainda não começou.
+    if (this.finished || this.awaitingChoice || this.apresentando.length > 0) return [];
     const events: PlayEvent[] = [];
     let next: string;
     if (this.pending !== null) {

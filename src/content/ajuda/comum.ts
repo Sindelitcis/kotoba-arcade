@@ -1,5 +1,17 @@
 /** Perguntas que valem para quase todo jogo. Cada tela escolhe as que fazem sentido para ela. */
-import type { Pergunta } from './tipos';
+import type { LinhaTecla, Pergunta } from './tipos';
+
+/** Teclas da apresentação de coisa nova, igual em todos os jogos. */
+export const TECLAS_APRESENTA: LinhaTecla = {
+  teclas: ['←', '→', 'R', 'V'],
+  faz: 'Na apresentação de coisa nova: voltar, seguir, ouvir de novo, trocar a voz do português (Voz 1 ou Voz 2)',
+};
+
+/** Por que tem apresentação e prática antes da cobrança. */
+export const ANTES_DE_COBRAR: Pergunta = {
+  p: 'Por que o jogo mostra as coisas antes de perguntar?',
+  r: 'Porque não dá para lembrar do que você nunca viu. Coisa nova chega primeiro numa apresentação, de 3 a 5 por vez: imagem, som em japonês e o que quer dizer, falado em português. Depois vem a prática: pergunta fácil, com dica e poucas opções, e errar ali não custa nada, o item só aparece de novo. Tempo, vida, combo e mais opções só entram quando você já acertou na prática.',
+};
 
 export const VOLTOU: Pergunta = {
   p: 'Por que essa palavra voltou?',

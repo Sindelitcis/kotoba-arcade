@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
+import { chavesDosKanji, firmarCartas, passarApresentacao } from './apoio';
 
 const SHOTS = process.env.SHOTS_DIR;
 
@@ -6,9 +7,18 @@ test.beforeEach(async ({ page }) => {
   await page.goto('/');
 });
 
-async function open(page: Page) {
+/** Abre o Kotodama. Jogador novo passa antes pela apresentação das cartas; devolve quantas eram. */
+async function open(page: Page): Promise<number> {
   await page.locator('.tile', { hasText: 'Kotodama' }).click();
+  let n = 0;
+  if ((await page.getByTestId('rg').getAttribute('data-phase')) !== 'combat') n = await passarApresentacao(page);
   await expect(page.getByTestId('rg')).toHaveAttribute('data-phase', 'combat');
+  return n;
+}
+
+/** Quem já estudou tudo: as cartas cobram direto, sem apresentação nem prática. */
+async function firmarTudo(page: Page) {
+  await firmarCartas(page, chavesDosKanji());
 }
 
 const phase = (page: Page) => page.getByTestId('rg').getAttribute('data-phase');
@@ -58,22 +68,27 @@ async function playToTheEnd(page: Page) {
   throw new Error('a run não terminou');
 }
 
-test('do fliperama para o primeiro combate com uma tecla', async ({ page }) => {
+test('do fliperama para o primeiro combate com uma tecla: antes, as cartas novas são apresentadas', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'Kotoba Arcade' })).toBeVisible();
   await expect(async () => {
     await page.keyboard.press('r');
-    await expect(page.getByTestId('rg')).toHaveAttribute('data-phase', 'combat', { timeout: 500 });
+    await expect(page.getByTestId('rg')).toHaveAttribute('data-phase', 'apresenta', { timeout: 500 });
   }).toPass();
+  await expect(page.getByTestId('rg-apresenta')).toBeVisible();
+  await expect(page.getByTestId('rg-card')).toHaveCount(0);
+  expect(await passarApresentacao(page)).toBeGreaterThanOrEqual(3);
+  await expect(page.getByTestId('rg')).toHaveAttribute('data-phase', 'combat');
   await expect(page.getByTestId('rg-card').first()).toBeVisible();
   await expect(page.getByTestId('rg-relics').locator('.rg-relic')).toHaveCount(1);
   await expect(page.getByTestId('rg-hp')).toContainText('40/40');
 });
 
-test('carta nova ensina antes de perguntar, e acertar solta o efeito forte', async ({ page }) => {
+test('carta em prática pergunta com dica e duas opções, e acertar solta o efeito forte', async ({ page }) => {
   await open(page);
   const before = await enemyHp(page);
   await page.locator('.rg-card.e-attack').first().click();
-  await expect(page.getByTestId('teach')).toBeVisible();
+  await expect(page.getByTestId('rg-pratica')).toBeVisible();
+  await expect(page.locator('.choice')).toHaveCount(2);
   await page.locator('[data-answer="yes"]').click();
   await expect(page.getByTestId('rg-echo')).toContainText('Golpe: 9 de dano');
   await expect(page.getByTestId('rg-ask')).toBeHidden();
@@ -81,8 +96,22 @@ test('carta nova ensina antes de perguntar, e acertar solta o efeito forte', asy
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/roguelike-combate.png` });
 });
 
-test('errar solta o efeito fraco e mostra a resposta certa', async ({ page }) => {
+test('na prática, errar não enfraquece a carta: o golpe sai forte e a carta aparece de novo', async ({ page }) => {
   await open(page);
+  const before = await enemyHp(page);
+  await page.locator('.rg-card.e-attack').first().click();
+  await page.locator('.choice:not([data-answer])').first().click();
+  await expect(page.getByTestId('rg-echo')).toContainText('Prática: a carta saiu inteira');
+  await expect(page.getByTestId('apresentacao')).toHaveAttribute('data-modo', 'de-novo');
+  await passarApresentacao(page);
+  expect(await enemyHp(page)).toBe(before - 9);
+  await expect(page.getByTestId('rg-hp')).toContainText('40/40');
+});
+
+test('na cobrança, errar solta o efeito fraco e mostra a resposta certa', async ({ page }) => {
+  await firmarTudo(page);
+  await open(page);
+  await expect(page.getByTestId('rg-pratica')).toHaveCount(0);
   const before = await enemyHp(page);
   await page.locator('.rg-card.e-attack').first().click();
   const answer = await page.locator('[data-answer="yes"] span').innerText();
@@ -134,7 +163,7 @@ test('uma run inteira só no teclado, do primeiro nó até o chefe', async ({ pa
 });
 
 test('Esc no meio da run volta ao fliperama sem perder o que foi estudado', async ({ page }) => {
-  await open(page);
+  const apresentados = await open(page);
   await page.locator('.rg-card').first().click();
   await page.locator('[data-answer="yes"]').click();
   await expect(page.getByTestId('rg-ask')).toBeHidden();
@@ -143,5 +172,6 @@ test('Esc no meio da run volta ao fliperama sem perder o que foi estudado', asyn
   await page.reload();
   const kanji = Number(await page.getByTestId('kanji-seen').innerText());
   const words = await page.locator('.meter b').nth(1).innerText();
-  expect(kanji + Number(words)).toBe(1);
+  // O que foi apresentado já conta como visto.
+  expect(kanji + Number(words)).toBe(apresentados);
 });

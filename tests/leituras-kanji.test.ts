@@ -42,22 +42,20 @@ describe('leitura do kanji sozinho', () => {
 describe('a carta de kanji fala o que está na tela', () => {
   it('a voz e o texto que aparece depois da resposta são a leitura do kanji, não a palavra de exemplo', () => {
     for (const k of KANJI) {
-      for (const q of [kanjiMeaningQuestion(k, seededRng(1), true), kanjiRecallQuestion(k, seededRng(1))]) {
+      for (const q of [kanjiMeaningQuestion(k, seededRng(1)), kanjiRecallQuestion(k, seededRng(1))]) {
         expect(q.speak).toBe(k.kanji);
         expect(q.speakKana).toBe(k.reading);
         expect(q.echo).toBe(`${k.kanji} · ${k.reading} (${romaji(k.reading)}) · ${k.pt[0]}`);
       }
     }
-    const nove = kanjiMeaningQuestion(kanji('九'), seededRng(1), true);
+    const nove = kanjiMeaningQuestion(kanji('九'), seededRng(1));
     expect(nove.speakKana).toBe('きゅう');
     expect(nove.echo).not.toContain('くがつ');
   });
 
-  it('o primeiro contato ensina a leitura sozinha, as outras e um exemplo com a leitura dele', () => {
-    const q = kanjiMeaningQuestion(kanji('九'), seededRng(1), true);
-    expect(q.teach?.lines).toContain('Sozinho, lê-se きゅう (kyuu).');
-    expect(q.teach?.lines).toContain('Dentro de palavras também: く, ここの.');
-    expect(q.teach?.lines.some((l) => l.includes('九月 (くがつ)'))).toBe(true);
+  it('as linhas de leitura trazem a leitura sozinha e as outras; a dica da prática usa a primeira', () => {
+    expect(readingLines(kanji('九'))).toEqual(['Sozinho, lê-se きゅう (kyuu).', 'Dentro de palavras também: く, ここの.']);
+    expect(kanjiRecallQuestion(kanji('九'), seededRng(1)).dica).toBe('Sozinho, lê-se きゅう (kyuu).');
     expect(readingLines(kanji('週'))).toEqual(['Sozinho, lê-se しゅう (shuu).']);
   });
 });

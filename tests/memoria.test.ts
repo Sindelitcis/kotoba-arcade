@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { FIGURAS, figura } from '../src/content/imagens';
 import { seededRng } from '../src/core/rng';
 import { emptySave } from '../src/core/save';
-import { review, type CardState } from '../src/core/srs';
+import { review, type CardState, newCard } from '../src/core/srs';
 import {
   brigam,
   chave,
@@ -16,12 +16,14 @@ import {
   seConfundem,
   SOBE_COM,
   subir,
+  NOVAS_POR_RODADA,
   type MemoriaSave,
 } from '../src/games/memoria/engine';
+import { foiApresentado } from '../src/core/ensino';
 
 /** Carta já firme (em revisão), com estabilidade de alguns dias ou semanas. */
 function firme(dias: number): CardState {
-  let c = review(undefined, { correct: true }, 0);
+  let c = review(newCard(0), { correct: true }, 0);
   let t = 0;
   while (c.stability < dias) {
     t = c.due;
@@ -44,7 +46,7 @@ function rodada(seed = 1, prep?: (s: ReturnType<typeof emptySave>, m: MemoriaSav
 /** Joga o quadro inteiro sem errar. */
 function resolver(r: MemoriaRound) {
   const ev = [];
-  r.comecar();
+  r.apresentou();
   const pares = new Map<number, number[]>();
   r.quadro.cartas.forEach((c, i) => pares.set(c.par, [...(pares.get(c.par) ?? []), i]));
   for (const [a, b] of pares.values()) {
@@ -109,17 +111,54 @@ describe('Memória: regras puras', () => {
 });
 
 describe('Memória: rodada', () => {
-  it('jogador novo: o primeiro quadro apresenta as palavras antes de cobrar', () => {
-    const { r } = rodada();
-    expect(r.fase).toBe('licao');
-    expect(r.quadro.novas.length).toBe(r.quadro.cartas.length / 2);
-    // Antes de "começar", escolher carta não faz nada.
+  it('jogador novo: as palavras são apresentadas antes do primeiro quadro, e o quadro é prática', () => {
+    const { r, data } = rodada();
+    expect(r.fase).toBe('apresenta');
+    expect(r.apresentadas).toHaveLength(NOVAS_POR_RODADA);
+    expect(Object.keys(data.cards)).toHaveLength(0);
+    // Antes de acabar a apresentação, escolher carta não faz nada.
     expect(r.escolher_carta(0)).toEqual([]);
+    r.apresentou();
+    expect(r.fase).toBe('jogo');
+    expect(r.quadro.apoio).toBe(true);
+    expect(r.quadro.modo).toBe('rapido');
+    const figs = new Set(r.quadro.cartas.map((c) => c.figura));
+    for (const f of figs) expect(r.apresentadas).toContain(f);
+    for (const c of r.quadro.cartas) if (c.lado === 'palavra') expect(c.mostra).toBe('kana');
+  });
+
+  it('prática: confundir não zera o combo nem desce o nível, e a palavra aparece de novo', () => {
+    const { r, save } = rodada(3);
+    r.apresentou();
+    const cs = r.quadro.cartas;
+    const img = cs.findIndex((c) => c.lado === 'img');
+    const certa = cs.findIndex((c) => c.lado === 'palavra' && c.par === cs[img]!.par);
+    r.escolher_carta(img);
+    r.escolher_carta(certa);
+    const combo = r.combo;
+    const outra = cs.findIndex((c, i) => c.lado === 'img' && !c.feita && i !== img);
+    const errada = cs.findIndex((c) => c.lado === 'palavra' && !c.feita && c.par !== cs[outra]!.par);
+    const ev = [...r.escolher_carta(outra), ...r.escolher_carta(errada)];
+    expect(ev.some((e) => e.t === 'de-novo')).toBe(true);
+    expect(r.combo).toBe(combo);
+    expect(save.nivel[cs[outra]!.figura.word.id] ?? 0).toBe(0);
+  });
+
+  it('nenhum quadro traz palavra que não foi apresentada', () => {
+    for (let seed = 1; seed <= 10; seed++) {
+      const { r, data } = rodada(seed);
+      for (let n = 0; n < QUADROS.length; n++) {
+        resolver(r);
+        for (const c of r.quadro.cartas) expect(foiApresentado(data.cards, chave(c.figura.word))).toBe(true);
+        r.proximo();
+      }
+    }
   });
 
   it('nenhum quadro tem duas palavras que brigam', () => {
     for (let seed = 1; seed <= 20; seed++) {
       const { r } = rodada(seed);
+      r.apresentou();
       for (let n = 0; n < QUADROS.length; n++) {
         const figs = [...new Set(r.quadro.cartas.map((c) => c.figura))];
         for (const a of figs) for (const b of figs) if (a !== b) expect(brigam(a, b)).toBe(false);
@@ -131,15 +170,21 @@ describe('Memória: rodada', () => {
 
   it('três quadros com pausa entre eles; o fim dá resumo, XP e moedas', () => {
     const { r, data, save } = rodada(2);
+    // Jogador novo: só as palavras apresentadas cabem, então os quadros ficam menores.
+    const tamanhos: number[] = [];
     const ev1 = resolver(r);
+    tamanhos.push(r.quadro.cartas.length / 2);
     expect(ev1.some((e) => e.t === 'quadro')).toBe(true);
     expect(r.fase).toBe('pausa');
     r.proximo();
     resolver(r);
+    tamanhos.push(r.quadro.cartas.length / 2);
     r.proximo();
     const fim = resolver(r);
+    tamanhos.push(r.quadro.cartas.length / 2);
     const e = fim.find((x) => x.t === 'fim');
-    expect(e && e.t === 'fim' && e.resumo.pares).toBe(4 + 6 + 6);
+    expect(tamanhos.every((n, i) => n <= QUADROS[i]!.pares)).toBe(true);
+    expect(e && e.t === 'fim' && e.resumo.pares).toBe(tamanhos.reduce((a, b) => a + b, 0));
     expect(save.rounds).toBe(1);
     expect(data.profile.coins).toBeGreaterThan(0);
     expect(data.profile.xp).toBeGreaterThan(0);
@@ -182,7 +227,6 @@ describe('Memória: rodada', () => {
     });
     resolver(r);
     r.proximo();
-    r.comecar();
     expect(r.quadro.modo).toBe('memoria');
     const cs = r.quadro.cartas;
     const img = cs.findIndex((c) => c.lado === 'img');
