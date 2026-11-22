@@ -42,14 +42,24 @@ export function Furigana({ texto, leitura }: { texto: string; leitura?: string }
   );
 }
 
-/** Texto em português com japonês no meio: furigana só nos pedaços em japonês com kanji. */
-export function Misto({ texto }: { texto: string }) {
+/**
+ * Texto em português com japonês no meio: furigana só nos pedaços em japonês com kanji.
+ * `assunto`: o kanji de que o texto fala, citado sozinho ("Em 日本, 日 se lê に"). Ele fica sem
+ * leitura em cima: a leitura dele muda de palavra para palavra e já está grande no cartão.
+ * `leituras`: a leitura de cada palavra citada, quando o conteúdo a sabe (何人 é なにじん no curso,
+ * e não なんにん).
+ */
+export function Misto({ texto, assunto, leituras }: { texto: string; assunto?: string; leituras?: Readonly<Record<string, string>> }) {
   return (
     <>
       {dividirMisto(texto).map((p, i) =>
-        p.jp ? (
+        p.jp && p.t === assunto ? (
           <span key={i} lang="ja">
-            <Furigana texto={p.t} />
+            {p.t}
+          </span>
+        ) : p.jp ? (
+          <span key={i} lang="ja">
+            <Furigana texto={p.t} leitura={leituras?.[p.t]} />
           </span>
         ) : (
           p.t

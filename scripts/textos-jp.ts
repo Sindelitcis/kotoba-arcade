@@ -23,6 +23,8 @@ import { KANJI_PECAS } from '../src/games/pecas/dados';
 import { trechosJp } from '../src/core/leitura-jp';
 import { hasKanji, kataToHira } from '../src/core/kana';
 import { listarFalas } from './falas';
+import { palavrasDa, UNIDADES } from '../src/content/curso';
+import { cartaoDaPalavra, cartaoDoKanji, cartaoDoPonto } from '../src/curso/cartoes';
 
 export interface TextoJp {
   texto: string;
@@ -117,6 +119,25 @@ function dasPalavras(): TextoJp[] {
   ];
 }
 
+/**
+ * O curso: os cartões de palavra, de kanji e de gramática. No cartão de kanji, o próprio kanji
+ * citado sozinho na explicação fica sem leitura (`Misto` com `assunto`).
+ */
+function doCurso(): TextoJp[] {
+  const out: TextoJp[] = [];
+  for (const u of UNIDADES) {
+    const origem = `curso/${u.id}`;
+    const cartoes = [...palavrasDa(u).map(cartaoDaPalavra), ...u.kanji.map((k) => cartaoDoKanji(k, u.id)), ...u.gramatica.map((g) => cartaoDoPonto(g, u.id))];
+    for (const c of cartoes) {
+      if (c.alvo.t !== 'kanji') out.push({ texto: c.grande, leitura: c.leitura ? kataToHira(c.leitura) : undefined, origem });
+      if (c.exemplo) out.push({ texto: c.exemplo.jp, leitura: c.exemplo.kana ? kataToHira(c.exemplo.kana) : undefined, origem });
+      const assunto = c.alvo.t === 'kanji' ? c.grande : undefined;
+      for (const s of [c.pt, c.explicacao ?? '']) for (const t of trechosJp(s)) if (hasKanji(t) && t !== assunto) out.push({ texto: t, leitura: c.leituras?.[t], origem });
+    }
+  }
+  return out;
+}
+
 /** As frases de exemplo dos kanji (Dex, cartão de apresentação, frase do dia no fliperama). */
 const dosKanji = (): TextoJp[] => KANJI.flatMap((k) => k.sentences.map((s) => ({ texto: s.jp, origem: `kanjimon/${k.kanji}` })));
 
@@ -134,7 +155,7 @@ function soJapones(t: TextoJp): TextoJp[] {
 /** Sem repetição; quando o mesmo texto aparece com e sem leitura, fica a que tem. `origem` junta todas, separadas por espaço. */
 export function listarTextosJp(): TextoJp[] {
   const porTexto = new Map<string, TextoJp>();
-  for (const t of [...dasPalavras(), ...dasFalas(), ...dosKanji(), ...doAprofundar(), ...daAjuda(), ...doCodigo()].flatMap(soJapones)) {
+  for (const t of [...dasPalavras(), ...dasFalas(), ...dosKanji(), ...doAprofundar(), ...doCurso(), ...daAjuda(), ...doCodigo()].flatMap(soJapones)) {
     if (!hasKanji(t.texto)) continue;
     const visto = porTexto.get(t.texto);
     if (!visto) porTexto.set(t.texto, { ...t });

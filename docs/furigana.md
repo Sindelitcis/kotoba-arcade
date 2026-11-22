@@ -32,6 +32,7 @@ Se sobrar texto sem leitura, ou leitura que não bate com a voz, o script lista 
 - O kanji que é a própria pergunta: a carta do KanjiMon na caçada, a face da carta do Kotodama, o kanji desenhado do Kanji em peças e a carta "só kanji" da Memória. A leitura em cima entregaria a resposta.
 - A peça de kanji que aparece sozinha numa historinha da ficha do Aprofundar (夂, 忄, 頁). É desenho, não palavra. A lista fica em `formas`, no mesmo arquivo.
 - O verso da carta da Memória (言), que é só enfeite.
+- O kanji de um cartão de kanji citado sozinho na explicação do cartão ("Em 日本, 日 se lê に"). A leitura dele muda de palavra para palavra e já está grande no alto do cartão (`Misto` com `assunto`). As palavras citadas ao lado levam a leitura que o conteúdo dá (`leituras` no item: no curso, 何人 é なにじん, e não なんにん como no dado geral).
 
 ## Esconder o que você já sabe
 

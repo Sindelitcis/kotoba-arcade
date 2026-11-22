@@ -37,6 +37,14 @@ export function significadoDoKanji(k: string): string {
 }
 
 /** O texto do cartão: a leitura de agora, a troca (se houver) e as leituras que vêm depois. */
+/** As palavras do curso citadas no texto do cartão, com a leitura delas. */
+export function leiturasCitadas(texto: string): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const u of UNIDADES)
+    for (const p of palavrasDa(u)) if (p.jp !== p.kana && texto.includes(p.jp) && !(p.jp in out)) out[p.jp] = p.kana;
+  return out;
+}
+
 export function explicacaoDoKanji(k: KanjiDaUnidade): string {
   const partes: string[] = [];
   // Toda palavra citada leva a leitura junto: nenhum kanji fica sem leitura na tela.
@@ -68,6 +76,7 @@ export function cartaoDoKanji(k: KanjiDaUnidade, unidade: string): ItemNovo {
     leitura: k.leitura,
     pt: sig,
     explicacao: explicacaoDoKanji(k),
+    leituras: leiturasCitadas(explicacaoDoKanji(k)),
     exemplo: palavra && palavra.jp !== k.k ? { jp: palavra.jp, kana: palavra.kana, pt: palavra.pt } : undefined,
     falas,
   };

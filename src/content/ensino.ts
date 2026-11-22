@@ -24,6 +24,8 @@ export interface ItemNovo {
   exemplo?: ExemploFicha;
   /** Imagem do item, quando o jogo tem (figura da Memória, do Kana em imagens). */
   img?: string;
+  /** Leitura das palavras citadas na explicação, quando o conteúdo sabe (texto → kana). */
+  leituras?: Readonly<Record<string, string>>;
   /** O que toca ao aparecer: o japonês, o português e o exemplo. */
   falas: Trecho[];
 }

@@ -128,7 +128,7 @@ export function Apresentacao({ itens, onFim, modo = 'novos', fim, visual, onItem
           </p>
           {item.explicacao && item.explicacao !== item.pt && (
             <p class="ap-explica">
-              <Misto texto={item.explicacao} />
+              <Misto texto={item.explicacao} assunto={item.alvo.t === 'kanji' ? item.grande : undefined} leituras={item.leituras} />
             </p>
           )}
           {item.exemplo && (
