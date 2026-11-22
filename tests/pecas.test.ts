@@ -234,9 +234,11 @@ describe('rodada', () => {
 describe('modo 1: achar a peça', () => {
   it('as alternativas erradas nunca estão no kanji (nem como outra forma da peça)', () => {
     // Bug que este teste evita: oferecer 人 como errada em 休, que tem 亻.
+    // Tudo visto: há peça conhecida de sobra para as quatro alternativas.
+    const todos = vistos(KANJI_PECAS, deps().clock.t);
     for (const k of KANJI_PECAS.filter((x) => pecasDoKanji(x).length > 0)) {
       const d = deps({ modo: 'peca', rng: seededRng(k.ordem + 1) });
-      d.cards = vistos([k], d.clock.t);
+      d.cards = { ...todos };
       const r = new PecasRound(d);
       // Uma semente por kanji: a rodada sorteia, e a regra vale para toda pergunta que sair.
       const p = r.pergunta;
@@ -246,6 +248,30 @@ describe('modo 1: achar a peça', () => {
       expect(new Set(p.opcoes).size).toBe(4);
       for (const o of p.opcoes) if (o !== p.alvo) expect(dentro.has(o), `${p.k.kanji}: ${o}`).toBe(false);
     }
+  });
+});
+
+describe('modo 1: só peça já vista confunde', () => {
+  it('com poucos kanji vistos, toda alternativa errada é peça de um kanji visto', () => {
+    const lista = KANJI_PECAS.filter((x) => pecasDoKanji(x).length > 0).slice(0, 4);
+    const conhecidas = new Set(lista.flatMap((k) => [k.kanji, ...k.pecas]));
+    for (let s = 1; s < 20; s++) {
+      const d = deps({ modo: 'peca', rng: seededRng(s) });
+      d.cards = vistos(lista, d.clock.t);
+      const r = new PecasRound(d);
+      const p = r.pergunta;
+      if (p.modo === 'peca') for (const o of p.opcoes) if (o !== p.alvo) expect(conhecidas.has(o), o).toBe(true);
+      if (p.modo === 'montar') for (const o of p.bandeja) if (!p.precisa.includes(o)) expect(conhecidas.has(o), o).toBe(true);
+    }
+  });
+
+  it('o primeiro kanji, sem nada visto antes: monta com as peças dele em vez de escolher entre peças nunca vistas', () => {
+    const d = deps({ modo: 'peca' });
+    const r = new PecasRound(d);
+    r.seguir();
+    const p = r.pergunta;
+    if (p.modo === 'peca') expect(p.opcoes).toEqual([p.alvo]);
+    else if (p.modo === 'montar') expect(p.bandeja.every((x) => p.precisa.includes(x))).toBe(true);
   });
 });
 
@@ -305,6 +331,8 @@ describe('modo 3: intruso', () => {
   it('a grade tem seis kanji e só um diferente, de um par de parecidos', () => {
     for (let s = 1; s < 30; s++) {
       const d = deps({ modo: 'intruso', rng: seededRng(s) });
+      // O intruso só usa par em que os dois kanji já foram vistos.
+      d.cards = vistos(KANJI_PECAS, d.clock.t);
       const r = new PecasRound(d);
       const p = r.pergunta;
       if (p.modo !== 'intruso') throw new Error('modo');
@@ -343,13 +371,29 @@ describe('modo 5: palavras de dois kanji', () => {
 
   it('acerto revisa a carta da palavra, não a do kanji', () => {
     const d = deps({ modo: 'composto' });
+    // Palavra já apresentada em outro jogo (o KanjiMon, a Jornada) e os dois kanji vistos aqui.
+    d.cards = { ...vistos(COMPOSTOS[0]!.kanji, d.clock.t), [cardKey(`w:${COMPOSTOS[0]!.jp}`, 'meaning')]: newCard(d.clock.t) };
     const r = new PecasRound(d);
     const p = r.pergunta;
     if (p.modo !== 'composto') throw new Error('modo');
+    const antes = { ...d.cards[cartaPecas(p.k)]! };
     expect(p.opcoes[p.certa]).toBe(p.palavra.kana);
     acertar(r);
     expect(d.cards[cartaComposto(p.palavra)]).toBeDefined();
-    expect(d.cards[cartaPecas(p.k)]).toBeUndefined();
+    expect(d.cards[cartaPecas(p.k)]).toEqual(antes);
+  });
+
+  it('sem kanji visto, nenhuma palavra de dois kanji aparece (fica no achar a peça)', () => {
+    const d = deps({ modo: 'composto' });
+    const r = new PecasRound(d);
+    expect(r.pergunta.modo).not.toBe('composto');
+  });
+
+  it('palavra nunca apresentada não vira pergunta, mesmo com os dois kanji vistos (学生 não se lê pelos kanji soltos)', () => {
+    const d = deps({ modo: 'composto' });
+    d.cards = vistos(KANJI_PECAS, d.clock.t);
+    const r = new PecasRound(d);
+    expect(r.pergunta.modo).not.toBe('composto');
   });
 });
 

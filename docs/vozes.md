@@ -6,7 +6,7 @@ O japonês que os jogos falam vem de arquivos gravados em `public/vozes/`: palav
 
 - `scripts/falas.ts` lista cada texto que vai para `speak()`, com a voz e a leitura esperada.
 - `npm run vozes` grava o que falta e atualiza `public/vozes/manifesto.json` (texto → voz → arquivo). O nome do arquivo é um hash do texto, da voz e do que foi mandado ao motor. Mudou a frase, muda o arquivo; o que sobrar é apagado.
-- `speak(texto, voz)` em `src/core/audio.ts` procura o texto no manifesto e toca o mp3. Palavra solta e kana usam `speakWord(kana)`, que pede a voz de palavra. Sem gravação, usa a voz do navegador.
+- `speak(texto, voz)` em `src/core/audio.ts` procura o texto no manifesto e toca o mp3. Palavra solta e kana usam `speakWord(kana)`, que pede a voz de palavra. Sem gravação, fica mudo e avisa no console (não há voz do navegador).
 - `tests/vozes.test.ts` falha se algum texto da lista ficar sem áudio. Escreveu uma cena nova, rode `npm run vozes`.
 - `tests/vozes-cobertura.test.ts` parte dos jogos: lista toda chamada de `speak()` do código (chamada nova falha até alguém dizer de onde vem o texto) e joga 80 rodadas do Kumitate conferindo cada frase que a rodada fala, inteira ou pela metade.
 
@@ -124,53 +124,27 @@ As aulas do modo Ouvir (tecla `O` no fliperama), a lição de cada peça nova do
 - `src/core/sequencia.ts` toca uma lista de trechos (português, japonês, pausa). A pausa tem o tamanho da última fala em japonês, entre 2 e 8 segundos.
 - `scripts/falas-pt.ts` lista todo o português falado. Os textos não têm número, romaji nem japonês: a voz em português leria "masu" como "mazu". Partícula e palavra japonesa vão sempre pela gravação em japonês (`tests/aulas.test.ts` confere).
 
-Há duas vozes em português, as duas no site, com o mesmo texto como chave. O nome é genérico de propósito: Voz 1 e Voz 2.
+O português tem uma voz só: a de um amigo do Rafael, usada com autorização (Fish Speech com um modelo afinado). Fica em `public/vozes-pt/voz1/`, com o texto como chave, e não precisa de servidor no PC. Não há escolha de voz nos Ajustes.
 
-| Voz | Pasta | Quem é |
-| --- | --- | --- |
-| Voz 1 (padrão) | `public/vozes-pt/voz1/` | voz em português de um amigo do Rafael, usada com autorização (Fish Speech com um modelo afinado) |
-| Voz 2 | `public/vozes-pt/voz2/` | Kokoro-82M, voz pf_dora (Apache-2.0) |
+O site não tem voz de reserva. O que não foi gravado (em português ou em japonês) fica mudo e deixa no console a marca `[voz] sem gravação` (`src/core/sem-gravacao.ts`). A voz genérica do navegador (`speechSynthesis`) saiu de vez: `tests/sem-voz-do-navegador.test.ts` falha se ela voltar ao código ou ao `dist`, e os testes de ponta a ponta falham se a marca aparecer em qualquer tela que eles percorrem (`e2e/apoio.ts`). A única fala sem gravação de propósito é o texto que a IA da nuvem escreve na hora na Conversa: esse não tem como estar gravado, e toca só com o AivisSpeech do PC (`speakSeGravado`).
 
-Em Ajustes, "Voz em português" escolhe uma das duas; a escolha fica no save (`settings.vozPt`, padrão `voz1`). Se a voz escolhida não tiver uma fala, toca a outra; sem as duas, a voz do navegador. Nenhuma das duas precisa de servidor no PC.
+Cada mp3 leva nos metadados o comentário `kotoba-voz-1`. `tests/vozes-pt.test.ts` falha se algum texto faltar, se sobrar arquivo, se um mp3 estiver sem a marca, ou se aparecer no Git ou em `public/` uma voz de referência (`amigo.wav`, `amigo.txt`), pesos de modelo (`.safetensors`, `.pth`, `.ckpt`, `.bin`) ou o `local/config.local.json`. O `.gitignore` também barra esses nomes.
 
-Cada mp3 leva nos metadados o comentário da sua voz: `kotoba-voz-1` ou `kotoba-voz-2`. `tests/vozes-pt.test.ts` falha se algum texto faltar em qualquer das vozes, se sobrar arquivo, se um mp3 estiver na pasta errada, ou se aparecer no Git ou em `public/` uma voz de referência (`amigo.wav`, `amigo.txt`), pesos de modelo (`.safetensors`, `.pth`, `.ckpt`, `.bin`) ou o `local/config.local.json`. O `.gitignore` também barra esses nomes.
-
-### Voz 1
+### Como gravar
 
 Gravada com o motor dos audiobooks (`D:\Estudio\audiobooks\motor`, só leitura) e o modelo do Fish Speech afinado. A gravação de referência e os pesos ficam no PC; só os mp3 entram no site.
 
 ```bash
-npm run vozes-pt:voz1
+npm run vozes-pt
 ```
 
 Passa pela trava da placa (`--vram 11`). Pesos em int8, duas falas por vez (com o autoteste do lote), e o Whisper conferindo cada fala e refazendo até três vezes. Corta o silêncio, deixa em -18 LUFS e grava mp3 mono de 48 kbps em `public/vozes-pt/voz1/`, com o `manifesto.json`. O nome de cada arquivo é o começo do SHA-1 de `referência|texto`. Os caminhos do motor ficam em `local/config.local.json`, seção `voz1` (o arquivo não vai para o Git; `local/config.exemplo.json` mostra os campos vazios). O que o Whisper ouviu fica em `D:\KotobaArcade\voz\trabalho\conferidas-pt-voz1.json`, e uma gravação interrompida continua dali; as dúvidas vão para `duvidas-pt-voz1.json`.
-
-### Voz 2: Kokoro-82M, voz pf_dora
-
-Comparamos seis vozes que podem ser publicadas, todas na CPU, com 12 frases das aulas. O Whisper (large-v3-turbo) transcreveu cada uma, e o UTMOS22 deu uma nota de naturalidade de 1 a 5.
-
-| Voz | Licença | Erro do Whisper | Naturalidade |
-| --- | --- | --- | --- |
-| Kokoro pf_dora | Apache-2.0 | 2% | 3,79 |
-| Kokoro pm_alex | Apache-2.0 | 2% | 3,53 |
-| Kokoro pm_santa | Apache-2.0 | 4% | 3,07 |
-| Piper faber | CC0 (dados) | 2% | 3,56 |
-| Piper cadu | CC0 (dados) | 6% | 3,95 |
-| Piper jeff | CC0 (dados) | 9% | 2,36 |
-
-O resto do erro da dora, da faber e do alex era número escrito em algarismo e "quê" sem acento: nenhuma palavra trocada. A cadu soa melhor, mas engoliu "Trezentos ienes" e falou "Isso" de um jeito que o Whisper ouviu "Ivo". Ficou a dora: lê certo e soa natural. Velocidade 0,95.
-
-```bash
-npm run vozes-pt:voz2
-```
-
-Passa pela trava da placa: o Kokoro roda na CPU e o Whisper que confere roda na placa (na CPU, cada fala levava mais de um minuto de processador). O Python fica em `D:\KotobaArcade\voz\pt-livre\venv` (kokoro, faster-whisper, num2words; `PT_VOZ2_PYTHON` troca). Para cada texto: gera, o Whisper ouve, e se ele ouvir duas palavras ou mais diferentes, gera de novo a 0,9 e a 1,0 e fica a melhor. Corta o silêncio, deixa em -18 LUFS e grava mp3 mono de 48 kbps em `public/vozes-pt/voz2/`. O que o Whisper ouviu fica em `trabalho/conferidas-pt-voz2.json`, e as dúvidas em `trabalho/duvidas-pt-voz2.json`.
 
 ## Apresentação de coisa nova
 
 Todo jogo apresenta o que é novo antes de perguntar (`src/core/Apresentacao.tsx`, ver `src/core/ensino.ts`). A carta toca o japonês na gravação de sempre e, logo depois, o significado em português: "Quer dizer prateleira." A frase sai de `frasePtDoSignificado` (`src/content/ensino.ts`): pega o primeiro sentido, tira parênteses, escreve número por extenso e troca ordinal por palavra (2ª feira vira segunda-feira, 1ª vez vira primeira vez). Se sobrar algarismo, romaji ou japonês, a carta não fala o português; `tests/significado.test.ts` confere.
 
-A lista entra em `scripts/falas-pt.ts` com a origem `ensino/significado` e é gravada nas duas vozes como o resto. A tecla V na apresentação troca entre Voz 1 e Voz 2, e a escolha vai para Ajustes.
+A lista entra em `scripts/falas-pt.ts` com a origem `ensino/significado` e é gravada como o resto.
 
 A Cena Viva tem duas falas próprias em japonês na etapa "nome": a pergunta これはなんですか？ e, depois do acerto, a frase com o nome (これは棚です。). As duas vêm de `scripts/falas.ts`, na voz da まお.
 

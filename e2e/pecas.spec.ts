@@ -1,5 +1,5 @@
-import { expect, test, type Page } from '@playwright/test';
-import { passarApresentacao } from './apoio';
+import { expect, test, type Page } from './base';
+import { chavesDasPecas, firmarCartas, passarApresentacao } from './apoio';
 
 test.beforeEach(async ({ page }) => {
   await page.route('https://kanjimon.online/**', (route) => route.abort());
@@ -44,9 +44,8 @@ test('do fliperama à primeira resposta só no teclado: lição primeiro, com as
   await comecar(page);
   const licao = page.getByTestId('pc-licao');
   await expect(licao).toBeVisible();
-  // A historinha das peças, com o português falado (Voz 1 ou Voz 2).
+  // A historinha das peças, com o português falado.
   await expect(licao.locator('.ap-explica')).not.toBeEmpty();
-  await expect(licao.getByTestId('ap-voz')).toBeVisible();
   // Traços do KanjiVG: o kanji é desenho, não letra.
   await expect(licao.locator('svg.pc-kanji path').first()).toBeVisible();
   await page.keyboard.press('Enter');
@@ -63,6 +62,8 @@ test('do fliperama à primeira resposta só no teclado: lição primeiro, com as
 });
 
 test('erro não tem tela de erro: mostra a explicação e segue', async ({ page }) => {
+  // Peça errada, intruso e significados só saem do que já foi visto: aqui, todos os kanji.
+  await firmarCartas(page, chavesDasPecas());
   await abrir(page);
   await comecar(page);
   await page.keyboard.press('Enter');
@@ -95,6 +96,8 @@ test('uma rodada inteira termina no resumo e o progresso fica salvo', async ({ p
 });
 
 test('modo intruso (tecla 3): seis kanji e um diferente, com a diferença explicada', async ({ page }) => {
+  // Peça errada, intruso e significados só saem do que já foi visto: aqui, todos os kanji.
+  await firmarCartas(page, chavesDasPecas());
   await abrir(page);
   await comecar(page, '3');
   // Kanji nunca visto ganha lição antes, em qualquer modo.
@@ -110,6 +113,8 @@ test('modo intruso (tecla 3): seis kanji e um diferente, com a diferença explic
 });
 
 test('modo montar (tecla 2): peça errada volta para a bandeja e a rodada continua', async ({ page }) => {
+  // Peça errada, intruso e significados só saem do que já foi visto: aqui, todos os kanji.
+  await firmarCartas(page, chavesDasPecas());
   await abrir(page);
   await comecar(page, '2');
   if (await page.getByTestId('pc-licao').isVisible()) await page.keyboard.press('Enter');
@@ -130,6 +135,8 @@ test('Esc sai da rodada para o menu e do menu para o fliperama', async ({ page }
 });
 
 test('em tela baixa, a explicação rola para dentro da tela depois da resposta', async ({ page }) => {
+  // Peça errada, intruso e significados só saem do que já foi visto: aqui, todos os kanji.
+  await firmarCartas(page, chavesDasPecas());
   await page.setViewportSize({ width: 800, height: 560 });
   await abrir(page);
   await comecar(page, '4');

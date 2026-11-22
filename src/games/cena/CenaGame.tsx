@@ -38,6 +38,7 @@ import {
   type Seg,
 } from './engine';
 import { LUGARES } from './lugares';
+import { Furigana } from '../../core/Furigana';
 
 type Modo = 'menu' | 'rodada' | 'resumo';
 
@@ -46,10 +47,9 @@ export function Frase({ segs }: { segs: readonly Seg[] }) {
     <>
       {segs.map((s, i) =>
         s.r ? (
-          <ruby key={i}>
-            {s.t}
-            <rt>{s.r}</rt>
-          </ruby>
+          <span key={i}>
+            <Furigana texto={s.t} leitura={s.r} />
+          </span>
         ) : (
           <span key={i}>{s.t}</span>
         ),

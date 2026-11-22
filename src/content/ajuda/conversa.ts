@@ -39,15 +39,15 @@ export const CONVERSA: Ajuda = {
   ensina: [
     'Falar obriga a montar a frase sozinho. É o passo que os outros jogos preparam.',
     'O personagem fala no seu nível e puxa as palavras que você já está aprendendo.',
-    'As palavras novas do resumo entram na memória e aparecem nos outros jogos.',
+    'As palavras apresentadas antes da conversa entram na memória e aparecem nos outros jogos.',
     'Errar não para a conversa. O personagem entende o que dá e segue.',
-    'Palavra que aparece na conversa sem ter sido apresentada conta só como primeiro contato, sem nota.',
+    'Palavra que aparece na conversa sem ter sido apresentada vem com o significado, sem nota, e ainda não conta como vista: a apresentação dela fica para a próxima conversa.',
   ],
   perguntas: [
     ANTES_DE_COBRAR,
     { p: 'Por que pede senha?', r: 'A IA da nuvem tem uma cota grátis por dia. A senha garante que só você gasta essa cota. Depois de entrar, o navegador lembra por 30 dias.' },
     { p: 'Apareceu que a cota de hoje acabou.', r: 'A nuvem grátis tem um limite por dia, que zera às 21h (horário de Brasília). Até lá, os outros jogos funcionam. Com a IA do seu PC (escolha "Meu PC"), não tem limite.' },
-    { p: 'Por que a voz do personagem às vezes muda?', r: 'As falas fixas tocam a gravação. O resto usa a voz japonesa do navegador, porque a nuvem grátis não tem voz em japonês. Com a IA do seu PC, a voz vem do AivisSpeech, uma para cada personagem.' },
+    { p: 'Por que às vezes o personagem não fala?', r: 'As falas fixas tocam a gravação. O que a IA da nuvem escreve na hora não tem voz, porque a nuvem grátis não fala japonês. Com a IA do seu PC, toda fala tem voz, do AivisSpeech, uma para cada personagem.' },
     { p: 'Como uso a IA do meu PC no site?', r: 'Escolha "Meu PC" e clique em "Ligar a IA do meu PC". Na primeira vez, o navegador pede licença para o site falar com o PC: clique em Permitir. Depois disso, o Automático acha o PC sozinho.' },
     { p: 'O microfone não liga.', r: 'O reconhecimento de fala ainda está carregando, ou o navegador não deu permissão. Enquanto isso, digite.' },
     { p: 'O que eu falo sai do meu PC?', r: 'Na nuvem, o áudio vai para a IA da Cloudflare, vira texto e não fica guardado. Com a IA do seu PC, nada sai da máquina.' },

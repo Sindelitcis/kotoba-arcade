@@ -93,14 +93,14 @@ describe('voz de cada personagem', () => {
 });
 
 describe('speak', () => {
-  const M: Manifesto = { versao: 1, falas: { はし: { mao: 'a.mp3' }, つぎ: { mao: 'b.mp3', aida: 'c.mp3' } } };
+  const M: Manifesto = { versao: 1, falas: { はし: { mao: 'a.mp3' }, つぎ: { mao: 'b.mp3', aida: 'c.mp3' }, ひ: { mao: 'd.mp3' } } };
   let tocados: string[];
-  let navegador: string[];
+  let avisos: string[];
 
   beforeEach(() => {
     vi.resetModules();
     tocados = [];
-    navegador = [];
+    avisos = [];
     vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify(M))));
     vi.stubGlobal(
       'Audio',
@@ -113,25 +113,18 @@ describe('speak', () => {
         pause() {}
       },
     );
-    vi.stubGlobal('speechSynthesis', {
-      getVoices: () => [{ lang: 'ja-JP' }],
-      cancel: () => {},
-      speak: (u: { text: string }) => navegador.push(u.text),
-    });
-    vi.stubGlobal(
-      'SpeechSynthesisUtterance',
-      class {
-        constructor(public text: string) {}
-      },
-    );
+    vi.spyOn(console, 'warn').mockImplementation((m: string) => void avisos.push(m));
   });
-  afterEach(() => vi.unstubAllGlobals());
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+  });
 
   it('toca a gravação quando o texto está no manifesto', async () => {
     const { speak } = await import('../src/core/audio');
     await speak('はし');
     expect(tocados).toEqual(['/vozes/a.mp3']);
-    expect(navegador).toEqual([]);
+    expect(avisos).toEqual([]);
   });
 
   it('usa a voz do personagem e, sem ela, a padrão', async () => {
@@ -141,34 +134,34 @@ describe('speak', () => {
     expect(tocados).toEqual(['/vozes/c.mp3', '/vozes/a.mp3']);
   });
 
-  it('sem gravação, cai na voz do navegador', async () => {
+  // Bug: o que não tinha gravação caía na voz genérica do navegador.
+  it('sem gravação, fica mudo e avisa no console; nunca a voz do navegador', async () => {
     const { speak } = await import('../src/core/audio');
     await speak('ぜんぜん しらない ことば');
     expect(tocados).toEqual([]);
-    expect(navegador).toEqual(['ぜんぜん しらない ことば']);
+    expect(avisos).toEqual(['[voz] sem gravação (ja): ぜんぜん しらない ことば']);
   });
 
-  it('sem manifesto (rede fora), cai na voz do navegador', async () => {
+  it('kanji sem gravação própria toca a do kana', async () => {
+    const { speakKanji } = await import('../src/core/audio');
+    await speakKanji('日', 'ひ');
+    expect(tocados).toEqual(['/vozes/d.mp3']);
+    expect(avisos).toEqual([]);
+  });
+
+  it('texto escrito na hora pela IA da Conversa: sem gravação, fica mudo sem aviso', async () => {
+    const { speakSeGravado } = await import('../src/core/audio');
+    await speakSeGravado('きょうは なにを しますか');
+    await speakSeGravado('はし');
+    expect(tocados).toEqual(['/vozes/a.mp3']);
+    expect(avisos).toEqual([]);
+  });
+
+  it('sem manifesto (rede fora), fica mudo', async () => {
     vi.stubGlobal('fetch', vi.fn(async () => Promise.reject(new Error('sem rede'))));
     const { speak } = await import('../src/core/audio');
     await speak('はし');
-    expect(navegador).toEqual(['はし']);
-  });
-
-  it('se o arquivo não toca, fala pelo navegador', async () => {
-    vi.stubGlobal(
-      'Audio',
-      class {
-        play() {
-          return Promise.reject(new Error('bloqueado'));
-        }
-        pause() {}
-      },
-    );
-    const { speak } = await import('../src/core/audio');
-    await speak('はし');
-    await new Promise((r) => setTimeout(r, 0));
-    expect(navegador).toEqual(['はし']);
+    expect(tocados).toEqual([]);
   });
 
   it('com a voz desligada, não fala nada', async () => {
@@ -178,6 +171,6 @@ describe('speak', () => {
     await speak('はし');
     app.data.settings.voice = true;
     expect(tocados).toEqual([]);
-    expect(navegador).toEqual([]);
+    expect(avisos).toEqual([]);
   });
 });

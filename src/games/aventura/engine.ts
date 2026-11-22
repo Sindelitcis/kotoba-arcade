@@ -373,9 +373,11 @@ export class ScenePlay {
 
   /**
    * Registra na memória o que aconteceu com as palavras de uma fala.
-   * Palavra nunca vista só é apresentada ali (com leitura e significado na tela) e não
-   * leva nota nesta passada, nem a apresentada antes da cena. Nota boa, uma por palavra
-   * por passada.
+   * Palavra nunca apresentada aparece com leitura e significado na tela (a glosa), mas não
+   * conta como apresentada: só o cartão de apresentação faz isso, senão outro jogo (a Memória,
+   * o KanjiMon) passaria a cobrar uma palavra que a pessoa só viu de passagem. Ela entra no
+   * cartão da próxima passada. A apresentada antes da cena não leva nota nesta passada.
+   * Nota boa, uma por palavra por passada.
    */
   private touch(ids: readonly string[], correct: boolean, hinted: boolean, ms?: number): Word[] {
     const { cards, lookup } = this.deps;
@@ -384,7 +386,7 @@ export class ScenePlay {
     for (const id of ids) {
       const key = cardKey(id, 'meaning');
       if (!foiApresentado(cards, key)) {
-        apresentar(cards, [key], now);
+        if (this.fresh.has(id)) continue;
         this.fresh.add(id);
         this.credited.add(id);
         const w = lookup(id);

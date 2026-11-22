@@ -1,4 +1,5 @@
-import { expect, test, type Page } from '@playwright/test';
+import { firmarCartas } from './apoio';
+import { expect, test, type Page } from './base';
 
 test.beforeEach(async ({ page }) => {
   await page.route('https://kanjimon.online/**', (route) => route.abort());
@@ -50,6 +51,8 @@ test('do fliperama à primeira peça só no teclado: lição primeiro, depois a 
 });
 
 test('peça que não serve volta com o porquê, sem tela de erro', async ({ page }) => {
+  // Só peça de ponto já ensinado engana: が já foi visto em outra rodada.
+  await firmarCartas(page, ['g:ga#uso']);
   await openGame(page);
   await startRound(page);
   await page.keyboard.press('Enter');
@@ -57,7 +60,7 @@ test('peça que não serve volta com o porquê, sem tela de erro', async ({ page
   expect(bad).toBeGreaterThanOrEqual(0);
   await page.keyboard.press(String(bad + 1));
   await expect(page.getByTestId('gr-why')).toContainText('não encaixa aqui');
-  await expect(page.getByTestId('gr-why')).toContainText('vai は');
+  await expect(page.getByTestId('gr-why')).toContainText('は.');
   await expect(page.locator('.gr-block.tried')).toHaveCount(1);
   await expect(page.getByTestId('gr-board')).toBeVisible();
   await expect(page.getByTestId('gr-done')).toHaveCount(0);

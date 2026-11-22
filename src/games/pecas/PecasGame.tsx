@@ -14,6 +14,7 @@ import { KANJI_PECAS, peca, type KanjiPeca, type Palavra } from './dados';
 import { cartaPecas, cartaSignificado, leituraOficial, MODOS, PecasRound, pecasDoKanji, ROUND_SIZE, vistos, type Evento, type Modo, type Pergunta, type Resumo } from './engine';
 import '../../assets/fontes/pecas.css';
 import { carregarTracos, CORES_PECA, elementosDe, KanjiDesenho, PecaDesenho, tracos } from './Tracos';
+import { Furigana } from '../../core/Furigana';
 
 type Tela = 'menu' | 'rodada' | 'resumo';
 
@@ -115,10 +116,7 @@ function Explicacao({ k, falar = true }: { k: KanjiPeca; falar?: boolean }) {
           <b>{k.kanji}</b> = {leituraOficial(k)}
         </button>
         <button class="ghost" onClick={() => falarPalavra(k.palavra)}>
-          <ruby>
-            {k.palavra.jp}
-            <rt>{k.palavra.kana}</rt>
-          </ruby>{' '}
+          <Furigana texto={k.palavra.jp} leitura={k.palavra.kana} />{' '}
           <span class="muted">{k.palavra.pt}</span>
         </button>
       </p>
@@ -340,10 +338,7 @@ export function PecasGame() {
               ) : p.modo === 'composto' ? (
                 <div class="pc-composto-revela">
                   <p class="pc-palavra" lang="ja">
-                    <ruby>
-                      {p.palavra.jp}
-                      <rt>{p.palavra.kana}</rt>
-                    </ruby>{' '}
+                    <Furigana texto={p.palavra.jp} leitura={p.palavra.kana} />{' '}
                     = {p.palavra.pt}
                   </p>
                   <div class="pc-par">

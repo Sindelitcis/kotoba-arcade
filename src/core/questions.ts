@@ -4,7 +4,7 @@
  */
 import { cardKey, KANJI, WORDS, type Kanji, type Word } from '../content';
 import { compareReading, kanaToRomaji, type ReadingMatch } from './kana';
-import { cortarOpcoes, emPratica, opcoesPara } from './ensino';
+import { cortarOpcoes, emPratica, itensApresentados, opcoesPara } from './ensino';
 import { shuffle, type Rng } from './rng';
 import type { CardState } from './srs';
 
@@ -37,6 +37,34 @@ export interface Question {
   echo: string;
 }
 
+/**
+ * Cartas da pessoa, quando a pergunta deve usar só alternativas que ela já viu. Com as cartas,
+ * toda alternativa errada é de um item já apresentado (core/ensino.ts): ninguém escolhe entre
+ * coisas que nunca viu. Sem elas (testes de conteúdo), vale o conteúdo inteiro.
+ */
+export type Vistos = Readonly<Record<string, CardState>> | undefined;
+
+/** Conjunto dos itens apresentados, montado uma vez por cartas (as perguntas de um encontro usam o mesmo). */
+const cache = new WeakMap<object, { n: number; itens: Set<string> }>();
+function apresentados(cards: Readonly<Record<string, CardState>>): Set<string> {
+  const n = Object.keys(cards).length;
+  const c = cache.get(cards);
+  if (c && c.n === n) return c.itens;
+  const itens = itensApresentados(cards);
+  cache.set(cards, { n, itens });
+  return itens;
+}
+
+const visto = (cards: Vistos, itemId: string) => !cards || apresentados(cards).has(itemId);
+const kanjiVistos = (cards: Vistos) => KANJI.filter((o) => visto(cards, o.id));
+const palavrasVistas = (cards: Vistos) => WORDS.filter((o) => visto(cards, o.id));
+/**
+ * Significados já vistos, de kanji e de palavra. No começo há poucas palavras vistas; os
+ * significados dos kanji apresentados completam as alternativas sem trazer nada desconhecido.
+ */
+const significadosVistos = (cards: Vistos): string[] =>
+  cards ? [...kanjiVistos(cards).map((o) => o.pt[0] as string), ...palavrasVistas(cards).map((o) => o.pt)] : [];
+
 function neighbors<T>(list: readonly T[], index: number, radius: number): T[] {
   const out: T[] = [];
   for (let i = Math.max(0, index - radius); i <= Math.min(list.length - 1, index + radius); i++) {
@@ -63,16 +91,16 @@ function choicesFor(rng: Rng, answer: string, near: string[], far: readonly stri
   return shuffle(rng, [answer, ...distractors(rng, answer, near, far, alsoRight)]);
 }
 
-export function kanjiMeaningQuestion(k: Kanji, rng: Rng): Question {
+export function kanjiMeaningQuestion(k: Kanji, rng: Rng, cards?: Vistos): Question {
   const idx = KANJI.indexOf(k);
   const answer = k.pt[0] as string;
-  const near = neighbors(KANJI, idx, 6).map((o) => o.pt[0] as string);
+  const near = neighbors(KANJI, idx, 6).filter((o) => visto(cards, o.id)).map((o) => o.pt[0] as string);
   return {
     kind: 'kanji-meaning',
     card: cardKey(k.id, 'meaning'),
     prompt: k.kanji,
     ask: 'O que significa?',
-    choices: choicesFor(rng, answer, near, KANJI.map((o) => o.pt[0] as string), (v) => k.pt.includes(v)),
+    choices: choicesFor(rng, answer, near, cards ? significadosVistos(cards) : KANJI.map((o) => o.pt[0] as string), (v) => k.pt.includes(v)),
     answer,
     typing: false,
     dica: k.story,
@@ -80,7 +108,7 @@ export function kanjiMeaningQuestion(k: Kanji, rng: Rng): Question {
   };
 }
 
-export function kanjiRecallQuestion(k: Kanji, rng: Rng): Question {
+export function kanjiRecallQuestion(k: Kanji, rng: Rng, cards?: Vistos): Question {
   const idx = KANJI.indexOf(k);
   const meaning = k.pt[0] as string;
   // 天 e 空 querem dizer "céu": um não pode ser a alternativa errada do outro.
@@ -90,7 +118,13 @@ export function kanjiRecallQuestion(k: Kanji, rng: Rng): Question {
     card: cardKey(k.id, 'recall'),
     prompt: k.pt[0] as string,
     ask: 'Qual é o kanji?',
-    choices: choicesFor(rng, k.kanji, neighbors(KANJI, idx, 6).map((o) => o.kanji), KANJI.map((o) => o.kanji), (v) => sameMeaning.has(v)),
+    choices: choicesFor(
+      rng,
+      k.kanji,
+      neighbors(KANJI, idx, 6).filter((o) => visto(cards, o.id)).map((o) => o.kanji),
+      kanjiVistos(cards).map((o) => o.kanji),
+      (v) => sameMeaning.has(v),
+    ),
     answer: k.kanji,
     typing: false,
     dica: readingLines(k)[0] as string,
@@ -116,18 +150,18 @@ function echoOf(w: Word): string {
   return `${w.jp} · ${w.kana} · ${w.pt}`;
 }
 
-function wordNeighbors(w: Word): Word[] {
-  return neighbors(WORDS, WORDS.indexOf(w), 9);
+function wordNeighbors(w: Word, cards: Vistos): Word[] {
+  return neighbors(WORDS, WORDS.indexOf(w), 9).filter((o) => visto(cards, o.id));
 }
 
-export function wordMeaningQuestion(w: Word, rng: Rng): Question {
+export function wordMeaningQuestion(w: Word, rng: Rng, cards?: Vistos): Question {
   return {
     kind: 'word-meaning',
     card: cardKey(w.id, 'meaning'),
     prompt: w.jp,
     sub: w.kana,
     ask: 'O que significa?',
-    choices: choicesFor(rng, w.pt, wordNeighbors(w).map((o) => o.pt), WORDS.map((o) => o.pt)),
+    choices: choicesFor(rng, w.pt, wordNeighbors(w, cards).map((o) => o.pt), cards ? significadosVistos(cards) : WORDS.map((o) => o.pt)),
     answer: w.pt,
     typing: false,
     dica: `Lê-se ${w.kana}.`,
@@ -137,19 +171,20 @@ export function wordMeaningQuestion(w: Word, rng: Rng): Question {
   };
 }
 
-export function wordReadingQuestion(w: Word, rng: Rng, typing: boolean): Question {
+export function wordReadingQuestion(w: Word, rng: Rng, typing: boolean, cards?: Vistos): Question {
   // Alternativas de tamanho parecido, para não dar para acertar só pelo comprimento.
-  const near = wordNeighbors(w)
+  const near = wordNeighbors(w, cards)
     .filter((o) => Math.abs(o.kana.length - w.kana.length) <= 1)
     .map((o) => o.kana);
-  const far = WORDS.filter((o) => Math.abs(o.kana.length - w.kana.length) <= 1).map((o) => o.kana);
+  const vistas = palavrasVistas(cards);
+  const far = vistas.filter((o) => Math.abs(o.kana.length - w.kana.length) <= 1).map((o) => o.kana);
   return {
     kind: 'word-reading',
     card: cardKey(w.id, 'reading'),
     prompt: w.jp,
     sub: w.pt,
     ask: typing ? 'Digite a leitura (romaji ou kana)' : 'Como se lê?',
-    choices: choicesFor(rng, w.kana, near, far.length >= 4 ? far : WORDS.map((o) => o.kana)),
+    choices: choicesFor(rng, w.kana, near, far.length >= 4 ? far : [...vistas.map((o) => o.kana), ...(cards ? kanjiVistos(cards).map((o) => o.reading) : [])]),
     answer: w.kana,
     typing,
     dica: `Começa com ${[...w.kana][0]}.`,

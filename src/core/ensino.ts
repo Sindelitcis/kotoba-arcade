@@ -49,6 +49,13 @@ export function foiApresentado(cards: Readonly<Record<string, CardState>>, chave
   return false;
 }
 
+/** Todos os itens já apresentados, de uma vez (para filtrar listas grandes sem varrer as cartas a cada item). */
+export function itensApresentados(cards: Readonly<Record<string, CardState>>): Set<string> {
+  const out = new Set<string>();
+  for (const k in cards) out.add(itemDe(k));
+  return out;
+}
+
 export function faseDe(cards: Readonly<Record<string, CardState>>, chave: string): FaseEnsino {
   const c = cards[chave];
   if (!c) return foiApresentado(cards, chave) ? 'pratica' : 'novo';

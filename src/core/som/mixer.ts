@@ -107,7 +107,7 @@ export function volumeVoz(): number {
  * Acompanha uma voz: aplica o volume de voz e abaixa a música enquanto ela toca.
  * Chame antes de começar a tocar ou falar.
  */
-export function acompanharVoz(fonte: HTMLAudioElement | SpeechSynthesisUtterance): void {
+export function acompanharVoz(fonte: HTMLAudioElement): void {
   fonte.volume = volumeVoz();
   if (typeof fonte.addEventListener !== 'function') return;
   let ativa = false;
@@ -123,14 +123,8 @@ export function acompanharVoz(fonte: HTMLAudioElement | SpeechSynthesisUtterance
     vozesAtivas.value = Math.max(0, vozesAtivas.value - 1);
     aplicarVolumes();
   };
-  if (typeof SpeechSynthesisUtterance !== 'undefined' && fonte instanceof SpeechSynthesisUtterance) {
-    fonte.addEventListener('start', comeca);
-    fonte.addEventListener('end', acaba);
-    fonte.addEventListener('error', acaba);
-  } else {
-    for (const ev of ['play', 'playing']) fonte.addEventListener(ev, comeca);
-    for (const ev of ['pause', 'ended', 'error', 'emptied', 'abort']) fonte.addEventListener(ev, acaba);
-  }
+  for (const ev of ['play', 'playing']) fonte.addEventListener(ev, comeca);
+  for (const ev of ['pause', 'ended', 'error', 'emptied', 'abort']) fonte.addEventListener(ev, acaba);
 }
 
 // ---------- arquivos ----------

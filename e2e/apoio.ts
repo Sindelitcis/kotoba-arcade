@@ -88,3 +88,16 @@ export function chavesDosKanji(): string[] {
 export function chavesDosKana(): string[] {
   return KANA_TABLE.flatMap((k) => [`a:${k.hira}#reading`, `ak:${k.kata}#reading`]);
 }
+
+/** Cartas do Kanji em peças de todos os kanji (lidos dos arquivos de dados), como de quem já viu todos. */
+export function chavesDasPecas(): string[] {
+  const dir = join(process.cwd(), 'src', 'games', 'pecas', 'dados');
+  const out: string[] = [];
+  for (const f of ['n5.ts', 'n4.ts', 'n3a.ts', 'n3b.ts']) {
+    for (const linha of readFileSync(join(dir, f), 'utf8').split('\n')) {
+      const m = /^(\S)\|/.exec(linha);
+      if (m) out.push(`k:${m[1]}#pecas`);
+    }
+  }
+  return out;
+}

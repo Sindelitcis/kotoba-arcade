@@ -34,7 +34,6 @@ export const OUVIR: Ajuda = {
   perguntas: [
     { p: 'Preciso ouvir na ordem?', r: 'Não. Escolha qualquer aula. A ordem é só a da Jornada.' },
     { p: 'A aula conta como missão da Jornada?', r: 'Não. Ela prepara a lição em quadrinhos, que continua sendo a missão.' },
-    { p: 'Posso trocar a voz em português?', r: 'Pode. Em Ajustes, no fliperama, escolha Voz 1 ou Voz 2. Vale para as aulas e para as explicações dos jogos.' },
     SAVE,
   ],
 };

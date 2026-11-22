@@ -3,7 +3,7 @@ import { useAprofundar } from '../../core/aprofundar/estado';
 import { gramaticaDaFrase } from '../../content/aprofundar/detectar';
 import { app, commit, conversaSave, go, screen } from '../../core/app';
 import { CENA_CONVERSA, cenaStyle, pessoaUrl } from '../../core/arte';
-import { sfx, speak, speakWord } from '../../core/audio';
+import { sfx, speakSeGravado, speakWord } from '../../core/audio';
 import { acompanharVoz } from '../../core/som/mixer';
 import { VOZ_CONVERSA } from '../../core/vozes';
 import { onomato } from '../../core/fx';
@@ -38,6 +38,7 @@ import { Apresentacao } from '../../core/Apresentacao';
 import { cardKey } from '../../content';
 import { itemDaPalavra, type ItemNovo } from '../../content/ensino';
 import { gravar, type Gravacao } from './microfone';
+import { Furigana } from '../../core/Furigana';
 
 type Fase = 'procurando' | 'senha' | 'desligado' | 'pc-fora' | 'menu' | 'apresenta' | 'conversa' | 'resumo';
 
@@ -51,10 +52,9 @@ function RubyText({ ruby }: { ruby: readonly Ruby[] }) {
     <>
       {ruby.map((r, i) =>
         r.r ? (
-          <ruby key={i}>
-            {r.t}
-            <rt>{r.r}</rt>
-          </ruby>
+          <span key={i}>
+            <Furigana texto={r.t} leitura={r.r} />
+          </span>
         ) : (
           <span key={i}>{r.t}</span>
         ),
@@ -225,7 +225,7 @@ export function ConversaGame() {
     };
   }, []);
 
-  /** Fala do personagem: voz do servidor local; se ela falhar, a gravada (abertura) ou a do navegador. */
+  /** Fala do personagem: voz do servidor local; se ela falhar, a gravada (abertura e frases prontas). */
   const tocar = async (linha: Linha, cena: Cena) => {
     if (!app.data.settings.voice) return;
     audioEl.current?.pause();
@@ -242,10 +242,10 @@ export function ConversaGame() {
         await a.play();
         return;
       } catch {
-        // cai para a voz do navegador
+        // sem o AivisSpeech do PC, só toca o que estiver gravado
       }
     }
-    speak(linha.jp, VOZ_CONVERSA[cena.personagem.voz]);
+    speakSeGravado(linha.jp, VOZ_CONVERSA[cena.personagem.voz]);
   };
 
   const reagir = (events: Evento[]) => {
@@ -774,7 +774,7 @@ export function ConversaGame() {
           )}
           {resumo.novas.length > 0 && (
             <div class="cv-block" data-testid="cv-new">
-              <h3>Palavras novas na sua memória</h3>
+              <h3>Palavras novas desta conversa</h3>
               <ul class="av-words">
                 {resumo.novas.map((t) => (
                   <li key={t.id}>

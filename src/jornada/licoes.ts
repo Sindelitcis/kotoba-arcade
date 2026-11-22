@@ -303,30 +303,76 @@ function quadroExpressao(e: Expressao): Quadro {
   };
 }
 
-function perguntaExpressao(e: Expressao): Pergunta {
+/**
+ * Erradas de uma expressão: outras que a pessoa já viu, na lição (o trio dela primeiro) ou nas
+ * lições de expressões anteriores (`antes`), nunca uma que se confunde de verdade. Só se nada
+ * disso bastar entram as de outro contexto.
+ */
+export function erradasVistas(e: Expressao, vistas: readonly Expressao[], antes: readonly Expressao[] = []): Expressao[] {
+  const out: Expressao[] = [];
+  for (const o of [...[...vistas].reverse(), ...antes]) if (out.length < 2 && o !== e && !seConfundem(e.id, o.id) && !out.includes(o)) out.push(o);
+  for (const o of erradasDaExpressao(e)) if (out.length < 2 && !out.includes(o)) out.push(o);
+  return out;
+}
+
+function perguntaExpressao(e: Expressao, vistas: readonly Expressao[], antes: readonly Expressao[]): Pergunta {
   return {
     tipo: 'pergunta',
     id: `expr:${e.id}`,
     enunciado: `${e.quando} O que dizer?`,
     correta: e.jp,
-    erradas: erradasDaExpressao(e).map((o) => o.jp),
+    erradas: erradasVistas(e, vistas, antes).map((o) => o.jp),
     japones: true,
     explicacao: `${textoSimples(e.jp)}: ${e.pt}. Registro ${NOME_CURTO[e.registro].toLowerCase()}.`,
     falaResposta: falaFrase(e.jp),
   };
 }
 
-function emTrios<T>(itens: readonly T[], quadro: (x: T) => Quadro, pergunta: (x: T) => Passo, porVez = TRIO): Passo[] {
-  return pedacos(itens, porVez).flatMap((t) => [...t.map(quadro), ...t.map(pergunta)]);
+/**
+ * Quadros de três em três, cada trio seguido das perguntas dele. A pergunta recebe tudo o que
+ * a lição já apresentou até ali (os trios anteriores e o dela), para tirar as alternativas
+ * erradas só do que a pessoa já viu (docs/ensino.md).
+ */
+function emTrios<T>(itens: readonly T[], quadro: (x: T) => Quadro, pergunta: (x: T, vistos: readonly T[]) => Passo, porVez = TRIO): Passo[] {
+  const vistos: T[] = [];
+  return pedacos(itens, porVez).flatMap((t) => {
+    vistos.push(...t);
+    const ate = [...vistos];
+    return [...t.map(quadro), ...t.map((x) => pergunta(x, ate))];
+  });
 }
 
-const expressoes = GRUPOS_EXPRESSOES.map((g) => {
-  const itens = g.ids.map((id) => {
-    const e = expressaoPorId.get(id);
-    if (!e) throw new Error(`expressão desconhecida: ${id}`);
-    return e;
-  });
-  return licao(`expr:${g.id}`, g.titulo, emTrios(itens, quadroExpressao, perguntaExpressao));
+/**
+ * Ordem dos quadros de um grupo de expressões: cada trio evita juntar as que se confundem
+ * (おはよう, こんにちは e こんばんは no mesmo trio deixariam a pergunta sem errada já vista,
+ * já que uma não pode ser a errada da outra). Fora isso, segue a ordem da escola.
+ */
+export function trioSemConfusao(itens: readonly Expressao[]): Expressao[] {
+  const resto = [...itens];
+  const out: Expressao[] = [];
+  while (resto.length > 0) {
+    const trio: Expressao[] = [];
+    while (trio.length < TRIO && resto.length > 0) {
+      const i = resto.findIndex((e) => trio.every((o) => !seConfundem(e.id, o.id)));
+      trio.push(...resto.splice(i >= 0 ? i : 0, 1));
+    }
+    out.push(...trio);
+  }
+  return out;
+}
+
+const expressoes = GRUPOS_EXPRESSOES.map((g, n) => {
+  const doGrupo = (ids: readonly string[]) =>
+    ids.map((id) => {
+      const e = expressaoPorId.get(id);
+      if (!e) throw new Error(`expressão desconhecida: ${id}`);
+      return e;
+    });
+  // As lições anteriores, da mais recente para a mais antiga.
+  const antes = GRUPOS_EXPRESSOES.slice(0, n)
+    .reverse()
+    .flatMap((o) => doGrupo(o.ids));
+  return licao(`expr:${g.id}`, g.titulo, emTrios(trioSemConfusao(doGrupo(g.ids)), quadroExpressao, (e, vistas) => perguntaExpressao(e, vistas, antes)));
 });
 
 // ───────── Situações ─────────
@@ -388,10 +434,18 @@ function quadroPalavra(p: PalavraTema): Quadro {
   return { tipo: 'quadro', jp: palavra.jp, pt: palavra.pt, linhas, fala: falaDaPalavra(p), carta: p.word ? cardKey(p.word.id, 'meaning') : undefined };
 }
 
-function perguntaPalavra(p: PalavraTema, vizinhas: readonly PalavraTema[]): Pergunta {
+/**
+ * `vistas`: as palavras que a lição já apresentou (o trio da pergunta por último). `antes`:
+ * as do mesmo tema em lições anteriores. Errada só sai daí, ou do par parecido, que o quadro
+ * mostra ("Não confunda com..."). Só a primeira palavra de um tema, sem nada visto, usa as
+ * vizinhas.
+ */
+function perguntaPalavra(p: PalavraTema, vistas: readonly PalavraTema[], antes: readonly PalavraTema[], vizinhas: readonly PalavraTema[]): Pergunta {
   // O par parecido (おばさん × おばあさん) é a melhor alternativa errada: treina o detalhe.
   const pares = (p.palavra.parecidas ?? []).map((id) => porOrigem.get(id)).filter((x): x is PalavraTema => !!x);
-  const outras = vizinhas.filter((v) => v !== p && !pares.includes(v));
+  const conhecidas = [...[...vistas].reverse(), ...[...antes].reverse()];
+  const lista = conhecidas.filter((v) => v !== p).length > 0 ? conhecidas : vizinhas;
+  const outras = [...lista, ...vizinhas].filter((v, i, a) => v !== p && !pares.includes(v) && a.indexOf(v) === i && v.palavra.pt !== p.palavra.pt);
   const erradas = [...pares, ...outras].slice(0, 2).map((o) => o.palavra.pt);
   return {
     tipo: 'pergunta',
@@ -427,7 +481,8 @@ function licoesDoTema(tema: string): Licao[] {
     // Vogal longa e っ: cada palavra já com a pergunta, porque a lição abre com uma página de texto.
     const porVez = tema === 'sons' ? 1 : TRIO;
     PALAVRAS_DA_LICAO.set(`vocab:${tema}:${n}`, grupo);
-    out.push(licao(`vocab:${tema}:${n}`, titulo, emTrios(grupo, quadroPalavra, (p) => perguntaPalavra(p, vizinhas(p)), porVez)));
+    const antes = todas.slice(0, i);
+    out.push(licao(`vocab:${tema}:${n}`, titulo, emTrios(grupo, quadroPalavra, (p, vistas) => perguntaPalavra(p, vistas, antes, vizinhas(p)), porVez)));
   }
   return out;
 }
@@ -476,9 +531,13 @@ function quadroKanji(k: KanjiEscola): Quadro {
   };
 }
 
-function perguntaKanji(k: KanjiEscola, grupo: readonly KanjiEscola[]): Pergunta {
-  const i = grupo.indexOf(k);
-  const erradas = [1, 2].map((d) => (grupo[(i + d) % grupo.length] as KanjiEscola).significado);
+/** Erradas: significados de outros kanji que a lição já apresentou (o trio dela primeiro). */
+function perguntaKanji(k: KanjiEscola, vistos: readonly KanjiEscola[]): Pergunta {
+  const erradas = [...vistos]
+    .reverse()
+    .filter((o) => o !== k && o.significado !== k.significado)
+    .slice(0, 2)
+    .map((o) => o.significado);
   return {
     tipo: 'pergunta',
     id: `kanji:${k.char}`,
@@ -498,7 +557,7 @@ export const GRUPOS_KANJI: readonly (readonly KanjiEscola[])[] = (() => {
   return out;
 })();
 
-const kanji = GRUPOS_KANJI.map((g, i) => licao(`kanji:${i + 1}`, `Kanji ${i + 1}: ${g.map((k) => k.char).join(' ')}`, emTrios(g, quadroKanji, (k) => perguntaKanji(k, g))));
+const kanji = GRUPOS_KANJI.map((g, i) => licao(`kanji:${i + 1}`, `Kanji ${i + 1}: ${g.map((k) => k.char).join(' ')}`, emTrios(g, quadroKanji, perguntaKanji)));
 
 // ───────── Índice ─────────
 

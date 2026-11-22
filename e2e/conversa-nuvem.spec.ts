@@ -1,4 +1,4 @@
-import { expect, test, type Page, type Route } from '@playwright/test';
+import { expect, test, type Page, type Route } from './base';
 import { passarApresentacao } from './apoio';
 
 // A Conversa na nuvem (Cloudflare) com o servidor simulado: aqui o e2e roda no vite preview, sem as Functions.

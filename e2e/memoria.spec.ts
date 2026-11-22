@@ -1,4 +1,4 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Page } from './base';
 import { passarApresentacao, seApresentar } from './apoio';
 
 const SHOTS = process.env.SHOTS_DIR;
@@ -108,4 +108,39 @@ test('no celular, o quadro cabe na tela sem rolar para o lado', async ({ page })
   await expect(page.getByTestId('me-quadro')).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/memoria-celular.png`, fullPage: true });
+});
+
+test('caso relatado: save antigo com prateleira, cama, cadeira e livro sem apresentação. Nada vai para o quadro sem passar pelo cartão', async ({ page }) => {
+  // Save da versão 1: a carta existia sem a pessoa ter visto a palavra. Antes, a Memória
+  // ensinava テレビ e logo cobrava たな, ベッド, いす e ほん.
+  await page.evaluate(() => {
+    const carta = { due: Date.now() - 86_400_000, stability: 0, difficulty: 0, elapsed_days: 0, scheduled_days: 0, learning_steps: 0, reps: 0, lapses: 0, state: 0 };
+    const cards = Object.fromEntries(['w:棚', 'w:ベッド', 'w:椅子', 'w:本'].map((id) => [`${id}#meaning`, carta]));
+    localStorage.setItem('kotoba-arcade:save', JSON.stringify({ v: 1, createdAt: 0, updatedAt: 0, cards, games: {} }));
+  });
+  await page.reload();
+  await abrir(page);
+  await page.keyboard.press('Enter');
+  const vistas = new Set<string>();
+  for (let quadro = 0; quadro < 3; quadro++) {
+    const cartao = page.getByTestId('apresentacao');
+    await page.waitForTimeout(150);
+    while (await cartao.isVisible()) {
+      vistas.add((await cartao.getAttribute('data-item'))!.split('#')[0]!);
+      const antes = `${await cartao.getAttribute('data-item')}|${await cartao.getAttribute('data-i')}`;
+      await page.keyboard.press('Enter');
+      await expect(async () => {
+        if (!(await cartao.isVisible())) return;
+        expect(`${await cartao.getAttribute('data-item')}|${await cartao.getAttribute('data-i')}`).not.toBe(antes);
+      }).toPass({ timeout: 3000 });
+    }
+    await expect(page.getByTestId('me-quadro')).toBeVisible();
+    const noQuadro = await page.locator('.me-carta').evaluateAll((els) => els.map((e) => e.getAttribute('data-palavra')!));
+    for (const id of noQuadro) expect(vistas, `${id} no quadro sem ter sido apresentada`).toContain(id);
+    await resolverQuadro(page);
+    if (quadro < 2) {
+      await expect(page.getByTestId('me-pausa')).toBeVisible();
+      await page.keyboard.press('Enter');
+    }
+  }
 });

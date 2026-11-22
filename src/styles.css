@@ -1248,7 +1248,6 @@ input[type='text'], input:not([type]) { color: var(--text); }
 .ap-ex-pt { color: var(--text-2); font-size: 0.92rem; }
 .ap-acoes { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
 .ap-acoes .primary { margin-left: auto; }
-.ap-voz { font-size: 0.85rem; }
 /* Cena Viva na prática: o que ainda não foi apresentado fica apagado e não clica. */
 .cn-coisa.apagada { opacity: 0.35; filter: grayscale(0.7); pointer-events: none; }
 .cn-opcoes { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }

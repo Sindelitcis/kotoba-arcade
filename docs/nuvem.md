@@ -75,10 +75,10 @@ Errar a leitura é pior que não mostrar, então o servidor só aceita a respost
 
 Uma alternativa seria o kuromoji no navegador (dicionário de 17 MB, leitura exata e sem gastar cota), mas instalar um pacote novo de terceiros foi barrado nesta mudança. Fica como ideia para depois, se a cota apertar.
 
-**Voz: a do navegador.** O único modelo de voz em japonês do Workers AI, o MeloTTS, foi descontinuado em 20/11/2026 (a chamada devolve "Model has been deprecated"). Os outros (Deepgram Aura) só falam inglês e espanhol. Então:
+**Voz: só a gravada.** O único modelo de voz em japonês do Workers AI, o MeloTTS, foi descontinuado em 20/11/2026 (a chamada devolve "Model has been deprecated"). Os outros (Deepgram Aura) só falam inglês e espanhol. Então:
 
 - falas fixas (abertura de cada cena e tudo que já foi gravado): os mp3 de `public/vozes`, gravados com AivisSpeech/VOICEVOX, como antes;
-- falas novas da IA: a voz japonesa do navegador, com a configuração de cada personagem (`VOZ_CONVERSA`).
+- falas novas da IA: sem voz. A voz genérica do navegador saiu do site; com a IA do PC, toda fala tem voz do AivisSpeech.
 
 A voz do AivisSpeech no PC continua bem melhor (tem uma voz por personagem e entonação natural). Quem tem a IA instalada no PC pode usar ela no próprio site publicado: a Conversa tem a escolha "IA: Automático · Nuvem · Meu PC". Veja `docs/ia-do-pc.md`.
 

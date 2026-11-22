@@ -2,8 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { KANJI, WORDS, getWord } from '../src/content';
 import { isKana } from '../src/core/kana';
 import { dayKey, levelInfo, markPlayed, readingMeter, recentDays } from '../src/core/progress';
-import { emptySave, exportSave, importSave, loadSave, memoryStore, SAVE_KEY, writeSave } from '../src/core/save';
-import { DAY, review, newCard } from '../src/core/srs';
+import { emptySave, exportSave, importSave, loadSave, memoryStore, SAVE_KEY, SAVE_VERSION, writeSave } from '../src/core/save';
+import { DAY, review, newCard, State } from '../src/core/srs';
 
 const T0 = new Date('2026-11-15T12:00:00').getTime();
 
@@ -145,7 +145,7 @@ describe('cartas estragadas no save', () => {
     // Um backup editado à mão (ou de versão antiga) com "due" em texto quebrava o FSRS na hora da revisão.
     const boa = review(newCard(0), { correct: true }, T0);
     const texto = JSON.stringify({
-      v: 1,
+      v: 2,
       cards: {
         'k:一#meaning': boa,
         'k:二#meaning': { ...boa, due: 'amanhã' },
@@ -157,6 +157,38 @@ describe('cartas estragadas no save', () => {
     const s = importSave(texto, T0);
     expect(Object.keys(s.cards)).toEqual(['k:一#meaning']);
     expect(() => review(s.cards['k:一#meaning']!, { correct: true }, T0 + DAY)).not.toThrow();
+  });
+});
+
+describe('save da versão 1: carta sem apresentação', () => {
+  // Bug relatado: a Memória ensinou テレビ e logo cobrou たんす, ベッド, 椅子 e 本. Essas palavras
+  // tinham carta de um save antigo, de quando os jogos criavam carta sem apresentar nada, e
+  // "ter carta" passou a querer dizer "já foi apresentado".
+  const firme = () => {
+    let c = review(newCard(0), { correct: true }, T0 - 400 * DAY);
+    while (c.state !== State.Review) c = review(c, { correct: true }, c.due);
+    return c;
+  };
+
+  it('fica só o item que a pessoa já sabe (alguma carta em revisão); o resto volta a ser novo', () => {
+    const texto = JSON.stringify({
+      v: 1,
+      cards: {
+        'w:椅子#meaning': newCard(T0),
+        'w:本#meaning': review(newCard(0), { correct: true }, T0),
+        'w:机#meaning': firme(),
+        'w:机#reading': newCard(T0),
+        'a:あ#reading': firme(),
+      },
+    });
+    const s = importSave(texto, T0);
+    expect(Object.keys(s.cards).sort()).toEqual(['a:あ#reading', 'w:机#meaning', 'w:机#reading']);
+    expect(s.v).toBe(SAVE_VERSION);
+  });
+
+  it('no save novo (versão 2), toda carta fica: ela só existe depois da apresentação', () => {
+    const s = importSave(JSON.stringify({ v: 2, cards: { 'w:椅子#meaning': newCard(T0) } }), T0);
+    expect(Object.keys(s.cards)).toEqual(['w:椅子#meaning']);
   });
 });
 

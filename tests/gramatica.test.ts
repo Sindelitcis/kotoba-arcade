@@ -43,6 +43,14 @@ function setup(seed = 1, course: Course = COURSE) {
   return { data, save, deps, tick: (ms: number) => (t += ms), round: () => new GramaticaRound(deps) };
 }
 
+/**
+ * A pessoa já viu o segundo ponto (が) em outra rodada: a peça dele pode confundir na bandeja.
+ * Sem isso, o primeiro ponto não tem peça errada nenhuma (só peça de ponto visto engana).
+ */
+function conhecerGa(cards: Record<string, CardState>): void {
+  cards[cardOf('ga')] = newCard(T0 - DAY);
+}
+
 /** Carta já firme, vista ontem, que ainda não venceu. */
 function firm(): CardState {
   let card = review(newCard(0), { correct: true }, T0 - DAY);
@@ -186,8 +194,16 @@ describe('rodada', () => {
     expect(r.activeSlot!.tray).toContain('は');
   });
 
-  it('peça errada volta com o porquê, sem tela de erro, e a frase continua', () => {
+  it('primeiro ponto, nada visto antes: a bandeja não traz peça de ponto que ninguém ensinou', () => {
     const { round } = setup();
+    const r = round();
+    r.begin();
+    for (const slot of r.puzzle.slots.filter((x) => x.open)) expect(slot.tray.every((b) => fits(slot.role, b))).toBe(true);
+  });
+
+  it('peça errada volta com o porquê, sem tela de erro, e a frase continua', () => {
+    const { round, deps } = setup();
+    conhecerGa(deps.cards);
     const r = round();
     r.begin();
     const slot = r.activeSlot!;
@@ -249,6 +265,7 @@ describe('rodada', () => {
 
   it('depois do primeiro contato, errar conta na memória', () => {
     const { round, deps, tick } = setup();
+    conhecerGa(deps.cards);
     const r = round();
     solve(r);
     const before = deps.cards[cardOf('wa')]!;
@@ -374,7 +391,8 @@ describe('rodada', () => {
   });
 
   it('errar muito não expulsa ninguém: a rodada sempre chega ao fim', () => {
-    const { round } = setup(7);
+    const { round, deps } = setup(7);
+    conhecerGa(deps.cards);
     const r = round();
     for (let i = 0; i < ROUND_SIZE; i++) {
       wrongFirst(r);

@@ -1,4 +1,4 @@
-import { expect, test, type Page, type Route } from '@playwright/test';
+import { expect, test, type Page, type Route } from './base';
 import { passarApresentacao } from './apoio';
 
 // Modo híbrido: PC ligado e sessão na nuvem. O texto vem da nuvem; ouvir, furigana e voz, do PC.

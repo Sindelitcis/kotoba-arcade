@@ -3,8 +3,8 @@ import type { LinhaTecla, Pergunta } from './tipos';
 
 /** Teclas da apresentação de coisa nova, igual em todos os jogos. */
 export const TECLAS_APRESENTA: LinhaTecla = {
-  teclas: ['←', '→', 'R', 'V'],
-  faz: 'Na apresentação de coisa nova: voltar, seguir, ouvir de novo, trocar a voz do português (Voz 1 ou Voz 2)',
+  teclas: ['←', '→', 'R'],
+  faz: 'Na apresentação de coisa nova: voltar, seguir, ouvir de novo',
 };
 
 /** Por que tem apresentação e prática antes da cobrança. */

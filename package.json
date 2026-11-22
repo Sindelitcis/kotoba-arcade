@@ -15,8 +15,7 @@
     "local": "node local/iniciar.mjs",
     "test:local": "python -I -m unittest discover -s local -p \"test_*.py\"",
     "vozes": "python -I scripts/placa.py --nome vozes --vram 4 -- node scripts/gravar-vozes.mjs",
-    "vozes-pt:voz1": "python -I scripts/placa.py --nome vozes-pt-voz1 --vram 11 -- node scripts/gravar-vozes-pt.mjs --voz1",
-    "vozes-pt:voz2": "python -I scripts/placa.py --nome vozes-pt-voz2 --vram 3 -- node scripts/gravar-vozes-pt.mjs --voz2"
+    "vozes-pt": "python -I scripts/placa.py --nome vozes-pt --vram 11 -- node scripts/gravar-vozes-pt.mjs"
   },
   "dependencies": {
     "@preact/signals": "^2.11.4",

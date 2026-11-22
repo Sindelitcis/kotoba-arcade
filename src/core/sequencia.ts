@@ -4,16 +4,17 @@
  * dos jogos (explicação em português e, logo depois, o exemplo em japonês).
  *
  * Japonês vem de `public/vozes` (as mesmas gravações dos jogos). Português vem de
- * `fala-pt.ts`, na voz em português escolhida nos Ajustes.
- * Sem gravação, a voz do navegador. Qualquer fala nova (`speak()`) para a sequência.
+ * `fala-pt.ts`. Trecho sem gravação fica mudo e avisa no console (`sem-gravacao.ts`).
+ * Qualquer fala nova (`speak()`) para a sequência.
  */
 import { app } from './app';
 import { assumirFala, largarFala, loadVoices, recordedFile, VOZES_URL, type Manifesto } from './audio';
-import { carregarPt, urlPt, type FontesPt } from './fala-pt';
+import { carregarPt, urlPt, type ManifestoPt } from './fala-pt';
+import { avisarSemGravacao } from './sem-gravacao';
 import { acompanharVoz } from './som/mixer';
 import { VOZ_PADRAO, VOZ_PALAVRA } from './vozes';
 
-/** Japonês falado: a chave da gravação, a voz e o kana para a voz do navegador. */
+/** Japonês falado: a chave da gravação, a voz e o kana (outra chave, se o texto não tiver gravação). */
 export interface FalaJp {
   texto: string;
   voz: 'palavra' | 'frase';
@@ -32,12 +33,10 @@ export function msDaPausa(vezes: number, ultimoJpSeg: number): number {
   return Math.round(s * 1000);
 }
 
-/** O que a sequência precisa do navegador: tocar um endereço e falar sem gravação. */
+/** O que a sequência precisa do navegador: tocar um endereço e esperar. */
 export interface Saida {
   /** Toca o arquivo; resolve com a duração em segundos (0 se não tocou). */
   tocar(url: string, sinal: AbortSignal): Promise<number>;
-  /** Voz do navegador. Resolve quando termina (ou logo, se não houver voz). */
-  falarNavegador(texto: string, lang: 'pt-BR' | 'ja-JP', sinal: AbortSignal): Promise<void>;
   esperar(ms: number, sinal: AbortSignal): Promise<void>;
 }
 
@@ -55,22 +54,6 @@ export const saidaDoNavegador: Saida = {
     });
     return Promise.race([fim, abortado(sinal).then(() => (a.pause(), 0))]);
   },
-  falarNavegador(texto, lang, sinal) {
-    if (typeof speechSynthesis === 'undefined') return Promise.resolve();
-    const voz = speechSynthesis.getVoices().find((v) => v.lang.replace('_', '-').toLowerCase().startsWith(lang.slice(0, 2)));
-    if (!voz) return Promise.resolve();
-    const u = new SpeechSynthesisUtterance(texto);
-    u.voice = voz;
-    u.lang = lang;
-    u.rate = lang === 'ja-JP' ? 0.9 : 1;
-    const fim = new Promise<void>((resolve) => {
-      u.onend = () => resolve();
-      u.onerror = () => resolve();
-    });
-    acompanharVoz(u);
-    speechSynthesis.speak(u);
-    return Promise.race([fim, abortado(sinal).then(() => speechSynthesis.cancel())]);
-  },
   esperar(ms, sinal) {
     return new Promise((resolve) => {
       const t = setTimeout(resolve, ms);
@@ -81,7 +64,7 @@ export const saidaDoNavegador: Saida = {
 
 export interface Fontes {
   jp: Manifesto | null;
-  pt: FontesPt;
+  pt: ManifestoPt | null;
 }
 
 async function fontesPadrao(): Promise<Fontes> {
@@ -126,15 +109,15 @@ export function tocarSequencia(trechos: readonly Trecho[], opcoes: Opcoes = {}):
       if (t.tipo === 'pausa') {
         await saida.esperar(msDaPausa(t.vezes, ultimoJp), ctrl.signal);
       } else if (t.tipo === 'pt') {
-        const url = urlPt(fontes.pt, t.texto, app.data.settings.vozPt);
-        const dur = url ? await saida.tocar(url, ctrl.signal) : 0;
-        if (!dur && !ctrl.signal.aborted) await saida.falarNavegador(t.texto, 'pt-BR', ctrl.signal);
+        const url = urlPt(fontes.pt, t.texto);
+        if (url) await saida.tocar(url, ctrl.signal);
+        else if (fontes.pt) avisarSemGravacao('pt', t.texto);
       } else {
         const voz = t.fala.voz === 'palavra' ? VOZ_PALAVRA : VOZ_PADRAO;
-        const arquivo = fontes.jp ? recordedFile(fontes.jp, t.fala.texto, voz) : undefined;
+        const arquivo = fontes.jp ? (recordedFile(fontes.jp, t.fala.texto, voz) ?? recordedFile(fontes.jp, t.fala.kana, voz)) : undefined;
         const dur = arquivo ? await saida.tocar(VOZES_URL + arquivo, ctrl.signal) : 0;
         if (dur) ultimoJp = dur;
-        else if (!ctrl.signal.aborted) await saida.falarNavegador(t.fala.kana, 'ja-JP', ctrl.signal);
+        if (!arquivo && fontes.jp) avisarSemGravacao('ja', t.fala.texto);
       }
     }
     return !ctrl.signal.aborted;

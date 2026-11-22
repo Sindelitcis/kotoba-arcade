@@ -3,11 +3,12 @@
  * pelo gerenciador de som (`som/mixer.ts`), que cuida dos volumes e da primeira interação.
  *
  * Voz em japonês: gravações em `public/vozes/` (ver `scripts/gravar-vozes.mjs`), achadas pelo
- * manifesto `texto → voz → arquivo`. O que não foi gravado (fala do modelo na Conversa, frase
- * pela metade no Kumitate) cai na voz do navegador. Toda voz passa por `acompanharVoz`, que
- * aplica o volume de voz e abaixa a música enquanto ela fala.
+ * manifesto `texto → voz → arquivo`. Não há voz de reserva: o que não foi gravado fica mudo
+ * e avisa no console (`sem-gravacao.ts`). Toda voz passa por `acompanharVoz`, que aplica o
+ * volume de voz e abaixa a música enquanto ela fala.
  */
 import { app } from './app';
+import { avisarSemGravacao } from './sem-gravacao';
 import { acompanharVoz, tocarEfeito } from './som/mixer';
 import { VOZ_PADRAO, VOZ_PALAVRA, type VozId } from './vozes';
 
@@ -51,28 +52,6 @@ export const sfx = {
   page: () => tocarEfeito('carta'),
 };
 
-let jaVoice: SpeechSynthesisVoice | null | undefined;
-
-function findVoice(): SpeechSynthesisVoice | null {
-  if (jaVoice !== undefined) return jaVoice;
-  const voices = speechSynthesis.getVoices();
-  if (voices.length === 0) return null; // ainda carregando; tenta de novo na próxima
-  jaVoice = voices.find((v) => v.lang.replace('_', '-').toLowerCase().startsWith('ja')) ?? null;
-  return jaVoice;
-}
-
-function speakInBrowser(text: string): void {
-  if (typeof speechSynthesis === 'undefined') return;
-  const voice = findVoice();
-  if (!voice) return;
-  const u = new SpeechSynthesisUtterance(text);
-  u.voice = voice;
-  u.lang = 'ja-JP';
-  u.rate = 0.9;
-  acompanharVoz(u);
-  speechSynthesis.speak(u);
-}
-
 export interface Manifesto {
   versao: number;
   /** texto → voz → arquivo em `vozes/`. */
@@ -81,17 +60,12 @@ export interface Manifesto {
 
 export const VOZES_URL = `${import.meta.env.BASE_URL}vozes/`;
 let manifesto: Promise<Manifesto | null> | null = null;
-let gravadas = false;
 
-/** Baixa o manifesto uma vez. Sem rede ou sem arquivo, fica null e tudo vai para o navegador. */
+/** Baixa o manifesto uma vez. Sem rede ou sem arquivo, fica null e nada toca. */
 export function loadVoices(): Promise<Manifesto | null> {
   manifesto ??= fetch(`${VOZES_URL}manifesto.json`)
     .then((r) => (r.ok ? (r.json() as Promise<Manifesto>) : null))
-    .catch(() => null)
-    .then((m) => {
-      gravadas = !!m && Object.keys(m.falas).length > 0;
-      return m;
-    });
+    .catch(() => null);
   return manifesto;
 }
 
@@ -110,7 +84,6 @@ let outraFala: (() => void) | null = null;
 function silence(): void {
   playing?.pause();
   playing = null;
-  if (typeof speechSynthesis !== 'undefined') speechSynthesis.cancel();
   const parar = outraFala;
   outraFala = null;
   parar?.();
@@ -138,36 +111,44 @@ export function speakWord(kana: string): Promise<void> {
 
 /**
  * Kanji sozinho: a gravação fica no próprio kanji, porque o kana se repete (日 e 火 são
- * ひ, com acento diferente). Sem gravação, o navegador fala o kana, nunca o kanji, que
- * ele leria de qualquer jeito.
+ * ひ, com acento diferente). Sem gravação do kanji, toca a do kana.
  */
 export function speakKanji(kanji: string, kana: string): Promise<void> {
   return speak(kanji, VOZ_PALAVRA, kana);
 }
 
 /**
- * Fala um texto em japonês: a gravação, quando existe; senão a voz do navegador.
- * Uma fala nova corta a anterior. `voz` escolhe o personagem (Aventura).
- * `fallback` é o que o navegador fala quando não há gravação (o kana de um kanji solto).
+ * Fala um texto em japonês gravado. Uma fala nova corta a anterior. `voz` escolhe o
+ * personagem (Aventura). `alternativa` é outra chave para procurar quando o texto não
+ * tem gravação (o kana de um kanji solto).
  */
-export function speak(text: string, voz: VozId = VOZ_PADRAO, fallback: string = text): Promise<void> {
+export function speak(text: string, voz: VozId = VOZ_PADRAO, alternativa?: string): Promise<void> {
+  return tocarJp(text, voz, alternativa, true);
+}
+
+/**
+ * Igual a `speak`, mas sem aviso quando não há gravação: para o texto que a IA da Conversa
+ * escreve na hora, que não tem como estar gravado (sem o PC, ele fica sem voz).
+ */
+export function speakSeGravado(text: string, voz: VozId = VOZ_PADRAO): Promise<void> {
+  return tocarJp(text, voz, undefined, false);
+}
+
+function tocarJp(text: string, voz: VozId, alternativa: string | undefined, avisar: boolean): Promise<void> {
   if (!app.data.settings.voice) return Promise.resolve();
   const n = ++request;
   silence();
   return loadVoices().then((m) => {
     if (n !== request) return; // outra fala veio antes de o manifesto chegar
-    const file = m ? recordedFile(m, text, voz) : undefined;
-    if (!file || typeof Audio === 'undefined') return speakInBrowser(fallback);
+    const file = m ? (recordedFile(m, text, voz) ?? (alternativa ? recordedFile(m, alternativa, voz) : undefined)) : undefined;
+    if (!file) {
+      if (m && avisar) avisarSemGravacao('ja', text);
+      return;
+    }
+    if (typeof Audio === 'undefined') return;
     const a = new Audio(VOZES_URL + file);
     playing = a;
     acompanharVoz(a);
-    a.play().catch(() => {
-      if (n === request) speakInBrowser(fallback);
-    });
+    a.play().catch(() => {});
   });
-}
-
-/** Há voz japonesa: as gravações carregaram ou o navegador tem uma voz instalada. */
-export function hasJapaneseVoice(): boolean {
-  return gravadas || (typeof speechSynthesis !== 'undefined' && !!findVoice());
 }

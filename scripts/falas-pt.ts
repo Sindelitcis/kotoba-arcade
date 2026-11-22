@@ -3,9 +3,8 @@
  * da Aventura, o retorno das perguntas da Jornada, as fichas do Aprofundar e o significado
  * falado das apresentações de item novo (src/content/ensino.ts).
  *
- * `scripts/gravar-vozes-pt.mjs` grava esta lista nas duas vozes, em `public/vozes-pt/voz1/`
- * e `public/vozes-pt/voz2/` (ver docs/vozes.md).
- * `tests/vozes-pt.test.ts` confere que cada texto tem gravação na voz livre.
+ * `scripts/gravar-vozes-pt.mjs` grava esta lista em `public/vozes-pt/voz1/` (ver docs/vozes.md).
+ * `tests/vozes-pt.test.ts` confere que cada texto tem gravação.
  */
 import { AULAS } from '../src/aulas';
 import { SCENES } from '../src/games/aventura/cenas';
@@ -14,6 +13,8 @@ import { COURSE } from '../src/games/gramatica/pontos';
 import { FRASES_DE_RETORNO } from '../src/jornada/retorno';
 import { falasPtDaFicha, fichaDe, todosOsAlvos } from '../src/content/aprofundar/fichas';
 import { falasPtDoEnsino } from '../src/content/ensino';
+import { ETAPAS } from '../src/games/cena/engine';
+import { falaDaEtapa } from '../src/games/cena/aulas';
 
 export interface FalaPt {
   /** Exatamente o texto do trecho `{ tipo: 'pt' }`. */
@@ -36,6 +37,7 @@ export function listarFalasPt(): FalaPt[] {
       return f ? falasPtDaFicha(f).map((texto) => ({ texto, origem: `aprofundar/${a.t}` })) : [];
     }),
     ...falasPtDoEnsino().map((texto) => ({ texto, origem: 'ensino/significado' })),
+    ...ETAPAS.flatMap((e) => falaDaEtapa(e).flatMap((t) => (t.tipo === 'pt' ? [{ texto: t.texto, origem: `cena/etapa/${e}` }] : []))),
   ];
   const vistas = new Set<string>();
   return todas.filter((f) => {

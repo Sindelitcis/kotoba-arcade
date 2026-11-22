@@ -253,12 +253,30 @@ export class PecasRound {
       case 'montar':
         return pecasDoKanji(k).length >= 2;
       case 'intruso':
-        return PARECIDOS.some((p) => p.a === k.kanji || p.b === k.kanji);
+        return this.paresConhecidos(k).length > 0;
       case 'adivinhar':
         return true;
       case 'composto':
-        return COMPOSTOS.some((c) => c.kanji.includes(k));
+        return COMPOSTOS.some((c) => c.kanji.includes(k) && this.compostoPronto(c));
     }
+  }
+
+  /**
+   * Palavra de dois kanji que já pode virar pergunta: apresentada antes (no KanjiMon, na Jornada,
+   * em qualquer jogo) e com os dois kanji já vistos aqui. A leitura dentro da palavra pode mudar
+   * (学生 é がくせい), então adivinhar pela leitura dos kanji seria cobrar o que ninguém ensinou.
+   */
+  private compostoPronto(c: Composto): boolean {
+    return foiApresentado(this.deps.cards, cartaComposto(c)) && c.kanji.every((x) => this.visto(x));
+  }
+
+  /** Pares de parecidos do kanji em que o outro kanji também já foi visto. */
+  private paresConhecidos(k: KanjiPeca): (typeof PARECIDOS)[number][] {
+    return PARECIDOS.filter((p) => {
+      if (p.a !== k.kanji && p.b !== k.kanji) return false;
+      const outro = kanjiPeca(p.a === k.kanji ? p.b : p.a);
+      return !!outro && this.visto(outro);
+    });
   }
 
   private escolherKanji(filtro: (k: KanjiPeca) => boolean): KanjiPeca {
@@ -297,7 +315,8 @@ export class PecasRound {
     }
     if (modo !== 'misto') {
       const k = this.escolherKanji((x) => this.viavel(modo, x));
-      return this.abrir(k, modo);
+      // Treino de um modo que ainda não dá (intruso sem o par visto): fica no "achar a peça".
+      return this.abrir(k, this.viavel(modo, k) ? modo : 'peca');
     }
 
     const k = this.escolherKanji(() => true);
@@ -341,22 +360,26 @@ export class PecasRound {
     this.inicio = this.deps.now();
   }
 
-  /** Alternativas erradas de peça: peças que não estão no kanji, de preferência conhecidas. */
+  /**
+   * Alternativas erradas de peça: peças que não estão no kanji e que a pessoa já viu (em algum
+   * kanji apresentado). Peça nunca vista não entra: com pouca coisa vista, há menos opções.
+   */
   private pecasErradas(k: KanjiPeca, n: number): string[] {
     const { rng, elementos } = this.deps;
     const els = elementos(k.kanji);
-    const livres = TODAS_PECAS.filter((p) => serveDeErrada(p, k, els));
     const sabe = this.conhecidas();
-    const conhecidas = shuffle(rng, livres.filter((p) => sabe.has(p)));
-    const resto = shuffle(rng, livres.filter((p) => !sabe.has(p)));
-    return [...conhecidas, ...resto].slice(0, n);
+    return shuffle(rng, TODAS_PECAS.filter((p) => serveDeErrada(p, k, els) && sabe.has(p))).slice(0, n);
   }
 
   private perguntaPeca(k: KanjiPeca, licao: boolean): void {
     const { rng } = this.deps;
     const ps = pecasDoKanji(k);
+    const erradas = this.pecasErradas(k, 3);
+    // O primeiro kanji não tem com o que confundir: em vez de uma escolha de uma opção só,
+    // a pessoa monta o kanji com as peças que acabou de ver (se ele tiver duas ou mais).
+    if (erradas.length === 0 && ps.length >= 2) return this.perguntaMontar(k, licao);
     const alvo = ps[Math.floor(rng() * ps.length)] as string;
-    const opcoes = shuffle(rng, [alvo, ...this.pecasErradas(k, 3)]);
+    const opcoes = shuffle(rng, [alvo, ...erradas]);
     this.iniciar({ modo: 'peca', k, licao, alvo, opcoes, certa: opcoes.indexOf(alvo) });
   }
 
@@ -369,7 +392,7 @@ export class PecasRound {
 
   private perguntaIntruso(k: KanjiPeca, licao = false): void {
     const { rng } = this.deps;
-    const pares = PARECIDOS.filter((p) => p.a === k.kanji || p.b === k.kanji);
+    const pares = this.paresConhecidos(k);
     const par = pares[Math.floor(rng() * pares.length)] as (typeof PARECIDOS)[number];
     const outro = kanjiPeca(par.a === k.kanji ? par.b : par.a) as KanjiPeca;
     // O kanji escolhido é a maioria ou o diferente, sorteado.
@@ -382,9 +405,9 @@ export class PecasRound {
   private perguntaAdivinhar(k: KanjiPeca, licao: boolean): void {
     const { rng } = this.deps;
     const certo = k.pt[0] as string;
-    // Alternativas: significados de outros kanji do mesmo nível, sem repetir palavra.
+    // Alternativas: significados de outros kanji já vistos, sem repetir palavra.
     const usados = new Set([certo, ...k.pt]);
-    const outros = shuffle(rng, KANJI_PECAS.filter((x) => x !== k && x.nivel === k.nivel))
+    const outros = shuffle(rng, KANJI_PECAS.filter((x) => x !== k && this.visto(x)))
       .map((x) => x.pt[0] as string)
       .filter((s) => (usados.has(s) ? false : (usados.add(s), true)))
       .slice(0, 3);
@@ -394,18 +417,17 @@ export class PecasRound {
 
   private perguntaComposto(k?: KanjiPeca): void {
     const { cards, now, rng } = this.deps;
-    const lista = k ? COMPOSTOS.filter((c) => c.kanji.includes(k)) : COMPOSTOS;
+    const todos = (k ? COMPOSTOS.filter((c) => c.kanji.includes(k)) : COMPOSTOS).filter((c) => this.compostoPronto(c));
+    // Nenhuma palavra pronta ainda (treino de compostos logo no começo): fica no kanji.
+    if (todos.length === 0) return this.abrir(k ?? this.escolherKanji((x) => this.viavel('peca', x)), 'peca');
+    const lista = todos;
     const pool = lista.map(cartaComposto);
     const pick = pickNext(pool, cards, now(), rng, { recent: this.recentes, maxYoung: MAX_JOVENS });
     // Palavra nova: de preferência uma com os dois kanji já vistos.
-    const novas = lista.filter((c) => !foiApresentado(cards, cartaComposto(c)));
-    const nova = novas.find((c) => c.kanji.every((x) => this.visto(x))) ?? novas[0];
-    const key = (pick && pick.reason !== 'practice') || !nova ? (pick?.key ?? (pool[0] as string)) : cartaComposto(nova);
+    const key = pick?.key ?? (pool[0] as string);
     this.recentes = [...this.recentes, key].slice(-4);
     const palavra = lista[pool.indexOf(key)] as Composto;
     const opcoes = shuffle(rng, opcoesDeLeitura(palavra, rng));
-    // A tela mostra a leitura de cada kanji: é a apresentação da palavra.
-    apresentar(cards, [key], now());
     this.iniciar({ modo: 'composto', k: k ?? palavra.kanji[0], licao: false, palavra, opcoes, certa: opcoes.indexOf(palavra.kana) });
   }
 

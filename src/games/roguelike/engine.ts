@@ -497,10 +497,10 @@ export class Run {
     const make = (useOther: boolean): Question => {
       if (id.startsWith('k:')) {
         const k = getKanji(id);
-        return apoiar(useOther ? kanjiRecallQuestion(k, rng) : kanjiMeaningQuestion(k, rng), cards);
+        return apoiar(useOther ? kanjiRecallQuestion(k, rng, cards) : kanjiMeaningQuestion(k, rng, cards), cards);
       }
       const w = palavra(id);
-      return apoiar(useOther ? wordReadingQuestion(w, rng, masteryLevel(cards[other]) >= 3) : wordMeaningQuestion(w, rng), cards);
+      return apoiar(useOther ? wordReadingQuestion(w, rng, masteryLevel(cards[other]) >= 3, cards) : wordMeaningQuestion(w, rng, cards), cards);
     };
     // O caminho inverso (e a leitura) só entram depois de o significado ter sido visto de verdade.
     const ready = !!meaning && meaning.reps >= (id.startsWith('k:') ? 2 : 1);

@@ -2,26 +2,24 @@
  * A apresentação de itens novos, igual em todos os jogos (core/ensino.ts).
  *
  * Um item por vez, sem pergunta e sem relógio: imagem, a escrita grande com a leitura, o
- * japonês falado, o significado em português (também falado, na Voz 1 ou na Voz 2), uma
+ * japonês falado, o significado em português (também falado), uma
  * explicação curta e um exemplo. No fim, o botão leva à prática.
  *
  * Teclas (ficam só aqui; a ajuda de cada jogo cita estas):
  *   Enter, Espaço, →   próximo (no último, começar a prática)
  *   ←                  voltar um
  *   R                  ouvir de novo
- *   V                  trocar a voz em português
  */
 import type { ComponentChildren } from 'preact';
 import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import type { ItemNovo } from '../content/ensino';
-import { app, commit } from './app';
 import { useAprofundar } from './aprofundar/estado';
 import { fichaDe } from '../content/aprofundar/fichas';
-import { NOME_VOZ_PT, VOZES_PT } from './fala-pt';
 import { camadaAberta } from './help/ajuda';
 import { Icone } from './Icone';
 import { tocarSequencia, type Tocador } from './sequencia';
 import { teclaDe } from './teclas';
+import { Furigana } from './Furigana';
 
 export interface PropsApresentacao {
   itens: readonly ItemNovo[];
@@ -48,21 +46,13 @@ function Escrita({ item }: { item: ItemNovo }) {
   const longo = [...item.grande].length > 4;
   return (
     <span class={`ap-grande${longo ? ' longo' : ''}${item.alvo.t === 'kanji' ? ' kanji' : ''}`} lang="ja">
-      {fur ? (
-        <ruby>
-          {item.grande}
-          <rt>{item.leitura}</rt>
-        </ruby>
-      ) : (
-        item.grande
-      )}
+      {fur ? <Furigana texto={item.grande} leitura={item.leitura} /> : item.grande}
     </span>
   );
 }
 
 export function Apresentacao({ itens, onFim, modo = 'novos', fim, visual, onItem }: PropsApresentacao) {
   const [i, setI] = useState(0);
-  const [, setVoz] = useState(app.data.settings.vozPt);
   const item = itens[i];
   const ultimo = i >= itens.length - 1;
   const fimRef = useRef(onFim);
@@ -85,17 +75,9 @@ export function Apresentacao({ itens, onFim, modo = 'novos', fim, visual, onItem
     } else setI((n) => n + 1);
   };
   const voltar = () => setI((n) => Math.max(0, n - 1));
-  const trocarVoz = () => {
-    const atual = app.data.settings.vozPt;
-    const nova = VOZES_PT[(VOZES_PT.indexOf(atual) + 1) % VOZES_PT.length]!;
-    app.data.settings.vozPt = nova;
-    commit();
-    setVoz(nova);
-    falar(item);
-  };
 
-  const teclas = useRef({ seguir, voltar, trocarVoz, item });
-  teclas.current = { seguir, voltar, trocarVoz, item };
+  const teclas = useRef({ seguir, voltar, item });
+  teclas.current = { seguir, voltar, item };
   // Antes da pintura: com useEffect, um Enter logo que o cartão aparecia se perdia.
   useLayoutEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -108,7 +90,6 @@ export function Apresentacao({ itens, onFim, modo = 'novos', fim, visual, onItem
       if (tecla === 'Enter' || tecla === ' ' || tecla === 'ArrowRight') t.seguir();
       else if (tecla === 'ArrowLeft') t.voltar();
       else if (key === 'r') falar(t.item);
-      else if (key === 'v') t.trocarVoz();
       else feito = false;
       if (feito) {
         e.preventDefault();
@@ -122,7 +103,6 @@ export function Apresentacao({ itens, onFim, modo = 'novos', fim, visual, onItem
 
   if (!item) return null;
   const desenho = visual?.(item);
-  const vozPt = app.data.settings.vozPt;
   return (
     <section class={`ap-cartao ${modo}`} data-testid="apresentacao" data-modo={modo} data-item={item.chaves[0]} data-i={i} data-total={itens.length} aria-live="polite">
       <header class="ap-topo">
@@ -166,9 +146,6 @@ export function Apresentacao({ itens, onFim, modo = 'novos', fim, visual, onItem
         </button>
         <button onClick={() => falar(item)} data-testid="ap-ouvir">
           <Icone nome="volume-2" /> Ouvir <kbd>R</kbd>
-        </button>
-        <button class="ghost ap-voz" onClick={trocarVoz} title="Trocar a voz em português" data-testid="ap-voz">
-          {NOME_VOZ_PT[vozPt]} <kbd>V</kbd>
         </button>
         <button class="primary" onClick={seguir} data-testid="ap-seguir">
           {ultimo ? (fim ?? (modo === 'novos' ? 'Praticar' : 'Entendi')) : 'Próximo'} <kbd>Enter</kbd>

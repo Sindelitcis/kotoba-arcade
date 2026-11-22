@@ -807,14 +807,17 @@ export class Conversa {
     return [{ t: 'linha', linha }, ...this.ouvir(m.jp, m.kana)];
   }
 
-  /** Palavra que o personagem disse e o jogador nunca tinha visto entra na memória, como primeiro contato. */
+  /**
+   * Palavra que o personagem disse e o jogador nunca tinha visto: aparece com o significado na
+   * tela (o aviso "nova"), mas não conta como apresentada. Só o cartão de apresentação faz isso;
+   * senão a Memória e o KanjiMon passariam a cobrar o que a pessoa só ouviu de passagem.
+   */
   private ouvir(fala: string, leitura: string): Evento[] {
-    const { cards, now } = this.deps;
+    const { cards } = this.deps;
     const events: Evento[] = [];
     for (const t of acharTermos(fala, leitura)) {
       const key = cardKey(t.id, 'meaning');
-      if (foiApresentado(cards, key)) continue;
-      apresentar(cards, [key], now());
+      if (foiApresentado(cards, key) || this.revistas.has(t.id)) continue;
       this.revistas.add(t.id);
       this.novas.push(t);
       events.push({ t: 'nova', termo: t });
@@ -831,9 +834,8 @@ export class Conversa {
       this.revistas.add(t.id);
       const key = cardKey(t.id, 'meaning');
       const nova = !foiApresentado(cards, key);
-      // Usou sozinho uma palavra nunca vista: é o primeiro contato, sem nota.
-      if (nova) apresentar(cards, [key], now());
-      else avaliar(cards, key, { correct: true, hinted: comAjuda }, now());
+      // Usou sozinho uma palavra nunca apresentada: sem nota, e ela segue esperando o cartão.
+      if (!nova) avaliar(cards, key, { correct: true, hinted: comAjuda }, now());
       if (nova) {
         this.novas.push(t);
         events.push({ t: 'nova', termo: t });

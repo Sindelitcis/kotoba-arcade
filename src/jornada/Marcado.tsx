@@ -1,4 +1,5 @@
 import { palavras } from '../content/escola/ruby';
+import { Furigana } from '../core/Furigana';
 
 /**
  * Japonês marcado da escola-japones ("{私|わたし} は …") com furigana em todo kanji.
@@ -11,10 +12,9 @@ export function Marcado({ texto, class: cls }: { texto: string; class?: string }
         <span key={i} class="jn-palavra">
           {p.map((s, j) =>
             s.leitura ? (
-              <ruby key={j}>
-                {s.texto}
-                <rt>{s.leitura}</rt>
-              </ruby>
+              <span key={j}>
+                <Furigana texto={s.texto} leitura={s.leitura} />
+              </span>
             ) : (
               <span key={j}>{s.texto}</span>
             ),

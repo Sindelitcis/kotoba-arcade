@@ -1,4 +1,4 @@
-import { expect, test, type Page, type Route } from '@playwright/test';
+import { expect, test, type Page, type Route } from './base';
 import { passarApresentacao } from './apoio';
 
 const SERVIDOR = 'http://127.0.0.1:8791';

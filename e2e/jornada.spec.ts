@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './base';
 
 const SHOTS = process.env.SHOTS_DIR;
 

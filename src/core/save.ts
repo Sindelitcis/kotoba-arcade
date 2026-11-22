@@ -2,10 +2,15 @@
  * Save local, versionado, com exportar e importar. Sem login e sem servidor.
  * Tudo que um jogo quiser guardar vai em `games[idDoJogo]`.
  */
-import { VOZ_PT_PADRAO, VOZES_PT, type VozPt } from './fala-pt';
-import type { CardState } from './srs';
+import { State, type CardState } from './srs';
 
-export const SAVE_VERSION = 1;
+/**
+ * 1: o primeiro save.
+ * 2: "ensinar antes de cobrar" (core/ensino.ts). Ter carta passou a querer dizer "já foi
+ *    apresentado". No save 1, os jogos criavam carta sem apresentar nada, então a carta de lá
+ *    não prova que a pessoa viu o item: ver `cartasDoSave1`.
+ */
+export const SAVE_VERSION = 2;
 export const SAVE_KEY = 'kotoba-arcade:save';
 
 export interface Settings {
@@ -18,8 +23,6 @@ export interface Settings {
   voice: boolean;
   /** Reduz tremor de tela e partículas. */
   calm: boolean;
-  /** Voz do português falado (aulas, Kumitate, Aventura, Jornada): Voz 1 ou Voz 2. */
-  vozPt: VozPt;
   /** Tema da tela: o do sistema, claro ou escuro (docs/estilo.md). */
   tema: Tema;
   /** Ritmo de estudo: quanto os jogos oferecem o Aprofundar sozinhos (ver `core/aprofundar`). */
@@ -63,7 +66,7 @@ export function emptySave(now: number): SaveData {
     createdAt: now,
     updatedAt: now,
     profile: { xp: 0, coins: 0, daysPlayed: [] },
-    settings: { sound: true, volMusica: 0.6, volEfeitos: 0.8, volVoz: 1, voice: true, calm: false, vozPt: VOZ_PT_PADRAO, tema: 'auto', ritmo: 'equilibrado' },
+    settings: { sound: true, volMusica: 0.6, volEfeitos: 0.8, volVoz: 1, voice: true, calm: false, tema: 'auto', ritmo: 'equilibrado' },
     cards: {},
     games: {},
   };
@@ -88,6 +91,21 @@ function cleanCards(input: unknown): Record<string, CardState> {
   const out: Record<string, CardState> = {};
   if (!isObject(input)) return out;
   for (const [k, v] of Object.entries(input)) if (isCard(v)) out[k] = v;
+  return out;
+}
+
+/**
+ * Cartas de um save da versão 1. Lá, qualquer jogo criava carta ao mostrar uma palavra, sem
+ * apresentar (a Memória punha armário, cama e cadeira no quadro sem nunca ter ensinado). Fica
+ * só o item que a pessoa já sabe de verdade: pelo menos uma carta dele em revisão no FSRS.
+ * O resto sai e volta a ser novo, para ser apresentado antes da primeira pergunta.
+ */
+export function cartasDoSave1(cards: Record<string, CardState>): Record<string, CardState> {
+  const item = (k: string) => (k.includes('#') ? k.slice(0, k.lastIndexOf('#')) : k);
+  const sabidos = new Set<string>();
+  for (const [k, c] of Object.entries(cards)) if (c.state === State.Review) sabidos.add(item(k));
+  const out: Record<string, CardState> = {};
+  for (const [k, c] of Object.entries(cards)) if (sabidos.has(item(k))) out[k] = c;
   return out;
 }
 
@@ -120,11 +138,10 @@ export function normalizeSave(input: unknown, now: number): SaveData {
       volVoz: vol(settings.volVoz, base.settings.volVoz),
       voice: typeof settings.voice === 'boolean' ? settings.voice : base.settings.voice,
       calm: typeof settings.calm === 'boolean' ? settings.calm : base.settings.calm,
-      vozPt: VOZES_PT.includes(settings.vozPt as VozPt) ? (settings.vozPt as VozPt) : base.settings.vozPt,
       tema: TEMAS.includes(settings.tema as Tema) ? (settings.tema as Tema) : base.settings.tema,
       ritmo: RITMOS.includes(settings.ritmo as Ritmo) ? (settings.ritmo as Ritmo) : base.settings.ritmo,
     },
-    cards: cleanCards(input.cards),
+    cards: input.v < 2 ? cartasDoSave1(cleanCards(input.cards)) : cleanCards(input.cards),
     games: isObject(input.games) ? input.games : {},
   };
 }

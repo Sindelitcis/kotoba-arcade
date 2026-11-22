@@ -148,16 +148,17 @@ const ORDINAL_KANA = ['', 'いちばんめ', 'にばんめ', 'さんばんめ', 
 export const ETAPAS = ['nome', 'achar', 'cor', 'tamanho', 'lugar', 'contar', 'acao', 'denso', 'descrever'] as const;
 export type Etapa = (typeof ETAPAS)[number];
 
+/** `licao` é só a estrutura; como jogar a etapa fica em `AULAS_ETAPA[e].comoJoga` (aulas.ts), que entra logo depois no cartão. */
 export const ETAPA_INFO: Readonly<Record<Etapa, { titulo: string; nivel: string; licao: string; exemplo: readonly Seg[]; exemploPt: string }>> = {
-  nome: { titulo: 'O nome das coisas', nivel: 'N5', licao: 'これは〜です quer dizer "isto é ~". A coisa marcada brilha; escolha o nome dela.', exemplo: [{ t: 'これは' }, seg('傘', 'かさ'), { t: 'です。' }], exemploPt: 'Isto é um guarda-chuva.' },
-  achar: { titulo: 'Onde está?', nivel: 'N5', licao: 'O nome da coisa + はどこ？ pergunta onde ela está. はどこ quer dizer "onde está". Ouça a pergunta e clique na coisa.', exemplo: [seg('傘', 'かさ'), { t: 'はどこ？' }], exemploPt: 'Onde está o guarda-chuva?' },
+  nome: { titulo: 'O nome das coisas', nivel: 'N5', licao: 'これは〜です quer dizer "isto é ~".', exemplo: [{ t: 'これは' }, seg('傘', 'かさ'), { t: 'です。' }], exemploPt: 'Isto é um guarda-chuva.' },
+  achar: { titulo: 'Onde está?', nivel: 'N5', licao: 'O nome da coisa + はどこ？ pergunta onde ela está. はどこ quer dizer "onde está".', exemplo: [seg('傘', 'かさ'), { t: 'はどこ？' }], exemploPt: 'Onde está o guarda-chuva?' },
   cor: { titulo: 'Cores', nivel: 'N5', licao: 'A cor vem antes da coisa, como em "vermelho guarda-chuva": 赤い傘. Os adjetivos de cor terminam em い.', exemplo: [seg('赤い', 'あかい'), seg('傘', 'かさ'), { t: 'はどこ？' }], exemploPt: 'Onde está o guarda-chuva vermelho?' },
   tamanho: { titulo: 'Grande e pequeno', nivel: 'N5', licao: '大きい (おおきい) é grande, 小さい (ちいさい) é pequeno. Também vêm antes da coisa.', exemplo: [seg('大きい', 'おおきい'), { t: 'かばんはどこ？' }], exemploPt: 'Onde está a bolsa grande?' },
   lugar: { titulo: 'Onde está', nivel: 'N5', licao: 'O japonês diz o lugar primeiro: 机の上の本 é "o livro de cima da mesa". 上 em cima, 下 embaixo, 横 ao lado, 前 na frente, 中 dentro.', exemplo: [seg('机', 'つくえ'), { t: 'の' }, seg('上', 'うえ'), { t: 'の' }, seg('本', 'ほん'), { t: 'はどこ？' }], exemploPt: 'Onde está o livro em cima da mesa?' },
   contar: { titulo: 'Contadores', nivel: 'N5', licao: 'Para contar, o número leva um contador: つ para coisas em geral, 本 para coisas compridas, 枚 para coisas finas, 匹 para bichos pequenos, 台 para máquinas e veículos, 冊 para livros, 人 para gente.', exemplo: [{ t: 'りんごが' }, seg('三つ', 'みっつ'), { t: 'あるところはどこ？' }], exemploPt: 'Onde estão as três maçãs?' },
   acao: { titulo: 'Quem está fazendo', nivel: 'N4', licao: 'Verbo na forma て + いる é o que está acontecendo agora: 読んでいる = está lendo. Antes de 人 (pessoa), descreve a pessoa: 読んでいる人 = a pessoa que está lendo.', exemplo: [seg('読んでいる', 'よんでいる'), HITO, { t: 'はどこ？' }], exemploPt: 'Onde está a pessoa que está lendo?' },
   denso: { titulo: 'Frases longas', nivel: 'N4–N3', licao: 'Tudo junto: o lugar, a cor e a coisa, sempre do detalhe para o nome. にある = "que está em". 左から二番目 = o segundo a partir da esquerda. いちばん = o mais.', exemplo: [{ t: 'テーブルの' }, seg('上', 'うえ'), { t: 'にある' }, seg('赤い', 'あかい'), { t: 'かばんはどこ？' }], exemploPt: 'Onde está a bolsa vermelha que está em cima da mesa?' },
-  descrever: { titulo: 'Descreva a cena', nivel: 'N4–N3', licao: 'Agora é você quem fala: monte a frase sobre a coisa marcada. Lugar + に + coisa + が + あります. Gente e bicho usam います.', exemplo: [seg('机', 'つくえ'), { t: 'の' }, seg('上', 'うえ'), { t: 'に' }, seg('本', 'ほん'), { t: 'があります' }], exemploPt: 'Tem um livro em cima da mesa.' },
+  descrever: { titulo: 'Descreva a cena', nivel: 'N4–N3', licao: 'Lugar + に + coisa + が + あります. Gente e bicho usam います.', exemplo: [seg('机', 'つくえ'), { t: 'の' }, seg('上', 'うえ'), { t: 'に' }, seg('本', 'ほん'), { t: 'があります' }], exemploPt: 'Tem um livro em cima da mesa.' },
 };
 
 export interface Tarefa {
@@ -269,7 +270,7 @@ export function tarefas(l: Lugar, etapa: Etapa): Tarefa[] {
       vistos.add(k);
       const alvo = l.coisas.filter((o) => palavraDe(o).id === w.id && o.rel === c.rel && o.de && palavraDe(achaCoisa(l, o.de)!).id === wr.id);
       const r = REL[c.rel];
-      out.push({ etapa, segs: [...nomeDe(ref), { t: 'の' }, segW(r), { t: 'の' }, ...nomeDe(c), PERGUNTA], alvo: ids(alvo), palavras: [w] });
+      out.push({ etapa, segs: [...nomeDe(ref), { t: 'の' }, segW(r), { t: 'の' }, ...nomeDe(c), PERGUNTA], alvo: ids(alvo), palavras: [wr, w] });
     }
   }
 
@@ -308,7 +309,7 @@ export function tarefas(l: Lugar, etapa: Etapa): Tarefa[] {
       const soLugar = objetos.filter((o) => palavraDe(o).id === w.id && o.rel === c.rel && o.de === c.de);
       if (mesmoConjunto(ids(alvo), ids(soCor)) || mesmoConjunto(ids(alvo), ids(soLugar))) continue;
       const corW = PALAVRAS_COR[cor];
-      const t: Tarefa = { etapa, segs: [...nomeDe(ref), { t: 'の' }, segW(REL[c.rel]), { t: 'にある' }, segW(corW), segW(w), PERGUNTA], alvo: ids(alvo), palavras: [corW, w] };
+      const t: Tarefa = { etapa, segs: [...nomeDe(ref), { t: 'の' }, segW(REL[c.rel]), { t: 'にある' }, segW(corW), segW(w), PERGUNTA], alvo: ids(alvo), palavras: [palavraDe(ref), corW, w] };
       if (!out.some((o) => textoDe(o.segs) === textoDe(t.segs))) out.push(t);
     }
     // 2. 左から N番目 (três ou mais iguais em fila, sem empate de posição).
@@ -334,7 +335,7 @@ export function tarefas(l: Lugar, etapa: Etapa): Tarefa[] {
       const ref = achaCoisa(l, c.de);
       if (!ehPessoa(c) || !c.rel || !ref) continue;
       const f = daCoisa(c).figura;
-      out.push({ etapa, segs: [...nomeDe(ref), { t: 'の' }, segW(REL[c.rel]), { t: 'で' }, seg(`${f.te!.jp}いる`, `${f.te!.kana}いる`), HITO, PERGUNTA], alvo: [c.id], palavras: [f.word] });
+      out.push({ etapa, segs: [...nomeDe(ref), { t: 'の' }, segW(REL[c.rel]), { t: 'で' }, seg(`${f.te!.jp}いる`, `${f.te!.kana}いる`), HITO, PERGUNTA], alvo: [c.id], palavras: [palavraDe(ref), f.word] });
     }
   }
 
@@ -348,7 +349,7 @@ export function tarefas(l: Lugar, etapa: Etapa): Tarefa[] {
       const certas: Seg[] = [...nomeDe(ref), { t: 'の' }, segW(REL[c.rel]), { t: 'に' }, ...sujeito, { t: 'が' }, verbo];
       const outraRel = (Object.keys(REL) as Rel[]).find((r) => r !== c.rel && r !== 'naka')!;
       const sobras: Seg[] = [segW(REL[outraRel]), { t: 'を' }, { t: vive(c) ? 'あります' : 'います' }];
-      const t: Tarefa = { etapa, segs: certas, alvo: [c.id], palavras: [w], pecas: { certas, sobras } };
+      const t: Tarefa = { etapa, segs: certas, alvo: [c.id], palavras: [palavraDe(ref), w], pecas: { certas, sobras } };
       // Frase igual para duas coisas (dois livros no mesmo lugar) vale uma vez só.
       if (!out.some((o) => textoDe(o.segs) === textoDe(t.segs))) out.push(t);
     }
@@ -603,9 +604,12 @@ export class CenaRound {
     return !!c && foiApresentado(this.deps.cards, chave(palavraDe(c)));
   }
 
-  /** Dá para clicar: na prática, só no que já foi apresentado (menos coisa para chutar). */
+  /**
+   * Dá para clicar: só no que já foi apresentado. Coisa que a pessoa nunca viu fica na cena
+   * como cenário, mas não vira alternativa (nem na prática, nem na cobrança).
+   */
   clicavel(id: string): boolean {
-    return !this.apoio || this.conhecida(id);
+    return this.conhecida(id);
   }
 
   /** A tarefa da vez. Pedir durante a apresentação é erro do chamador (a tela não mostra tarefa ali). */

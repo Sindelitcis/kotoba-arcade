@@ -1,4 +1,4 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Page } from './base';
 import { chavesDosKana, chavesDosKanji, firmarCartas } from './apoio';
 
 const SHOTS = process.env.SHOTS_DIR;

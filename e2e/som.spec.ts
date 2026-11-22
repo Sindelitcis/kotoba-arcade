@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './base';
 
 test.beforeEach(async ({ page }) => {
   await page.route('https://kanjimon.online/**', (route) => route.abort());

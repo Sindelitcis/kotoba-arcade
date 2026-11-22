@@ -17,6 +17,7 @@ import { etapaDa, registrarMissao } from './etapas';
 import { acharLicao, temJapones, type Passo, type Quadro } from './licoes';
 import { Marcado } from './Marcado';
 import { falaDaPergunta, falaDoQuadro, retornoFalado } from './retorno';
+import { Furigana } from '../core/Furigana';
 
 function falar(trechos: readonly Trecho[]): void {
   if (trechos.length > 0) tocarSequencia(trechos);
@@ -36,10 +37,7 @@ function QuadroView({ q }: { q: Quadro }) {
       {q.quem && <span class="lc-quem">{q.quem}</span>}
       {q.grande && (
         <div class="lc-grande" lang="ja">
-          <ruby>
-            {q.grande}
-            <rt>{q.leitura}</rt>
-          </ruby>
+          <Furigana texto={q.grande} leitura={q.leitura} />
         </div>
       )}
       {q.jp && <Marcado texto={q.jp} class={q.quem ? 'lc-fala' : 'lc-jp'} />}

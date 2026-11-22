@@ -14,6 +14,7 @@ import { Apresentacao } from '../../core/Apresentacao';
 import { itemDaLicao } from './falado';
 import { cardOf, exampleView, fits, GramaticaRound, openPoints, plainSentence, ROUND_SIZE, slotWritten, WINS_TO_UNLOCK, type RoundEvent, type RoundSummary, type Written } from './engine';
 import { COURSE, POINTS } from './pontos';
+import { Furigana } from '../../core/Furigana';
 
 type Mode = 'menu' | 'round' | 'summary';
 
@@ -21,10 +22,7 @@ function Word({ w }: { w: Written }) {
   return (
     <>
       {w.text && w.reading ? (
-        <ruby>
-          {w.text}
-          <rt>{w.reading}</rt>
-        </ruby>
+        <Furigana texto={w.text} leitura={w.reading} />
       ) : (
         w.text
       )}

@@ -144,11 +144,11 @@ describe('quem usa a placa passa pela trava', () => {
     expect(pkg.scripts.vozes).toMatch(/^python -I scripts\/placa\.py .*-- node scripts\/gravar-vozes\.mjs$/);
   });
 
-  it('as gravações das duas vozes em português prendem a placa', () => {
+  it('a gravação do português prende a placa, e só há uma voz para gravar', () => {
     const pkg = JSON.parse(readFileSync(join(__dirname, '..', 'package.json'), 'utf8'));
-    expect(pkg.scripts['vozes-pt:voz1']).toMatch(/^python -I scripts\/placa\.py .*-- node scripts\/gravar-vozes-pt\.mjs --voz1$/);
-    expect(pkg.scripts['vozes-pt:voz2']).toMatch(/^python -I scripts\/placa\.py .*-- node scripts\/gravar-vozes-pt\.mjs --voz2$/);
-    // Sem servidor das aulas: o site toca as duas vozes sozinho.
+    expect(pkg.scripts['vozes-pt']).toMatch(/^python -I scripts\/placa\.py .*-- node scripts\/gravar-vozes-pt\.mjs$/);
+    expect(Object.keys(pkg.scripts).filter((k) => k.startsWith('vozes-pt:'))).toEqual([]);
+    // Sem servidor das aulas: o site toca a voz sozinho.
     expect(Object.keys(pkg.scripts).filter((k) => k.startsWith('aulas'))).toEqual([]);
   });
 

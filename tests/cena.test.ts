@@ -142,7 +142,7 @@ describe('Cena Viva: instruções geradas', () => {
   it('denso: lugar + cor só quando os dois juntos decidem', () => {
     const t = tarefas(SALA, 'denso').find((x) => textoDe(x.segs) === 'テーブルの上にある赤いかばんはどこ？')!;
     expect(t.alvo).toEqual(['b1']);
-    expect(t.palavras.map((w) => w.jp)).toEqual(['赤い', 'かばん']);
+    expect(t.palavras.map((w) => w.jp)).toEqual(['テーブル', '赤い', 'かばん']);
     // Na cadeira só tem a vermelha: "椅子の上にある赤いかばん" não precisaria da cor.
     expect(tarefas(SALA, 'denso').some((x) => textoDe(x.segs).startsWith('椅子の上にある赤い'))).toBe(false);
   });

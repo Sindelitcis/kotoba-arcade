@@ -223,7 +223,7 @@ export class Hunt {
     const { cards, rng, now } = this.deps;
     const t = now();
     const ap = (q: Question) => apoiar(q, cards);
-    const out: Question[] = [ap(kanjiMeaningQuestion(k, rng))];
+    const out: Question[] = [ap(kanjiMeaningQuestion(k, rng, cards))];
     const usedWords = new Set<string>();
     let novaPalavra: Word | null = null;
     const kanjiFirme = faseDe(cards, cardKey(k.id, 'meaning')) === 'cobranca';
@@ -245,28 +245,28 @@ export class Hunt {
       const r = cards[cardKey(w.id, 'reading')];
       if (!m) {
         if (!foiApresentado(cards, cardKey(w.id, 'meaning'))) novaPalavra = w;
-        return wordMeaningQuestion(w, rng);
+        return wordMeaningQuestion(w, rng, cards);
       }
       // A leitura só depois do significado firmar.
-      if (emPratica(cards, cardKey(w.id, 'meaning'))) return wordMeaningQuestion(w, rng);
-      if (!r) return wordReadingQuestion(w, rng, false);
+      if (emPratica(cards, cardKey(w.id, 'meaning'))) return wordMeaningQuestion(w, rng, cards);
+      if (!r) return wordReadingQuestion(w, rng, false, cards);
       const weakerIsReading = retrievability(r, t) <= retrievability(m, t);
-      if (weakerIsReading) return wordReadingQuestion(w, rng, masteryLevel(r) >= 3 && !emPratica(cards, cardKey(w.id, 'reading')));
-      return wordMeaningQuestion(w, rng);
+      if (weakerIsReading) return wordReadingQuestion(w, rng, masteryLevel(r) >= 3 && !emPratica(cards, cardKey(w.id, 'reading')), cards);
+      return wordMeaningQuestion(w, rng, cards);
     };
 
     while (out.length < seals) {
       const wantRecall = kanjiFirme && out.length === seals - 1 && !out.some((q) => q.kind === 'kanji-recall');
-      const q = wantRecall ? kanjiRecallQuestion(k, rng) : nextWordQuestion();
+      const q = wantRecall ? kanjiRecallQuestion(k, rng, cards) : nextWordQuestion();
       if (!q) {
         // Sem palavra que dê para perguntar ainda: o significado de novo, com as opções embaralhadas.
-        out.push(ap({ ...kanjiMeaningQuestion(k, rng) }));
+        out.push(ap({ ...kanjiMeaningQuestion(k, rng, cards) }));
         continue;
       }
       // Evita duas perguntas idênticas no mesmo encontro.
       if (out.some((o) => o.card === q.card)) {
         const alt = kanjiFirme ? k.words.find((w) => foiApresentado(cards, cardKey(w.id, 'meaning')) && !emPratica(cards, cardKey(w.id, 'meaning')) && !out.some((o) => o.card === cardKey(w.id, 'reading'))) : undefined;
-        out.push(ap(alt ? wordReadingQuestion(alt, rng, false) : kanjiMeaningQuestion(k, rng)));
+        out.push(ap(alt ? wordReadingQuestion(alt, rng, false, cards) : kanjiMeaningQuestion(k, rng, cards)));
       } else {
         out.push(ap(q));
       }

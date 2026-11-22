@@ -15,7 +15,6 @@
 import {
   KANA_IMAGENS,
   LOTES,
-  LOTE_DE,
   PALAVRAS_KATAKANA,
   kanaDaPalavra,
   kanaItem,
@@ -145,22 +144,21 @@ export function sorteiaOpcoes(rng: Rng, certa: Opcao, outras: Opcao[], n = 4): {
 
 /**
  * Outros kana para as alternativas: mesma escrita, som diferente, desenho diferente.
- * Primeiro os que confundem (se já vistos ou do mesmo lote), depois os já vistos, depois o resto do lote.
+ * Só kana já vistos (apresentados, nesta rodada ou antes): primeiro os que confundem, depois os
+ * do mesmo tipo, depois o resto. Com pouca coisa vista, a pergunta tem menos alternativas, mas
+ * nunca uma que a pessoa ainda não conhece (docs/ensino.md).
  */
 export function distratores(alvo: KanaItem, vistos: ReadonlySet<string>, rng: Rng, n = 3): KanaItem[] {
-  const lote = LOTE_DE.get(alvo.id) ?? 0;
   const ok = (k: KanaItem) =>
     k.id !== alvo.id && k.escrita === alvo.escrita && k.romaji !== alvo.romaji && chaveImagem(k) !== chaveImagem(alvo) && !dentroDePalavra(k);
   const out: KanaItem[] = [];
   const poe = (lista: KanaItem[]) => {
     for (const k of shuffle(rng, lista)) if (out.length < n && ok(k) && !out.some((o) => o.id === k.id || o.romaji === k.romaji)) out.push(k);
   };
-  poe(alvo.parecidos.map(kanaItem).filter((k) => vistos.has(k.id) || LOTE_DE.get(k.id) === lote));
+  poe(alvo.parecidos.map(kanaItem).filter((k) => vistos.has(k.id)));
   // Do mesmo tipo primeiro (combinado com combinado), para a pergunta não se resolver pelo tamanho.
   poe(KANA_IMAGENS.filter((k) => vistos.has(k.id) && k.grupo === alvo.grupo));
   poe(KANA_IMAGENS.filter((k) => vistos.has(k.id)));
-  poe(KANA_IMAGENS.filter((k) => LOTE_DE.get(k.id) === lote));
-  poe(KANA_IMAGENS.filter((k) => (LOTE_DE.get(k.id) ?? 0) <= lote + 1));
   return out;
 }
 
@@ -173,8 +171,7 @@ export function perguntaDe(modo: Modo, alvo: KanaItem, vistos: ReadonlySet<strin
     return { modo: 'som', alvo, ...s, fala: alvo.exemplo.kana };
   }
   if (modo === 'pares') {
-    const lote = LOTE_DE.get(alvo.id);
-    const grupo = alvo.parecidos.map(kanaItem).filter((k) => k.romaji !== alvo.romaji && (vistos.has(k.id) || LOTE_DE.get(k.id) === lote));
+    const grupo = alvo.parecidos.map(kanaItem).filter((k) => k.romaji !== alvo.romaji && vistos.has(k.id));
     if (grupo.length === 0) return perguntaDe('letra-imagem', alvo, vistos, rng);
     const s = sorteiaOpcoes(rng, { item: alvo }, grupo.map((item) => ({ item })), grupo.length + 1);
     return { modo, alvo, ...s, fala: alvo.fala };
@@ -194,8 +191,14 @@ export function palavrasLegiveis(vistos: ReadonlySet<string>): PalavraKatakana[]
   return PALAVRAS_KATAKANA.filter((p) => kanaDaPalavra(p.kana).every((k) => vistos.has(k.id)));
 }
 
-export function perguntaRelampago(palavra: PalavraKatakana, rng: Rng): Pergunta {
-  const outras = shuffle(rng, PALAVRAS_KATAKANA.filter((p) => p.kana !== palavra.kana && p.pt !== palavra.pt)).slice(0, 3);
+/**
+ * Leitura relâmpago: a palavra e as alternativas (os significados) vêm das palavras que já dá
+ * para ler. Só com pouca palavra legível entram outras, e mesmo assim a resposta é em português.
+ */
+export function perguntaRelampago(palavra: PalavraKatakana, rng: Rng, vistos?: ReadonlySet<string>): Pergunta {
+  const candidatas = PALAVRAS_KATAKANA.filter((p) => p.kana !== palavra.kana && p.pt !== palavra.pt);
+  const legiveis = vistos ? candidatas.filter((p) => kanaDaPalavra(p.kana).every((k) => vistos.has(k.id))) : [];
+  const outras = (legiveis.length >= 3 ? shuffle(rng, legiveis) : [...shuffle(rng, legiveis), ...shuffle(rng, candidatas.filter((p) => !legiveis.includes(p)))]).slice(0, 3);
   const s = sorteiaOpcoes(rng, { texto: palavra.pt }, outras.map((p) => ({ texto: p.pt })));
   return { modo: 'relampago', palavra, ...s, fala: palavra.kana };
 }
@@ -367,7 +370,7 @@ export class Rodada {
       if ((this.modoFixo === 'relampago' || (!this.modoFixo && rng() < 0.2)) && legiveis.length > 0) {
         const palavra = legiveis[Math.floor(rng() * legiveis.length)] as PalavraKatakana;
         if (!this.fila.some((p) => p.palavra?.kana === palavra.kana)) {
-          this.fila.push(perguntaRelampago(palavra, rng));
+          this.fila.push(perguntaRelampago(palavra, rng, this.vistos));
           continue;
         }
       }

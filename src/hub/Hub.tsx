@@ -3,14 +3,13 @@ import { KANJI, type Sentence } from '../content';
 import { app, aventuraSave, cenaSave, commit, conversaSave, go, gramaticaSave, jornadaSave, pecasSave, kanaBeatSave, kanaImagensSave, kanjimonSave, memoriaSave, replaceSave, roguelikeSave, saved, screen, tick, type Screen } from '../core/app';
 import { cenaStyle, type Cena } from '../core/arte';
 import { figuraUrl } from '../core/figuras';
-import { hasJapaneseVoice, sfx, speak } from '../core/audio';
+import { sfx, speak } from '../core/audio';
 import { visitados, type Saves } from '../core/cor';
 import { Icone } from '../core/Icone';
 import type { Ritmo, Tema } from '../core/save';
 import { useSubtelaAjuda } from '../core/help/ajuda';
 import { AjustesSom } from '../core/som/AjustesSom';
 import { levelInfo, readingMeter, recentDays } from '../core/progress';
-import { NOME_VOZ_PT, VOZES_PT, type VozPt } from '../core/fala-pt';
 import { EXPLICA_RITMO, exportSave, NOME_RITMO, RITMOS } from '../core/save';
 import { teclaDe } from '../core/teclas';
 import { BOOSTER_COST, canOpenBooster } from '../games/kanjimon/engine';
@@ -131,12 +130,6 @@ export function Hub() {
 
   const escolherRitmo = (ritmo: Ritmo) => {
     settings.ritmo = ritmo;
-    commit();
-    sfx.click();
-  };
-
-  const escolherVozPt = (voz: VozPt) => {
-    settings.vozPt = voz;
     commit();
     sfx.click();
   };
@@ -330,8 +323,7 @@ export function Hub() {
             <h2 id="ajustes-titulo">Ajustes</h2>
             <AjustesSom />
             <label class="check">
-              <input type="checkbox" checked={settings.voice} onChange={() => toggle('voice')} /> Voz em japonês
-              {!hasJapaneseVoice() && <small class="muted"> (este navegador não tem voz japonesa instalada)</small>}
+              <input type="checkbox" checked={settings.voice} onChange={() => toggle('voice')} /> Voz
             </label>
             <label class="check">
               <input type="checkbox" checked={settings.calm} onChange={() => toggle('calm')} /> Modo calmo (menos movimento e faíscas)
@@ -345,14 +337,6 @@ export function Hub() {
               ))}
             </div>
             <p class="muted">{EXPLICA_RITMO[settings.ritmo]}</p>
-            <h3 id="voz-pt-titulo">Voz em português</h3>
-            <div class="segmento" role="group" aria-labelledby="voz-pt-titulo">
-              {VOZES_PT.map((v) => (
-                <button key={v} aria-pressed={settings.vozPt === v} onClick={() => escolherVozPt(v)} data-testid={`voz-pt-${v}`}>
-                  {NOME_VOZ_PT[v]}
-                </button>
-              ))}
-            </div>
             <h3 id="tema-titulo">Tema</h3>
             <div class="segmento" role="group" aria-labelledby="tema-titulo">
               {(

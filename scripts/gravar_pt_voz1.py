@@ -1,6 +1,6 @@
-"""Grava o português falado na Voz 1 (Fish Speech com o modelo afinado) em public/vozes-pt/voz1/.
+"""Grava o português falado do site (Fish Speech com o modelo afinado) em public/vozes-pt/voz1/
 
-Chamado por `npm run vozes-pt:voz1` (scripts/gravar-vozes-pt.mjs), que passa pela trava da placa.
+Chamado por `npm run vozes-pt` (scripts/gravar-vozes-pt.mjs), que passa pela trava da placa.
 Usa o motor dos audiobooks como está (pesos em int8, dois trechos por vez, o Whisper conferindo
 cada fala e refazendo até 3 vezes o que ouviu diferente). Fala de uma ou duas palavras é refeita
 uma vez só: sem frase em volta o Whisper erra muito ("Porta." vira "Boa noite."), e cada tentativa

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { cardKey, WORDS } from '../src/content';
+import { foiApresentado } from '../src/core/ensino';
 import { DAILY_WORDS, findWord } from '../src/content/vida';
 import { isKana } from '../src/core/kana';
 import { emptySave } from '../src/core/save';
@@ -279,15 +280,17 @@ describe('uma cena em andamento', () => {
     expect(data.cards[key('こんにちは')]?.reps).toBe(0);
   });
 
-  it('palavra que sobrou da apresentação é apresentada na própria fala, sem nota', () => {
+  it('palavra que sobrou da apresentação aparece com glosa na fala, mas não conta como apresentada', () => {
     const { play, data } = setup(MINI, false);
-    // Só a primeira foi apresentada antes; as outras chegam na fala.
+    // Só a primeira foi apresentada antes; as outras só passam pela fala, com leitura e significado.
     play.apresentando = ['w:こんにちは'];
     play.apresentou();
     play.advance();
     const events = pick(play, 'ok');
     expect(events.some((e) => e.t === 'new')).toBe(true);
-    expect(data.cards[key('どこ')]?.reps).toBe(0);
+    // Sem carta: a Memória e o KanjiMon não podem cobrar o que só passou numa fala.
+    expect(data.cards[key('どこ')]).toBeUndefined();
+    expect(foiApresentado(data.cards, key('どこ'))).toBe(false);
   });
 
   it('entender a pergunta faz a história andar e registra as palavras ouvidas e ditas', () => {

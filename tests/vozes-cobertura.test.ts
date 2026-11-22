@@ -54,7 +54,8 @@ const CHAMADAS: Record<string, string[]> = {
     'speak(fala)', // a apresentação "de novo" fechou: repete o pedido (falaDaTarefa)
   ],
   'src/games/conversa/ConversaGame.tsx': [
-    'speak(linha.jp, VOZ_CONVERSA[cena.personagem.voz])', // abertura gravada; resposta do modelo vem do servidor local
+    // Abertura e frases prontas são gravadas; o que a IA escreve na hora só tem voz pelo AivisSpeech do PC.
+    'speakSeGravado(linha.jp, VOZ_CONVERSA[cena.personagem.voz])',
     'speakWord(t.kana)', // palavras novas do resumo
   ],
   'src/games/gramatica/GramaticaGame.tsx': [
@@ -78,10 +79,10 @@ const CHAMADAS: Record<string, string[]> = {
   'src/hub/Hub.tsx': ['speak(sentence.jp)'],
 };
 
-/** Pega `speak(...)`, `speakWord(...)` e `speakKanji(...)` com os parênteses balanceados. */
+/** Pega `speak(...)`, `speakWord(...)`, `speakKanji(...)` e `speakSeGravado(...)` com os parênteses balanceados. */
 function chamadas(fonte: string): string[] {
   const out: string[] = [];
-  for (const m of fonte.matchAll(/\bspeak(Word|Kanji)?\(/g)) {
+  for (const m of fonte.matchAll(/\bspeak(Word|Kanji|SeGravado)?\(/g)) {
     let fundo = 0;
     let i = m.index;
     for (; i < fonte.length; i++) {

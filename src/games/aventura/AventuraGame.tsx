@@ -19,6 +19,7 @@ import { figuraDaPalavra } from '../../content/imagens';
 import { figuraUrl } from '../../core/figuras';
 import { SCENES, SPEAKERS } from './cenas';
 import { diaryEntries, isUnlocked, PLAYER, ScenePlay, suggestScene, type PlayEvent, type Scene, type SceneSummary, type Shown, type TokenView } from './engine';
+import { Furigana } from '../../core/Furigana';
 
 /** A narração vai na voz em português; as falas, na voz de quem fala. */
 function falarQuadro(shown: Shown): void {
@@ -49,10 +50,9 @@ function Line({ tokens, allReadings }: { tokens: readonly TokenView[]; allReadin
         const cls = t.word ? (t.help === 'full' ? 'av-w new' : 'av-w') : undefined;
         if (t.reading && (allReadings || t.help !== 'none')) {
           return (
-            <ruby key={i} class={cls}>
-              {t.text}
-              <rt>{t.reading}</rt>
-            </ruby>
+            <span key={i} class={cls}>
+              <Furigana texto={t.text} leitura={t.reading} />
+            </span>
           );
         }
         return (

@@ -512,8 +512,12 @@ export class GramaticaRound {
     const point = (cabeNovo ? novo : pool.find((p) => pick && cardOf(p.id) === pick.key)) ?? novo ?? (pool[0] as Point);
     this.recentPoints.push(cardOf(point.id));
     const teach = !foiApresentado(cards, cardOf(point.id));
-    const choices = point.sentences.filter((s) => !this.recentSentences.includes(s.jp));
-    const list = choices.length > 0 ? choices : point.sentences;
+    // Frase com gramática ainda não vista fica para depois: primeiro as que só usam pontos já
+    // apresentados (e o desta frase). Sem nenhuma assim, vale qualquer uma do ponto.
+    const limpas = point.sentences.filter((s) => this.soConhecidos(s.jp, point));
+    const base = limpas.length > 0 ? limpas : point.sentences;
+    const choices = base.filter((s) => !this.recentSentences.includes(s.jp));
+    const list = choices.length > 0 ? choices : base;
     const sentence = list[Math.floor(rng() * list.length)] as { jp: string; pt: string };
     this.recentSentences.push(sentence.jp);
     this.puzzle = this.build(point, sentence, teach);
@@ -524,6 +528,11 @@ export class GramaticaRound {
   /** Ponto já visto (apresentado) ou que é o desta frase. */
   private known(point: Point, target: Point): boolean {
     return point === target || foiApresentado(this.deps.cards, cardOf(point.id));
+  }
+
+  /** Todo buraco da frase é de um ponto já visto ou do ponto da frase. */
+  private soConhecidos(jp: string, target: Point): boolean {
+    return parseSentence(jp).every((p) => p.k !== 'gap' || this.known(pointOfRole(this.deps.course, p.role), target));
   }
 
   /** O ponto da frase ainda está em prática (ou acabou de ser apresentado). */
@@ -582,13 +591,9 @@ export class GramaticaRound {
       const p = pointOfBlock(course, b);
       return p && this.known(p, target);
     });
-    // Ainda não tem peça conhecida para confundir: entra a do próximo ponto (a explicação ensina).
-    const order = (b: Block) => course.points.findIndex((p) => p.blocks.includes(b));
-    const unseen = wrong.filter((b) => !seen.includes(b)).sort((a, b) => order(a) - order(b));
-    const shuffled = shuffle(rng, seen);
-    const room = TRAY_SIZE - correct.length;
-    const distract = shuffled.slice(0, room);
-    if (correct.length + distract.length < 2) distract.push(...unseen.slice(0, 2 - correct.length - distract.length));
+    // Só peça de ponto já visto confunde. No primeiro ponto ainda não há nenhuma: a bandeja
+    // tem só a certa (que brilha), e a peça que engana chega quando o ponto dela for ensinado.
+    const distract = shuffle(rng, seen).slice(0, TRAY_SIZE - correct.length);
     return shuffle(rng, [...correct, ...distract]);
   }
 

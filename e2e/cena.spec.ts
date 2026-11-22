@@ -1,4 +1,4 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Page } from './base';
 import { passarApresentacao, seApresentar } from './apoio';
 
 const SHOTS = process.env.SHOTS_DIR;
@@ -153,7 +153,7 @@ test('etapa de montar a frase: lição primeiro, peças em kana, a frase cresce 
   await abrir(page);
   await page.keyboard.press('Enter');
   await seApresentar(page);
-  await expect(page.getByTestId('cn-licao')).toContainText('monte a frase sobre a coisa marcada');
+  await expect(page.getByTestId('cn-licao')).toContainText('Monte a frase sobre a coisa marcada');
   await passarApresentacao(page);
   await expect(page.getByTestId('cn-bandeja')).toBeVisible();
   await expect(page.locator('.cn-coisa.marcada')).toHaveCount(1);

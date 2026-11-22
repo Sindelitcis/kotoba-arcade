@@ -8,7 +8,7 @@ Um gerenciador só (`src/core/som/mixer.ts`) toca música e efeitos:
 
 - Nada toca antes do primeiro clique, toque ou tecla. A trilha pedida antes disso começa nessa hora.
 - Nos Ajustes há Som (liga e desliga tudo) e um volume para Música, Efeitos e Voz.
-- Quando uma voz fala, a música desce para uns 20% e volta quando a voz acaba. Toda voz (gravada ou do navegador) passa por `acompanharVoz`.
+- Quando uma voz fala, a música desce para uns 20% e volta quando a voz acaba. Toda voz gravada passa por `acompanharVoz`.
 - Cada tela tem um clima, e trocar de tela troca a trilha com crossfade de pouco mais de um segundo (`src/core/som/climas.ts`). Um jogo pode pedir outro clima por cima com `useClima`, como o chefe do Kotodama e as telas de resultado.
 - Com modo calmo ou "reduzir movimento" no sistema, a troca de tela fica sem o som de transição.
 - Aba escondida deixa a música em silêncio.

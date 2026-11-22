@@ -325,11 +325,12 @@ describe('conversa', () => {
     expect(s.calls).toHaveLength(0);
   });
 
-  it('palavra nova que o personagem disse entra na memória como primeiro contato', () => {
+  it('palavra nova que o personagem disse aparece com o significado, mas não conta como apresentada', () => {
     const s = setup([]);
     const nova = s.inicio.filter((e) => e.t === 'nova').map((e) => (e.t === 'nova' ? e.termo.jp : ''));
     expect(nova).toContain('注文');
-    expect(s.data.cards[cardKey('w:注文', 'meaning')]).toBeDefined();
+    // Só ouvir não é apresentação: a Memória não pode passar a cobrar 注文.
+    expect(s.data.cards[cardKey('w:注文', 'meaning')]).toBeUndefined();
   });
 
   it('uma fala entendida rende xp, marca o passo e mostra a resposta com furigana', async () => {

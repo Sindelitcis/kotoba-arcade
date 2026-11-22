@@ -14,6 +14,7 @@ import { itemDaPalavra, type ItemNovo } from '../../content/ensino';
 import { chave } from './engine';
 import { FIGURAS_MEMORIA, MemoriaRound, QUADROS, type Carta, type Evento, type Resumo } from './engine';
 import { foco, recortar } from '../../core/foco';
+import { Furigana } from '../../core/Furigana';
 
 type Modo = 'menu' | 'rodada' | 'resumo';
 
@@ -24,14 +25,7 @@ const FUNDO = 'heya';
 
 function Escrita({ w, leitura }: { w: Word; leitura: boolean }) {
   if (w.jp === w.kana) return <>{w.jp}</>;
-  return leitura ? (
-    <ruby>
-      {w.jp}
-      <rt>{w.kana}</rt>
-    </ruby>
-  ) : (
-    <>{w.jp}</>
-  );
+  return leitura ? <Furigana texto={w.jp} leitura={w.kana} /> : <>{w.jp}</>;
 }
 
 function Alto() {
@@ -48,7 +42,7 @@ function CartaView({ c, i, onClick, brilha, escolhida }: { c: Carta; i: number; 
   const cls = ['me-carta', c.lado, c.aberta ? 'aberta' : 'fechada', c.feita ? 'feita' : '', brilha ? 'brilha' : '', escolhida ? 'escolhida' : ''].filter(Boolean).join(' ');
   const rotulo = c.aberta ? (c.lado === 'img' ? `imagem: ${f.word.pt}` : c.mostra === 'audio' ? 'palavra em áudio' : f.word.kana) : 'carta virada';
   return (
-    <button class={cls} onClick={onClick} data-carta={i} data-par={c.par} data-lado={c.lado} aria-label={rotulo}>
+    <button class={cls} onClick={onClick} data-carta={i} data-par={c.par} data-lado={c.lado} data-palavra={f.word.id} aria-label={rotulo}>
       <kbd>{GRADE[i]!.toUpperCase()}</kbd>
       {!c.aberta ? (
         <span class="me-verso" lang="ja">
