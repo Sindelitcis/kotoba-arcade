@@ -48,8 +48,9 @@ async function playUntilOverlay(page: Page, title: string) {
 
 test('do fliperama para a caçada com uma tecla: primeiro os kanji novos são apresentados, depois a prática', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'Kotoba Arcade' })).toBeVisible();
-  // Um Enter só, logo que a página abre. O ouvinte ligava depois da pintura e esse Enter se perdia.
-  await page.keyboard.press('Enter');
+  // Uma tecla só, logo que a página abre. O ouvinte ligava depois da pintura e a tecla se perdia.
+  // (O Enter agora continua o curso; o atalho do KanjiMon é o C.)
+  await page.keyboard.press('c');
   const cartao = page.getByTestId('apresentacao');
   await expect(cartao).toHaveAttribute('data-item', 'k:一#meaning');
   await expect(cartao).toContainText('um');

@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { KANJI, type Sentence } from '../content';
-import { app, aventuraSave, cenaSave, commit, conversaSave, go, gramaticaSave, jornadaSave, pecasSave, kanaBeatSave, kanaImagensSave, kanjimonSave, memoriaSave, replaceSave, roguelikeSave, saved, screen, tick, type Screen } from '../core/app';
+import { app, aventuraSave, cenaSave, commit, conversaSave, cursoSave, go, gramaticaSave, jornadaSave, pecasSave, kanaBeatSave, kanaImagensSave, kanjimonSave, memoriaSave, replaceSave, roguelikeSave, saved, screen, tick, type Screen } from '../core/app';
 import { cenaStyle, type Cena } from '../core/arte';
 import { figuraUrl } from '../core/figuras';
 import { sfx, speak } from '../core/audio';
@@ -15,6 +15,8 @@ import { Furigana } from '../core/Furigana';
 import { teclaDe } from '../core/teclas';
 import { BOOSTER_COST, canOpenBooster } from '../games/kanjimon/engine';
 import { etapaDa, proximaMissao } from '../jornada/etapas';
+import { continuarCurso } from '../curso/CursoTela';
+import { blocosDa, NOME_BLOCO, proximaLicao } from '../curso/motor';
 
 interface Tile {
   id: string;
@@ -82,6 +84,9 @@ export function Hub() {
   const jornada = jornadaSave();
   const proxima = proximaMissao(jornada);
   const etapaProx = proxima ? etapaDa(proxima.id) : undefined;
+  // Curso: a próxima lição, o caminho principal.
+  const licao = proximaLicao(cursoSave());
+  const parteLicao = licao ? blocosDa(licao.unidade)[licao.bloco] : undefined;
 
   // Ligado junto com o desenho da tela: tecla apertada logo que a tela aparece não se perde.
   useLayoutEffect(() => {
@@ -98,8 +103,9 @@ export function Hub() {
         // Botão escolhido pelo Tab: o Enter e o espaço são dele.
         if (e.target instanceof HTMLElement && e.target.closest('button, a, input, select, textarea')) return;
         e.preventDefault();
-        go(nextGame);
-      } else if (tecla.toLowerCase() === 'd') go('kanjidex');
+        continuarCurso();
+      } else if (tecla.toLowerCase() === 'u') go('curso');
+      else if (tecla.toLowerCase() === 'd') go('kanjidex');
       else if (tecla.toLowerCase() === 'b' && booster === 'ok') go('booster');
       else if (tecla.toLowerCase() === 'k') go('kanabeat');
       else if (tecla.toLowerCase() === 'c') go('kanjimon');
@@ -206,6 +212,30 @@ export function Hub() {
         </p>
       )}
 
+      <button class="koma jornada-faixa hub-curso" style={cenaStyle('aventura-narita')} onClick={continuarCurso} data-testid="hub-curso">
+        <span class="hub-rotulo">
+          <Icone nome="book-open" /> Curso · A1 <kbd>Enter</kbd>
+        </span>
+        <span class="jornada-faixa-txt">
+          {licao ? (
+            <>
+              <b>
+                Unidade {licao.unidade.numero} · {licao.unidade.titulo}
+              </b>
+              <span>Ao final: “Consigo {licao.unidade.consigo}.”</span>
+              <span class="jornada-faixa-prox">
+                <Icone nome="play" /> Continuar o curso · Parte {licao.bloco + 1} de {blocosDa(licao.unidade).length}: {parteLicao ? NOME_BLOCO[parteLicao.tipo] : ''}
+              </span>
+            </>
+          ) : (
+            <b>O A1 está feito. Abra o curso para refazer uma unidade.</b>
+          )}
+        </span>
+      </button>
+      <button class="ghost hub-curso-mapa" onClick={() => go('curso')} data-testid="hub-curso-mapa">
+        Ver as unidades <kbd>U</kbd>
+      </button>
+
       <section class="hub-hero">
         <button class="koma jornada-faixa" style={cenaStyle(etapaProx?.cena ?? 'hub-shibuya')} onClick={() => go('jornada')} data-testid="hub-jornada">
           <span class="hub-rotulo">
@@ -229,7 +259,7 @@ export function Hub() {
             </span>
             <span class="play-now-main">{nextLabel.split(' · ')[0]}</span>
             <span class="play-now-sub">
-              {nextLabel.split(' · ')[1]} <kbd>Enter</kbd>
+              {nextLabel.split(' · ')[1]}
             </span>
           </button>
 

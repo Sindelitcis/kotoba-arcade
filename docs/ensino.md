@@ -25,7 +25,7 @@ A regra vale para tudo o que aparece numa pergunta, não só para o alvo:
 
 ### Um registro só, para todos os jogos
 
-"Já apresentado" é ter carta no FSRS, de qualquer habilidade, criada por qualquer jogo (`foiApresentado`). A carta só nasce no cartão de apresentação (`apresentar()`), na lição do jogo ou no quadro da Jornada. É isso que faz a continuidade: a Cena Viva da sala apresenta 本 e 椅子, e a Memória já pode pôr os dois no quadro sem apresentar de novo; o KanjiMon apresenta 学生, e o Kanji em peças pode perguntar a leitura dela.
+"Já apresentado" é ter carta no FSRS, de qualquer habilidade, criada por qualquer jogo (`foiApresentado`). A carta só nasce no cartão de apresentação (`apresentar()`), na lição do jogo, no quadro da Jornada ou no cartão do curso. É isso que faz a continuidade: a Cena Viva da sala apresenta 本 e 椅子, e a Memória já pode pôr os dois no quadro sem apresentar de novo; o KanjiMon apresenta 学生, e o Kanji em peças pode perguntar a leitura dela.
 
 O save da versão 1 (antes desta regra) tinha cartas criadas sem apresentação. Foi assim que a Memória ensinou テレビ e logo cobrou たな, ベッド, 椅子 e 本. Na abertura de um save antigo, `cartasDoSave1` (em `core/save.ts`) deixa só os itens que a pessoa já sabe (alguma carta em revisão); o resto volta a ser novo e passa pelo cartão antes da primeira pergunta.
 
@@ -58,6 +58,7 @@ O exemplo dos cartões de estrutura segue a mesma regra. Na Cena Viva, a lição
 | Kumitate | a lição curta do ponto, com exemplo e áudio | a peça certa brilha; errar não zera o combo; a bandeja só tem peça de ponto já ensinado | frase inteira, tempo e combo; a frase prefere só gramática já vista |
 | Aventura | até 5 palavras da cena antes da primeira fala | a primeira passada não vale nota; palavra não apresentada vem com leitura e significado e não ganha carta | as cenas seguintes cobram |
 | Conversa | as palavras da situação antes de conversar | palavra não apresentada aparece com o significado (aviso "nova"), sem carta | o resto da conversa |
+| Curso | as palavras de cada parte (de 3 a 5) e, logo depois, os kanji delas, com a leitura da palavra e o aviso das outras | duas opções na primeira vez, três depois, todas de itens do curso já apresentados; errar mostra o cartão de novo e a pergunta volta no fim; nunca põe outra leitura do mesmo kanji como errada | a prova de unidade (fase 3) |
 | Jornada | o quadro da lição apresenta a palavra ou o kanji, de três em três | a pergunta logo depois é prática; a alternativa errada é de um quadro anterior (o trio de expressões evita juntar as que se confundem) | missões seguintes |
 
 ## Calma: nada rápido a ponto de atrapalhar

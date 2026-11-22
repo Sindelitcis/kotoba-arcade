@@ -33,6 +33,7 @@ import { pecasDasEtapas } from '../src/games/cena/aulas';
 import { daCoisa, ETAPAS, falaDaTarefa, falaDoNome, nomeDe, PERGUNTA_NOME, tarefas, type Seg } from '../src/games/cena/engine';
 import { LUGARES } from '../src/games/cena/lugares';
 import { falasDaFicha, fichaDe, todosOsAlvos } from '../src/content/aprofundar/fichas';
+import { falasDoCurso } from '../src/curso/cartoes';
 
 export interface Fala {
   /** Exatamente o texto que o jogo passa para `speak()`. */
@@ -404,6 +405,8 @@ export function listarFalas(): Fala[] {
     ...FIGURAS.map((f) => palavra(f.word, 'imagens/figura')),
     ...IMAGEM_WORDS.map((w) => palavra(w, 'imagens/palavra')),
     ...cena(),
+    // Curso: as palavras do currículo (os cartões de palavra e de kanji falam a palavra).
+    ...falasDoCurso().jp.map((f) => palavra(f.palavra, f.origem)),
     ...cenaEtapas(),
     ...aprofundar(),
   ];

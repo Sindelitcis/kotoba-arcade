@@ -14,10 +14,16 @@ describe('teclado do fliperama', () => {
     screen.value = 'hub';
   });
 
-  it('Enter no fliperama abre o jogo da vez', async () => {
+  it('Enter no fliperama continua o curso', async () => {
     await act(() => render(<Hub />, document.body));
     press('Enter');
-    expect(screen.value).toBe('kanjimon');
+    expect(screen.value).toBe('curso');
+  });
+
+  it('U no fliperama abre o mapa do curso', async () => {
+    await act(() => render(<Hub />, document.body));
+    press('u');
+    expect(screen.value).toBe('curso');
   });
 
   it('tecla apertada quando a tela já é de um jogo não é tratada pelo fliperama', async () => {
@@ -84,14 +90,13 @@ describe('aviso de gravação', () => {
     expect(document.querySelector('[data-testid="save-failed"]')?.textContent).toContain('backup');
   });
 
-  it('J no fliperama abre a Jornada, e Enter continua abrindo o jogo da vez', async () => {
+  it('J no fliperama abre a Jornada, e Enter continua sendo o curso', async () => {
     await act(() => render(<Hub />, document.body));
     press('j');
     expect(screen.value).toBe('jornada');
     screen.value = 'hub';
-    // A Jornada não vira o "jogo da vez": Enter segue com uma tecla só.
     press('Enter');
-    expect(['kanjimon', 'kanabeat', 'roguelike', 'aventura', 'conversa', 'gramatica']).toContain(screen.value);
+    expect(screen.value).toBe('curso');
   });
 
   it('M abre a Memória e L abre a Cena Viva', async () => {

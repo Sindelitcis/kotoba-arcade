@@ -99,14 +99,14 @@ for (const c of CASOS) {
   });
 }
 
-test('depois de abrir pelo botão e fechar, o Enter do fliperama volta a ser jogar agora', async ({ page }) => {
-  // O foco ficava no botão de ajuda e o Enter reabria a ajuda em vez de abrir o jogo.
+test('depois de abrir pelo botão e fechar, o Enter do fliperama volta a continuar o curso', async ({ page }) => {
+  // O foco ficava no botão de ajuda e o Enter reabria a ajuda em vez de seguir.
   await page.getByTestId('ajuda-botao').click();
   await expect(painel(page)).toBeVisible();
   await page.keyboard.press('Escape');
   await expect(painel(page)).toBeHidden();
   await page.keyboard.press('Enter');
-  await expect(page.getByTestId('enemy-kanji')).toBeVisible();
+  await expect(page.getByTestId('cs-objetivo')).toBeVisible();
   await expect(painel(page)).toBeHidden();
 });
 
@@ -116,7 +116,7 @@ test('o índice troca de seção pelo clique e pelo número', async ({ page }) =
   await expect(corpo.locator('h3').first()).toHaveText('Objetivo');
   await painel(page).getByRole('button', { name: /Teclas/ }).click();
   await expect(corpo.locator('h3').first()).toHaveText('Teclas');
-  await expect(corpo).toContainText('Jogar agora');
+  await expect(corpo).toContainText('Continuar o curso');
   await page.keyboard.press('6');
   await expect(corpo.locator('h3').first()).toHaveText('Perguntas comuns');
   await expect(corpo).toContainText('Como funciona o save?');

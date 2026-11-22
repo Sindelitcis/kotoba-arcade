@@ -20,6 +20,7 @@ import { KanjiMonGame } from './games/kanjimon/KanjiMonGame';
 import { PecasGame } from './games/pecas/PecasGame';
 import { MemoriaGame } from './games/memoria/MemoriaGame';
 import { RoguelikeGame } from './games/roguelike/RoguelikeGame';
+import { CursoTela } from './curso/CursoTela';
 import { Hub } from './hub/Hub';
 import { JornadaTela } from './jornada/JornadaTela';
 import { LicaoTela } from './jornada/LicaoTela';
@@ -61,6 +62,8 @@ function App() {
       return <KanaImagensGame />;
     case 'ouvir':
       return <OuvirTela />;
+    case 'curso':
+      return <CursoTela />;
     default:
       return <Hub />;
   }

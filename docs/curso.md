@@ -102,6 +102,37 @@ Uma lição leva de 20 a 30 minutos, em blocos curtos que dá para parar e volta
 9. **Tarefa de uso:** escrever três frases, conversar com a IA sobre o tema da lição ou fazer uma
    missão de verdade ("leia o preço de três coisas no próximo mercado japonês que visitar").
 
+## O motor do curso
+
+Feito na fase 2, em `src/curso/`. A tela inicial abre com "Continuar o curso" (Enter), que leva à
+próxima parte; a tecla U mostra o mapa das unidades.
+
+- **Partes curtas.** `motor.ts` (`blocosDa`) divide a unidade em partes de uns 5 minutos: objetivo
+  (com a revisão rápida da unidade anterior), palavras de 3 a 5 por vez, os kanji dessas palavras
+  logo depois delas, a gramática, as notas culturais já conferidas e o diálogo da situação. A
+  unidade de revisão tem só o objetivo e uma prática com o que já foi visto. Os passos que dependem
+  do conteúdo da fase 4 (aula falada, exemplos de gramática, tarefa de uso) e das provas da fase 3
+  (mini-teste) ainda não entram.
+- **Cartões.** `cartoes.ts` monta a apresentação direto do currículo, no mesmo cartão dos jogos
+  (`core/Apresentacao.tsx`). O do kanji mostra a leitura usada na palavra, a explicação da troca
+  quando ela muda e as outras leituras do curso, com a unidade em que entram. O de gramática mostra
+  o padrão e a regra, sem exemplo até a fase 4.
+- **Prática.** `pratica.ts`: duas opções na primeira vez e três depois, todas de itens do curso já
+  apresentados. Errar não tira nada: a resposta fica na tela até a pessoa seguir, o cartão aparece
+  de novo e a pergunta volta no fim. A parte acaba quando cada item foi acertado uma vez.
+- **Memória.** As palavras e os kanji entram nas mesmas cartas do FSRS dos jogos (`w:<palavra>#meaning`,
+  `k:<kanji>#meaning` e `#reading`). O que foi visto no curso os jogos já podem praticar.
+- **Progresso.** Fica em `games.curso` no save: quantas partes de cada unidade foram feitas e
+  quais unidades foram concluídas. Parar no meio volta na mesma parte.
+- **Liberação.** A unidade 1 é livre e cada outra abre quando a anterior é concluída. O ponto que
+  decide isso é `venceu()`, em `motor.ts`; a fase 3 troca "chegou ao fim" pela prova com 80%.
+- **Voz.** Tudo o que os cartões falam (a palavra em japonês e o "Quer dizer..." na Voz 1) entra
+  nas listas de gravação (`scripts/falas.ts` e `scripts/falas-pt.ts`, origem `curso`).
+
+`tests/curso-motor.test.ts` percorre o A1 inteiro com um save zerado e confere, em cada pergunta,
+que o alvo e todas as alternativas já foram apresentados; também cobre as partes, os cartões, o
+progresso e a liberação. `e2e/curso.spec.ts` faz o caminho no navegador.
+
 ## Provas
 
 - **Fim de unidade:** prova digital no site, com nota mínima de 80% para liberar a próxima. Quem
@@ -153,14 +184,14 @@ A voz em japonês (AivisSpeech) pronuncia mal um kana sozinho. Duas frentes:
 ## O que já existe
 
 O conteúdo atual (vocabulário, figuras, vozes, kanji, cenas) é reaproveitado e redistribuído pelas
-unidades. A Jornada vira o curso. Os jogos continuam, como exercícios das lições e como prática livre.
+unidades. Por enquanto a Jornada continua ao lado do curso, no fliperama; ela vai ser absorvida
+por ele. Os jogos continuam, como exercícios das lições e como prática livre.
 
 ## Fases
 
 1. **Currículo:** feito para o A1 (`src/content/curso/`), com testes. Falta conferir as notas
    culturais contra as fontes e cruzar o vocabulário com uma lista de N5.
-2. **Motor do curso:** a tela inicial com a próxima lição, o tocador de lição, o progresso e o
-   destravamento.
+2. **Motor do curso:** feito (ver "O motor do curso", acima). Falta o que depende das fases 3 e 4.
 3. **Provas e impressos:** mini-teste, prova de unidade digital e imprimível, apostila, folhas de
    exercício, cartões, gabarito por código e nivelamento.
 4. **Conteúdo do A1:** aulas faladas na Voz 1, diálogos, quadros e exercícios, unidade por unidade.

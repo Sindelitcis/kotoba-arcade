@@ -30,11 +30,18 @@ completo está em [docs/curso.md](docs/curso.md) e tem seis fases:
 5. áudio de kana;
 6. A2.
 
-Estado em 22/11/2026: a fase 1 está feita para o A1. O currículo está em `src/content/curso/`, com
-as 20 unidades, os kanji e as leituras, a gramática e as notas, e é conferido por
-`tests/curso.test.ts`. Faltam conferir as notas culturais contra as fontes e cruzar o vocabulário
-com uma lista de N5. A próxima é a fase 2, o motor do curso. Até lá, os jogos e a Jornada continuam
-como estão.
+Estado em 22/11/2026: as fases 1 e 2 estão feitas para o A1.
+
+- **Currículo** em `src/content/curso/`: as 20 unidades, os kanji e as leituras, a gramática e as
+  notas, conferido por `tests/curso.test.ts`. Faltam conferir as notas culturais contra as fontes
+  (até lá elas não aparecem no curso) e cruzar o vocabulário com uma lista de N5.
+- **Motor** em `src/curso/`: a tela inicial abre com "Continuar o curso" (Enter), o tocador percorre
+  a unidade em partes curtas (palavras, kanji, gramática, diálogo), o progresso fica salvo e cada
+  unidade só libera depois da anterior. Por enquanto basta chegar ao fim da unidade; a fase 3 troca
+  isso pela prova (`venceu()` em `src/curso/motor.ts`). Detalhes em
+  [docs/curso.md](docs/curso.md#o-motor-do-curso).
+- A próxima é a fase 3, provas e impressos. Os jogos e a Jornada continuam no fliperama, como
+  prática livre.
 
 Regras de ensino que valem em tudo ([docs/ensino.md](docs/ensino.md)):
 
@@ -58,6 +65,9 @@ Regras de ensino que valem em tudo ([docs/ensino.md](docs/ensino.md)):
 - **Base:** Vite, TypeScript strict, Preact com signals e ts-fsrs para a repetição espaçada. Os
   testes usam Vitest (`tests/`) e Playwright (`e2e/`).
 - **Rodar:** `npm run dev`. Antes de publicar, `npm run check` (tipos, unidade, local, build e e2e).
+- **Gravar vozes:** `npm run vozes` (japonês) e `npm run vozes-pt` (Voz 1). O segundo precisa de
+  `local/config.local.json` com a seção `voz1` (fora do Git; os worktrees em `D:\KotobaArcade\worktrees`
+  têm cópias).
 - **Publicação:** push na `main` dispara o GitHub Actions (`.github/workflows/publicar.yml`), que
   testa e publica na Cloudflare Pages. A conta é a do persoria, no plano gratuito.
 - **Conversa por voz:**

@@ -1,0 +1,597 @@
+/**
+ * O curso: o mapa das unidades e o tocador de lição (docs/curso.md, fase 2).
+ *
+ * O tocador percorre os blocos da unidade (`blocosDa`, em motor.ts). Bloco de palavras ou de
+ * kanji: a apresentação (core/Apresentacao.tsx) e, logo depois, a prática com apoio
+ * (pratica.ts). Cada bloco feito fica salvo; parar no meio volta no mesmo bloco.
+ *
+ * Teclas:
+ *   Enter, Espaço   seguir (no mapa: continuar o curso)
+ *   1, 2, 3         responder na prática
+ *   R               ouvir de novo
+ *   Esc             parar aqui (no mapa: voltar ao fliperama)
+ */
+import { useLayoutEffect, useMemo, useRef, useState } from 'preact/hooks';
+import { palavrasDa, UNIDADES, type Unidade } from '../content/curso';
+import { SITUACOES } from '../content/escola';
+import { app, commit, cursoAberto, cursoSave, go, screen } from '../core/app';
+import { cenaStyle } from '../core/arte';
+import { Apresentacao } from '../core/Apresentacao';
+import { sfx } from '../core/audio';
+import { acertou, errou } from '../core/cor';
+import { apresentar } from '../core/ensino';
+import { Furigana } from '../core/Furigana';
+import { Icone } from '../core/Icone';
+import { useAprofundar } from '../core/aprofundar/estado';
+import { tocarSequencia, type Trecho } from '../core/sequencia';
+import { teclaDe } from '../core/teclas';
+import { camadaAberta } from '../core/help/ajuda';
+import type { Alvo } from '../content/aprofundar/alvo';
+import { falaFrase } from '../jornada/licoes';
+import { Marcado } from '../jornada/Marcado';
+import { MOEDAS_LICAO, XP_ACERTO, XP_LICAO } from '../jornada/andamento';
+import { cartaoDaPalavra, cartaoDoKanji, cartaoDoPonto, falaDaPalavra } from './cartoes';
+import { blocosDa, cartaDaPalavra, cartasDoKanji, itensAte, itensDaRevisao, itensDoBloco, liberada, NOME_BLOCO, ondeContinuar, proximaLicao, registrarBloco, unidadePorId, venceu, type Bloco, type ItemPratica } from './motor';
+import { Pratica } from './pratica';
+import './curso.css';
+
+/** Uma tecla por vez: quem está na tela registra o que faz com ela. */
+type Teclado = (tecla: string, e: KeyboardEvent) => boolean;
+
+function useTeclado(fn: Teclado): void {
+  const ref = useRef(fn);
+  ref.current = fn;
+  // Antes da pintura: tecla apertada logo que a tela aparece não se perde.
+  useLayoutEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (screen.value !== 'curso' || camadaAberta.value || e.ctrlKey || e.altKey || e.metaKey) return;
+      const tecla = teclaDe(e);
+      if (tecla === null) return;
+      // Botão escolhido pelo Tab: o Enter e o espaço são dele.
+      if ((tecla === 'Enter' || tecla === ' ') && e.target instanceof HTMLElement && e.target.closest('button')) return;
+      if (ref.current(tecla, e)) e.preventDefault();
+    };
+    addEventListener('keydown', onKey);
+    return () => removeEventListener('keydown', onKey);
+  }, []);
+}
+
+const voltarAoHub = () => {
+  cursoAberto.value = null;
+  go('hub');
+};
+
+/** Abre a unidade no bloco pedido (ou onde ela parou). */
+export function abrirUnidade(u: Unidade, bloco = ondeContinuar(cursoSave(), u)): void {
+  cursoAberto.value = { unidade: u.id, bloco };
+}
+
+/** Continua o curso de onde parou (o "Continuar o curso" da tela inicial). */
+export function continuarCurso(): void {
+  const prox = proximaLicao(cursoSave());
+  if (prox) abrirUnidade(prox.unidade, prox.bloco);
+  else cursoAberto.value = null;
+  go('curso');
+}
+
+export function CursoTela() {
+  const aberto = cursoAberto.value;
+  const u = aberto ? unidadePorId(aberto.unidade) : undefined;
+  if (aberto && u && liberada(cursoSave(), u.id)) return <Tocador key={`${u.id}:${aberto.bloco}`} unidade={u} bloco={aberto.bloco} />;
+  return <Mapa />;
+}
+
+/* ───────── Mapa ───────── */
+
+function Mapa() {
+  const save = cursoSave();
+  const prox = proximaLicao(save);
+
+  useTeclado((tecla) => {
+    if (tecla === 'Escape') {
+      voltarAoHub();
+      return true;
+    }
+    if ((tecla === 'Enter' || tecla === ' ') && prox) {
+      abrirUnidade(prox.unidade, prox.bloco);
+      return true;
+    }
+    return false;
+  });
+
+  return (
+    <main class="lc cs">
+      <header class="lc-topo">
+        <button class="ghost" onClick={voltarAoHub}>
+          ← Fliperama <kbd>Esc</kbd>
+        </button>
+        <div>
+          <h1>Curso · A1</h1>
+          <small class="muted">Uma unidade depois da outra. Cada uma libera a seguinte.</small>
+        </div>
+      </header>
+
+      {prox ? (
+        <button class="koma jornada-faixa cs-continuar" style={cenaStyle('aventura-narita')} onClick={() => abrirUnidade(prox.unidade, prox.bloco)} data-testid="cs-continuar">
+          <span class="hub-rotulo">
+            <Icone nome="play" /> Continuar <kbd>Enter</kbd>
+          </span>
+          <span class="jornada-faixa-txt">
+            <b>
+              Unidade {prox.unidade.numero} · {prox.unidade.titulo}
+            </b>
+            <span>
+              Parte {prox.bloco + 1} de {blocosDa(prox.unidade).length}: {NOME_BLOCO[(blocosDa(prox.unidade)[prox.bloco] as Bloco).tipo]}
+            </span>
+          </span>
+        </button>
+      ) : (
+        <p class="notice">O A1 inteiro está feito. Dá para refazer qualquer unidade.</p>
+      )}
+
+      <ol class="cs-unidades">
+        {UNIDADES.map((x) => {
+          const livre = liberada(save, x.id);
+          const feita = venceu(save, x.id);
+          const total = blocosDa(x).length;
+          const feitos = Math.min(save.feitos[x.id] ?? 0, total);
+          return (
+            <li key={x.id}>
+              <button class={`cs-unidade${feita ? ' feita' : ''}${livre ? '' : ' trancada'}`} disabled={!livre} onClick={() => abrirUnidade(x, feita ? 0 : undefined)} data-testid="cs-unidade" data-unidade={x.id}>
+                <span class="cs-num">{x.numero}</span>
+                <span class="cs-unidade-txt">
+                  <b>{x.titulo}</b>
+                  <span>Consigo {x.consigo}.</span>
+                  {livre ? (
+                    <span class="cs-estado">{feita ? 'Feita. Pode refazer.' : feitos > 0 ? `${feitos} de ${total} partes` : `${total} partes`}</span>
+                  ) : (
+                    <span class="cs-estado">
+                      <Icone nome="lock" /> Libera depois da unidade {x.numero - 1}
+                    </span>
+                  )}
+                </span>
+              </button>
+            </li>
+          );
+        })}
+      </ol>
+    </main>
+  );
+}
+
+/* ───────── Tocador ───────── */
+
+function Tocador({ unidade, bloco }: { unidade: Unidade; bloco: number }) {
+  const blocos = useMemo(() => blocosDa(unidade), [unidade]);
+  const b = blocos[bloco];
+  const [feito, setFeito] = useState<{ acertos: number; concluiu: boolean } | null>(null);
+
+  const parar = () => {
+    cursoAberto.value = null;
+    commit();
+  };
+
+  // Esc para em qualquer parte do bloco, até no meio da apresentação.
+  useTeclado((tecla) => {
+    if (tecla !== 'Escape') return false;
+    parar();
+    return true;
+  });
+
+  const terminar = (acertos = 0) => {
+    const concluiu = registrarBloco(cursoSave(), unidade, bloco);
+    app.data.profile.xp += XP_LICAO + acertos * XP_ACERTO;
+    if (concluiu) app.data.profile.coins += MOEDAS_LICAO;
+    commit();
+    setFeito({ acertos, concluiu });
+  };
+
+  if (!b) {
+    cursoAberto.value = null;
+    return null;
+  }
+
+  return (
+    <main class="lc cs">
+      <header class="lc-topo">
+        <button class="ghost" onClick={parar}>
+          ← Parar aqui <kbd>Esc</kbd>
+        </button>
+        <div>
+          <h1>
+            Unidade {unidade.numero} · {unidade.titulo}
+          </h1>
+          <small class="muted" data-testid="cs-parte">
+            Parte {bloco + 1} de {blocos.length} · {NOME_BLOCO[b.tipo]}
+          </small>
+        </div>
+      </header>
+      <div class="bar lc-barra" aria-hidden="true">
+        <i style={{ width: `${((bloco + (feito ? 1 : 0)) / blocos.length) * 100}%` }} />
+      </div>
+
+      {feito ? <Intervalo unidade={unidade} bloco={bloco} total={blocos.length} acertos={feito.acertos} concluiu={feito.concluiu} onParar={parar} /> : <BlocoView unidade={unidade} bloco={b} onFim={terminar} />}
+    </main>
+  );
+}
+
+function BlocoView({ unidade, bloco, onFim }: { unidade: Unidade; bloco: Bloco; onFim: (acertos?: number) => void }) {
+  switch (bloco.tipo) {
+    case 'objetivo':
+      return <Objetivo unidade={unidade} onFim={onFim} />;
+    case 'palavras':
+    case 'kanji':
+      return <Estudo unidade={unidade} bloco={bloco} onFim={onFim} />;
+    case 'gramatica':
+      return <Apresentacao itens={bloco.pontos.map((p) => cartaoDoPonto(p, unidade.id))} onFim={() => onFim()} fim="Seguir" />;
+    case 'notas':
+      return <Notas bloco={bloco} onFim={onFim} />;
+    case 'dialogo':
+      return <Dialogo situacao={bloco.situacao} onFim={onFim} />;
+    case 'revisao':
+      return <Revisao unidade={unidade} onFim={onFim} />;
+  }
+}
+
+/** Entre um bloco e outro: o que foi feito e o que vem. Enter segue, Esc para. */
+function Intervalo({ unidade, bloco, total, acertos, concluiu, onParar }: { unidade: Unidade; bloco: number; total: number; acertos: number; concluiu: boolean; onParar: () => void }) {
+  const seguinte = UNIDADES[unidade.numero];
+  const prox = blocosDa(unidade)[bloco + 1];
+  const seguir = () => {
+    if (!concluiu && prox) abrirUnidade(unidade, bloco + 1);
+    else if (seguinte) abrirUnidade(seguinte, ondeContinuar(cursoSave(), seguinte));
+    else onParar();
+  };
+  useTeclado((tecla) => {
+    if (tecla === 'Enter' || tecla === ' ') {
+      seguir();
+      return true;
+    }
+    return false;
+  });
+  return (
+    <div class="koma lc-quadro" data-testid="cs-intervalo">
+      <div class="lc-conteudo lc-fim">
+        {concluiu ? (
+          <>
+            <h2 class="cs-titulo" data-testid="cs-unidade-feita">
+              Unidade {unidade.numero} feita
+            </h2>
+            <p class="lc-linha">Agora você já pode dizer: “Consigo {unidade.consigo}.”</p>
+            {seguinte && (
+              <p class="lc-linha">
+                A unidade {seguinte.numero}, {seguinte.titulo}, está liberada.
+              </p>
+            )}
+          </>
+        ) : (
+          <>
+            <h2 class="cs-titulo">
+              Parte {bloco + 1} de {total} feita
+            </h2>
+            {acertos > 0 && <p class="lc-linha">{acertos === 1 ? '1 acerto de primeira.' : `${acertos} acertos de primeira.`}</p>}
+            {prox && <p class="lc-linha">A próxima é {NOME_BLOCO[prox.tipo].toLowerCase()}. Pode parar aqui e voltar depois: o curso continua deste ponto.</p>}
+          </>
+        )}
+      </div>
+      <div class="actions center">
+        <button class="ghost" onClick={onParar}>
+          Parar aqui <kbd>Esc</kbd>
+        </button>
+        <button class="primary" onClick={seguir} data-testid="cs-seguir">
+          {concluiu ? (seguinte ? `Unidade ${seguinte.numero}` : 'Ver o curso') : 'Seguir'} <kbd>Enter</kbd>
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* ───────── Objetivo ───────── */
+
+function Objetivo({ unidade, onFim }: { unidade: Unidade; onFim: () => void }) {
+  const anterior = UNIDADES[unidade.numero - 2];
+  // Revisão rápida: algumas palavras da unidade anterior, para lembrar antes de começar.
+  const revisar = useMemo(() => (anterior ? palavrasDa(anterior).filter((p) => app.data.cards[cartaDaPalavra(p)]).slice(0, 5) : []), [anterior]);
+  useTeclado((tecla) => {
+    if (tecla === 'Enter' || tecla === ' ') {
+      onFim();
+      return true;
+    }
+    return false;
+  });
+  return (
+    <div class="koma lc-quadro" data-testid="cs-objetivo">
+      <div class="lc-conteudo">
+        <span class="gr-tag">Objetivo</span>
+        <h2 class="cs-titulo">Ao final, você vai poder dizer: “Consigo {unidade.consigo}.”</h2>
+        {!unidade.revisao && (
+          <p class="lc-linha">
+            {unidade.palavras.length} palavras, {new Set(unidade.kanji.map((k) => k.k)).size} kanji e {unidade.gramatica.length} {unidade.gramatica.length === 1 ? 'ponto' : 'pontos'} de gramática, em partes curtas.
+          </p>
+        )}
+        {revisar.length > 0 && (
+          <>
+            <p class="lc-linha">Antes, lembre da unidade {anterior?.numero}:</p>
+            <ul class="cs-revisar">
+              {revisar.map((p) => (
+                <li key={p.jp}>
+                  <button class="ghost" onClick={() => void tocarSequencia([{ tipo: 'jp', fala: falaDaPalavra(p) }])}>
+                    <span lang="ja" class="jn-jp">
+                      <Furigana texto={p.jp} leitura={p.kana} />
+                    </span>{' '}
+                    <span class="lc-ex-pt">{p.pt}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
+      </div>
+      <div class="actions center">
+        <button class="primary" onClick={() => onFim()} data-testid="cs-seguir">
+          Começar <kbd>Enter</kbd>
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* ───────── Palavras e kanji: apresentar e praticar ───────── */
+
+function Estudo({ unidade, bloco, onFim }: { unidade: Unidade; bloco: Extract<Bloco, { tipo: 'palavras' | 'kanji' }>; onFim: (acertos?: number) => void }) {
+  const [fase, setFase] = useState<'apresentar' | 'praticar'>('apresentar');
+  const cartoes = useMemo(() => (bloco.tipo === 'palavras' ? bloco.palavras.map(cartaoDaPalavra) : bloco.kanji.map((k) => cartaoDoKanji(k, unidade.id))), [bloco, unidade]);
+  const cartas = useMemo(() => (bloco.tipo === 'palavras' ? bloco.palavras.map(cartaDaPalavra) : bloco.kanji.flatMap(cartasDoKanji)), [bloco]);
+
+  if (fase === 'apresentar')
+    return (
+      <Apresentacao
+        itens={cartoes}
+        onFim={() => {
+          apresentar(app.data.cards, cartas, Date.now());
+          commit();
+          setFase('praticar');
+        }}
+      />
+    );
+  return <PraticaView itens={itensDoBloco(bloco)} conhecidos={itensAte(unidade.numero)} cartaoDe={(i) => cartaoDoItem(i, bloco, unidade)} onFim={onFim} />;
+}
+
+/** O cartão que volta quando a pessoa erra. */
+function cartaoDoItem(i: ItemPratica, bloco: Bloco | null, unidade: Unidade) {
+  if (i.tipo === 'palavra') {
+    const p = (bloco?.tipo === 'palavras' ? bloco.palavras : UNIDADES.flatMap(palavrasDa)).find((x) => `w:${x.jp}` === i.id);
+    if (p) return cartaoDaPalavra(p);
+  }
+  for (const u of bloco ? [unidade] : UNIDADES) for (const k of u.kanji) if (`k:${k.k}:${k.leitura}` === i.id) return cartaoDoKanji(k, u.id);
+  return null;
+}
+
+function Revisao({ unidade, onFim }: { unidade: Unidade; onFim: (acertos?: number) => void }) {
+  const itens = useMemo(() => itensDaRevisao(unidade, app.data.cards, Math.random), [unidade]);
+  if (itens.length === 0) return <Vazio texto="Ainda não há nada visto para revisar. Faça as unidades antes desta." onFim={onFim} />;
+  return <PraticaView itens={itens} conhecidos={itensAte(unidade.numero)} cartaoDe={(i) => cartaoDoItem(i, null, unidade)} onFim={onFim} />;
+}
+
+function PraticaView({ itens, conhecidos, cartaoDe, onFim }: { itens: ItemPratica[]; conhecidos: ItemPratica[]; cartaoDe: (i: ItemPratica) => ReturnType<typeof cartaoDaPalavra> | null; onFim: (acertos: number) => void }) {
+  const ref = useRef<Pratica | null>(null);
+  ref.current ??= new Pratica(itens, conhecidos, { cards: app.data.cards, now: () => Date.now(), rng: Math.random });
+  const pr = ref.current;
+  const [, setFrame] = useState(0);
+  const redraw = () => setFrame((n) => n + 1);
+  const [deNovo, setDeNovo] = useState(false);
+  const combo = useRef(0);
+  const p = pr.pergunta;
+  const item = p?.item;
+
+  const ouvir = () => {
+    if (item?.tipo === 'palavra') void tocarSequencia([{ tipo: 'jp', fala: falaDaPalavra(item) }]);
+    else if (item && pr.resposta) void tocarSequencia([{ tipo: 'jp', fala: falaDaPalavra(item) }]);
+  };
+
+  // A palavra fala quando a pergunta aparece. A leitura do kanji só depois da resposta (senão entrega).
+  useLayoutEffect(() => {
+    if (item?.tipo === 'palavra' && !pr.resposta && !deNovo) ouvir();
+  }, [p, deNovo]);
+
+  const alvos: Alvo[] = item && pr.resposta ? [item.tipo === 'palavra' ? { t: 'palavra', id: item.id } : { t: 'kanji', c: item.destaque as string }] : [];
+  useAprofundar(alvos);
+
+  const responder = (o: string) => {
+    const r = pr.responder(o);
+    if (!r) return;
+    if (r.certa) {
+      combo.current++;
+      sfx.hit(combo.current);
+      acertou(combo.current);
+    } else {
+      sfx.miss();
+      errou();
+    }
+    commit();
+    redraw();
+  };
+
+  const seguir = () => {
+    if (!pr.resposta) return;
+    if (pr.mostrarDeNovo && !deNovo && cartaoDe(pr.mostrarDeNovo)) {
+      setDeNovo(true);
+      return;
+    }
+    setDeNovo(false);
+    pr.seguir();
+    if (pr.fim) onFim(pr.acertos);
+    else redraw();
+  };
+
+  useTeclado((tecla) => {
+    if (tecla === 'Enter' || tecla === ' ') {
+      seguir();
+      return true;
+    }
+    if (tecla.toLowerCase() === 'r') {
+      ouvir();
+      return true;
+    }
+    if (/^[1-3]$/.test(tecla) && p && !pr.resposta) {
+      const o = p.opcoes[Number(tecla) - 1];
+      if (o !== undefined) responder(o);
+      return true;
+    }
+    return false;
+  });
+
+  if (!p || !item) return null;
+  if (deNovo) {
+    const c = cartaoDe(item);
+    if (c) return <Apresentacao itens={[c]} modo="de-novo" onFim={seguir} />;
+  }
+
+  const enunciado = item.tipo === 'palavra' ? 'O que quer dizer?' : item.jp === item.destaque ? `Como se lê ${item.destaque}?` : `Em ${item.jp}, como se lê ${item.destaque}?`;
+  return (
+    <div class="koma lc-quadro" data-testid="cs-pergunta" data-item={item.id}>
+      <div class="lc-conteudo">
+        <span class="gr-tag">Prática · faltam {pr.faltam}</span>
+        <p class="lc-enunciado">{enunciado}</p>
+        <div class="lc-grande cs-pergunta-jp" lang="ja">
+          {/* A leitura do kanji só aparece depois da resposta: ela é a pergunta. */}
+          {item.tipo === 'palavra' || pr.resposta ? <Furigana texto={item.jp} leitura={item.kana} /> : item.jp}
+        </div>
+        <div class="lc-opcoes">
+          {p.opcoes.map((o, i) => {
+            const marca = pr.resposta ? (o === item.certa ? ' certa' : o === pr.resposta.escolhida ? ' errada' : ' apagada') : '';
+            return (
+              <button key={o} class={`lc-opcao${marca}`} disabled={!!pr.resposta} onClick={() => responder(o)} data-testid="cs-opcao" data-certa={o === item.certa ? '1' : undefined}>
+                <kbd>{i + 1}</kbd> <span lang={item.tipo === 'kanji' ? 'ja' : undefined}>{o}</span>
+              </button>
+            );
+          })}
+        </div>
+        {pr.resposta && (
+          <p class={pr.resposta.certa ? 'lc-retorno bom' : 'lc-retorno'} role="status" data-testid="cs-retorno">
+            {pr.resposta.certa ? 'Isso.' : 'A certa é a marcada. Ela volta daqui a pouco.'}{' '}
+            <span lang="ja">
+              <Furigana texto={item.jp} leitura={item.kana} />
+            </span>{' '}
+            {item.tipo === 'kanji' ? `: ${item.destaque} = ${item.certa}` : `= ${item.certa}`}
+          </p>
+        )}
+      </div>
+      <div class="actions center">
+        <button onClick={ouvir} disabled={item.tipo === 'kanji' && !pr.resposta}>
+          <Icone nome="volume-2" /> Ouvir <kbd>R</kbd>
+        </button>
+        <button class="primary" disabled={!pr.resposta} onClick={seguir} data-testid="cs-seguir">
+          Seguir <kbd>Enter</kbd>
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function Vazio({ texto, onFim }: { texto: string; onFim: () => void }) {
+  useTeclado((tecla) => {
+    if (tecla !== 'Enter' && tecla !== ' ') return false;
+    onFim();
+    return true;
+  });
+  return (
+    <div class="koma lc-quadro">
+      <p class="lc-linha">{texto}</p>
+      <div class="actions center">
+        <button class="primary" onClick={() => onFim()} data-testid="cs-seguir">
+          Seguir <kbd>Enter</kbd>
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* ───────── Notas culturais ───────── */
+
+function Notas({ bloco, onFim }: { bloco: Extract<Bloco, { tipo: 'notas' }>; onFim: () => void }) {
+  useTeclado((tecla) => {
+    if (tecla === 'Enter' || tecla === ' ') {
+      onFim();
+      return true;
+    }
+    return false;
+  });
+  return (
+    <div class="koma lc-quadro">
+      <div class="lc-conteudo">
+        {bloco.notas.map((n) => (
+          <section key={n.titulo} class="cs-nota">
+            <h2 class="cs-titulo">{n.titulo}</h2>
+            <p class="lc-linha">{n.texto}</p>
+            <small class="muted">Fonte: {n.fontes.join('; ')}</small>
+          </section>
+        ))}
+      </div>
+      <div class="actions center">
+        <button class="primary" onClick={() => onFim()} data-testid="cs-seguir">
+          Seguir <kbd>Enter</kbd>
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* ───────── Diálogo ───────── */
+
+/** Uma fala por vez: ela toca, dá um tempo para repetir em voz alta (shadowing) e toca de novo. */
+function Dialogo({ situacao, onFim }: { situacao: string; onFim: () => void }) {
+  const s = SITUACOES.find((x) => x.id === situacao);
+  const [i, setI] = useState(0);
+  const falas = s?.falas ?? [];
+  const tocar = (n: number) => {
+    const f = falas[n];
+    if (!f) return;
+    const jp: Trecho = { tipo: 'jp', fala: falaFrase(f.jp) };
+    void tocarSequencia([jp, { tipo: 'pausa', vezes: 1.2 }, jp]);
+  };
+  useLayoutEffect(() => tocar(i), [i]);
+  const seguir = () => {
+    if (i + 1 < falas.length) setI(i + 1);
+    else onFim();
+  };
+  useTeclado((tecla) => {
+    if (tecla === 'Enter' || tecla === ' ') {
+      seguir();
+      return true;
+    }
+    if (tecla.toLowerCase() === 'r') {
+      tocar(i);
+      return true;
+    }
+    return false;
+  });
+  useAprofundar(s ? [{ t: 'cena', id: `situacao:${s.id}` }] : []);
+  if (!s) return <Vazio texto="Este diálogo não existe mais." onFim={onFim} />;
+  return (
+    <div class="koma lc-quadro" data-testid="cs-dialogo">
+      <div class="lc-conteudo">
+        <span class="gr-tag">Diálogo · {s.titulo}</span>
+        <p class="lc-linha">{s.contexto}</p>
+        <p class="muted">Ouça, repita em voz alta no intervalo e ouça de novo.</p>
+        <ol class="cs-falas">
+          {falas.slice(0, i + 1).map((f, n) => (
+            <li key={n} class={n === i ? 'agora' : ''}>
+              <span class="lc-quem">{f.quem}</span>
+              <Marcado texto={f.jp} class="lc-fala" />
+              <span class="lc-ex-pt">{f.pt}</span>
+            </li>
+          ))}
+        </ol>
+      </div>
+      <div class="actions center">
+        <button onClick={() => tocar(i)}>
+          <Icone nome="volume-2" /> Ouvir <kbd>R</kbd>
+        </button>
+        <button class="primary" onClick={seguir} data-testid="cs-seguir">
+          {i + 1 < falas.length ? 'Próxima fala' : 'Seguir'} <kbd>Enter</kbd>
+        </button>
+      </div>
+    </div>
+  );
+}

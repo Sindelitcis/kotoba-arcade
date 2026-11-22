@@ -4,6 +4,7 @@ import { AVENTURA } from './aventura';
 import { CENA } from './cena';
 import { CONVERSA } from './conversa';
 import { AJUSTES, HUB } from './hub';
+import { CURSO } from './curso';
 import { JORNADA, LICAO } from './jornada';
 import { KANABEAT } from './kanabeat';
 import { BOOSTER, KANJIDEX, KANJIMON } from './kanjimon';
@@ -36,6 +37,7 @@ export const AJUDA: Record<TelaAjuda, Ajuda> = {
   memoria: MEMORIA,
   cena: CENA,
   ouvir: OUVIR,
+  curso: CURSO,
 };
 
 /** A tela usa a F1 para outra coisa (a Conversa traduz com ela). Ali a F1 não abre a ajuda. */

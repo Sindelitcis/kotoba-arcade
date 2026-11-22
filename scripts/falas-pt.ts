@@ -14,6 +14,7 @@ import { FRASES_DE_RETORNO } from '../src/jornada/retorno';
 import { falasPtDaFicha, fichaDe, todosOsAlvos } from '../src/content/aprofundar/fichas';
 import { falasPtDoEnsino } from '../src/content/ensino';
 import { falasPtDasEtapas } from '../src/games/cena/aulas';
+import { falasDoCurso } from '../src/curso/cartoes';
 
 export interface FalaPt {
   /** Exatamente o texto do trecho `{ tipo: 'pt' }`. */
@@ -37,6 +38,7 @@ export function listarFalasPt(): FalaPt[] {
     }),
     ...falasPtDoEnsino().map((texto) => ({ texto, origem: 'ensino/significado' })),
     ...falasPtDasEtapas().map((texto) => ({ texto, origem: 'cena/etapa' })),
+    ...falasDoCurso().pt.map((texto) => ({ texto, origem: 'curso/significado' })),
   ];
   const vistas = new Set<string>();
   return todas.filter((f) => {

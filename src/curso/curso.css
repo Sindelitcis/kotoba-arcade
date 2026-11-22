@@ -1,0 +1,20 @@
+/* ───────── Curso (cs-) ───────── */
+.cs-continuar { min-height: 200px; }
+.cs-unidades { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+.cs-unidade { width: 100%; height: 100%; display: flex; gap: 14px; align-items: flex-start; text-align: left; padding: 14px 16px; border-radius: var(--r-m); }
+.cs-num { flex: none; display: grid; place-items: center; width: 2.2rem; height: 2.2rem; border-radius: var(--r-pill); background: var(--brand-soft); color: var(--brand-text); font-weight: 800; }
+.cs-unidade-txt { display: grid; gap: 3px; }
+.cs-unidade-txt > span { color: var(--text-2); font-size: 0.88rem; }
+.cs-estado { font-weight: 700; display: inline-flex; gap: 6px; align-items: center; }
+.cs-unidade.feita .cs-num { background: var(--ok-soft); color: var(--ok-text); }
+.cs-unidade.trancada { opacity: 0.6; }
+.cs-pergunta-jp { font-size: 4rem; }
+.cs-revisar, .cs-falas { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.cs-revisar .jn-jp { font-size: 1.3rem; line-height: 1.9; }
+.cs-falas li { display: grid; gap: 6px; justify-items: start; opacity: 0.6; }
+.cs-falas li.agora { opacity: 1; }
+.cs-nota + .cs-nota { margin-top: 12px; }
+.jornada-faixa.hub-curso { min-height: 260px; }
+.hub-curso-mapa { justify-self: start; }
+@media (max-width: 520px) { .cs-pergunta-jp { font-size: 2.8rem; } }
+.cs-titulo { font: 800 1.6rem/1.3 var(--f-texto); letter-spacing: -0.01em; margin: 0; }

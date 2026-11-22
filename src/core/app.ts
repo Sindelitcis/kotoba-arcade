@@ -12,11 +12,12 @@ import { ensureMemoriaSave, type MemoriaSave } from '../games/memoria/engine';
 import { ensureRoguelikeSave, type RoguelikeSave } from '../games/roguelike/engine';
 import { ensureOuvirSave, type OuvirSave } from '../ouvir/save';
 import { ensureJornadaSave, registrarMissao, type JornadaSave } from '../jornada/etapas';
+import { ensureCursoSave, type CursoSave } from '../curso/motor';
 import { foco } from './foco';
 import { markPlayed } from './progress';
 import { importSave, loadSave, writeSave, type SaveData } from './save';
 
-export type Screen = 'hub' | 'kanjimon' | 'kanjidex' | 'booster' | 'kanabeat' | 'roguelike' | 'aventura' | 'conversa' | 'gramatica' | 'jornada' | 'licao' | 'pecas' | 'kanaimagens' | 'memoria' | 'cena' | 'ouvir';
+export type Screen = 'hub' | 'kanjimon' | 'kanjidex' | 'booster' | 'kanabeat' | 'roguelike' | 'aventura' | 'conversa' | 'gramatica' | 'jornada' | 'licao' | 'pecas' | 'kanaimagens' | 'memoria' | 'cena' | 'ouvir' | 'curso';
 
 export const app: { data: SaveData } = { data: loadSave(localStorage, Date.now()) };
 
@@ -32,6 +33,9 @@ export function commit(): void {
   tick.value++;
 }
 
+/** Unidade do curso aberta no tocador e o bloco em que ela está. `null`: o mapa das unidades. */
+export const cursoAberto = signal<{ unidade: string; bloco: number } | null>(null);
+
 /** Lição em quadrinhos aberta e a missão da Jornada que a abriu. */
 export const licaoAberta = signal<{ licao: string; missao: string } | null>(null);
 
@@ -44,7 +48,7 @@ export function go(next: Screen): void {
     next = 'jornada';
   }
   if (next !== 'hub' && next !== 'jornada') {
-    if (next !== 'licao' && next !== 'ouvir') app.data.profile.lastGame = next === 'kanjidex' || next === 'booster' ? 'kanjimon' : next;
+    if (next !== 'licao' && next !== 'ouvir' && next !== 'curso') app.data.profile.lastGame = next === 'kanjidex' || next === 'booster' ? 'kanjimon' : next;
     markPlayed(app.data, Date.now());
     commit();
   } else if (next === 'jornada') commit();
@@ -98,6 +102,10 @@ export function memoriaSave(): MemoriaSave {
 
 export function ouvirSave(): OuvirSave {
   return ensureOuvirSave(app.data.games);
+}
+
+export function cursoSave(): CursoSave {
+  return ensureCursoSave(app.data.games);
 }
 
 export function cenaSave(): CenaSave {

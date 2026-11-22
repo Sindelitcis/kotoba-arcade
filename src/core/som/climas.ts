@@ -18,6 +18,7 @@ export const CLIMA_DA_TELA: Record<Screen, Clima | null> = {
   hub: 'hub',
   jornada: 'hub',
   licao: 'calmo',
+  curso: 'calmo',
   ouvir: 'calmo',
   gramatica: 'calmo',
   memoria: 'calmo',

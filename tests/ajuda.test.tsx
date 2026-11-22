@@ -36,6 +36,7 @@ const FONTE: Record<TelaAjuda, string> = {
   memoria: 'games/memoria/MemoriaGame.tsx',
   cena: 'games/cena/CenaGame.tsx',
   ouvir: 'ouvir/OuvirTela.tsx',
+  curso: 'curso/CursoTela.tsx',
 };
 
 const NOMES: Record<string, string> = { Esc: 'Escape', Espaço: ' ', '↑': 'ArrowUp', '↓': 'ArrowDown', '←': 'ArrowLeft', '→': 'ArrowRight' };
@@ -113,7 +114,7 @@ describe('conteúdo da ajuda', () => {
 
   it('toda tela com apresentação de coisa nova explica as teclas dela e por que ela vem antes', () => {
     const comApresentacao = Object.values(AJUDA).filter((a) => teclado(FONTE[a.tela]) !== ler(FONTE[a.tela]));
-    expect(comApresentacao.map((a) => a.tela).sort()).toEqual(['aventura', 'cena', 'conversa', 'gramatica', 'kanabeat', 'kanaimagens', 'kanjimon', 'memoria', 'pecas', 'roguelike']);
+    expect(comApresentacao.map((a) => a.tela).sort()).toEqual(['aventura', 'cena', 'conversa', 'curso', 'gramatica', 'kanabeat', 'kanaimagens', 'kanjimon', 'memoria', 'pecas', 'roguelike']);
     for (const a of comApresentacao) {
       expect(a.teclas, a.tela).toContain(TECLAS_APRESENTA);
       expect(a.perguntas, a.tela).toContain(ANTES_DE_COBRAR);
