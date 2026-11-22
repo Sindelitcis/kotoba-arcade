@@ -30,8 +30,11 @@ completo está em [docs/curso.md](docs/curso.md) e tem seis fases:
 5. áudio de kana;
 6. A2.
 
-Estado em 22/11/2026: o plano está escrito e nenhuma fase foi começada. Até o curso existir, os
-jogos e a Jornada continuam como estão.
+Estado em 22/11/2026: a fase 1 está feita para o A1. O currículo está em `src/content/curso/`, com
+as 20 unidades, os kanji e as leituras, a gramática e as notas, e é conferido por
+`tests/curso.test.ts`. Faltam conferir as notas culturais contra as fontes e cruzar o vocabulário
+com uma lista de N5. A próxima é a fase 2, o motor do curso. Até lá, os jogos e a Jornada continuam
+como estão.
 
 Regras de ensino que valem em tudo ([docs/ensino.md](docs/ensino.md)):
 

@@ -74,9 +74,17 @@ Cada nível termina com um simulado no formato do JLPT e um certificado do curso
 | 19 | falar do tempo e das estações | 〜でしょう, より | 天, 気, 雨 · nota: 季節 |
 | 20 | revisão do nível | | simulado N5 |
 
-A lista final de vocabulário, kanji e gramática por unidade sai de um cruzamento automático com as
-listas do N5: um teste falha se algum item do N5 ficar sem unidade, ou se aparecer numa unidade
-antes de ter sido ensinado.
+O currículo completo do A1 está em `src/content/curso/a1.ts`: objetivo, vocabulário, kanji com a
+leitura usada em cada unidade, gramática e notas culturais com fonte. `tests/curso.test.ts` confere:
+
+- todos os kanji do N5 e todos os pontos de gramática do N5 (`src/content/curso/n5.ts`) têm unidade;
+- nenhuma palavra usa kanji ainda não ensinado (o que falta fica em kana);
+- toda leitura nova de um kanji já visto vem com a explicação da troca;
+- nenhuma palavra entra duas vezes e toda nota tem fonte.
+
+Kanji fora do N5 que a vida pede cedo (駅, 会社, 曜日, 病気...) entram marcados como `extra`. As notas
+culturais estão com `conferida: false`: cada uma precisa ser conferida contra a fonte antes de ir
+para a lição publicada.
 
 ## A lição
 
@@ -149,8 +157,8 @@ unidades. A Jornada vira o curso. Os jogos continuam, como exercícios das liç�
 
 ## Fases
 
-1. **Currículo:** a lista completa de unidades do A1 com objetivo, vocabulário, kanji e leituras,
-   gramática, notas culturais com fonte e o cruzamento com o N5. Fica em dados versionados, com testes.
+1. **Currículo:** feito para o A1 (`src/content/curso/`), com testes. Falta conferir as notas
+   culturais contra as fontes e cruzar o vocabulário com uma lista de N5.
 2. **Motor do curso:** a tela inicial com a próxima lição, o tocador de lição, o progresso e o
    destravamento.
 3. **Provas e impressos:** mini-teste, prova de unidade digital e imprimível, apostila, folhas de
