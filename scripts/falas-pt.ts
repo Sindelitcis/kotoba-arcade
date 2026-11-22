@@ -13,8 +13,7 @@ import { COURSE } from '../src/games/gramatica/pontos';
 import { FRASES_DE_RETORNO } from '../src/jornada/retorno';
 import { falasPtDaFicha, fichaDe, todosOsAlvos } from '../src/content/aprofundar/fichas';
 import { falasPtDoEnsino } from '../src/content/ensino';
-import { ETAPAS } from '../src/games/cena/engine';
-import { falaDaEtapa } from '../src/games/cena/aulas';
+import { falasPtDasEtapas } from '../src/games/cena/aulas';
 
 export interface FalaPt {
   /** Exatamente o texto do trecho `{ tipo: 'pt' }`. */
@@ -37,7 +36,7 @@ export function listarFalasPt(): FalaPt[] {
       return f ? falasPtDaFicha(f).map((texto) => ({ texto, origem: `aprofundar/${a.t}` })) : [];
     }),
     ...falasPtDoEnsino().map((texto) => ({ texto, origem: 'ensino/significado' })),
-    ...ETAPAS.flatMap((e) => falaDaEtapa(e).flatMap((t) => (t.tipo === 'pt' ? [{ texto: t.texto, origem: `cena/etapa/${e}` }] : []))),
+    ...falasPtDasEtapas().map((texto) => ({ texto, origem: 'cena/etapa' })),
   ];
   const vistas = new Set<string>();
   return todas.filter((f) => {

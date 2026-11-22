@@ -149,16 +149,16 @@ export const ETAPAS = ['nome', 'achar', 'cor', 'tamanho', 'lugar', 'contar', 'ac
 export type Etapa = (typeof ETAPAS)[number];
 
 /** `licao` é só a estrutura; como jogar a etapa fica em `AULAS_ETAPA[e].comoJoga` (aulas.ts), que entra logo depois no cartão. */
-export const ETAPA_INFO: Readonly<Record<Etapa, { titulo: string; nivel: string; licao: string; exemplo: readonly Seg[]; exemploPt: string }>> = {
-  nome: { titulo: 'O nome das coisas', nivel: 'N5', licao: 'これは〜です quer dizer "isto é ~".', exemplo: [{ t: 'これは' }, seg('傘', 'かさ'), { t: 'です。' }], exemploPt: 'Isto é um guarda-chuva.' },
-  achar: { titulo: 'Onde está?', nivel: 'N5', licao: 'O nome da coisa + はどこ？ pergunta onde ela está. はどこ quer dizer "onde está".', exemplo: [seg('傘', 'かさ'), { t: 'はどこ？' }], exemploPt: 'Onde está o guarda-chuva?' },
-  cor: { titulo: 'Cores', nivel: 'N5', licao: 'A cor vem antes da coisa, como em "vermelho guarda-chuva": 赤い傘. Os adjetivos de cor terminam em い.', exemplo: [seg('赤い', 'あかい'), seg('傘', 'かさ'), { t: 'はどこ？' }], exemploPt: 'Onde está o guarda-chuva vermelho?' },
-  tamanho: { titulo: 'Grande e pequeno', nivel: 'N5', licao: '大きい (おおきい) é grande, 小さい (ちいさい) é pequeno. Também vêm antes da coisa.', exemplo: [seg('大きい', 'おおきい'), { t: 'かばんはどこ？' }], exemploPt: 'Onde está a bolsa grande?' },
-  lugar: { titulo: 'Onde está', nivel: 'N5', licao: 'O japonês diz o lugar primeiro: 机の上の本 é "o livro de cima da mesa". 上 em cima, 下 embaixo, 横 ao lado, 前 na frente, 中 dentro.', exemplo: [seg('机', 'つくえ'), { t: 'の' }, seg('上', 'うえ'), { t: 'の' }, seg('本', 'ほん'), { t: 'はどこ？' }], exemploPt: 'Onde está o livro em cima da mesa?' },
-  contar: { titulo: 'Contadores', nivel: 'N5', licao: 'Para contar, o número leva um contador: つ para coisas em geral, 本 para coisas compridas, 枚 para coisas finas, 匹 para bichos pequenos, 台 para máquinas e veículos, 冊 para livros, 人 para gente.', exemplo: [{ t: 'りんごが' }, seg('三つ', 'みっつ'), { t: 'あるところはどこ？' }], exemploPt: 'Onde estão as três maçãs?' },
-  acao: { titulo: 'Quem está fazendo', nivel: 'N4', licao: 'Verbo na forma て + いる é o que está acontecendo agora: 読んでいる = está lendo. Antes de 人 (pessoa), descreve a pessoa: 読んでいる人 = a pessoa que está lendo.', exemplo: [seg('読んでいる', 'よんでいる'), HITO, { t: 'はどこ？' }], exemploPt: 'Onde está a pessoa que está lendo?' },
-  denso: { titulo: 'Frases longas', nivel: 'N4–N3', licao: 'Tudo junto: o lugar, a cor e a coisa, sempre do detalhe para o nome. にある = "que está em". 左から二番目 = o segundo a partir da esquerda. いちばん = o mais.', exemplo: [{ t: 'テーブルの' }, seg('上', 'うえ'), { t: 'にある' }, seg('赤い', 'あかい'), { t: 'かばんはどこ？' }], exemploPt: 'Onde está a bolsa vermelha que está em cima da mesa?' },
-  descrever: { titulo: 'Descreva a cena', nivel: 'N4–N3', licao: 'Lugar + に + coisa + が + あります. Gente e bicho usam います.', exemplo: [seg('机', 'つくえ'), { t: 'の' }, seg('上', 'うえ'), { t: 'に' }, seg('本', 'ほん'), { t: 'があります' }], exemploPt: 'Tem um livro em cima da mesa.' },
+export const ETAPA_INFO: Readonly<Record<Etapa, { titulo: string; nivel: string; licao: string }>> = {
+  nome: { titulo: 'O nome das coisas', nivel: 'N5', licao: 'これは〜です quer dizer "isto é ~".' },
+  achar: { titulo: 'Onde está?', nivel: 'N5', licao: 'O nome da coisa + はどこ？ pergunta onde ela está. はどこ quer dizer "onde está".' },
+  cor: { titulo: 'Cores', nivel: 'N5', licao: 'A cor vem antes da coisa, como em "vermelho guarda-chuva". Os adjetivos de cor terminam em い.' },
+  tamanho: { titulo: 'Grande e pequeno', nivel: 'N5', licao: '大きい (おおきい) é grande, 小さい (ちいさい) é pequeno. Também vêm antes da coisa.' },
+  lugar: { titulo: 'Onde está', nivel: 'N5', licao: 'O japonês diz o lugar primeiro e a coisa depois, ligados por の, como em "o livro de cima da mesa". 上 em cima, 下 embaixo, 横 ao lado, 前 na frente, 中 dentro.' },
+  contar: { titulo: 'Contadores', nivel: 'N5', licao: 'Para contar, o número leva um contador: つ para coisas em geral, 本 para coisas compridas, 枚 para coisas finas, 匹 para bichos pequenos, 台 para máquinas e veículos, 冊 para livros, 人 para gente.' },
+  acao: { titulo: 'Quem está fazendo', nivel: 'N4', licao: 'Verbo na forma て + いる é o que está acontecendo agora. Antes de 人 (pessoa), descreve a pessoa: verbo em て + いる + 人 = a pessoa que está fazendo isso.' },
+  denso: { titulo: 'Frases longas', nivel: 'N4–N3', licao: 'Tudo junto: o lugar, a cor e a coisa, sempre do detalhe para o nome. にある = "que está em". 左から二番目 = o segundo a partir da esquerda. いちばん = o mais.' },
+  descrever: { titulo: 'Descreva a cena', nivel: 'N4–N3', licao: 'Lugar + に + coisa + が + あります. Gente e bicho usam います.' },
 };
 
 export interface Tarefa {
@@ -633,6 +633,18 @@ export class CenaRound {
   /** A tarefa só vale se todas as palavras dela já foram apresentadas. */
   pronta(t: Tarefa): boolean {
     return t.palavras.every((w) => foiApresentado(this.deps.cards, chave(w)));
+  }
+
+  /**
+   * O exemplo da lição da etapa: uma pergunta de verdade deste lugar, só com palavras já
+   * apresentadas. Em "nome" e "descrever" o exemplo não é a própria pergunta que vem logo
+   * depois (entregaria a resposta); sem outra pronta, é ela mesma.
+   */
+  exemploDaLicao(): Tarefa {
+    const t = this.tarefa;
+    const entrega = t.etapa === 'nome' || t.etapa === 'descrever';
+    const outra = tarefas(this.deps.lugar, t.etapa).find((o) => this.pronta(o) && (!entrega || textoDe(o.segs) !== textoDe(t.segs)));
+    return outra ?? t;
   }
 
   /** Sorteia a etapa (a mais nova aberta com mais peso) e a tarefa, escolhendo a palavra pelo pickNext. */

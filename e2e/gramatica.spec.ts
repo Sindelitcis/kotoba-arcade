@@ -21,9 +21,25 @@ async function startRound(page: Page) {
   }).toPass();
 }
 
+/**
+ * Passa pelos cartões da lição até o do ponto (o que tem a frase de exemplo marcada). Antes
+ * dele vêm as palavras do exemplo que ainda não foram vistas.
+ */
+async function ateOCartaoDoPonto(page: Page) {
+  for (let i = 0; i < 8 && !(await page.locator('.gr-example .mark').isVisible()); i++) {
+    const antes = await page.getByTestId('gr-lesson').textContent();
+    await page.keyboard.press('Enter');
+    await expect(page.getByTestId('gr-lesson')).not.toHaveText(antes ?? '');
+  }
+  await expect(page.locator('.gr-example .mark')).toBeVisible();
+}
+
 /** Monta a frase da vez, sempre com a peça certa, e segue para a próxima. */
 async function solveSentence(page: Page) {
-  if (await page.getByTestId('gr-lesson').isVisible()) await page.keyboard.press('Enter');
+  if (await page.getByTestId('gr-lesson').isVisible()) {
+    await ateOCartaoDoPonto(page);
+    await page.keyboard.press('Enter');
+  }
   for (let i = 0; i < 6; i++) {
     if (await page.getByTestId('gr-done').isVisible()) break;
     await page.locator('.gr-block[data-ok="yes"]').first().click();
@@ -35,6 +51,9 @@ async function solveSentence(page: Page) {
 test('do fliperama à primeira peça só no teclado: lição primeiro, depois a peça certa brilha', async ({ page }) => {
   await openGame(page);
   await startRound(page);
+  // Primeiro as palavras do exemplo, que o save zerado ainda não viu; depois o ponto.
+  await expect(page.getByTestId('gr-lesson')).toContainText('Palavra');
+  await ateOCartaoDoPonto(page);
   await expect(page.getByTestId('gr-lesson')).toContainText('は: o assunto da frase');
   await expect(page.locator('.gr-example .mark')).toHaveText('は');
   await page.keyboard.press('Enter');
@@ -55,6 +74,7 @@ test('peça que não serve volta com o porquê, sem tela de erro', async ({ page
   await firmarCartas(page, ['g:ga#uso']);
   await openGame(page);
   await startRound(page);
+  await ateOCartaoDoPonto(page);
   await page.keyboard.press('Enter');
   const bad = await page.locator('.gr-block').evaluateAll((els) => els.findIndex((e) => e.getAttribute('data-ok') === 'no'));
   expect(bad).toBeGreaterThanOrEqual(0);

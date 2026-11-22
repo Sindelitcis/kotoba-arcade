@@ -6,7 +6,8 @@
 import { describe, expect, it } from 'vitest';
 import { fichaDe, todosOsAlvos } from '../src/content/aprofundar/fichas';
 import { itemDaFicha, type ItemNovo } from '../src/content/ensino';
-import { ETAPAS } from '../src/games/cena/engine';
+import { ETAPAS, tarefas } from '../src/games/cena/engine';
+import { LUGARES } from '../src/games/cena/lugares';
 import { itemDaEtapa } from '../src/games/cena/aulas';
 import { itemDaLicao } from '../src/games/gramatica/falado';
 import { COURSE } from '../src/games/gramatica/pontos';
@@ -41,7 +42,7 @@ describe('cartão de apresentação sem frase repetida', () => {
   });
 
   it('lições de etapa da Cena Viva', () => {
-    for (const e of ETAPAS) expect(repetidas(itemDaEtapa(e)), e).toEqual([]);
+    for (const e of ETAPAS) for (const l of LUGARES) for (const t of tarefas(l, e).slice(0, 3)) expect(repetidas(itemDaEtapa(e, t)), `${l.id}/${e}`).toEqual([]);
   });
 
   it('lições do Kumitate', () => {

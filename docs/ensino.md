@@ -42,6 +42,8 @@ O save da versão 1 (antes desta regra) tinha cartas criadas sem apresentação.
 
 `tests/continuidade.test.ts` começa cada jogo com um save zerado, joga várias rodadas e guarda à parte tudo o que passou pela apresentação. A cada pergunta confere que o alvo, cada alternativa, cada carta do quadro e cada coisa clicável estão nesse registro. Também cobre o caso relatado (save antigo na Memória), a sequência da Jornada (Cena Viva da sala e depois a Memória da sala) e, na Jornada, que toda alternativa errada já apareceu num quadro antes. O e2e `e2e/memoria.spec.ts` refaz o caso relatado no navegador, com o save antigo no localStorage.
 
+O exemplo dos cartões de estrutura segue a mesma regra. Na Cena Viva, a lição de cada etapa pega como exemplo uma pergunta de verdade do lugar em que você está, montada só com coisas já apresentadas (na コンビニ, これはパンです。 e não これは傘です。). Em "nome" e "descrever" ela evita a pergunta que vem logo depois, para não entregar a resposta. O exemplo já tem voz, porque é a mesma frase gravada para a pergunta, e o cartão escreve o que cada palavra quer dizer. No Kumitate, se a frase de exemplo do ponto tem palavra ainda não vista, o cartão dessa palavra vem antes do cartão do ponto. `tests/exemplo-estrutura.test.ts` confere isso em todos os lugares e em todos os pontos.
+
 ## Jogo por jogo
 
 | Jogo | Apresenta | Prática | Cobrança |

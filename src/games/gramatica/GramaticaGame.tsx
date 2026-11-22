@@ -12,7 +12,8 @@ import { foco } from '../../core/foco';
 import { teclaDe } from '../../core/teclas';
 import { Apresentacao } from '../../core/Apresentacao';
 import { itemDaLicao } from './falado';
-import { cardOf, exampleView, fits, GramaticaRound, openPoints, plainSentence, ROUND_SIZE, slotWritten, WINS_TO_UNLOCK, type RoundEvent, type RoundSummary, type Written } from './engine';
+import { itemDaPalavra } from '../../content/ensino';
+import { cardOf, cartaDaPalavra, exampleView, fits, GramaticaRound, openPoints, plainSentence, ROUND_SIZE, slotWritten, WINS_TO_UNLOCK, type RoundEvent, type RoundSummary, type Written } from './engine';
 import { COURSE, POINTS } from './pontos';
 import { Furigana } from '../../core/Furigana';
 
@@ -173,10 +174,11 @@ export function GramaticaGame() {
           <section class="gr-lesson" data-testid="gr-lesson">
             <Apresentacao
               key={pz.point.id}
-              itens={[itemDaLicao(COURSE, pz.point)]}
+              itens={[...round.novasDoExemplo().map((w) => itemDaPalavra(w, cartaDaPalavra(w.id))), itemDaLicao(COURSE, pz.point)]}
               onFim={proceed}
               fim="Montar uma"
-              visual={() => (
+              visual={(item) =>
+                item.alvo.t !== 'gramatica' ? undefined : (
                 <p class="gr-example" lang="ja">
                   {exampleView(COURSE, pz.point).map((w, i) => (
                     <span key={i} class={w.mark ? 'gr-piece mark' : 'gr-piece'}>

@@ -17,6 +17,7 @@ import { shuffle, type Rng } from '../../core/rng';
 import type { Profile } from '../../core/save';
 import { apresentar, avaliar, emPratica, foiApresentado, notaDaPratica } from '../../core/ensino';
 import type { CardState } from '../../core/srs';
+import { cardKey } from '../../content';
 
 // ───────── Peças ─────────
 
@@ -458,6 +459,14 @@ export function roundPoints(course: Course, save: GramaticaSave, focus?: readonl
   return doFoco.length > 0 ? doFoco : openPoints(course, save);
 }
 
+/** As palavras do exemplo da lição do ponto (先生, 日本人...), com a leitura que o exemplo mostra. */
+export function palavrasDoExemplo(point: Point): { id: string; jp: string; kana: string }[] {
+  return parseSentence(point.example.jp).flatMap((p) => (p.k === 'text' && p.word ? [{ id: p.word, jp: p.text, kana: p.reading ?? p.text }] : []));
+}
+
+/** Carta de significado da palavra (a mesma da Memória, da Cena Viva e do KanjiMon). */
+export const cartaDaPalavra = (id: string) => cardKey(id, 'meaning');
+
 export type Phase = 'lesson' | 'build' | 'solved' | 'end';
 
 /** Uma rodada de `ROUND_SIZE` frases. */
@@ -597,10 +606,22 @@ export class GramaticaRound {
     return shuffle(rng, [...correct, ...distract]);
   }
 
-  /** Sai da lição e vai montar: o ponto passa a apresentado. */
+  /**
+   * Palavras do exemplo da lição que ainda não foram apresentadas: o cartão da peça nova
+   * mostra cada uma antes, para o exemplo só usar o que já foi ensinado.
+   */
+  novasDoExemplo(): { id: string; jp: string; kana: string; pt: string }[] {
+    return palavrasDoExemplo(this.puzzle.point).flatMap((w) => {
+      const achada = this.deps.lookup(w.id);
+      return achada && !foiApresentado(this.deps.cards, cartaDaPalavra(w.id)) ? [{ ...w, pt: achada.pt }] : [];
+    });
+  }
+
+  /** Sai da lição e vai montar: o ponto e as palavras do exemplo passam a apresentados. */
   begin(): void {
     if (this.phase !== 'lesson') return;
-    apresentar(this.deps.cards, [cardOf(this.puzzle.point.id)], this.deps.now());
+    const palavras = this.novasDoExemplo().map((w) => cartaDaPalavra(w.id));
+    apresentar(this.deps.cards, [...palavras, cardOf(this.puzzle.point.id)], this.deps.now());
     this.phase = 'build';
     this.activeSince = this.deps.now();
   }

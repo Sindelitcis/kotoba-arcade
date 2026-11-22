@@ -405,7 +405,9 @@ describe('rodada', () => {
   it('cartas de gramática usam a chave g:<ponto>#uso', () => {
     const { round, deps } = setup();
     solve(round());
-    expect(Object.keys(deps.cards)).toEqual(['g:wa#uso']);
+    // Além do ponto, as palavras do exemplo da lição, apresentadas no mesmo cartão.
+    expect(Object.keys(deps.cards).filter((k) => k.startsWith('g:'))).toEqual(['g:wa#uso']);
+    expect(Object.keys(deps.cards).filter((k) => !k.startsWith('g:')).every((k) => k.endsWith('#meaning'))).toBe(true);
     expect(deps.cards['g:wa#uso']!.state).toBe(State.Learning);
   });
 

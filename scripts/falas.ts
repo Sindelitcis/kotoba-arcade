@@ -29,8 +29,8 @@ import { LICOES, type FalaQuadro } from '../src/jornada/licoes';
 import { AULAS } from '../src/aulas';
 import type { FalaJp } from '../src/core/sequencia';
 import { FIGURAS, IMAGEM_WORDS } from '../src/content/imagens';
-import { falaDaEtapa } from '../src/games/cena/aulas';
-import { daCoisa, ETAPA_INFO, ETAPAS, falaDaTarefa, falaDoNome, nomeDe, PERGUNTA_NOME, tarefas, type Seg } from '../src/games/cena/engine';
+import { pecasDasEtapas } from '../src/games/cena/aulas';
+import { daCoisa, ETAPAS, falaDaTarefa, falaDoNome, nomeDe, PERGUNTA_NOME, tarefas, type Seg } from '../src/games/cena/engine';
 import { LUGARES } from '../src/games/cena/lugares';
 import { falasDaFicha, fichaDe, todosOsAlvos } from '../src/content/aprofundar/fichas';
 
@@ -346,15 +346,12 @@ function cena(): Fala[] {
   return out;
 }
 
-/** Cena Viva: a lição de cada etapa (a peça nova dita sozinha e o exemplo). */
+/**
+ * Cena Viva: a peça nova de cada lição de etapa, dita sozinha. O exemplo da lição é uma
+ * pergunta da própria cena (já gravada em cena()).
+ */
 function cenaEtapas(): Fala[] {
-  return ETAPAS.flatMap((e) =>
-    falaDaEtapa(e).flatMap((t): Fala[] => {
-      if (t.tipo !== 'jp') return [];
-      const origem = `cena/etapa/${e}`;
-      return t.fala.voz === 'palavra' ? [falaDoQuadro(t.fala, origem)] : [falaCena(ETAPA_INFO[e].exemplo, origem)];
-    }),
-  );
+  return pecasDasEtapas().map(({ etapa, peca }) => falaDoQuadro({ texto: peca, voz: 'palavra', kana: peca }, `cena/etapa/${etapa}`));
 }
 
 /** Aprofundar: o japonês de cada ficha (quase tudo já é dos jogos; o resto é novo). */

@@ -396,7 +396,7 @@ export function CenaGame() {
 
         {r.fase === 'licao' ? (
           <div data-testid="cn-licao">
-            <Apresentacao key={t.etapa} itens={[itemDaEtapa(t.etapa)]} onFim={seguir} fim="Entendi" />
+            <Apresentacao key={t.etapa} itens={[itemDaEtapa(t.etapa, r.exemploDaLicao())]} onFim={seguir} fim="Entendi" />
           </div>
         ) : deNovo ? (
           <>

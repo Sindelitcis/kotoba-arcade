@@ -8,7 +8,8 @@ import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { app } from '../src/core/app';
 import { Apresentacao } from '../src/core/Apresentacao';
 import { partesFurigana } from '../src/core/Furigana';
-import { ETAPAS } from '../src/games/cena/engine';
+import { ETAPAS, tarefas, textoDe } from '../src/games/cena/engine';
+import { LUGARES } from '../src/games/cena/lugares';
 import { itemDaEtapa } from '../src/games/cena/aulas';
 import { Frase } from '../src/games/cena/CenaGame';
 
@@ -32,7 +33,8 @@ describe('furigana só em cima de kanji', () => {
 
   it('a lição de cada etapa da Cena Viva: só kanji ganha leitura', async () => {
     for (const e of ETAPAS) {
-      const item = itemDaEtapa(e);
+      const l = LUGARES.find((x) => tarefas(x, e).length > 0)!;
+      const item = itemDaEtapa(e, tarefas(l, e)[0]!);
       await act(() => render(<Apresentacao itens={[item]} onFim={() => {}} />, document.body));
       const rubis = [...document.querySelectorAll('.ap-grande ruby')];
       for (const r of rubis) {
@@ -43,10 +45,12 @@ describe('furigana só em cima de kanji', () => {
     }
   });
 
-  it('o caso relatado: これは傘です。 mostra かさ só em cima de 傘', async () => {
-    await act(() => render(<Apresentacao itens={[itemDaEtapa('nome')]} onFim={() => {}} />, document.body));
-    expect([...document.querySelectorAll('.ap-grande rt')].map((r) => r.textContent)).toEqual(['かさ']);
-    expect(document.querySelector('.ap-grande')?.textContent).toBe('これは傘かさです。');
+  it('o caso relatado: これは棚です。 mostra たな só em cima de 棚', async () => {
+    const konbini = LUGARES.find((l) => l.id === 'konbini')!;
+    const tana = tarefas(konbini, 'nome').find((t) => textoDe(t.segs) === 'これは棚です。')!;
+    await act(() => render(<Apresentacao itens={[itemDaEtapa('nome', tana)]} onFim={() => {}} />, document.body));
+    expect([...document.querySelectorAll('.ap-grande rt')].map((r) => r.textContent)).toEqual(['たな']);
+    expect(document.querySelector('.ap-grande')?.textContent).toBe('これは棚たなです。');
   });
 
   it('frase da Cena Viva com okurigana: 赤い ganha leitura só no 赤', async () => {
