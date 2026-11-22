@@ -4,7 +4,8 @@ import { sfx, speakKanji } from '../../core/audio';
 import { burstFrom, onomato } from '../../core/fx';
 import { teclaDe } from '../../core/teclas';
 import { useAprofundar } from '../../core/aprofundar/estado';
-import { artUrl, RARITY_COLORS } from './art';
+import { RARITY_COLORS } from './art';
+import { ArteCarta } from './ArteCarta';
 import { BOOSTER_COST, canOpenBooster, openBooster, RARITY, type BoosterCard } from './engine';
 
 export function Booster() {
@@ -70,7 +71,7 @@ export function Booster() {
         {cards.map((c, i) =>
           i < revealed ? (
             <div key={i} class={`enemy-card r-${c.rarity} flip-in`}>
-              <img src={artUrl(c.kanji, c.rarity)} alt="" onError={(e) => ((e.target as HTMLImageElement).style.visibility = 'hidden')} />
+              <ArteCarta kanji={c.kanji} rarity={c.rarity} />
               <div class="enemy-kanji">{c.kanji.kanji}</div>
               <div class="enemy-rarity">{RARITY[c.rarity].name}</div>
               {c.newCard && <span class="badge">NOVA</span>}

@@ -11,6 +11,7 @@ import { Apresentacao } from '../../core/Apresentacao';
 import { itemNovoDe, type ItemNovo } from '../../content/ensino';
 import { getKanji, parseCardKey } from '../../content';
 import { artUrl, RARITY_COLORS } from './art';
+import { ArteCarta } from './ArteCarta';
 import { CHEST_EVERY, Hunt, MAX_HEARTS, RARITY, type Enemy, type HuntEvent, type Question } from './engine';
 
 interface View {
@@ -352,7 +353,7 @@ function Cacada({ h, view, setView: setViewOu, setApres, deNovo, setDeNovo, rein
 
       <section class="arena" ref={arenaEl} style={{ ...cenaStyle('kanjimon-takao'), ...corStyle(cor.value) }} data-testid="arena">
         <div class={`enemy-card r-${view.enemy.rarity}${hideCard ? ' hidden-face' : ''}`} ref={cardEl}>
-          <img src={artUrl(view.enemy.kanji, view.enemy.rarity)} alt="" onError={(e) => ((e.target as HTMLImageElement).style.visibility = 'hidden')} />
+          <ArteCarta kanji={view.enemy.kanji} rarity={view.enemy.rarity} />
           <div class="enemy-kanji" data-testid="enemy-kanji">
             {hideCard ? '？' : view.enemy.kanji.kanji}
           </div>
@@ -445,7 +446,7 @@ function Cacada({ h, view, setView: setViewOu, setApres, deNovo, setDeNovo, rein
       {overlay?.t === 'capture' && (
         <div class="overlay win" onClick={dismiss}>
           <div class={`capture-card r-${overlay.enemy.rarity}`}>
-            <img src={artUrl(overlay.enemy.kanji, overlay.enemy.rarity)} alt="" onError={(e) => ((e.target as HTMLImageElement).style.visibility = 'hidden')} />
+            <ArteCarta kanji={overlay.enemy.kanji} rarity={overlay.enemy.rarity} />
             <div class="enemy-kanji">{overlay.enemy.kanji.kanji}</div>
           </div>
           <h2>Capturado!</h2>

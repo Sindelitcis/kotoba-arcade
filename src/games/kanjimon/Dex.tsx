@@ -6,7 +6,7 @@ import { kanaToRomaji } from '../../core/kana';
 import { masteryLevel } from '../../core/srs';
 import { teclaDe } from '../../core/teclas';
 import { useAprofundar } from '../../core/aprofundar/estado';
-import { artUrl } from './art';
+import { ArteCarta } from './ArteCarta';
 import { dexKey, RARITIES, RARITY, type Rarity } from './engine';
 
 function Stars({ level }: { level: number }) {
@@ -87,7 +87,7 @@ export function Dex() {
             <div class="dex-detail">
               <div>
                 <div class={`enemy-card r-${face}${dex[dexKey(open, face)] ? '' : ' locked'}`}>
-                  {dex[dexKey(open, face)] ? <img src={artUrl(open, face)} alt="" /> : null}
+                  {dex[dexKey(open, face)] ? <ArteCarta kanji={open} rarity={face} /> : null}
                   <div class="enemy-kanji">{open.kanji}</div>
                   <div class="enemy-rarity">{dex[dexKey(open, face)] ? RARITY[face].name : 'Ainda não capturada'}</div>
                 </div>
