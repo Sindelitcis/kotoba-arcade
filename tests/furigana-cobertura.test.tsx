@@ -22,6 +22,7 @@ import { blocosDoTexto, FORMAS_SEM_LEITURA, MARCA_SEM_LEITURA, partesDe } from '
 import { emptySave, importSave } from '../src/core/save';
 import { newCard, review, DAY } from '../src/core/srs';
 import { listarTextosJp } from '../scripts/textos-jp';
+import { listarFalas } from '../scripts/falas';
 
 const RAIZ = join(__dirname, '..');
 const KANJI_RE = /[一-鿿々〆ヶ]/;
@@ -82,6 +83,20 @@ describe('todo japonês com kanji do conteúdo tem leitura', () => {
     expect(LEITURAS['四時に会いましょう。']?.[0]).toBe('よじ');
     // Número em algarismo fica sem leitura; o 時 depois dele, com.
     expect(partesDe('3時半')).toEqual([{ t: '3' }, { t: '時半', r: 'じはん' }]);
+  });
+
+  // CI de 23/11/2026: a legenda (src/core/legenda.ts) mostra o texto de toda fala que toca, e
+  // 東京まで、一枚おねがいします。 da Aventura (お願いします no motor) e わたし学生です do Kumitate
+  // (com a pausa só no motor) ficaram sem leitura, porque as partes da voz não batiam com o texto.
+  it('toda fala gravada com kanji tem leitura, porque a legenda mostra o texto dela', () => {
+    const sem = listarFalas()
+      .filter((f) => partesDe(f.texto).some((p) => !p.r && KANJI_RE.test(p.t)))
+      .map((f) => `${f.origem}: ${f.texto}`);
+    expect(sem).toEqual([]);
+    expect(partesDe('東京まで、一枚おねがいします。').filter((p) => p.r)).toEqual([
+      { t: '東京', r: 'とうきょう' },
+      { t: '一枚', r: 'いちまい' },
+    ]);
   });
 
   it('todo <Furigana texto="…"> escrito no código tem leitura', () => {

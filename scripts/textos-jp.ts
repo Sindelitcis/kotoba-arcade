@@ -99,10 +99,18 @@ function dasFalas(): TextoJp[] {
   const out: TextoJp[] = [];
   for (const f of listarFalas()) {
     if (f.palavra && hasKanji(f.palavra.jp)) out.push({ texto: f.palavra.jp, leitura: kataToHira(f.palavra.kana), origem: f.origem });
-    const texto = f.partes.map((p) => p.t).join('');
-    if (!hasKanji(texto) || texto !== f.texto) continue;
+    // A legenda mostra o texto da fala, que nem sempre é igual às partes que vão para a voz:
+    // おねがいします na tela e お願いします no motor, ou a frase do Kumitate sem a pausa (、) no
+    // buraco ainda vazio. A leitura é a mesma; só a pausa sai quando o texto não a tem.
+    const texto = f.texto;
+    if (!hasKanji(texto)) continue;
     const completa = f.partes.every((p) => !hasKanji(p.t) || p.r);
-    out.push({ texto, leitura: completa ? f.partes.map((p) => p.r ?? p.t).join('') : undefined, origem: f.origem });
+    let leitura = completa ? f.partes.map((p) => p.r ?? p.t).join('') : undefined;
+    if (leitura && f.partes.map((p) => p.t).join('') !== texto) {
+      if (!texto.includes('、')) leitura = leitura.replaceAll('、', '');
+      leitura = leitura.replace(/\s+/g, '');
+    }
+    out.push({ texto, leitura, origem: f.origem });
   }
   return out;
 }
