@@ -254,7 +254,7 @@ A voz em japonês (AivisSpeech) pronuncia mal um kana sozinho. Duas frentes:
    embaixo da tela (`src/core/legenda.ts` e `LegendaVoz.tsx`). Quem toca o áudio liga a legenda
    (`legendar`): a fala solta, a sequência das aulas e a Conversa. No Módulo 0 ela mostra também
    o romaji.
-2. **Gravação melhor dos kana isolados (falta escolher).** O gravador sabe quatro jeitos
+2. **Gravação melhor dos kana isolados (feita).** O gravador sabe quatro jeitos
    (`KANA_METODOS` em `scripts/gravar_vozes.py`): o de sempre (VOICEVOX, kana sozinho); esticado
    (mais devagar, vogal mais longa e silêncio em volta); recortado (o motor fala か、か e fica só a
    primeira, cortada pelo tempo de cada mora); e a voz das frases (AivisSpeech まお). As versões de
@@ -264,6 +264,12 @@ A voz em japonês (AivisSpeech) pronuncia mal um kana sozinho. Duas frentes:
    resultado vai para `resultado.json` na mesma pasta. O jeito que ganhar entra em
    `scripts/kana-metodo.json`, e `npm run vozes` grava todos os kana de novo. Gravação humana
    com licença livre ficou de fora por ora: precisaria baixar um banco de áudio de fora.
+
+   Resultado (23/11/2026): a voz das frases ganhou em 13 dos 26 kana, o recortado em 5 (し, ち,
+   り, る, りゅ), o esticado em 1 (ん), o de sempre em nenhum, e em 7 nenhuma serviu (あ, お, ふ,
+   を, ぴ, ファ, ヴ). O site passou a usar a voz das frases (`aivis`) para todo kana solto. Os 7 sem
+   versão boa e os 5 em que o recorte soou melhor são o ponto de partida se um dia valer gravar
+   kana a kana com jeitos diferentes; a legenda com romaji continua cobrindo a dúvida.
 
 ## Módulo 0: kana e sons
 
@@ -290,6 +296,6 @@ por ele. Os jogos continuam, como exercícios das lições e como prática livre
 3. **Provas e impressos:** feito, com o simulado do JLPT e o certificado (ver "Provas" e
    "Material impresso", acima).
 4. **Conteúdo do A1:** feito (ver "Conteúdo do A1", acima), com o vocabulário do N5.
-5. **Áudio de kana e legendas:** legendas e Módulo 0 feitos. A gravação melhor dos kana
-   isolados está pronta para a comparação às cegas; falta o Rafael ouvir e escolher.
+5. **Áudio de kana e legendas:** feita: legendas, Módulo 0 e kana solto gravado com a
+   voz que ganhou a comparação às cegas.
 6. **A2.**

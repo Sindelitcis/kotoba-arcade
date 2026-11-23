@@ -30,8 +30,7 @@ completo está em [docs/curso.md](docs/curso.md) e tem seis fases:
 5. áudio de kana;
 6. A2.
 
-Estado em 23/11/2026: as fases 1 a 4 estão feitas para o A1, e a 5 está feita menos a escolha da
-gravação dos kana isolados, que espera o Rafael ouvir a comparação (`npm run comparar-kana`).
+Estado em 23/11/2026: as fases 1 a 5 estão feitas para o A1.
 
 - **Currículo** em `src/content/curso/`: as 20 unidades, os kanji e as leituras, a gramática e as
   notas (conferidas contra a fonte), checado por `tests/curso.test.ts`. O vocabulário cobre 655
@@ -47,8 +46,7 @@ gravação dos kana isolados, que espera o Rafael ouvir a comparação (`npm run
   ou pelo QR. A unidade de revisão é o simulado do JLPT (vocabulário, gramática, leitura e escuta),
   que dá o certificado do curso. Também há nivelamento, apostila (com ditado por QR), cartões para
   recortar e folha de escrita dos kanji. Detalhes em [docs/curso.md](docs/curso.md#provas).
-- Falta: o Rafael escolher, às cegas, o jeito de gravar os kana isolados
-  ([docs/curso.md](docs/curso.md#áudio-de-kana-isolado)), e a fase 6, o A2. Os jogos e a Jornada continuam no fliperama, como prática
+- Falta: a fase 6, o A2. Os jogos e a Jornada continuam no fliperama, como prática
   livre.
 
 Regras de ensino que valem em tudo ([docs/ensino.md](docs/ensino.md)):
@@ -92,8 +90,8 @@ Regras de ensino que valem em tudo ([docs/ensino.md](docs/ensino.md)):
   - Japonês: AivisSpeech (`npm run vozes`).
   - Toda fala do site é gravada antes. Não existe voz do navegador.
   - Toda fala em japonês mostra legenda com furigana enquanto toca (`src/core/legenda.ts`); no
-    Módulo 0, também o romaji. Kana isolado ainda soa mal na voz japonesa; o jeito novo de gravar espera a
-    comparação às cegas.
+    Módulo 0, também o romaji. Kana solto usa a voz das frases, que ganhou a comparação às cegas
+    ([docs/curso.md](docs/curso.md#áudio-de-kana-isolado)).
 - **Música e efeitos:** com cara de anime, de licença livre ou não comercial, nunca trilha oficial
   ([docs/musica.md](docs/musica.md)).
 - **Fora do repositório:** `D:\KotobaArcade` guarda modelos, ambientes Python, gravações brutas e
