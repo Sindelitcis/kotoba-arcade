@@ -21,6 +21,7 @@
   "dependencies": {
     "@preact/signals": "^2.11.4",
     "preact": "^11.2.0",
+    "qrcode-generator": "^1.4.4",
     "ts-fsrs": "^5.4.2"
   },
   "devDependencies": {

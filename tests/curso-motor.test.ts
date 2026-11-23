@@ -9,15 +9,19 @@ import {
   blocosDa,
   cartaDaPalavra,
   cartasDoKanji,
+  concluiuBlocos,
   emLotes,
   ensureCursoSave,
   itensAte,
   itensDaRevisao,
   itensDoBloco,
+  itensDoMiniteste,
   liberada,
+  PERGUNTAS_DO_MINITESTE,
   ondeContinuar,
   proximaLicao,
   registrarBloco,
+  registrarProva,
   venceu,
   type Bloco,
   type ItemPratica,
@@ -249,12 +253,20 @@ describe('progresso e liberação', () => {
     expect(ondeContinuar(save, u)).toBe(2);
   });
 
-  it('o último bloco conclui a unidade e libera a seguinte', () => {
+  it('o último bloco leva à prova; só a prova aprovada libera a seguinte', () => {
     const save = ensureCursoSave({});
     const [u1, u2] = UNIDADES as [(typeof UNIDADES)[number], (typeof UNIDADES)[number]];
     const n = blocosDa(u1).length;
     for (let i = 0; i < n - 1; i++) expect(registrarBloco(save, u1, i)).toBe(false);
     expect(registrarBloco(save, u1, n - 1)).toBe(true);
+    expect(concluiuBlocos(save, u1.id)).toBe(true);
+    expect(venceu(save, u1.id)).toBe(false);
+    expect(liberada(save, u2.id)).toBe(false);
+    expect(proximaLicao(save)).toEqual({ unidade: u1, bloco: 0, prova: true });
+    // Reprovou: continua trancada.
+    registrarProva(save, u1.id, 0.7, false);
+    expect(liberada(save, u2.id)).toBe(false);
+    registrarProva(save, u1.id, 0.85, true);
     expect(venceu(save, u1.id)).toBe(true);
     expect(liberada(save, u2.id)).toBe(true);
     expect(liberada(save, UNIDADES[2]!.id)).toBe(false);
@@ -265,14 +277,49 @@ describe('progresso e liberação', () => {
 
   it('com o A1 todo feito, não há próxima lição', () => {
     const save = ensureCursoSave({});
-    for (const u of UNIDADES) registrarBloco(save, u, blocosDa(u).length - 1);
+    for (const u of UNIDADES) {
+      registrarBloco(save, u, blocosDa(u).length - 1);
+      registrarProva(save, u.id, 0.9, true);
+    }
     expect(proximaLicao(save)).toBeNull();
+  });
+
+  it('unidade já começada antes das provas continua aberta', () => {
+    const save = ensureCursoSave({ curso: { feitos: { 'a1-01': 99, 'a1-02': 2 }, concluidas: { 'a1-01': 1 } } });
+    expect(liberada(save, 'a1-02')).toBe(true);
+    expect(liberada(save, 'a1-03')).toBe(false);
+    // A primeira lição pendente é a prova da unidade 1, que ainda não foi feita.
+    expect(proximaLicao(save)).toMatchObject({ unidade: UNIDADES[0], prova: true });
+  });
+
+  it('a aprovação não se perde com uma prova pior depois, e a melhor nota fica', () => {
+    const save = ensureCursoSave({});
+    registrarProva(save, 'a1-01', 0.9, true);
+    registrarProva(save, 'a1-01', 0.5, false);
+    expect(save.provas['a1-01']).toMatchObject({ aprovada: true, melhor: 0.9, tentativas: 2 });
+  });
+
+  it('toda unidade de conteúdo termina com o mini-teste, antes da prova', () => {
+    for (const u of UNIDADES.filter((x) => !x.revisao)) expect(blocosDa(u).at(-1)?.tipo, u.id).toBe('miniteste');
+  });
+
+  it('o mini-teste só pergunta o que a unidade apresentou', () => {
+    for (const u of UNIDADES.filter((x) => !x.revisao)) {
+      const cards: Record<string, CardState> = {};
+      for (const b of blocosDa(u)) apresentar(cards, cartasDoBloco(b), 0);
+      const itens = itensDoMiniteste(u, seededRng(7));
+      expect(itens.length, u.id).toBeGreaterThan(0);
+      expect(itens.length).toBeLessThanOrEqual(PERGUNTAS_DO_MINITESTE);
+      for (const i of itens) expect(foiApresentado(cards, i.carta), `${u.id} ${i.id}`).toBe(true);
+    }
   });
 
   it('save estragado ou de unidade que não existe é limpo', () => {
     const games: Record<string, unknown> = { curso: { feitos: { 'a1-01': 3, 'x-99': 2, 'a1-02': 'muito' }, concluidas: { 'a1-01': -1 } } };
     const save = ensureCursoSave(games);
-    expect(save).toEqual({ feitos: { 'a1-01': 3 }, concluidas: {} });
-    expect(ensureCursoSave({ curso: 'lixo' })).toEqual({ feitos: {}, concluidas: {} });
+    expect(save).toEqual({ feitos: { 'a1-01': 3 }, concluidas: {}, provas: {} });
+    expect(ensureCursoSave({ curso: 'lixo' })).toEqual({ feitos: {}, concluidas: {}, provas: {} });
+    const comProva = ensureCursoSave({ curso: { provas: { 'a1-01': { melhor: 2, aprovada: 'sim', tentativas: -3 }, 'x-99': { melhor: 1, aprovada: true, tentativas: 1 } } } });
+    expect(comProva.provas).toEqual({ 'a1-01': { melhor: 1, aprovada: false, tentativas: 0 } });
   });
 });

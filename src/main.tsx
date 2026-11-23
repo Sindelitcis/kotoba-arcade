@@ -21,6 +21,7 @@ import { PecasGame } from './games/pecas/PecasGame';
 import { MemoriaGame } from './games/memoria/MemoriaGame';
 import { RoguelikeGame } from './games/roguelike/RoguelikeGame';
 import { CursoTela } from './curso/CursoTela';
+import { Impresso, pedidoDoEndereco } from './curso/Impresso';
 import { Hub } from './hub/Hub';
 import { JornadaTela } from './jornada/JornadaTela';
 import { LicaoTela } from './jornada/LicaoTela';
@@ -89,4 +90,6 @@ function Raiz() {
   );
 }
 
-render(<Raiz />, document.getElementById('app') as HTMLElement);
+// Material impresso do curso (?imprimir=..., ?gabarito=...): página própria, sem o resto do site.
+const pedido = pedidoDoEndereco(location.search);
+render(pedido ? <Impresso pedido={pedido} /> : <Raiz />, document.getElementById('app') as HTMLElement);

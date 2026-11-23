@@ -109,10 +109,10 @@ próxima parte; a tecla U mostra o mapa das unidades.
 
 - **Partes curtas.** `motor.ts` (`blocosDa`) divide a unidade em partes de uns 5 minutos: objetivo
   (com a revisão rápida da unidade anterior), palavras de 3 a 5 por vez, os kanji dessas palavras
-  logo depois delas, a gramática, as notas culturais já conferidas e o diálogo da situação. A
-  unidade de revisão tem só o objetivo e uma prática com o que já foi visto. Os passos que dependem
-  do conteúdo da fase 4 (aula falada, exemplos de gramática, tarefa de uso) e das provas da fase 3
-  (mini-teste) ainda não entram.
+  logo depois delas, a gramática, as notas culturais já conferidas, o diálogo da situação e, no
+  fim, o mini-teste (8 perguntas da unidade, com quatro alternativas, como na prova). A unidade de
+  revisão tem só o objetivo e uma prática com o que já foi visto. Os passos que dependem do
+  conteúdo da fase 4 (aula falada, exemplos de gramática, tarefa de uso) ainda não entram.
 - **Cartões.** `cartoes.ts` monta a apresentação direto do currículo, no mesmo cartão dos jogos
   (`core/Apresentacao.tsx`). O do kanji mostra a leitura usada na palavra, a explicação da troca
   quando ela muda e as outras leituras do curso, com a unidade em que entram. O de gramática mostra
@@ -122,10 +122,11 @@ próxima parte; a tecla U mostra o mapa das unidades.
   de novo e a pergunta volta no fim. A parte acaba quando cada item foi acertado uma vez.
 - **Memória.** As palavras e os kanji entram nas mesmas cartas do FSRS dos jogos (`w:<palavra>#meaning`,
   `k:<kanji>#meaning` e `#reading`). O que foi visto no curso os jogos já podem praticar.
-- **Progresso.** Fica em `games.curso` no save: quantas partes de cada unidade foram feitas e
-  quais unidades foram concluídas. Parar no meio volta na mesma parte.
-- **Liberação.** A unidade 1 é livre e cada outra abre quando a anterior é concluída. O ponto que
-  decide isso é `venceu()`, em `motor.ts`; a fase 3 troca "chegou ao fim" pela prova com 80%.
+- **Progresso.** Fica em `games.curso` no save: quantas partes de cada unidade foram feitas, quais
+  foram concluídas e a prova de cada uma (melhor nota, se passou, tentativas). Parar no meio volta
+  na mesma parte; com as partes feitas, "Continuar" leva à prova.
+- **Liberação.** A unidade 1 é livre e cada outra abre quando a prova da anterior é aprovada
+  (`venceu()`, em `motor.ts`). Unidade já começada antes das provas existirem continua aberta.
 - **Voz.** Tudo o que os cartões falam (a palavra em japonês e o "Quer dizer..." na Voz 1) entra
   nas listas de gravação (`scripts/falas.ts` e `scripts/falas-pt.ts`, origem `curso`).
 
@@ -135,27 +136,45 @@ progresso e a liberação. `e2e/curso.spec.ts` faz o caminho no navegador.
 
 ## Provas
 
-- **Fim de unidade:** prova digital no site, com nota mínima de 80% para liberar a próxima. Quem
-  não passa recebe uma revisão do que errou e pode refazer, com questões diferentes.
-- **Versão para imprimir:** a mesma prova em PDF/página de impressão, com espaço para escrever à
-  mão. Cada prova tem um código. O gabarito fica no site, aberto pelo código ou por um QR na folha,
-  para conferir depois.
-- **Fim de nível:** simulado no formato do JLPT (vocabulário, gramática, leitura e escuta), com
+Feitas na fase 3. A lógica está em `src/curso/prova.ts` e a tela em `src/curso/ProvaTela.tsx`.
+
+- **Fim de unidade:** 16 questões da unidade e 4 de revisão das anteriores, quatro alternativas
+  cada (sentido da palavra, palavra pelo sentido, leitura do kanji). Passa com 80%. O resultado só
+  aparece no fim, e dá para voltar e trocar uma resposta antes de entregar. Cada resposta conta como
+  revisão no FSRS. Quem não passa vê o que errou, revê os cartões disso e faz outra prova, com
+  outras questões. A aprovação nunca se perde com uma tentativa pior depois.
+- **Unidade de revisão:** a prova é um simulado de 30 questões com tudo o que veio antes.
+- **Só o que foi ensinado:** as questões e as alternativas erradas saem dos itens do curso até a
+  unidade da prova, nunca são outra resposta certa nem duas palavras com o mesmo sentido.
+- **Código:** cada prova tem um código, como `U04-K7QH` (unidade e semente, sem 0, O, 1, I e L).
+  O mesmo código gera sempre a mesma prova, sem depender do save, então a folha e o gabarito batem
+  em qualquer aparelho.
+- **Nivelamento:** no mapa, enquanto não há progresso. Quatro questões por unidade, em ordem, com
+  "Não sei". Acertou 3, a unidade conta como feita (as cartas entram como vistas) e vem a seguinte;
+  na primeira em que não passa, o curso começa nela. É a exceção à regra de só cobrar o que foi
+  ensinado ([ensino.md](ensino.md)).
+- **Ainda não:** o simulado de fim de nível no formato do JLPT (com escuta e leitura) e o
   certificado do curso.
-- **Nivelamento:** quem já sabe algo faz uma prova de entrada e começa da unidade certa.
 
 ## Material impresso
 
-Não fica só nas provas. Sempre que o papel ajudar a aprender, a lição tem a sua versão impressa:
+Feito na fase 3, em `src/curso/Impresso.tsx` (estilo em `impresso.css`, A4 em branco). Cada
+impresso é uma página do próprio site, aberta numa aba nova e impressa pelo navegador:
 
-- **Apostila da unidade:** a aula resumida, a tabela de vocabulário e kanji com leituras, a
-  gramática e as notas culturais, para ler longe da tela.
-- **Folhas de exercício:** escrita de kana e kanji com a ordem dos traços e quadriculado (原稿用紙),
-  completar frases, ligar, ditado (o áudio fica no site, aberto por QR).
-- **Cartões para recortar:** vocabulário e kanji da unidade, frente e verso.
-- **Gabarito:** de tudo o que é impresso, no site, aberto pelo código ou pelo QR da folha.
+- `?imprimir=prova&codigo=U04-K7QH`: a prova, com nome e data, o código e um QR para o gabarito.
+  O botão "Imprimir esta prova" fica no começo de cada prova.
+- `?gabarito=U04-K7QH`: a resposta de cada questão, com a palavra inteira e a explicação. No mapa
+  do curso há um campo para digitar o código da folha.
+- `?imprimir=apostila&unidade=a1-04`: vocabulário e kanji com leituras (e as outras leituras do
+  curso), a gramática e as notas culturais conferidas.
+- `?imprimir=cartoes&unidade=a1-04`: cartões para recortar, 8 por folha, com o verso espelhado para
+  imprimir frente e verso.
+- `?imprimir=escrita&unidade=a1-04`: para cada kanji, a ordem dos traços (KanjiVG) e uma linha de
+  caixas com cruz, com o modelo e três guias para cobrir.
 
-Tudo é gerado a partir dos mesmos dados da lição, então a apostila nunca fica diferente do site.
+Tudo sai dos mesmos dados da lição, então o papel nunca fica diferente do site. Ainda faltam
+folhas de exercício de frase (completar, ligar, ditado), que dependem do conteúdo da fase 4.
+`tests/curso-prova.test.ts` e `tests/curso-impresso.test.tsx` cobrem as provas e os impressos.
 
 ## Reforço depois da prova
 
@@ -192,8 +211,8 @@ por ele. Os jogos continuam, como exercícios das lições e como prática livre
 1. **Currículo:** feito para o A1 (`src/content/curso/`), com testes. Falta conferir as notas
    culturais contra as fontes e cruzar o vocabulário com uma lista de N5.
 2. **Motor do curso:** feito (ver "O motor do curso", acima). Falta o que depende das fases 3 e 4.
-3. **Provas e impressos:** mini-teste, prova de unidade digital e imprimível, apostila, folhas de
-   exercício, cartões, gabarito por código e nivelamento.
+3. **Provas e impressos:** feito (ver "Provas" e "Material impresso", acima). Falta o simulado
+   de fim de nível no formato do JLPT, que depende da fase 4.
 4. **Conteúdo do A1:** aulas faladas na Voz 1, diálogos, quadros e exercícios, unidade por unidade.
 5. **Áudio de kana e legendas.**
 6. **A2.**

@@ -14,7 +14,7 @@
 import { useLayoutEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { palavrasDa, UNIDADES, type Unidade } from '../content/curso';
 import { SITUACOES } from '../content/escola';
-import { app, commit, cursoAberto, cursoSave, go, screen } from '../core/app';
+import { app, commit, cursoAberto, cursoSave, go } from '../core/app';
 import { cenaStyle } from '../core/arte';
 import { Apresentacao } from '../core/Apresentacao';
 import { sfx } from '../core/audio';
@@ -24,37 +24,18 @@ import { Furigana } from '../core/Furigana';
 import { Icone } from '../core/Icone';
 import { useAprofundar } from '../core/aprofundar/estado';
 import { tocarSequencia, type Trecho } from '../core/sequencia';
-import { teclaDe } from '../core/teclas';
-import { camadaAberta } from '../core/help/ajuda';
 import type { Alvo } from '../content/aprofundar/alvo';
 import { falaFrase } from '../jornada/licoes';
 import { Marcado } from '../jornada/Marcado';
 import { MOEDAS_LICAO, XP_ACERTO, XP_LICAO } from '../jornada/andamento';
 import { cartaoDaPalavra, cartaoDoKanji, cartaoDoPonto, falaDaPalavra } from './cartoes';
-import { blocosDa, cartaDaPalavra, cartasDoKanji, itensAte, itensDaRevisao, itensDoBloco, liberada, NOME_BLOCO, ondeContinuar, proximaLicao, registrarBloco, unidadePorId, venceu, type Bloco, type ItemPratica } from './motor';
+import { blocosDa, cartaDaPalavra, cartasDoKanji, concluiuBlocos, itensAte, itensDaRevisao, itensDoBloco, itensDoMiniteste, liberada, NOME_BLOCO, ondeContinuar, proximaLicao, registrarBloco, unidadePorId, venceu, type Bloco, type ItemPratica } from './motor';
+import { abrirImpresso } from './Impresso';
+import { lerCodigo, OPCOES_PROVA } from './prova';
+import { NivelamentoTela, ProvaTela } from './ProvaTela';
+import { useTeclado } from './teclado';
 import { Pratica } from './pratica';
 import './curso.css';
-
-/** Uma tecla por vez: quem está na tela registra o que faz com ela. */
-type Teclado = (tecla: string, e: KeyboardEvent) => boolean;
-
-function useTeclado(fn: Teclado): void {
-  const ref = useRef(fn);
-  ref.current = fn;
-  // Antes da pintura: tecla apertada logo que a tela aparece não se perde.
-  useLayoutEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (screen.value !== 'curso' || camadaAberta.value || e.ctrlKey || e.altKey || e.metaKey) return;
-      const tecla = teclaDe(e);
-      if (tecla === null) return;
-      // Botão escolhido pelo Tab: o Enter e o espaço são dele.
-      if ((tecla === 'Enter' || tecla === ' ') && e.target instanceof HTMLElement && e.target.closest('button')) return;
-      if (ref.current(tecla, e)) e.preventDefault();
-    };
-    addEventListener('keydown', onKey);
-    return () => removeEventListener('keydown', onKey);
-  }, []);
-}
 
 const voltarAoHub = () => {
   cursoAberto.value = null;
@@ -66,17 +47,50 @@ export function abrirUnidade(u: Unidade, bloco = ondeContinuar(cursoSave(), u)):
   cursoAberto.value = { unidade: u.id, bloco };
 }
 
+/** Abre a prova da unidade. */
+export function abrirProva(u: Unidade): void {
+  cursoAberto.value = { unidade: u.id, bloco: 0, modo: 'prova' };
+}
+
 /** Continua o curso de onde parou (o "Continuar o curso" da tela inicial). */
 export function continuarCurso(): void {
   const prox = proximaLicao(cursoSave());
-  if (prox) abrirUnidade(prox.unidade, prox.bloco);
+  if (prox?.prova) abrirProva(prox.unidade);
+  else if (prox) abrirUnidade(prox.unidade, prox.bloco);
   else cursoAberto.value = null;
   go('curso');
 }
 
 export function CursoTela() {
   const aberto = cursoAberto.value;
+  const sair = () => {
+    cursoAberto.value = null;
+    commit();
+  };
+  if (aberto?.modo === 'nivelamento')
+    return (
+      <main class="lc cs">
+        <NivelamentoTela onSair={sair} />
+      </main>
+    );
   const u = aberto ? unidadePorId(aberto.unidade) : undefined;
+  if (aberto?.modo === 'prova' && u && liberada(cursoSave(), u.id))
+    return (
+      <main class="lc cs">
+        <header class="lc-topo">
+          <button class="ghost" onClick={sair}>
+            ← Parar aqui <kbd>Esc</kbd>
+          </button>
+          <div>
+            <h1>
+              Unidade {u.numero} · {u.titulo}
+            </h1>
+            <small class="muted">Prova da unidade</small>
+          </div>
+        </header>
+        <ProvaTela key={u.id} unidade={u} onSair={sair} />
+      </main>
+    );
   if (aberto && u && liberada(cursoSave(), u.id)) return <Tocador key={`${u.id}:${aberto.bloco}`} unidade={u} bloco={aberto.bloco} />;
   return <Mapa />;
 }
@@ -86,6 +100,12 @@ export function CursoTela() {
 function Mapa() {
   const save = cursoSave();
   const prox = proximaLicao(save);
+  const comecou = UNIDADES.some((x) => (save.feitos[x.id] ?? 0) > 0 || save.provas[x.id]);
+  const ir = () => {
+    if (!prox) return;
+    if (prox.prova) abrirProva(prox.unidade);
+    else abrirUnidade(prox.unidade, prox.bloco);
+  };
 
   useTeclado((tecla) => {
     if (tecla === 'Escape') {
@@ -93,7 +113,7 @@ function Mapa() {
       return true;
     }
     if ((tecla === 'Enter' || tecla === ' ') && prox) {
-      abrirUnidade(prox.unidade, prox.bloco);
+      ir();
       return true;
     }
     return false;
@@ -112,7 +132,7 @@ function Mapa() {
       </header>
 
       {prox ? (
-        <button class="koma jornada-faixa cs-continuar" style={cenaStyle('aventura-narita')} onClick={() => abrirUnidade(prox.unidade, prox.bloco)} data-testid="cs-continuar">
+        <button class="koma jornada-faixa cs-continuar" style={cenaStyle('aventura-narita')} onClick={ir} data-testid="cs-continuar">
           <span class="hub-rotulo">
             <Icone nome="play" /> Continuar <kbd>Enter</kbd>
           </span>
@@ -121,12 +141,21 @@ function Mapa() {
               Unidade {prox.unidade.numero} · {prox.unidade.titulo}
             </b>
             <span>
-              Parte {prox.bloco + 1} de {blocosDa(prox.unidade).length}: {NOME_BLOCO[(blocosDa(prox.unidade)[prox.bloco] as Bloco).tipo]}
+              {prox.prova ? 'As partes estão feitas. Falta a prova.' : `Parte ${prox.bloco + 1} de ${blocosDa(prox.unidade).length}: ${NOME_BLOCO[(blocosDa(prox.unidade)[prox.bloco] as Bloco).tipo]}`}
             </span>
           </span>
         </button>
       ) : (
         <p class="notice">O A1 inteiro está feito. Dá para refazer qualquer unidade.</p>
+      )}
+
+      {!comecou && (
+        <p class="cs-nivelamento">
+          Já estudou japonês antes?{' '}
+          <button class="ghost" onClick={() => (cursoAberto.value = { unidade: '', bloco: 0, modo: 'nivelamento' })} data-testid="cs-nivelamento">
+            Fazer o nivelamento
+          </button>
+        </p>
       )}
 
       <ol class="cs-unidades">
@@ -135,6 +164,8 @@ function Mapa() {
           const feita = venceu(save, x.id);
           const total = blocosDa(x).length;
           const feitos = Math.min(save.feitos[x.id] ?? 0, total);
+          const faltaProva = !feita && concluiuBlocos(save, x.id);
+          const prova = save.provas[x.id];
           return (
             <li key={x.id}>
               <button class={`cs-unidade${feita ? ' feita' : ''}${livre ? '' : ' trancada'}`} disabled={!livre} onClick={() => abrirUnidade(x, feita ? 0 : undefined)} data-testid="cs-unidade" data-unidade={x.id}>
@@ -143,7 +174,17 @@ function Mapa() {
                   <b>{x.titulo}</b>
                   <span>Consigo {x.consigo}.</span>
                   {livre ? (
-                    <span class="cs-estado">{feita ? 'Feita. Pode refazer.' : feitos > 0 ? `${feitos} de ${total} partes` : `${total} partes`}</span>
+                    <span class="cs-estado">
+                      {feita
+                        ? prova?.nivelamento
+                          ? 'Feita pelo nivelamento.'
+                          : `Feita · prova ${Math.round((prova?.melhor ?? 0) * 100)}%. Pode refazer.`
+                        : faltaProva
+                          ? 'Partes feitas. Falta a prova.'
+                          : feitos > 0
+                            ? `${feitos} de ${total} partes`
+                            : `${total} partes`}
+                    </span>
                   ) : (
                     <span class="cs-estado">
                       <Icone nome="lock" /> Libera depois da unidade {x.numero - 1}
@@ -151,11 +192,59 @@ function Mapa() {
                   )}
                 </span>
               </button>
+              {livre && (
+                <div class="cs-material">
+                  {(feita || faltaProva) && (
+                    <button class="ghost" onClick={() => abrirProva(x)} data-testid="cs-prova">
+                      {feita ? 'Refazer a prova' : 'Fazer a prova'}
+                    </button>
+                  )}
+                  <button class="ghost" onClick={() => abrirImpresso({ tipo: 'apostila', unidade: x.id })} data-testid="cs-apostila">
+                    Apostila
+                  </button>
+                  {x.kanji.length > 0 && (
+                    <button class="ghost" onClick={() => abrirImpresso({ tipo: 'escrita', unidade: x.id })}>
+                      Folha de escrita
+                    </button>
+                  )}
+                  <button class="ghost" onClick={() => abrirImpresso({ tipo: 'cartoes', unidade: x.id })}>
+                    Cartões
+                  </button>
+                </div>
+              )}
             </li>
           );
         })}
       </ol>
+
+      <Gabarito />
     </main>
+  );
+}
+
+/** Conferir uma prova feita no papel: o código está no alto da folha. */
+function Gabarito() {
+  const [texto, setTexto] = useState('');
+  const [erro, setErro] = useState(false);
+  const conferir = (e: Event) => {
+    e.preventDefault();
+    const c = lerCodigo(texto);
+    setErro(!c);
+    if (c) abrirImpresso({ tipo: 'gabarito', codigo: texto });
+  };
+  return (
+    <form class="cs-gabarito" onSubmit={conferir}>
+      <label for="cs-codigo">Fez uma prova no papel? Digite o código do alto da folha para ver o gabarito.</label>
+      <div class="cs-gabarito-linha">
+        <input id="cs-codigo" value={texto} onInput={(e) => setTexto((e.target as HTMLInputElement).value)} placeholder="U04-K7QH" autocomplete="off" spellcheck={false} data-testid="cs-codigo" />
+        <button type="submit">Ver o gabarito</button>
+      </div>
+      {erro && (
+        <p class="lc-retorno" role="status">
+          Esse código não existe. Ele tem a unidade e quatro letras, como U04-K7QH.
+        </p>
+      )}
+    </form>
   );
 }
 
@@ -230,6 +319,8 @@ function BlocoView({ unidade, bloco, onFim }: { unidade: Unidade; bloco: Bloco; 
       return <Dialogo situacao={bloco.situacao} onFim={onFim} />;
     case 'revisao':
       return <Revisao unidade={unidade} onFim={onFim} />;
+    case 'miniteste':
+      return <Miniteste unidade={unidade} onFim={onFim} />;
   }
 }
 
@@ -237,8 +328,10 @@ function BlocoView({ unidade, bloco, onFim }: { unidade: Unidade; bloco: Bloco; 
 function Intervalo({ unidade, bloco, total, acertos, concluiu, onParar }: { unidade: Unidade; bloco: number; total: number; acertos: number; concluiu: boolean; onParar: () => void }) {
   const seguinte = UNIDADES[unidade.numero];
   const prox = blocosDa(unidade)[bloco + 1];
+  const jaVenceu = venceu(cursoSave(), unidade.id);
   const seguir = () => {
     if (!concluiu && prox) abrirUnidade(unidade, bloco + 1);
+    else if (!jaVenceu) abrirProva(unidade);
     else if (seguinte) abrirUnidade(seguinte, ondeContinuar(cursoSave(), seguinte));
     else onParar();
   };
@@ -255,12 +348,14 @@ function Intervalo({ unidade, bloco, total, acertos, concluiu, onParar }: { unid
         {concluiu ? (
           <>
             <h2 class="cs-titulo" data-testid="cs-unidade-feita">
-              Unidade {unidade.numero} feita
+              Partes da unidade {unidade.numero} feitas
             </h2>
-            <p class="lc-linha">Agora você já pode dizer: “Consigo {unidade.consigo}.”</p>
-            {seguinte && (
+            <p class="lc-linha">O objetivo era: “Consigo {unidade.consigo}.”</p>
+            {jaVenceu ? (
+              <p class="lc-linha">A prova desta unidade já foi aprovada. Pode refazê-la pelo mapa quando quiser.</p>
+            ) : (
               <p class="lc-linha">
-                A unidade {seguinte.numero}, {seguinte.titulo}, está liberada.
+                Agora vem a prova. Passando com 80%, {seguinte ? `a unidade ${seguinte.numero} abre` : 'o A1 fica completo'}. Pode fazer agora ou depois: o curso guarda este ponto.
               </p>
             )}
           </>
@@ -279,7 +374,7 @@ function Intervalo({ unidade, bloco, total, acertos, concluiu, onParar }: { unid
           Parar aqui <kbd>Esc</kbd>
         </button>
         <button class="primary" onClick={seguir} data-testid="cs-seguir">
-          {concluiu ? (seguinte ? `Unidade ${seguinte.numero}` : 'Ver o curso') : 'Seguir'} <kbd>Enter</kbd>
+          {concluiu ? (!jaVenceu ? 'Ir para a prova' : seguinte ? `Unidade ${seguinte.numero}` : 'Ver o curso') : 'Seguir'} <kbd>Enter</kbd>
         </button>
       </div>
     </div>
@@ -367,15 +462,36 @@ function cartaoDoItem(i: ItemPratica, bloco: Bloco | null, unidade: Unidade) {
   return null;
 }
 
+/** Mini-teste: o que a unidade ensinou, com quatro alternativas, como vai ser na prova. */
+function Miniteste({ unidade, onFim }: { unidade: Unidade; onFim: (acertos?: number) => void }) {
+  const itens = useMemo(() => itensDoMiniteste(unidade, Math.random), [unidade]);
+  if (itens.length === 0) return <Vazio texto="Esta unidade não tem palavras para o mini-teste." onFim={onFim} />;
+  return <PraticaView itens={itens} conhecidos={itensAte(unidade.numero)} cartaoDe={(i) => cartaoDoItem(i, null, unidade)} onFim={onFim} opcoes={OPCOES_PROVA} rotulo="Mini-teste" />;
+}
+
 function Revisao({ unidade, onFim }: { unidade: Unidade; onFim: (acertos?: number) => void }) {
   const itens = useMemo(() => itensDaRevisao(unidade, app.data.cards, Math.random), [unidade]);
   if (itens.length === 0) return <Vazio texto="Ainda não há nada visto para revisar. Faça as unidades antes desta." onFim={onFim} />;
   return <PraticaView itens={itens} conhecidos={itensAte(unidade.numero)} cartaoDe={(i) => cartaoDoItem(i, null, unidade)} onFim={onFim} />;
 }
 
-function PraticaView({ itens, conhecidos, cartaoDe, onFim }: { itens: ItemPratica[]; conhecidos: ItemPratica[]; cartaoDe: (i: ItemPratica) => ReturnType<typeof cartaoDaPalavra> | null; onFim: (acertos: number) => void }) {
+function PraticaView({
+  itens,
+  conhecidos,
+  cartaoDe,
+  onFim,
+  opcoes,
+  rotulo = 'Prática',
+}: {
+  itens: ItemPratica[];
+  conhecidos: ItemPratica[];
+  cartaoDe: (i: ItemPratica) => ReturnType<typeof cartaoDaPalavra> | null;
+  onFim: (acertos: number) => void;
+  opcoes?: number;
+  rotulo?: string;
+}) {
   const ref = useRef<Pratica | null>(null);
-  ref.current ??= new Pratica(itens, conhecidos, { cards: app.data.cards, now: () => Date.now(), rng: Math.random });
+  ref.current ??= new Pratica(itens, conhecidos, { cards: app.data.cards, now: () => Date.now(), rng: Math.random }, opcoes);
   const pr = ref.current;
   const [, setFrame] = useState(0);
   const redraw = () => setFrame((n) => n + 1);
@@ -433,7 +549,7 @@ function PraticaView({ itens, conhecidos, cartaoDe, onFim }: { itens: ItemPratic
       ouvir();
       return true;
     }
-    if (/^[1-3]$/.test(tecla) && p && !pr.resposta) {
+    if (/^[1-4]$/.test(tecla) && p && !pr.resposta) {
       const o = p.opcoes[Number(tecla) - 1];
       if (o !== undefined) responder(o);
       return true;
@@ -451,7 +567,9 @@ function PraticaView({ itens, conhecidos, cartaoDe, onFim }: { itens: ItemPratic
   return (
     <div class="koma lc-quadro" data-testid="cs-pergunta" data-item={item.id}>
       <div class="lc-conteudo">
-        <span class="gr-tag">Prática · faltam {pr.faltam}</span>
+        <span class="gr-tag">
+          {rotulo} · faltam {pr.faltam}
+        </span>
         <p class="lc-enunciado">{enunciado}</p>
         <div class="lc-grande cs-pergunta-jp" lang="ja">
           {/* A leitura do kanji só aparece depois da resposta: ela é a pergunta. */}

@@ -224,7 +224,7 @@ export function Hub() {
               </b>
               <span>Ao final: “Consigo {licao.unidade.consigo}.”</span>
               <span class="jornada-faixa-prox">
-                <Icone nome="play" /> Continuar o curso · Parte {licao.bloco + 1} de {blocosDa(licao.unidade).length}: {parteLicao ? NOME_BLOCO[parteLicao.tipo] : ''}
+                <Icone nome="play" /> Continuar o curso · {licao.prova ? 'Falta a prova da unidade' : `Parte ${licao.bloco + 1} de ${blocosDa(licao.unidade).length}: ${parteLicao ? NOME_BLOCO[parteLicao.tipo] : ''}`}
               </span>
             </>
           ) : (

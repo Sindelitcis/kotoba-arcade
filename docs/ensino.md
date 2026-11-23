@@ -36,6 +36,7 @@ O save da versão 1 (antes desta regra) tinha cartas criadas sem apresentação.
 - **Primeiro ponto do Kumitate e primeiro kanji do Kanji em peças**: ainda não há nada visto para confundir. A bandeja tem só a peça certa (que brilha), e o primeiro kanji é montado com as próprias peças.
 - **Leitura relâmpago (Kana em imagens)**: a palavra em katakana é nova, mas todo kana dela já foi visto; as alternativas são em português.
 - **Recompensa do Kotodama**: a carta oferecida pode ser de item novo, com o selo NOVO. Não é pergunta: se a pessoa pegar, a carta é apresentada antes do próximo combate.
+- **Nivelamento do curso** (`src/curso/prova.ts`): é para quem já sabe japonês pular unidades, e só aparece se a pessoa pedir. Pergunta o que o curso ainda não apresentou, sempre com "Não sei". O que ela passa entra como visto.
 - **Jornada, primeira palavra do tema "sons"** (uma por vez): não há palavra anterior para virar alternativa errada, então entram as vizinhas do tema.
 
 ### Os testes

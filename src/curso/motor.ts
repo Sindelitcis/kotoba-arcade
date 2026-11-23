@@ -10,10 +10,12 @@
  *   gramatica   os pontos da unidade
  *   notas       notas culturais já conferidas contra a fonte (as outras ficam de fora)
  *   dialogo     a situação da unidade: escuta, leitura com furigana e repetição
+ *   miniteste   小テスト: perguntas da unidade com todas as alternativas, sem perder nada
  *   revisao     unidade de revisão: prática com o que já foi visto no nível
  *
- * A aula falada, o mini-teste e a tarefa de uso dependem do conteúdo da fase 4 e das provas
- * da fase 3; o motor já tem o lugar delas na ordem e pula o que ainda não existe.
+ * Depois dos blocos vem a prova da unidade (prova.ts): ela é que libera a seguinte.
+ *
+ * A aula falada e a tarefa de uso dependem do conteúdo da fase 4; o motor pula o que ainda não existe.
  */
 import { GRAMATICA_N5, palavrasDa, UNIDADES, type KanjiDaUnidade, type Nota, type Palavra, type Unidade } from '../content/curso';
 import { cardKey } from '../content';
@@ -30,6 +32,7 @@ export type Bloco =
   | { tipo: 'gramatica'; id: string; pontos: readonly string[] }
   | { tipo: 'notas'; id: string; notas: readonly Nota[] }
   | { tipo: 'dialogo'; id: string; situacao: string }
+  | { tipo: 'miniteste'; id: string }
   | { tipo: 'revisao'; id: string };
 
 export type TipoBloco = Bloco['tipo'];
@@ -41,6 +44,7 @@ export const NOME_BLOCO: Readonly<Record<TipoBloco, string>> = {
   gramatica: 'Gramática',
   notas: 'Cultura',
   dialogo: 'Diálogo',
+  miniteste: 'Mini-teste',
   revisao: 'Revisão',
 };
 
@@ -88,6 +92,7 @@ export function blocosDa(u: Unidade): Bloco[] {
   const notas = u.notas.filter((n) => n.conferida);
   if (notas.length > 0) out.push({ tipo: 'notas', id: `${u.id}:notas`, notas });
   for (const s of u.situacoes ?? []) out.push({ tipo: 'dialogo', id: `${u.id}:dialogo:${s}`, situacao: s });
+  out.push({ tipo: 'miniteste', id: `${u.id}:miniteste` });
   return out;
 }
 
@@ -159,11 +164,22 @@ export function partesDoPonto(id: string): { grande: string; pt: string } {
 
 /* ───────── Progresso ───────── */
 
+export interface ProvaSave {
+  /** Melhor nota, de 0 a 1. */
+  melhor: number;
+  aprovada: boolean;
+  tentativas: number;
+  /** Passou pelo nivelamento, sem fazer as partes. */
+  nivelamento?: true;
+}
+
 export interface CursoSave {
   /** Unidade → quantos blocos já foram feitos, em ordem. Só cresce. */
   feitos: Record<string, number>;
-  /** Unidade → quantas vezes foi concluída. */
+  /** Unidade → quantas vezes os blocos foram feitos até o fim. */
   concluidas: Record<string, number>;
+  /** Unidade → a prova. É ela que libera a unidade seguinte. */
+  provas: Record<string, ProvaSave>;
 }
 
 export function ensureCursoSave(games: Record<string, unknown>): CursoSave {
@@ -174,30 +190,57 @@ export function ensureCursoSave(games: Record<string, unknown>): CursoSave {
       for (const [k, v] of Object.entries(o)) if (unidadePorId(k) && typeof v === 'number' && Number.isFinite(v) && v > 0) out[k] = Math.floor(v);
     return out;
   };
-  const save: CursoSave = { feitos: limpar(raw?.feitos), concluidas: limpar(raw?.concluidas) };
+  const provas: Record<string, ProvaSave> = {};
+  if (raw?.provas && typeof raw.provas === 'object')
+    for (const [k, v] of Object.entries(raw.provas)) {
+      if (!unidadePorId(k) || !v || typeof v !== 'object') continue;
+      const p = v as Partial<ProvaSave>;
+      const melhor = typeof p.melhor === 'number' && Number.isFinite(p.melhor) ? Math.min(1, Math.max(0, p.melhor)) : 0;
+      const tentativas = typeof p.tentativas === 'number' && Number.isFinite(p.tentativas) ? Math.max(0, Math.floor(p.tentativas)) : 0;
+      provas[k] = { melhor, aprovada: p.aprovada === true, tentativas, ...(p.nivelamento ? { nivelamento: true as const } : {}) };
+    }
+  const save: CursoSave = { feitos: limpar(raw?.feitos), concluidas: limpar(raw?.concluidas), provas };
   games.curso = save;
   return save;
 }
 
-/**
- * O ponto de liberação: a unidade conta como vencida quando foi concluída.
- * A fase 3 troca isto pela prova de fim de unidade, com nota mínima de 80%.
- */
+/** O ponto de liberação: a unidade conta como vencida quando a prova dela foi aprovada (80%). */
 export function venceu(save: CursoSave, unidade: string): boolean {
+  return save.provas[unidade]?.aprovada === true;
+}
+
+/** As partes foram feitas até o fim: a prova da unidade pode ser feita. */
+export function concluiuBlocos(save: CursoSave, unidade: string): boolean {
   return (save.concluidas[unidade] ?? 0) > 0;
 }
 
-/** A primeira unidade é livre; cada outra só abre depois da anterior. */
+/** Guarda o resultado de uma prova. A aprovação não se perde com uma tentativa pior depois. */
+export function registrarProva(save: CursoSave, unidade: string, nota: number, aprovada: boolean): void {
+  const antes = save.provas[unidade];
+  save.provas[unidade] = {
+    melhor: Math.max(antes?.melhor ?? 0, nota),
+    aprovada: aprovada || antes?.aprovada === true,
+    tentativas: (antes?.tentativas ?? 0) + 1,
+    ...(antes?.nivelamento ? { nivelamento: true as const } : {}),
+  };
+}
+
+/**
+ * A primeira unidade é livre; cada outra só abre depois da prova da anterior. Unidade já começada
+ * (de antes das provas existirem) continua aberta: progresso feito não se tranca.
+ */
 export function liberada(save: CursoSave, unidade: string): boolean {
   const i = UNIDADES.findIndex((u) => u.id === unidade);
   if (i < 0) return false;
-  return i === 0 || venceu(save, (UNIDADES[i - 1] as Unidade).id);
+  return i === 0 || venceu(save, (UNIDADES[i - 1] as Unidade).id) || (save.feitos[unidade] ?? 0) > 0;
 }
 
 export interface Lugar {
   unidade: Unidade;
   /** Índice do bloco onde continuar. */
   bloco: number;
+  /** As partes estão feitas e falta a prova. */
+  prova?: true;
 }
 
 /** De onde continuar uma unidade: o primeiro bloco não feito (ou o começo, se já foi toda feita). */
@@ -210,7 +253,7 @@ export function ondeContinuar(save: CursoSave, u: Unidade): number {
 export function proximaLicao(save: CursoSave): Lugar | null {
   for (const u of UNIDADES) {
     if (!liberada(save, u.id)) return null;
-    if (!venceu(save, u.id)) return { unidade: u, bloco: ondeContinuar(save, u) };
+    if (!venceu(save, u.id)) return concluiuBlocos(save, u.id) ? { unidade: u, bloco: 0, prova: true } : { unidade: u, bloco: ondeContinuar(save, u) };
   }
   return null;
 }
@@ -269,6 +312,15 @@ export function itensAte(ate: number): ItemPratica[] {
     for (const k of u.kanji) out.push(itemDoKanji(k));
   }
   return out;
+}
+
+/** No mini-teste, quantas perguntas da unidade. */
+export const PERGUNTAS_DO_MINITESTE = 8;
+
+/** Os itens do mini-teste: um sorteio dos itens da unidade, todos já apresentados nos blocos antes. */
+export function itensDoMiniteste(u: Unidade, rng: Rng): ItemPratica[] {
+  const daUnidade = [...palavrasDa(u).map(itemDaPalavra), ...u.kanji.map(itemDoKanji)];
+  return shuffle(rng, daUnidade).slice(0, PERGUNTAS_DO_MINITESTE);
 }
 
 /** Itens do bloco que viram pergunta. */

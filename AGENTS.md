@@ -30,18 +30,20 @@ completo está em [docs/curso.md](docs/curso.md) e tem seis fases:
 5. áudio de kana;
 6. A2.
 
-Estado em 22/11/2026: as fases 1 e 2 estão feitas para o A1.
+Estado em 23/11/2026: as fases 1, 2 e 3 estão feitas para o A1.
 
 - **Currículo** em `src/content/curso/`: as 20 unidades, os kanji e as leituras, a gramática e as
   notas, conferido por `tests/curso.test.ts`. Faltam conferir as notas culturais contra as fontes
   (até lá elas não aparecem no curso) e cruzar o vocabulário com uma lista de N5.
 - **Motor** em `src/curso/`: a tela inicial abre com "Continuar o curso" (Enter), o tocador percorre
-  a unidade em partes curtas (palavras, kanji, gramática, diálogo), o progresso fica salvo e cada
-  unidade só libera depois da anterior. Por enquanto basta chegar ao fim da unidade; a fase 3 troca
-  isso pela prova (`venceu()` em `src/curso/motor.ts`). Detalhes em
-  [docs/curso.md](docs/curso.md#o-motor-do-curso).
-- A próxima é a fase 3, provas e impressos. Os jogos e a Jornada continuam no fliperama, como
-  prática livre.
+  a unidade em partes curtas (palavras, kanji, gramática, diálogo, mini-teste) e o progresso fica
+  salvo. Detalhes em [docs/curso.md](docs/curso.md#o-motor-do-curso).
+- **Provas e impressos** em `src/curso/prova.ts`, `ProvaTela.tsx` e `Impresso.tsx`: cada unidade
+  termina numa prova de 80% que libera a seguinte, com versão para imprimir e gabarito pelo código
+  ou pelo QR. Também há nivelamento, apostila, cartões para recortar e folha de escrita dos kanji.
+  Detalhes em [docs/curso.md](docs/curso.md#provas).
+- A próxima é a fase 4, o conteúdo do A1 (aulas faladas, exemplos, exercícios de frase e o
+  simulado do JLPT). Os jogos e a Jornada continuam no fliperama, como prática livre.
 
 Regras de ensino que valem em tudo ([docs/ensino.md](docs/ensino.md)):
 

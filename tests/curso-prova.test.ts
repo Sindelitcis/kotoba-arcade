@@ -1,0 +1,174 @@
+// @vitest-environment node
+import { describe, expect, it } from 'vitest';
+import { UNIDADES } from '../src/content/curso';
+import { seededRng } from '../src/core/rng';
+import { blocosDa, itensAte } from '../src/curso/motor';
+import {
+  codigoDaProva,
+  corrigir,
+  lerCodigo,
+  montarProva,
+  NIVEL_POR_UNIDADE,
+  NOTA_MINIMA,
+  novaSemente,
+  OPCOES_PROVA,
+  provaDoCodigo,
+  QUESTOES_DA_UNIDADE,
+  QUESTOES_DE_REVISAO,
+  questoesDeNivelamento,
+  UNIDADES_DO_NIVELAMENTO,
+} from '../src/curso/prova';
+
+const SEMENTES = ['K7QH', 'AAAA', '2Z9M', 'PQRS', 'HJ34'];
+
+describe('código da prova', () => {
+  it('ida e volta: o código guarda a unidade e a semente', () => {
+    const rng = seededRng(1);
+    for (const u of UNIDADES) {
+      const s = novaSemente(rng);
+      const c = lerCodigo(codigoDaProva(u, s));
+      expect(c?.unidade.id).toBe(u.id);
+      expect(c?.semente).toBe(s);
+    }
+  });
+
+  it('aceita minúscula, espaço e sem traço; recusa o que não existe', () => {
+    expect(lerCodigo('u04-k7qh')?.unidade.numero).toBe(4);
+    expect(lerCodigo(' U04 K7QH ')?.semente).toBe('K7QH');
+    expect(lerCodigo('4k7qh')?.unidade.numero).toBe(4);
+    expect(lerCodigo('U99-K7QH')).toBeNull();
+    expect(lerCodigo('U04-K7Q0')).toBeNull(); // 0 não é usado: confunde com O
+    expect(lerCodigo('qualquer coisa')).toBeNull();
+  });
+
+  it('a semente só usa letras que não se confundem à mão', () => {
+    const rng = seededRng(9);
+    for (let i = 0; i < 200; i++) expect(novaSemente(rng)).toMatch(/^[A-HJKMNP-Z2-9]{4}$/);
+  });
+});
+
+describe('montagem da prova', () => {
+  it('o mesmo código dá sempre a mesma prova (a folha impressa bate com o gabarito)', () => {
+    for (const u of UNIDADES) {
+      const a = montarProva(u, 'K7QH');
+      const b = provaDoCodigo(a.codigo);
+      expect(b?.questoes.map((q) => [q.item.id, q.opcoes, q.certa])).toEqual(a.questoes.map((q) => [q.item.id, q.opcoes, q.certa]));
+    }
+  });
+
+  it('outra semente, outra prova', () => {
+    const u = UNIDADES[3]!;
+    expect(montarProva(u, 'AAAA').questoes.map((q) => q.item.id)).not.toEqual(montarProva(u, 'BBBB').questoes.map((q) => q.item.id));
+  });
+
+  it('quatro alternativas diferentes, uma certa, numeradas em ordem', () => {
+    for (const u of UNIDADES)
+      for (const s of SEMENTES) {
+        const p = montarProva(u, s);
+        expect(p.questoes.length, u.id).toBeGreaterThanOrEqual(10);
+        p.questoes.forEach((q, i) => {
+          expect(q.n).toBe(i + 1);
+          expect(q.opcoes).toHaveLength(OPCOES_PROVA);
+          expect(new Set(q.opcoes).size).toBe(OPCOES_PROVA);
+          expect(q.opcoes.filter((o) => o === q.certa)).toHaveLength(1);
+        });
+      }
+  });
+
+  it('só cai o que o curso já ensinou até a unidade, até nas alternativas erradas', () => {
+    for (const u of UNIDADES)
+      for (const s of SEMENTES) {
+        const ate = itensAte(u.numero);
+        const ids = new Set(ate.map((i) => i.id));
+        const respostas = new Set(ate.flatMap((i) => [i.jp, i.certa]));
+        for (const q of montarProva(u, s).questoes) {
+          expect(ids.has(q.item.id), `${u.id} ${q.item.id}`).toBe(true);
+          for (const o of q.opcoes) expect(respostas.has(o), `${u.id} ${q.n}: ${o}`).toBe(true);
+        }
+      }
+  });
+
+  it('nenhuma alternativa errada é também uma resposta certa', () => {
+    const sentido = (t: string | undefined) => t?.split(/[,;(]/)[0]?.trim().toLowerCase();
+    for (const u of UNIDADES) {
+      const ate = itensAte(u.numero);
+      for (const s of SEMENTES)
+        for (const q of montarProva(u, s).questoes) {
+          const erradas = q.opcoes.filter((o) => o !== q.certa);
+          for (const o of erradas) expect(q.item.evitar.includes(o), `${u.id} ${q.n}: ${o}`).toBe(false);
+          if (q.tipo === 'palavra') {
+            // "Qual é 'água'?": nenhuma outra opção pode querer dizer água também.
+            const sentidos = erradas.map((o) => sentido(ate.find((i) => i.tipo === 'palavra' && i.jp === o)?.certa));
+            expect(sentidos).not.toContain(sentido(q.item.certa));
+          }
+        }
+    }
+  });
+
+  it('unidade de conteúdo: a maior parte é dela, e há revisão das anteriores', () => {
+    const u = UNIDADES.find((x) => x.numero === 5 && !x.revisao)!;
+    const anteriores = new Set(itensAte(u.numero - 1).map((i) => i.id));
+    const p = montarProva(u, 'K7QH');
+    const daUnidade = p.questoes.filter((q) => !anteriores.has(q.item.id)).length;
+    expect(daUnidade).toBeGreaterThanOrEqual(QUESTOES_DA_UNIDADE * 0.75);
+    expect(p.questoes.length - daUnidade).toBeLessThanOrEqual(QUESTOES_DE_REVISAO);
+  });
+
+  it('a unidade de revisão é um simulado do que veio antes', () => {
+    for (const u of UNIDADES.filter((x) => x.revisao)) {
+      const anteriores = new Set(itensAte(u.numero - 1).map((i) => i.id));
+      const p = montarProva(u, 'K7QH');
+      expect(p.questoes.length).toBeGreaterThanOrEqual(20);
+      for (const q of p.questoes) expect(anteriores.has(q.item.id)).toBe(true);
+    }
+  });
+
+  it('a questão de leitura não mostra a resposta no enunciado', () => {
+    for (const u of UNIDADES)
+      for (const q of montarProva(u, 'K7QH').questoes) if (q.tipo === 'leitura') expect(q.enunciado.includes(q.certa), q.enunciado).toBe(false);
+  });
+});
+
+describe('correção', () => {
+  const p = montarProva(UNIDADES[2]!, 'K7QH');
+  const total = p.questoes.length;
+  const certas = p.questoes.map((q) => q.certa);
+  const errar = (n: number) => certas.map((c, i) => (i < n ? p.questoes[i]!.opcoes.find((o) => o !== c) : c));
+
+  it('80% passa, menos que isso não', () => {
+    const podeErrar = total - Math.ceil(total * NOTA_MINIMA);
+    expect(corrigir(p, errar(podeErrar)).aprovada).toBe(true);
+    expect(corrigir(p, errar(podeErrar + 1)).aprovada).toBe(false);
+  });
+
+  it('em branco conta como errada, e a lista de erros vem na ordem', () => {
+    const r = corrigir(p, [undefined, ...certas.slice(1)]);
+    expect(r.acertos).toBe(total - 1);
+    expect(r.erradas.map((q) => q.n)).toEqual([1]);
+    expect(corrigir(p, []).acertos).toBe(0);
+  });
+});
+
+describe('nivelamento', () => {
+  it('não entra a unidade de revisão', () => {
+    expect(UNIDADES_DO_NIVELAMENTO.some((u) => u.revisao)).toBe(false);
+    expect(UNIDADES_DO_NIVELAMENTO[0]?.id).toBe(UNIDADES[0]?.id);
+  });
+
+  it('as questões de cada unidade são dela, com quatro alternativas do curso até ali', () => {
+    for (const u of UNIDADES_DO_NIVELAMENTO) {
+      const anteriores = new Set(itensAte(u.numero - 1).map((i) => i.id));
+      const qs = questoesDeNivelamento(u, seededRng(3));
+      expect(qs.length, u.id).toBe(NIVEL_POR_UNIDADE);
+      for (const q of qs) {
+        expect(anteriores.has(q.item.id)).toBe(false);
+        expect(new Set(q.opcoes).size).toBe(OPCOES_PROVA);
+        expect(q.opcoes).toContain(q.certa);
+      }
+    }
+  });
+
+  it('toda unidade de conteúdo tem prova depois do mini-teste', () => {
+    for (const u of UNIDADES_DO_NIVELAMENTO) expect(blocosDa(u).some((b) => b.tipo === 'miniteste')).toBe(true);
+  });
+});

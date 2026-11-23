@@ -1,0 +1,89 @@
+/* Material impresso do curso: papel branco, tinta preta, A4. */
+body.impresso {
+  background: #fff;
+  color: #111;
+}
+body.impresso #app { background: #fff; }
+
+.im {
+  max-width: 190mm;
+  margin: 0 auto;
+  padding: 16px;
+  color: #111;
+  background: #fff;
+  font: 400 11pt/1.5 var(--f-jp);
+}
+.im h1 { font-size: 15pt; margin: 0 0 4px; }
+.im h2 { font-size: 12.5pt; margin: 14px 0 6px; border-bottom: 1.5px solid #111; padding-bottom: 2px; }
+.im h3 { font-size: 11pt; margin: 8px 0 2px; }
+.im p { margin: 4px 0; }
+.im a { color: #114; }
+.im rt { font-size: 0.5em; color: #333; }
+
+.im-barra {
+  position: sticky; top: 0; z-index: 2;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  margin: -16px -16px 12px; padding: 10px 16px;
+  background: #f2f2f2; border-bottom: 1px solid #ccc;
+}
+
+.im-cabeca { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; border-bottom: 2px solid #111; padding-bottom: 8px; }
+.im-linhas { margin-top: 10px !important; }
+.im-codigo { display: grid; justify-items: center; gap: 2px; text-align: center; max-width: 34mm; }
+.im-codigo b { font: 700 12pt/1 monospace; letter-spacing: 0.08em; }
+.im-codigo small { font-size: 7pt; color: #444; }
+.im-qr { display: block; width: 26mm; height: 26mm; }
+.im-qr svg { width: 100%; height: 100%; }
+.im-instrucao { font-size: 9.5pt; color: #333; }
+
+.im-questoes { columns: 2; column-gap: 8mm; padding-left: 6mm; margin: 8px 0 0; }
+.im-questao { break-inside: avoid; margin-bottom: 8px; }
+.im-questao p { margin: 0 0 2px; }
+.im-opcoes { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 1px 8px; }
+.im-bola { display: inline-grid; place-items: center; width: 1.3em; height: 1.3em; border: 1px solid #111; border-radius: 50%; font-size: 8pt; }
+
+.im-gabarito { padding-left: 7mm; }
+.im-gabarito li { margin-bottom: 4px; }
+.im-explica { color: #333; }
+
+.im-tabela { width: 100%; border-collapse: collapse; }
+.im-tabela td { border-bottom: 1px solid #ccc; padding: 4px 6px; vertical-align: top; }
+.im-jp { white-space: nowrap; font-size: 12.5pt; width: 30%; }
+.im-kanji { font: 600 22pt/1.1 var(--f-kanji); width: 12mm; text-align: center; }
+.im-nota { display: block; color: #444; font-size: 9pt; }
+.im-lista { padding-left: 6mm; }
+.im-cultura { break-inside: avoid; }
+.im-rodape { margin-top: 14px; font-size: 8.5pt; color: #555; }
+
+.im-folha { break-after: page; }
+.im-cartoes { display: grid; grid-template-columns: 1fr 1fr; grid-auto-rows: 64mm; border-top: 1px dashed #999; border-left: 1px dashed #999; }
+.im-cartao { display: grid; place-content: center; justify-items: center; gap: 6px; padding: 6mm; text-align: center; border-right: 1px dashed #999; border-bottom: 1px dashed #999; }
+.im-cartao-frente { font: 600 26pt/1.2 var(--f-kanji); }
+.im-cartao-leitura { font-size: 14pt; }
+/* Verso: as colunas trocam de lado, para cair atrás da frente certa ao imprimir frente e verso. */
+.im-verso { direction: rtl; }
+.im-verso .im-cartao { direction: ltr; }
+
+.im-escrita { break-inside: avoid; margin-bottom: 10px; }
+.im-ordem { display: flex; flex-wrap: wrap; gap: 3px; margin: 4px 0; }
+.im-passo { width: 12mm; height: 12mm; border: 1px solid #ddd; }
+.im-passo path { fill: none; stroke: #bbb; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+.im-passo path.agora { stroke: #111; }
+.im-caixas { display: grid; grid-template-columns: repeat(10, 1fr); border-left: 1px solid #555; border-top: 1px solid #555; }
+.im-caixa {
+  position: relative; aspect-ratio: 1; display: grid; place-items: center;
+  border-right: 1px solid #555; border-bottom: 1px solid #555;
+  font: 600 13mm/1 var(--f-kanji); color: transparent;
+  /* Cruz pontilhada no meio, como no caderno de 漢字練習. */
+  background:
+    linear-gradient(to right, transparent calc(50% - 0.5px), #ccc calc(50% - 0.5px), #ccc calc(50% + 0.5px), transparent calc(50% + 0.5px)),
+    linear-gradient(to bottom, transparent calc(50% - 0.5px), #ccc calc(50% - 0.5px), #ccc calc(50% + 0.5px), transparent calc(50% + 0.5px));
+}
+.im-caixa.modelo { color: #111; }
+.im-caixa.guia { color: #ddd; }
+
+@page { size: A4; margin: 12mm; }
+@media print {
+  .no-print, .help-btn, .aprofundar { display: none !important; }
+  .im { padding: 0; max-width: none; }
+}

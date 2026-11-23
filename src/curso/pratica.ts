@@ -40,6 +40,8 @@ export class Pratica {
     /** Itens já vistos do curso, de onde saem mais alternativas erradas. */
     private readonly conhecidos: readonly ItemPratica[],
     private readonly deps: PraticaDeps,
+    /** Mini-teste: sempre com este número de opções, sem subir de 2 para 3. */
+    private readonly opcoesFixas?: number,
   ) {
     this.fila = [...itens];
     this.proxima();
@@ -61,7 +63,7 @@ export class Pratica {
       this.pergunta = null;
       return;
     }
-    const n = Math.min(OPCOES_MAX, opcoesPara(this.deps.cards, item.carta, OPCOES_MAX));
+    const n = this.opcoesFixas ?? Math.min(OPCOES_MAX, opcoesPara(this.deps.cards, item.carta, OPCOES_MAX));
     this.pergunta = montarPergunta(item, this.itens, this.conhecidos, this.deps.cards, n, this.deps.rng);
   }
 
