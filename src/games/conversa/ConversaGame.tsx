@@ -4,6 +4,7 @@ import { gramaticaDaFrase } from '../../content/aprofundar/detectar';
 import { app, commit, conversaSave, go, screen } from '../../core/app';
 import { CENA_CONVERSA, cenaStyle, pessoaUrl } from '../../core/arte';
 import { sfx, speakSeGravado, speakWord } from '../../core/audio';
+import { legendar } from '../../core/legenda';
 import { acompanharVoz, esperarEfeitos } from '../../core/som/mixer';
 import { VOZ_CONVERSA } from '../../core/vozes';
 import { onomato } from '../../core/fx';
@@ -240,6 +241,7 @@ export function ConversaGame() {
         a.onended = a.onerror = () => URL.revokeObjectURL(url);
         audioEl.current = a;
         acompanharVoz(a);
+        legendar(a, linha.jp);
         await esperarEfeitos();
         if (!montado.current || audioEl.current !== a) return;
         await a.play();

@@ -21,7 +21,8 @@
 import { GRAMATICA_N5, palavrasDa, UNIDADES, type KanjiDaUnidade, type Nota, type Palavra, type Unidade } from '../content/curso';
 import { cardKey } from '../content';
 import { AULAS_DO_CURSO } from '../content/curso/aulas';
-import { exemplosDaUnidade, type Exemplo } from './exemplos';
+import { exemplosDaUnidade, leituraDa, type Exemplo, type Leitura } from './exemplos';
+import { ditadoDa, lacunasDa } from './exercicios';
 import { foiApresentado } from '../core/ensino';
 import { shuffle, type Rng } from '../core/rng';
 import type { CardState } from '../core/srs';
@@ -35,6 +36,9 @@ export type Bloco =
   | { tipo: 'aula'; id: string }
   | { tipo: 'gramatica'; id: string; pontos: readonly string[] }
   | { tipo: 'frases'; id: string; exemplos: readonly Exemplo[] }
+  | { tipo: 'completar'; id: string }
+  | { tipo: 'ditado'; id: string; exemplos: readonly Exemplo[] }
+  | { tipo: 'leitura'; id: string; leitura: Leitura }
   | { tipo: 'notas'; id: string; notas: readonly Nota[] }
   | { tipo: 'dialogo'; id: string; situacao: string }
   | { tipo: 'miniteste'; id: string }
@@ -49,6 +53,9 @@ export const NOME_BLOCO: Readonly<Record<TipoBloco, string>> = {
   aula: 'Aula',
   gramatica: 'Gramática',
   frases: 'Montar frases',
+  completar: 'Completar',
+  ditado: 'Ditado',
+  leitura: 'Leitura',
   notas: 'Cultura',
   dialogo: 'Diálogo',
   miniteste: 'Mini-teste',
@@ -101,6 +108,12 @@ export function blocosDa(u: Unidade): Bloco[] {
   // O primeiro exemplo de cada ponto está no cartão; o exercício usa os outros.
   const paraMontar = u.gramatica.flatMap((g) => exemplosDaUnidade({ ...u, gramatica: [g] }).slice(1));
   if (paraMontar.length > 0) out.push({ tipo: 'frases', id: `${u.id}:frases`, exemplos: paraMontar });
+  // Completar e ditado usam todos os exemplos (os do cartão também): ali a frase já foi vista.
+  if (lacunasDa(u, () => 0.5).length > 0) out.push({ tipo: 'completar', id: `${u.id}:completar` });
+  const ditado = ditadoDa(u);
+  if (ditado.length > 0) out.push({ tipo: 'ditado', id: `${u.id}:ditado`, exemplos: ditado });
+  const leitura = leituraDa(u);
+  if (leitura) out.push({ tipo: 'leitura', id: `${u.id}:leitura`, leitura });
   const notas = u.notas.filter((n) => n.conferida);
   if (notas.length > 0) out.push({ tipo: 'notas', id: `${u.id}:notas`, notas });
   for (const s of u.situacoes ?? []) out.push({ tipo: 'dialogo', id: `${u.id}:dialogo:${s}`, situacao: s });
@@ -183,6 +196,8 @@ export interface ProvaSave {
   tentativas: number;
   /** Passou pelo nivelamento, sem fazer as partes. */
   nivelamento?: true;
+  /** Quando passou pela primeira vez (ms). Vai no certificado do nível. */
+  quando?: number;
 }
 
 export interface CursoSave {
@@ -192,6 +207,10 @@ export interface CursoSave {
   concluidas: Record<string, number>;
   /** Unidade → a prova. É ela que libera a unidade seguinte. */
   provas: Record<string, ProvaSave>;
+  /** O nome que vai no certificado, como a pessoa escreveu. */
+  nome?: string;
+  /** Módulo 0: quantos lotes de kana já foram feitos, em ordem. */
+  modulo0?: number;
 }
 
 export function ensureCursoSave(games: Record<string, unknown>): CursoSave {
@@ -209,9 +228,12 @@ export function ensureCursoSave(games: Record<string, unknown>): CursoSave {
       const p = v as Partial<ProvaSave>;
       const melhor = typeof p.melhor === 'number' && Number.isFinite(p.melhor) ? Math.min(1, Math.max(0, p.melhor)) : 0;
       const tentativas = typeof p.tentativas === 'number' && Number.isFinite(p.tentativas) ? Math.max(0, Math.floor(p.tentativas)) : 0;
-      provas[k] = { melhor, aprovada: p.aprovada === true, tentativas, ...(p.nivelamento ? { nivelamento: true as const } : {}) };
+      const quando = typeof p.quando === 'number' && Number.isFinite(p.quando) && p.quando > 0 ? p.quando : undefined;
+      provas[k] = { melhor, aprovada: p.aprovada === true, tentativas, ...(p.nivelamento ? { nivelamento: true as const } : {}), ...(quando ? { quando } : {}) };
     }
-  const save: CursoSave = { feitos: limpar(raw?.feitos), concluidas: limpar(raw?.concluidas), provas };
+  const nome = typeof raw?.nome === 'string' ? raw.nome.trim().slice(0, 60) : '';
+  const m0 = typeof raw?.modulo0 === 'number' && Number.isFinite(raw.modulo0) ? Math.max(0, Math.floor(raw.modulo0)) : 0;
+  const save: CursoSave = { feitos: limpar(raw?.feitos), concluidas: limpar(raw?.concluidas), provas, ...(nome ? { nome } : {}), ...(m0 ? { modulo0: m0 } : {}) };
   games.curso = save;
   return save;
 }
@@ -227,13 +249,15 @@ export function concluiuBlocos(save: CursoSave, unidade: string): boolean {
 }
 
 /** Guarda o resultado de uma prova. A aprovação não se perde com uma tentativa pior depois. */
-export function registrarProva(save: CursoSave, unidade: string, nota: number, aprovada: boolean): void {
+export function registrarProva(save: CursoSave, unidade: string, nota: number, aprovada: boolean, agora = Date.now()): void {
   const antes = save.provas[unidade];
+  const quando = antes?.quando ?? (aprovada ? agora : undefined);
   save.provas[unidade] = {
     melhor: Math.max(antes?.melhor ?? 0, nota),
     aprovada: aprovada || antes?.aprovada === true,
     tentativas: (antes?.tentativas ?? 0) + 1,
     ...(antes?.nivelamento ? { nivelamento: true as const } : {}),
+    ...(quando ? { quando } : {}),
   };
 }
 

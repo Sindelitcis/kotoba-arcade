@@ -10,6 +10,7 @@
 import { app } from './app';
 import { assumirFala, largarFala, loadVoices, recordedFile, VOZES_URL, type Manifesto } from './audio';
 import { carregarPt, urlPt, type ManifestoPt } from './fala-pt';
+import { legendar, type Legenda } from './legenda';
 import { avisarSemGravacao } from './sem-gravacao';
 import { acompanharVoz, esperarEfeitos } from './som/mixer';
 import { VOZ_PADRAO, VOZ_PALAVRA } from './vozes';
@@ -36,20 +37,21 @@ export function msDaPausa(vezes: number, ultimoJpSeg: number): number {
 /** O que a sequência precisa do navegador: tocar um endereço e esperar. */
 export interface Saida {
   /** Toca o arquivo; resolve com a duração em segundos (0 se não tocou). */
-  tocar(url: string, sinal: AbortSignal): Promise<number>;
+  tocar(url: string, sinal: AbortSignal, legenda?: Legenda): Promise<number>;
   esperar(ms: number, sinal: AbortSignal): Promise<void>;
 }
 
 const abortado = (sinal: AbortSignal) => new Promise<void>((resolve) => sinal.addEventListener('abort', () => resolve(), { once: true }));
 
 export const saidaDoNavegador: Saida = {
-  async tocar(url, sinal) {
+  async tocar(url, sinal, legenda) {
     if (typeof Audio === 'undefined') return 0;
     // Efeito curto que acabou de tocar termina antes; voz nunca fica por baixo de efeito.
     await esperarEfeitos();
     if (sinal.aborted) return 0;
     const a = new Audio(url);
     acompanharVoz(a);
+    if (legenda) legendar(a, legenda.texto, legenda.kana);
     const fim = new Promise<number>((resolve) => {
       a.addEventListener('ended', () => resolve(Number.isFinite(a.duration) ? a.duration : 0), { once: true });
       a.addEventListener('error', () => resolve(0), { once: true });
@@ -118,7 +120,7 @@ export function tocarSequencia(trechos: readonly Trecho[], opcoes: Opcoes = {}):
       } else {
         const voz = t.fala.voz === 'palavra' ? VOZ_PALAVRA : VOZ_PADRAO;
         const arquivo = fontes.jp ? (recordedFile(fontes.jp, t.fala.texto, voz) ?? recordedFile(fontes.jp, t.fala.kana, voz)) : undefined;
-        const dur = arquivo ? await saida.tocar(VOZES_URL + arquivo, ctrl.signal) : 0;
+        const dur = arquivo ? await saida.tocar(VOZES_URL + arquivo, ctrl.signal, { texto: t.fala.texto, kana: t.fala.kana }) : 0;
         if (dur) ultimoJp = dur;
         if (!arquivo && fontes.jp) avisarSemGravacao('ja', t.fala.texto);
       }

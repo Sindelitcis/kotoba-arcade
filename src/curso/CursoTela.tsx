@@ -12,7 +12,7 @@
  *   Esc             parar aqui (no mapa: voltar ao fliperama)
  */
 import { useLayoutEffect, useMemo, useRef, useState } from 'preact/hooks';
-import { palavrasDa, UNIDADES, type Unidade } from '../content/curso';
+import { palavrasDa, UNIDADES, type Palavra, type Unidade } from '../content/curso';
 import { SITUACOES } from '../content/escola';
 import { app, commit, cursoAberto, cursoSave, go } from '../core/app';
 import { cenaStyle } from '../core/arte';
@@ -29,12 +29,16 @@ import { falaFrase } from '../jornada/licoes';
 import { Marcado } from '../jornada/Marcado';
 import { MOEDAS_LICAO, XP_ACERTO, XP_LICAO } from '../jornada/andamento';
 import { cartaoDaPalavra, cartaoDoKanji, cartaoDoPonto, falaDaPalavra } from './cartoes';
+import { figuraDoCurso } from './figura';
+import { figuraUrl, temFigura } from '../core/figuras';
 import { blocosDa, cartaDaPalavra, cartasDoKanji, concluiuBlocos, itensAte, itensDaRevisao, itensDoBloco, itensDoMiniteste, liberada, NOME_BLOCO, ondeContinuar, proximaLicao, registrarBloco, unidadePorId, venceu, type Bloco, type ItemPratica } from './motor';
 import { abrirImpresso } from './Impresso';
 import { lerCodigo, OPCOES_PROVA } from './prova';
 import { NivelamentoTela, ProvaTela } from './ProvaTela';
 import { useTeclado } from './teclado';
-import { AulaView, MontarView } from './BlocosAula';
+import { LICOES_KANA, LOTES_DO_MODULO } from './modulo0';
+import { ModuloZeroTela } from './ModuloZero';
+import { AulaView, CompletarView, DitadoView, LeituraView, MontarView } from './BlocosAula';
 import { Pratica } from './pratica';
 import './curso.css';
 
@@ -68,6 +72,22 @@ export function CursoTela() {
     cursoAberto.value = null;
     commit();
   };
+  const licaoKana = aberto?.modo === 'modulo0' ? LICOES_KANA.find((l) => l.id === aberto.unidade) : undefined;
+  if (licaoKana)
+    return (
+      <main class="lc cs">
+        <header class="lc-topo">
+          <button class="ghost" onClick={sair}>
+            ← Parar aqui <kbd>Esc</kbd>
+          </button>
+          <div>
+            <h1>Módulo 0 · {licaoKana.titulo}</h1>
+            <small class="muted">Kana e sons</small>
+          </div>
+        </header>
+        <ModuloZeroTela key={licaoKana.id} licao={licaoKana} onSair={sair} />
+      </main>
+    );
   if (aberto?.modo === 'nivelamento')
     return (
       <main class="lc cs">
@@ -97,6 +117,35 @@ export function CursoTela() {
 }
 
 /* ───────── Mapa ───────── */
+
+/** As lições do Módulo 0, antes do A1. Não trancam nada: quem já lê kana pode pular. */
+function ModuloZeroNoMapa({ feitos }: { feitos: number }) {
+  return (
+    <section class="cs-modulo0" data-testid="cs-modulo0">
+      <h2>Módulo 0 · kana e sons</h2>
+      <p class="muted">Para quem ainda não lê hiragana e katakana. Já lê? Pode ir direto para a unidade 1.</p>
+      <ol class="cs-licoes-kana">
+        {LICOES_KANA.map((l) => {
+          const posicoes = l.lotes.map((x) => LOTES_DO_MODULO.indexOf(x));
+          const feitosAqui = posicoes.filter((p) => p < feitos).length;
+          const feita = feitosAqui === posicoes.length;
+          return (
+            <li key={l.id}>
+              <button class={feita ? 'ghost feita' : 'ghost'} onClick={() => (cursoAberto.value = { unidade: l.id, bloco: 0, modo: 'modulo0' })} data-testid="cs-licao-kana" data-id={l.id}>
+                {feita ? '✓ ' : ''}
+                {l.titulo}
+                <small class="muted">
+                  {' '}
+                  · {feitosAqui} de {posicoes.length}
+                </small>
+              </button>
+            </li>
+          );
+        })}
+      </ol>
+    </section>
+  );
+}
 
 function Mapa() {
   const save = cursoSave();
@@ -159,6 +208,8 @@ function Mapa() {
         </p>
       )}
 
+      <ModuloZeroNoMapa feitos={save.modulo0 ?? 0} />
+
       <ol class="cs-unidades">
         {UNIDADES.map((x) => {
           const livre = liberada(save, x.id);
@@ -211,6 +262,11 @@ function Mapa() {
                   <button class="ghost" onClick={() => abrirImpresso({ tipo: 'cartoes', unidade: x.id })}>
                     Cartões
                   </button>
+                  {x.revisao && feita && (
+                    <button class="ghost" onClick={() => abrirImpresso({ tipo: 'certificado', unidade: x.id })} data-testid="cs-certificado">
+                      Certificado
+                    </button>
+                  )}
                 </div>
               )}
             </li>
@@ -326,6 +382,12 @@ function BlocoView({ unidade, bloco, onFim }: { unidade: Unidade; bloco: Bloco; 
       return <AulaView unidade={unidade} onFim={onFim} />;
     case 'frases':
       return <MontarView exemplos={bloco.exemplos} onFim={onFim} />;
+    case 'completar':
+      return <CompletarView unidade={unidade} onFim={onFim} />;
+    case 'ditado':
+      return <DitadoView exemplos={bloco.exemplos} onFim={onFim} />;
+    case 'leitura':
+      return <LeituraView leitura={bloco.leitura} onFim={() => onFim()} />;
   }
 }
 
@@ -440,7 +502,7 @@ function Objetivo({ unidade, onFim }: { unidade: Unidade; onFim: () => void }) {
 
 function Estudo({ unidade, bloco, onFim }: { unidade: Unidade; bloco: Extract<Bloco, { tipo: 'palavras' | 'kanji' }>; onFim: (acertos?: number) => void }) {
   const [fase, setFase] = useState<'apresentar' | 'praticar'>('apresentar');
-  const cartoes = useMemo(() => (bloco.tipo === 'palavras' ? bloco.palavras.map(cartaoDaPalavra) : bloco.kanji.map((k) => cartaoDoKanji(k, unidade.id))), [bloco, unidade]);
+  const cartoes = useMemo(() => (bloco.tipo === 'palavras' ? bloco.palavras.map(cartaoComFigura) : bloco.kanji.map((k) => cartaoDoKanji(k, unidade.id))), [bloco, unidade]);
   const cartas = useMemo(() => (bloco.tipo === 'palavras' ? bloco.palavras.map(cartaDaPalavra) : bloco.kanji.flatMap(cartasDoKanji)), [bloco]);
 
   if (fase === 'apresentar')
@@ -457,11 +519,18 @@ function Estudo({ unidade, bloco, onFim }: { unidade: Unidade; bloco: Extract<Bl
   return <PraticaView itens={itensDoBloco(bloco)} conhecidos={itensAte(unidade.numero)} cartaoDe={(i) => cartaoDoItem(i, bloco, unidade)} onFim={onFim} />;
 }
 
+/** O cartão da palavra, com a figura dela quando o site tem uma. */
+function cartaoComFigura(p: Palavra) {
+  const f = figuraDoCurso(p, temFigura);
+  const img = f ? figuraUrl(f.img) : undefined;
+  return { ...cartaoDaPalavra(p), ...(img ? { img } : {}) };
+}
+
 /** O cartão que volta quando a pessoa erra. */
 function cartaoDoItem(i: ItemPratica, bloco: Bloco | null, unidade: Unidade) {
   if (i.tipo === 'palavra') {
     const p = (bloco?.tipo === 'palavras' ? bloco.palavras : UNIDADES.flatMap(palavrasDa)).find((x) => `w:${x.jp}` === i.id);
-    if (p) return cartaoDaPalavra(p);
+    if (p) return cartaoComFigura(p);
   }
   for (const u of bloco ? [unidade] : UNIDADES) for (const k of u.kanji) if (`k:${k.k}:${k.leitura}` === i.id) return cartaoDoKanji(k, u.id);
   return null;

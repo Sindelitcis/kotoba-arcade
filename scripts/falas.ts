@@ -34,7 +34,7 @@ import { daCoisa, ETAPAS, falaDaTarefa, falaDoNome, nomeDe, PERGUNTA_NOME, taref
 import { LUGARES } from '../src/games/cena/lugares';
 import { falasDaFicha, fichaDe, todosOsAlvos } from '../src/content/aprofundar/fichas';
 import { falasDoCurso } from '../src/curso/cartoes';
-import { exemplosDaUnidade, partesDaFala } from '../src/curso/exemplos';
+import { exemplosDaUnidade, leituraDa, partesDaFala, type Exemplo } from '../src/curso/exemplos';
 import { AULAS_DO_CURSO } from '../src/content/curso/aulas';
 import { UNIDADES } from '../src/content/curso';
 
@@ -360,14 +360,18 @@ function cenaEtapas(): Fala[] {
 
 /** Aprofundar: o japonês de cada ficha (quase tudo já é dos jogos; o resto é novo). */
 /** Exemplos de gramática do curso: cada peça já vem com a leitura certa. */
+function falaDoExemploDoCurso(e: Exemplo, origem: string): Fala {
+  const partes: Parte[] = e.pecas.map((p) => (hasKanji(p.t) ? { t: p.t, r: p.kana } : { t: p.t }));
+  partes.push({ t: e.jp.slice(-1) });
+  return { texto: e.jp, voz: VOZ_PADRAO, tts: e.jp, partes, origem };
+}
+
+/** Os exemplos de gramática e as frases da leitura graduada de cada unidade. */
 function exemplosDoCurso(): Fala[] {
-  return UNIDADES.flatMap((u) =>
-    exemplosDaUnidade(u).map((e): Fala => {
-      const partes: Parte[] = e.pecas.map((p) => (hasKanji(p.t) ? { t: p.t, r: p.kana } : { t: p.t }));
-      partes.push({ t: e.jp.slice(-1) });
-      return { texto: e.jp, voz: VOZ_PADRAO, tts: e.jp, partes, origem: `curso/${u.id}/exemplo/${e.ponto}` };
-    }),
-  );
+  return UNIDADES.flatMap((u) => [
+    ...exemplosDaUnidade(u).map((e) => falaDoExemploDoCurso(e, `curso/${u.id}/exemplo/${e.ponto}`)),
+    ...(leituraDa(u)?.frases ?? []).map((e) => falaDoExemploDoCurso(e, `curso/${u.id}/leitura`)),
+  ]);
 }
 
 function aprofundar(): Fala[] {

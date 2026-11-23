@@ -1487,3 +1487,8 @@ a.button { display: inline-flex; align-items: center; gap: 8px; text-decoration:
 a.button.primary { background: var(--brand); border-color: var(--brand); color: var(--on-brand); font-weight: 800; }
 a.button.ghost { background: transparent; border-color: transparent; color: var(--brand-text); padding: 4px 8px; }
 a.button[aria-disabled='true'] { pointer-events: none; opacity: 0.7; }
+
+/* Legenda da voz em japonês (src/core/LegendaVoz.tsx): embaixo, sem tapar nem pegar clique. */
+.legenda-voz { position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%); z-index: 40; pointer-events: none; max-width: min(92vw, 720px); display: grid; justify-items: center; gap: 2px; padding: 8px 16px; border-radius: 12px; background: color-mix(in srgb, var(--bg) 88%, transparent); box-shadow: 0 2px 12px rgb(0 0 0 / 0.18); text-align: center; animation: fade var(--d-1) ease; }
+.legenda-jp { font-size: 1.35rem; line-height: 1.9; }
+.legenda-romaji { font-size: 0.95rem; opacity: 0.8; letter-spacing: 0.02em; }

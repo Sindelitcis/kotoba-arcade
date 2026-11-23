@@ -8,7 +8,7 @@
  * Nivelamento: poucas questões por unidade, com "Não sei". Passou na unidade (3 de 4), ela conta
  * como feita e a seguinte é testada; não passou, o curso começa nela.
  */
-import { useMemo, useState } from 'preact/hooks';
+import { useLayoutEffect, useMemo, useState } from 'preact/hooks';
 import { UNIDADES, type Unidade } from '../content/curso';
 import { app, commit, cursoAberto, cursoSave } from '../core/app';
 import { Apresentacao } from '../core/Apresentacao';
@@ -19,7 +19,11 @@ import { seededRng } from '../core/rng';
 import { cartaoDaPalavra, cartaoDoKanji } from './cartoes';
 import { abrirImpresso } from './Impresso';
 import { cartaDaPalavra, cartasDoKanji, ondeContinuar, palavraDoCurso, registrarProva, type ItemPratica } from './motor';
-import { corrigir, montarProva, NIVEL_PARA_PASSAR, NOTA_MINIMA, novaSemente, questoesDeNivelamento, UNIDADES_DO_NIVELAMENTO, type Questao, type Resultado } from './prova';
+import { corrigir, deItem, montarProva, NIVEL_PARA_PASSAR, NOME_SECAO, NOTA_MINIMA, notaJlpt, novaSemente, passariaNoN5, questoesDeNivelamento, SIMULADO, UNIDADES_DO_NIVELAMENTO, type Questao, type Resultado, type Secao } from './prova';
+import { FraseDaQuestao, OpcaoDeFrase } from './QuestaoFrase';
+import { tocarSequencia } from '../core/sequencia';
+import { falaDoExemplo } from './exemplos';
+import { Icone } from '../core/Icone';
 import { useTeclado } from './teclado';
 import { palavrasDa } from '../content/curso';
 
@@ -37,6 +41,7 @@ function cartaoDe(item: ItemPratica) {
 
 /** O que aparece em destaque na questão. Na de leitura, sem furigana: a leitura é a pergunta. */
 function Destaque({ q }: { q: Questao }) {
+  if (!deItem(q)) return <FraseDaQuestao q={q} />;
   if (q.tipo === 'palavra') return null;
   return (
     <div class="lc-grande cs-pergunta-jp" lang="ja">
@@ -46,6 +51,7 @@ function Destaque({ q }: { q: Questao }) {
 }
 
 function TextoOpcao({ q, o }: { q: Questao; o: string }) {
+  if (!deItem(q)) return <OpcaoDeFrase q={q} o={o} />;
   if (q.tipo === 'palavra') {
     const p = palavraDoCurso(o);
     return <span lang="ja">{p ? <Furigana texto={o} leitura={p.kana} /> : o}</span>;
@@ -83,7 +89,7 @@ export function ProvaTela({ unidade, onSair }: { unidade: Unidade; onSair: () =>
     const cards = app.data.cards;
     // Cada resposta conta na memória, como uma revisão (só do que já foi apresentado).
     prova.questoes.forEach((x, n) => {
-      if (foiApresentado(cards, x.item.carta)) avaliar(cards, x.item.carta, { correct: respostas[n] === x.certa }, Date.now());
+      if (deItem(x) && foiApresentado(cards, x.item.carta)) avaliar(cards, x.item.carta, { correct: respostas[n] === x.certa }, Date.now());
     });
     registrarProva(cursoSave(), unidade.id, res.nota, res.aprovada);
     commit();
@@ -101,6 +107,17 @@ export function ProvaTela({ unidade, onSair }: { unidade: Unidade; onSair: () =>
     setSemente(novaSemente());
     setFase('inicio');
   };
+
+  // A escuta toca sozinha ao abrir a questão (e de novo com R); o texto nunca aparece.
+  const ouvirEscuta = () => {
+    if (q && !deItem(q) && q.tipo === 'escuta') void tocarSequencia([falaDoExemplo(q.frase)]);
+  };
+  useLayoutEffect(() => {
+    if (fase === 'questoes') ouvirEscuta();
+  }, [fase, i]);
+
+  const cartoesDoErro = () => (resultado?.erradas ?? []).flatMap((x) => (deItem(x) ? [cartaoDe(x.item)] : [])).filter((c) => c !== null);
+  const rever = () => (cartoesDoErro().length > 0 ? setFase('rever') : refazer());
 
   const irParaSeguinte = () => {
     if (seguinte) cursoAberto.value = { unidade: seguinte.id, bloco: ondeContinuar(cursoSave(), seguinte) };
@@ -130,17 +147,21 @@ export function ProvaTela({ unidade, onSair }: { unidade: Unidade; onSair: () =>
         setI(i - 1);
         return true;
       }
+      if (tecla.toLowerCase() === 'r') {
+        ouvirEscuta();
+        return true;
+      }
     }
     if (fase === 'resultado' && resultado && (tecla === 'Enter' || tecla === ' ')) {
       if (resultado.aprovada) irParaSeguinte();
-      else setFase('rever');
+      else rever();
       return true;
     }
     return false;
   });
 
   if (fase === 'rever' && resultado) {
-    const cartoes = resultado.erradas.map((x) => cartaoDe(x.item)).filter((c) => c !== null);
+    const cartoes = cartoesDoErro();
     if (cartoes.length > 0) return <Apresentacao itens={cartoes} modo="de-novo" onFim={refazer} fim="Fazer outra prova" />;
   }
 
@@ -151,6 +172,7 @@ export function ProvaTela({ unidade, onSair }: { unidade: Unidade; onSair: () =>
           <span class="gr-tag">Prova da unidade {unidade.numero}</span>
           <h2 class="cs-titulo">{unidade.revisao ? 'Simulado do A1' : unidade.titulo}</h2>
           <p class="lc-linha">
+            {unidade.revisao && `No formato do JLPT N5, em quatro partes: ${(Object.keys(SIMULADO) as Secao[]).map((s) => NOME_SECAO[s].split(' · ')[0]!.toLowerCase()).join(', ')}. Sem tempo marcado. `}
             {prova.questoes.length} questões com quatro alternativas. Passa com {pct(NOTA_MINIMA)} ({Math.ceil(prova.questoes.length * NOTA_MINIMA)} acertos), e então {seguinte ? `a unidade ${seguinte.numero} abre` : 'o A1 fica completo'}.
           </p>
           <p class="lc-linha">O resultado só aparece no fim. Dá para voltar e trocar uma resposta antes de entregar.</p>
@@ -187,6 +209,8 @@ export function ProvaTela({ unidade, onSair }: { unidade: Unidade; onSair: () =>
                 : 'Passou. O A1 está completo.'
               : `Faltou pouco: precisa de ${pct(NOTA_MINIMA)}. Reveja o que errou e faça outra prova, com outras questões.`}
           </p>
+          {unidade.revisao && <NotaDoSimulado prova={prova} respostas={respostas} />}
+          {unidade.revisao && resultado.aprovada && <PedirCertificado unidade={unidade} />}
           {resultado.aprovada && (TAREFAS[unidade.id]?.length ?? 0) > 0 && (
             <>
               <p class="lc-linha">Para usar fora do curso:</p>
@@ -206,9 +230,7 @@ export function ProvaTela({ unidade, onSair }: { unidade: Unidade; onSair: () =>
                 {resultado.erradas.map((x) => (
                   <li key={x.n}>
                     {x.n}. {x.enunciado}{' '}
-                    <span lang="ja">
-                      <Furigana texto={x.item.jp} leitura={x.item.kana} />
-                    </span>{' '}
+                    <span lang="ja">{deItem(x) ? <Furigana texto={x.item.jp} leitura={x.item.kana} /> : <Furigana texto={x.frase.jp} leitura={x.frase.kana} />}</span>{' '}
                     → <TextoOpcao q={x} o={x.certa} />
                   </li>
                 ))}
@@ -225,7 +247,7 @@ export function ProvaTela({ unidade, onSair }: { unidade: Unidade; onSair: () =>
               {seguinte ? `Unidade ${seguinte.numero}` : 'Ver o curso'} <kbd>Enter</kbd>
             </button>
           ) : (
-            <button class="primary" onClick={() => setFase('rever')} data-testid="pv-rever">
+            <button class="primary" onClick={rever} data-testid="pv-rever">
               Rever o que errei <kbd>Enter</kbd>
             </button>
           )}
@@ -240,9 +262,15 @@ export function ProvaTela({ unidade, onSair }: { unidade: Unidade; onSair: () =>
       <div class="lc-conteudo">
         <span class="gr-tag">
           Questão {q.n} de {prova.questoes.length}
+          {unidade.revisao && ` · ${NOME_SECAO[q.secao]}`}
         </span>
         <p class="lc-enunciado">{q.enunciado}</p>
         <Destaque q={q} />
+        {!deItem(q) && q.tipo === 'escuta' && (
+          <button onClick={ouvirEscuta} data-testid="pv-ouvir">
+            <Icone nome="volume-2" /> Ouvir de novo <kbd>R</kbd>
+          </button>
+        )}
         <div class="lc-opcoes">
           {q.opcoes.map((o, n) => (
             <button key={o} class={`lc-opcao${escolhida === o ? ' escolhida' : ''}`} aria-pressed={escolhida === o} onClick={() => escolher(o)} data-testid="pv-opcao" data-certa={o === q.certa ? '1' : undefined}>
@@ -259,6 +287,51 @@ export function ProvaTela({ unidade, onSair }: { unidade: Unidade; onSair: () =>
           {i + 1 < prova.questoes.length ? 'Próxima' : 'Entregar'} <kbd>Enter</kbd>
         </button>
       </div>
+    </div>
+  );
+}
+
+/** A nota do simulado por parte e na escala do JLPT. */
+function NotaDoSimulado({ prova, respostas }: { prova: Parameters<typeof notaJlpt>[0]; respostas: readonly (string | undefined)[] }) {
+  const n = notaJlpt(prova, respostas);
+  return (
+    <div class="pv-jlpt" data-testid="pv-jlpt">
+      <ul class="pv-erros">
+        {(Object.keys(SIMULADO) as Secao[]).map((s) => (
+          <li key={s}>
+            {NOME_SECAO[s]}: {n.partes[s].acertos} de {n.partes[s].total}
+          </li>
+        ))}
+      </ul>
+      <p class="lc-linha">
+        Na escala do JLPT: <b>{n.total} de 180</b> (conhecimento e leitura {n.conhecimento} de 120, escuta {n.escuta} de 60).{' '}
+        {passariaNoN5(n) ? 'Acima dos mínimos do N5 (80 no total, 38 e 19 nas partes).' : 'O N5 pede 80 no total, com ao menos 38 e 19 nas partes.'}
+      </p>
+      <p class="muted">É uma conta proporcional aos acertos, para ter uma ideia. A nota oficial do JLPT é calculada de outro jeito.</p>
+    </div>
+  );
+}
+
+/** Depois do simulado aprovado: o nome para o certificado e o botão que abre a folha. */
+function PedirCertificado({ unidade }: { unidade: Unidade }) {
+  const [nome, setNome] = useState(cursoSave().nome ?? '');
+  const abrir = () => {
+    const save = cursoSave();
+    const limpo = nome.trim().slice(0, 60);
+    if (limpo) save.nome = limpo;
+    else delete save.nome;
+    commit();
+    abrirImpresso({ tipo: 'certificado', unidade: unidade.id });
+  };
+  return (
+    <div class="pv-certificado" data-testid="pv-certificado">
+      <label>
+        Seu nome no certificado{' '}
+        <input value={nome} maxLength={60} onInput={(e) => setNome((e.target as HTMLInputElement).value)} data-testid="pv-nome" />
+      </label>
+      <button onClick={abrir} data-testid="pv-abrir-certificado">
+        Abrir o certificado
+      </button>
     </div>
   );
 }

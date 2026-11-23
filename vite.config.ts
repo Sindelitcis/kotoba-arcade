@@ -9,5 +9,8 @@ export default defineConfig({
   test: {
     environment: 'happy-dom',
     include: ['tests/**/*.test.ts', 'tests/**/*.test.tsx'],
+    // Os testes que percorrem o curso inteiro levam uns 2 s sozinhos; com a bateria toda em
+    // paralelo, passavam dos 5 s padrão e falhavam por tempo, não por erro.
+    testTimeout: 20_000,
   },
 });

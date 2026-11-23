@@ -30,23 +30,25 @@ completo está em [docs/curso.md](docs/curso.md) e tem seis fases:
 5. áudio de kana;
 6. A2.
 
-Estado em 23/11/2026: as fases 1, 2 e 3 estão feitas para o A1, e a 4 está quase toda feita.
+Estado em 23/11/2026: as fases 1 a 4 estão feitas para o A1, e a 5 está feita menos a gravação
+melhor dos kana isolados.
 
 - **Currículo** em `src/content/curso/`: as 20 unidades, os kanji e as leituras, a gramática e as
-  notas (conferidas contra a fonte), checado por `tests/curso.test.ts`. Falta cruzar o vocabulário
-  com uma lista de N5.
+  notas (conferidas contra a fonte), checado por `tests/curso.test.ts`. O vocabulário cobre só um
+  terço da lista de N5; o que falta está em [docs/curso.md](docs/curso.md#conteúdo-do-a1).
 - **Motor** em `src/curso/`: a tela inicial abre com "Continuar o curso" (Enter), o tocador percorre
-  a unidade em partes curtas (palavras, kanji, aula falada, gramática com exemplo, montar frases,
-  notas, diálogo, mini-teste) e o progresso fica salvo. Os exemplos só usam o que já foi ensinado
+  a unidade em partes curtas (palavras com figura, kanji, aula falada, gramática com exemplo,
+  montar frases, completar, ditado, leitura com shadowing, notas, diálogo, mini-teste) e o progresso
+  fica salvo. O Módulo 0 (kana e sons, seis lições) fica no alto do mapa e não tranca o A1. Os exemplos só usam o que já foi ensinado
   (`tests/curso-exemplos.test.ts`). Detalhes em [docs/curso.md](docs/curso.md#o-motor-do-curso).
 - **Provas e impressos** em `src/curso/prova.ts`, `ProvaTela.tsx` e `Impresso.tsx`: cada unidade
   termina numa prova de 80% que libera a seguinte, com versão para imprimir e gabarito pelo código
-  ou pelo QR. Também há nivelamento, apostila, cartões para recortar e folha de escrita dos kanji.
-  Detalhes em [docs/curso.md](docs/curso.md#provas).
-- Falta da fase 4: o simulado do JLPT com escuta e leitura, o certificado, completar e ditado,
-  leitura graduada e figura no vocabulário ([docs/curso.md](docs/curso.md#conteúdo-do-a1)). Depois
-  vem a fase 5, áudio de kana e legendas. Os jogos e a Jornada continuam no fliperama, como
-  prática livre.
+  ou pelo QR. A unidade de revisão é o simulado do JLPT (vocabulário, gramática, leitura e escuta),
+  que dá o certificado do curso. Também há nivelamento, apostila (com ditado por QR), cartões para
+  recortar e folha de escrita dos kanji. Detalhes em [docs/curso.md](docs/curso.md#provas).
+- Falta: gravar melhor os kana isolados (comparação às cegas com o Rafael), completar o
+  vocabulário do N5 e a fase 6, o A2. Os jogos e a Jornada continuam no fliperama, como prática
+  livre.
 
 Regras de ensino que valem em tudo ([docs/ensino.md](docs/ensino.md)):
 
@@ -88,7 +90,8 @@ Regras de ensino que valem em tudo ([docs/ensino.md](docs/ensino.md)):
     (`npm run vozes-pt`).
   - Japonês: AivisSpeech (`npm run vozes`).
   - Toda fala do site é gravada antes. Não existe voz do navegador.
-  - Kana isolado soa mal na voz japonesa; isso está no plano (fase 5).
+  - Toda fala em japonês mostra legenda com furigana enquanto toca (`src/core/legenda.ts`); no
+    Módulo 0, também o romaji. Kana isolado ainda soa mal na voz japonesa (fase 5, pendente).
 - **Música e efeitos:** com cara de anime, de licença livre ou não comercial, nunca trilha oficial
   ([docs/musica.md](docs/musica.md)).
 - **Fora do repositório:** `D:\KotobaArcade` guarda modelos, ambientes Python, gravações brutas e

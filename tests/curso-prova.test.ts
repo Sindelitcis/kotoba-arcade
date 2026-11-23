@@ -3,8 +3,14 @@ import { describe, expect, it } from 'vitest';
 import { UNIDADES } from '../src/content/curso';
 import { seededRng } from '../src/core/rng';
 import { blocosDa, itensAte } from '../src/curso/motor';
+import { exemplosDaUnidade } from '../src/curso/exemplos';
 import {
   codigoDaProva,
+  deItem,
+  notaJlpt,
+  passariaNoN5,
+  SIMULADO,
+  type Questao,
   corrigir,
   lerCodigo,
   montarProva,
@@ -20,6 +26,8 @@ import {
 } from '../src/curso/prova';
 
 const SEMENTES = ['K7QH', 'AAAA', '2Z9M', 'PQRS', 'HJ34'];
+
+const chave = (q: Questao) => (deItem(q) ? q.item.id : q.frase.jp);
 
 describe('código da prova', () => {
   it('ida e volta: o código guarda a unidade e a semente', () => {
@@ -52,13 +60,13 @@ describe('montagem da prova', () => {
     for (const u of UNIDADES) {
       const a = montarProva(u, 'K7QH');
       const b = provaDoCodigo(a.codigo);
-      expect(b?.questoes.map((q) => [q.item.id, q.opcoes, q.certa])).toEqual(a.questoes.map((q) => [q.item.id, q.opcoes, q.certa]));
+      expect(b?.questoes.map((q) => [chave(q), q.opcoes, q.certa])).toEqual(a.questoes.map((q) => [chave(q), q.opcoes, q.certa]));
     }
   });
 
   it('outra semente, outra prova', () => {
     const u = UNIDADES[3]!;
-    expect(montarProva(u, 'AAAA').questoes.map((q) => q.item.id)).not.toEqual(montarProva(u, 'BBBB').questoes.map((q) => q.item.id));
+    expect(montarProva(u, 'AAAA').questoes.map(chave)).not.toEqual(montarProva(u, 'BBBB').questoes.map(chave));
   });
 
   it('quatro alternativas diferentes, uma certa, numeradas em ordem', () => {
@@ -81,7 +89,7 @@ describe('montagem da prova', () => {
         const ate = itensAte(u.numero);
         const ids = new Set(ate.map((i) => i.id));
         const respostas = new Set(ate.flatMap((i) => [i.jp, i.certa]));
-        for (const q of montarProva(u, s).questoes) {
+        for (const q of montarProva(u, s).questoes.filter(deItem)) {
           expect(ids.has(q.item.id), `${u.id} ${q.item.id}`).toBe(true);
           for (const o of q.opcoes) expect(respostas.has(o), `${u.id} ${q.n}: ${o}`).toBe(true);
         }
@@ -93,7 +101,7 @@ describe('montagem da prova', () => {
     for (const u of UNIDADES) {
       const ate = itensAte(u.numero);
       for (const s of SEMENTES)
-        for (const q of montarProva(u, s).questoes) {
+        for (const q of montarProva(u, s).questoes.filter(deItem)) {
           const erradas = q.opcoes.filter((o) => o !== q.certa);
           for (const o of erradas) expect(q.item.evitar.includes(o), `${u.id} ${q.n}: ${o}`).toBe(false);
           if (q.tipo === 'palavra') {
@@ -109,7 +117,7 @@ describe('montagem da prova', () => {
     const u = UNIDADES.find((x) => x.numero === 5 && !x.revisao)!;
     const anteriores = new Set(itensAte(u.numero - 1).map((i) => i.id));
     const p = montarProva(u, 'K7QH');
-    const daUnidade = p.questoes.filter((q) => !anteriores.has(q.item.id)).length;
+    const daUnidade = p.questoes.filter((q) => deItem(q) && !anteriores.has(q.item.id)).length;
     expect(daUnidade).toBeGreaterThanOrEqual(QUESTOES_DA_UNIDADE * 0.75);
     expect(p.questoes.length - daUnidade).toBeLessThanOrEqual(QUESTOES_DE_REVISAO);
   });
@@ -119,8 +127,53 @@ describe('montagem da prova', () => {
       const anteriores = new Set(itensAte(u.numero - 1).map((i) => i.id));
       const p = montarProva(u, 'K7QH');
       expect(p.questoes.length).toBeGreaterThanOrEqual(20);
-      for (const q of p.questoes) expect(anteriores.has(q.item.id)).toBe(true);
+      for (const q of p.questoes.filter(deItem)) expect(anteriores.has(q.item.id)).toBe(true);
     }
+  });
+
+  // O simulado do JLPT: vocabulário, gramática, leitura e escuta, nessa ordem.
+  it('o simulado tem as quatro partes do JLPT, cheias e em ordem', () => {
+    const u = UNIDADES.find((x) => x.revisao)!;
+    for (const s of SEMENTES) {
+      const p = montarProva(u, s);
+      const secoes = p.questoes.map((q) => q.secao);
+      for (const [secao, n] of Object.entries(SIMULADO)) expect(secoes.filter((x) => x === secao).length, `${s} ${secao}`).toBe(n);
+      expect(secoes).toEqual([...secoes].sort((a, b) => Object.keys(SIMULADO).indexOf(a) - Object.keys(SIMULADO).indexOf(b)));
+    }
+  });
+
+  it('no simulado, as frases só usam o que o nível ensinou, e a escuta não repete frase da gramática', () => {
+    const u = UNIDADES.find((x) => x.revisao)!;
+    const doNivel = new Set(UNIDADES.filter((x) => x.numero < u.numero).flatMap(exemplosDaUnidade).map((e) => e.jp));
+    for (const s of SEMENTES) {
+      const frases = montarProva(u, s).questoes.filter((q) => !deItem(q));
+      for (const q of frases) if (!deItem(q) && q.tipo !== 'texto') expect(doNivel.has(q.frase.jp), q.frase.jp).toBe(true);
+      const gram = new Set(frases.filter((q) => q.secao === 'gramatica').map((q) => !deItem(q) && q.frase.jp));
+      for (const q of frases.filter((x) => x.secao === 'escuta')) expect(gram.has(!deItem(q) && q.frase.jp)).toBe(false);
+    }
+  });
+
+  it('na leitura, a certa é uma frase do texto e as erradas não estão nele', () => {
+    const u = UNIDADES.find((x) => x.revisao)!;
+    for (const s of SEMENTES)
+      for (const q of montarProva(u, s).questoes)
+        if (!deItem(q) && q.tipo === 'texto') {
+          const doTexto = q.texto!.frases.map((f) => f.pt);
+          expect(doTexto).toContain(q.certa);
+          for (const o of q.opcoes.filter((x) => x !== q.certa)) expect(doTexto).not.toContain(o);
+        }
+  });
+
+  it('a nota na escala do JLPT: 120 para conhecimento e leitura, 60 para escuta, e os mínimos do N5', () => {
+    const u = UNIDADES.find((x) => x.revisao)!;
+    const p = montarProva(u, 'K7QH');
+    const tudo = notaJlpt(p, p.questoes.map((q) => q.certa));
+    expect([tudo.conhecimento, tudo.escuta, tudo.total]).toEqual([120, 60, 180]);
+    expect(passariaNoN5(tudo)).toBe(true);
+    // Tudo certo menos a escuta: passa no total, mas não no mínimo de escuta.
+    const semEscuta = notaJlpt(p, p.questoes.map((q) => (q.secao === 'escuta' ? undefined : q.certa)));
+    expect(semEscuta.escuta).toBe(0);
+    expect(passariaNoN5(semEscuta)).toBe(false);
   });
 
   it('a questão de leitura não mostra a resposta no enunciado', () => {

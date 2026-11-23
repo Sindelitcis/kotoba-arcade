@@ -108,8 +108,8 @@ próxima parte; a tecla U mostra o mapa das unidades.
 
 - **Partes curtas.** `motor.ts` (`blocosDa`) divide a unidade em partes de uns 5 minutos: objetivo
   (com a revisão rápida da unidade anterior), palavras de 3 a 5 por vez, os kanji dessas palavras
-  logo depois delas, a aula falada, a gramática, o montar frases, as notas culturais, o diálogo
-  da situação e, no fim, o mini-teste (8 perguntas da unidade, com quatro alternativas, como na
+  logo depois delas, a aula falada, a gramática, o montar frases, o completar, o ditado, a
+  leitura graduada com shadowing, as notas culturais, o diálogo da situação e, no fim, o mini-teste (8 perguntas da unidade, com quatro alternativas, como na
   prova). A unidade de revisão tem só o objetivo e uma prática com o que já foi visto. Parte nova
   entra sempre antes da posição salva de quem já começou: a pessoa pode rever uma parte, nunca pular.
 - **Cartões.** `cartoes.ts` monta a apresentação direto do currículo, no mesmo cartão dos jogos
@@ -148,15 +148,36 @@ Feito na fase 4, em `src/content/curso/`:
   notas, que têm fonte. Tela em `src/curso/BlocosAula.tsx`.
 - **Montar frases**: o sentido em português e as peças embaralhadas; a peça fora de ordem avisa e
   não entra. Pronta, a frase toca e espera o Enter.
+- **Completar e ditado** (`src/curso/exercicios.ts`): no completar, a frase vem com uma peça de
+  gramática apagada e quatro opções, todas já apresentadas. Peças que se trocam sem a frase ficar
+  errada (は, が, も e を; に e へ; と e や; os fins de frase) nunca são opção errada uma da outra, e a
+  tradução desfaz o resto. No ditado, a frase só toca; a pessoa digita em romaji (vira kana na
+  hora) ou usa o teclado japonês. Vale a partícula escrita (は, へ) ou falada (わ, え), e を ou お.
+- **Leitura graduada** (`leituras.ts`): um texto de 4 ou 5 frases por unidade, em peças, conferido
+  como os exemplos (`tests/curso-leituras.test.ts`). Primeiro o texto inteiro (T mostra a
+  tradução), depois o shadowing: cada frase toca, há uma pausa para falar junto e toca de novo.
+- **Figura no vocabulário** (`src/curso/figura.ts`): a palavra do curso usa a figura do site quando
+  há uma com a mesma escrita, ou o mesmo kana e o mesmo sentido (あめ é chuva no curso e bala na
+  figura de 飴, então não vale). Hoje são umas 55 palavras, na tela e no verso dos cartões impressos.
 - **Tarefa de uso** (`tarefas.ts`): aparece depois da prova aprovada e na apostila.
 - **Notas culturais:** as 16 do A1 conferidas contra a fonte em 23/11/2026 (com três correções) e
   liberadas.
-- **Apostila:** ganhou a aula escrita, os exemplos, o exercício de montar com as respostas no fim e
-  a tarefa de uso.
+- **Apostila:** ganhou a aula escrita, os exemplos, os exercícios de montar e de completar, o
+  ditado (o QR abre `?ditado=a1-04`, um botão por frase), a leitura, a tarefa de uso e as respostas
+  de tudo no fim.
 
-Ainda faltam: o simulado de fim de nível no formato do JLPT (com escuta e leitura) e o certificado;
-exercícios de completar e ditado; leitura graduada e shadowing; figura no cartão de vocabulário;
-cruzar o vocabulário com uma lista de N5. `tests/curso-aulas.test.ts` cobre aula, montar e tarefa.
+`tests/curso-aulas.test.ts` cobre aula, montar e tarefa; `tests/curso-exercicios.test.ts`, completar
+e ditado.
+
+**Vocabulário contra o N5 (23/11/2026).** Cruzado com a lista aberta de N5 de Jonathan Waller
+(tanos.co.uk, pela versão do repositório open-anki-jlpt-decks; cópia só local, em
+`D:\KotobaArcade\dados\brutos\n5-vocabulario.txt`, porque a licença dos dados não está clara). O
+A1 tem 306 palavras e cobre umas 240 das 697 da lista. A conta é por escrita ou kana, então é
+aproximada: 白い conta separado de 白, e várias palavras do curso são expressões (はじめまして) ou
+formas (来ます) que a lista não traz. Faltam sobretudo verbos do dia a dia (買う, 会う, 乗る, 使う,
+分かる), família estendida (兄, 姉, 弟, 妹), lugares (銀行, 公園, 図書館, 郵便局), objetos de
+casa e escola, e os contadores de coisas (一つ, 二つ..., 〜枚, 〜匹). Entrar com essas palavras
+nas unidades certas é uma tarefa de conteúdo própria, ainda não feita.
 
 ## Provas
 
@@ -167,7 +188,16 @@ Feitas na fase 3. A lógica está em `src/curso/prova.ts` e a tela em `src/curso
   aparece no fim, e dá para voltar e trocar uma resposta antes de entregar. Cada resposta conta como
   revisão no FSRS. Quem não passa vê o que errou, revê os cartões disso e faz outra prova, com
   outras questões. A aprovação nunca se perde com uma tentativa pior depois.
-- **Unidade de revisão:** a prova é um simulado de 30 questões com tudo o que veio antes.
+- **Simulado do nível:** é a prova da unidade de revisão, nas quatro partes do JLPT, em ordem e
+  sem tempo marcado: vocabulário (文字・語彙, 14 questões de palavra e leitura de kanji), gramática
+  (文法, 8 de completar a frase), leitura (読解, 4 textos da leitura graduada e qual frase o texto
+  diz; as erradas vêm de outros textos) e escuta (聴解, 6 frases só no áudio e o sentido delas).
+  Passa com 80%, como as outras. O resultado mostra cada parte e a nota na escala do JLPT (120 de
+  conhecimento e leitura, 60 de escuta, mínimos do N5 de 80, 38 e 19), avisando que é uma conta
+  proporcional, não a nota oficial.
+- **Certificado:** com o simulado aprovado, a pessoa escreve o nome (fica no save) e abre
+  `?imprimir=certificado&unidade=a1-20`: nome, nível, nota, data da primeira aprovação e o aviso de
+  que é certificado do curso, não do JLPT. O botão também fica no mapa, na unidade de revisão.
 - **Só o que foi ensinado:** as questões e as alternativas erradas saem dos itens do curso até a
   unidade da prova, nunca são outra resposta certa nem duas palavras com o mesmo sentido.
 - **Código:** cada prova tem um código, como `U04-K7QH` (unidade e semente, sem 0, O, 1, I e L).
@@ -177,8 +207,6 @@ Feitas na fase 3. A lógica está em `src/curso/prova.ts` e a tela em `src/curso
   "Não sei". Acertou 3, a unidade conta como feita (as cartas entram como vistas) e vem a seguinte;
   na primeira em que não passa, o curso começa nela. É a exceção à regra de só cobrar o que foi
   ensinado ([ensino.md](ensino.md)).
-- **Ainda não:** o simulado de fim de nível no formato do JLPT (com escuta e leitura) e o
-  certificado do curso.
 
 ## Material impresso
 
@@ -196,8 +224,10 @@ impresso é uma página do próprio site, aberta numa aba nova e impressa pelo n
 - `?imprimir=escrita&unidade=a1-04`: para cada kanji, a ordem dos traços (KanjiVG) e uma linha de
   caixas com cruz, com o modelo e três guias para cobrir.
 
-Tudo sai dos mesmos dados da lição, então o papel nunca fica diferente do site. Ainda faltam
-folhas de exercício de frase (completar, ligar, ditado), que dependem do conteúdo da fase 4.
+- `?escuta=U20-K7QH`: o áudio da parte de escuta do simulado impresso, um botão por questão. A
+  folha do simulado traz esse QR ao lado do QR do gabarito, e a escuta não tem a frase escrita.
+
+Tudo sai dos mesmos dados da lição, então o papel nunca fica diferente do site.
 `tests/curso-prova.test.ts` e `tests/curso-impresso.test.tsx` cobrem as provas e os impressos.
 
 ## Reforço depois da prova
@@ -219,10 +249,24 @@ unidade como chefe e a coleção do KanjiMon. Nada de jogo precisa de velocidade
 
 A voz em japonês (AivisSpeech) pronuncia mal um kana sozinho. Duas frentes:
 
-1. Toda fala em japonês ganha legenda (kana e, no módulo 0, romaji).
-2. Os kana isolados ganham uma gravação melhor. Os caminhos são: gerar dentro de uma frase e
+1. **Legenda (feita).** Toda fala em japonês gravada mostra, enquanto toca, o texto com furigana
+   embaixo da tela (`src/core/legenda.ts` e `LegendaVoz.tsx`). Quem toca o áudio liga a legenda
+   (`legendar`): a fala solta, a sequência das aulas e a Conversa. No Módulo 0 ela mostra também
+   o romaji.
+2. **Gravação melhor dos kana isolados (falta).** Os caminhos são: gerar dentro de uma frase e
    recortar, testar outro modelo de voz, ou usar gravações humanas com licença livre. A escolha
-   é feita por comparação às cegas, como foi feito com as imagens.
+   é feita por comparação às cegas, como foi feito com as imagens, e precisa do ouvido do Rafael.
+
+## Módulo 0: kana e sons
+
+Feito na fase 5, em `src/curso/modulo0.ts` (lógica) e `ModuloZero.tsx` (tela). Seis lições no alto
+do mapa, antes do A1, com os mesmos kana, desenhos e cartas do Kana em imagens: vogais e linhas do K
+e do S; T, N e H; M, Y, R, W e ん; tenten, maru, combinados, っ e vogal longa; katakana básico;
+katakana com tenten, combinados e sons de fora. Cada lição abre com o que o desenho não mostra
+(し é shi, o R é um toque, っ é uma pausa) e segue por lotes de 3 a 6 kana: apresentação e um
+treino curto, ouvindo (qual kana é este som) ou lendo (como se lê). As opções erradas só vêm de kana
+já apresentados no módulo. O módulo não tranca o A1: quem já lê kana vai direto para a unidade 1. O
+progresso fica em `games.curso.modulo0` (lotes feitos).
 
 ## O que já existe
 
@@ -235,9 +279,10 @@ por ele. Os jogos continuam, como exercícios das lições e como prática livre
 1. **Currículo:** feito para o A1 (`src/content/curso/`), com testes. Falta cruzar o vocabulário
    com uma lista de N5.
 2. **Motor do curso:** feito (ver "O motor do curso", acima).
-3. **Provas e impressos:** feito (ver "Provas" e "Material impresso", acima). Falta o simulado
-   de fim de nível no formato do JLPT, que depende da fase 4.
-4. **Conteúdo do A1:** a maior parte feita (ver "Conteúdo do A1", acima). Falta o simulado do
-   JLPT, completar e ditado, leitura graduada e figura no vocabulário.
-5. **Áudio de kana e legendas.**
+3. **Provas e impressos:** feito, com o simulado do JLPT e o certificado (ver "Provas" e
+   "Material impresso", acima).
+4. **Conteúdo do A1:** feito (ver "Conteúdo do A1", acima). O vocabulário foi cruzado com o N5 e
+   ficou uma lista do que falta acrescentar.
+5. **Áudio de kana e legendas:** legendas e Módulo 0 feitos. Falta a gravação melhor dos kana
+   isolados, que depende da comparação às cegas.
 6. **A2.**

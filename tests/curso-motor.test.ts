@@ -233,6 +233,20 @@ describe('prática: só cobra o que já foi apresentado', () => {
 });
 
 describe('progresso e liberação', () => {
+  it('a data da primeira aprovação fica gravada (vai no certificado) e não muda depois', () => {
+    const save = ensureCursoSave({});
+    registrarProva(save, 'a1-20', 0.5, false, 1000);
+    expect(save.provas['a1-20']?.quando).toBeUndefined();
+    registrarProva(save, 'a1-20', 0.9, true, 2000);
+    registrarProva(save, 'a1-20', 0.95, true, 3000);
+    expect(save.provas['a1-20']?.quando).toBe(2000);
+    const games: Record<string, unknown> = { curso: { ...save, nome: '  Rafa  ' } };
+    const lido = ensureCursoSave(JSON.parse(JSON.stringify(games)));
+    expect(lido.provas['a1-20']?.quando).toBe(2000);
+    expect(lido.nome).toBe('Rafa');
+    expect(ensureCursoSave({ curso: { nome: 5 } }).nome).toBeUndefined();
+  });
+
   it('save novo: só a unidade 1 está liberada, e a próxima lição é o começo dela', () => {
     const games: Record<string, unknown> = {};
     const save = ensureCursoSave(games);

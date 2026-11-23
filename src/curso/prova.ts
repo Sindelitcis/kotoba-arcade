@@ -15,6 +15,8 @@
  */
 import { UNIDADES, type Unidade } from '../content/curso';
 import { hashString, seededRng, shuffle, type Rng } from '../core/rng';
+import { exemplosDaUnidade, leituraDa, type Exemplo, type Leitura, type Peca } from './exemplos';
+import { gramaticaAte, lacunaDo } from './exercicios';
 import { itensAte, type ItemPratica } from './motor';
 
 export const NOTA_MINIMA = 0.8;
@@ -23,19 +25,53 @@ export const OPCOES_PROVA = 4;
 /** Questões da própria unidade e de revisão das anteriores. */
 export const QUESTOES_DA_UNIDADE = 16;
 export const QUESTOES_DE_REVISAO = 4;
-/** O simulado do nível, na unidade de revisão. */
-export const QUESTOES_DO_SIMULADO = 30;
+/**
+ * O simulado do nível, na unidade de revisão, nas quatro partes do JLPT: vocabulário (文字・語彙),
+ * gramática (文法), leitura (読解) e escuta (聴解).
+ */
+export const SIMULADO = { vocabulario: 14, gramatica: 8, leitura: 4, escuta: 6 } as const;
+export type Secao = keyof typeof SIMULADO;
+export const NOME_SECAO: Readonly<Record<Secao, string>> = {
+  vocabulario: 'Vocabulário · 文字・語彙',
+  gramatica: 'Gramática · 文法',
+  leitura: 'Leitura · 読解',
+  escuta: 'Escuta · 聴解',
+};
 
 export type TipoQuestao = 'significado' | 'palavra' | 'leitura';
 
-export interface Questao {
+interface QuestaoBase {
   n: number;
-  tipo: TipoQuestao;
-  item: ItemPratica;
+  secao: Secao;
   enunciado: string;
   opcoes: string[];
   certa: string;
 }
+
+/** Questão de uma palavra ou de um kanji do curso. */
+export interface QuestaoDeItem extends QuestaoBase {
+  tipo: TipoQuestao;
+  item: ItemPratica;
+}
+
+/**
+ * Questão de frase (só no simulado):
+ * - completar: a frase com a lacuna; as opções são peças em japonês (`leituras` tem o kana delas);
+ * - texto: um texto da leitura graduada; as opções dizem o que ele conta, em português;
+ * - escuta: a frase só no áudio; as opções são o sentido, em português.
+ */
+export interface QuestaoDeFrase extends QuestaoBase {
+  tipo: 'completar' | 'texto' | 'escuta';
+  frase: Exemplo;
+  antes?: Peca[];
+  depois?: Peca[];
+  leituras?: Record<string, string>;
+  texto?: Leitura;
+}
+
+export type Questao = QuestaoDeItem | QuestaoDeFrase;
+
+export const deItem = (q: Questao): q is QuestaoDeItem => 'item' in q;
 
 export interface Prova {
   codigo: string;
@@ -115,20 +151,108 @@ export function montarProva(u: Unidade, semente: string): Prova {
   const ate = itensAte(u.numero);
   const anteriores = itensAte(u.numero - 1);
   const daUnidade = ate.filter((i) => !anteriores.some((x) => x.id === i.id));
-  const escolhidos = u.revisao
-    ? sortear(anteriores, QUESTOES_DO_SIMULADO, rng)
-    : [...sortear(daUnidade, QUESTOES_DA_UNIDADE, rng), ...sortear(anteriores, QUESTOES_DE_REVISAO, rng)];
-  const questoes: Questao[] = [];
-  for (const item of escolhidos) {
+  if (u.revisao) return { codigo: codigoDaProva(u, semente), unidade: u, questoes: questoesDoSimulado(u, anteriores, rng) };
+  const escolhidos = [...sortear(daUnidade, QUESTOES_DA_UNIDADE, rng), ...sortear(anteriores, QUESTOES_DE_REVISAO, rng)];
+  return { codigo: codigoDaProva(u, semente), unidade: u, questoes: questoesDeItens(escolhidos, ate, rng, 'vocabulario') };
+}
+
+function questoesDeItens(itens: readonly ItemPratica[], pool: readonly ItemPratica[], rng: Rng, secao: Secao, max = Infinity): QuestaoDeItem[] {
+  const out: QuestaoDeItem[] = [];
+  for (const item of itens) {
+    if (out.length >= max) break;
     // Palavra: metade das vezes do japonês para o português, metade ao contrário.
     const tipo: TipoQuestao = item.tipo === 'kanji' ? 'leitura' : rng() < 0.5 ? 'significado' : 'palavra';
-    const erradas = erradasPara(tipo, item, ate, rng);
+    const erradas = erradasPara(tipo, item, pool, rng);
     if (erradas.length < OPCOES_PROVA - 1) continue;
     const certa = respostaDe(tipo, item);
-    questoes.push({ n: questoes.length + 1, tipo, item, enunciado: enunciadoDe(tipo, item), opcoes: shuffle(rng, [certa, ...erradas]), certa });
+    out.push({ n: out.length + 1, secao, tipo, item, enunciado: enunciadoDe(tipo, item), opcoes: shuffle(rng, [certa, ...erradas]), certa });
   }
-  return { codigo: codigoDaProva(u, semente), unidade: u, questoes };
+  return out;
 }
+
+/* ───────── Simulado ───────── */
+
+/** Frase que diz algo (não "Obrigado."), para a pergunta de leitura, a escuta e as opções erradas. */
+const fraseQueConta = (e: Exemplo) => e.pt.length >= 14;
+
+function questoesDoSimulado(u: Unidade, anteriores: readonly ItemPratica[], rng: Rng): Questao[] {
+  const nivel = UNIDADES.filter((x) => x.numero < u.numero && !x.revisao);
+  const vocab = questoesDeItens(shuffle(rng, anteriores), anteriores, rng, 'vocabulario', SIMULADO.vocabulario);
+
+  // Gramática: completar a frase, com as peças que o nível ensinou.
+  const conhecidas = gramaticaAte(u.numero);
+  const frases = nivel.flatMap(exemplosDaUnidade);
+  const gramatica: QuestaoDeFrase[] = [];
+  for (const e of shuffle(rng, frases)) {
+    if (gramatica.length >= SIMULADO.gramatica) break;
+    const l = lacunaDo(e, rng, conhecidas);
+    if (!l || l.opcoes.length < OPCOES_PROVA) continue;
+    const leituras = Object.fromEntries(frases.flatMap((f) => f.pecas).filter((p) => l.opcoes.includes(p.t)).map((p) => [p.t, p.kana]));
+    gramatica.push({ n: 0, secao: 'gramatica', tipo: 'completar', enunciado: 'Qual peça completa a frase?', frase: e, antes: l.antes, depois: l.depois, leituras, opcoes: l.opcoes, certa: l.resposta.t });
+  }
+
+  // Leitura: um texto do nível e o que ele conta; as opções erradas vêm de outros textos.
+  const textos = nivel.map(leituraDa).filter((l): l is Leitura => !!l);
+  const leitura: QuestaoDeFrase[] = [];
+  for (const t of shuffle(rng, textos)) {
+    if (leitura.length >= SIMULADO.leitura) break;
+    const certa = shuffle(rng, t.frases.filter(fraseQueConta))[0];
+    if (!certa) continue;
+    const doTexto = new Set(t.frases.map((f) => f.pt));
+    const outras = textos.filter((x) => x !== t).flatMap((x) => x.frases.filter(fraseQueConta).map((f) => f.pt));
+    const erradas = [...new Set(shuffle(rng, outras))].filter((pt) => !doTexto.has(pt)).slice(0, OPCOES_PROVA - 1);
+    if (erradas.length < OPCOES_PROVA - 1) continue;
+    leitura.push({ n: 0, secao: 'leitura', tipo: 'texto', enunciado: 'Qual destas frases o texto diz?', frase: certa, texto: t, opcoes: shuffle(rng, [certa.pt, ...erradas]), certa: certa.pt });
+  }
+
+  // Escuta: a frase só no áudio; qual é o sentido.
+  const escuta: QuestaoDeFrase[] = [];
+  const usadas = new Set(gramatica.map((q) => q.frase.jp));
+  for (const e of shuffle(rng, frases)) {
+    if (escuta.length >= SIMULADO.escuta) break;
+    if (usadas.has(e.jp) || !fraseQueConta(e)) continue;
+    const outras = shuffle(rng, frases).filter((f) => f.jp !== e.jp && f.pt !== e.pt && fraseQueConta(f));
+    const erradas = [...new Set(outras.map((f) => f.pt))].slice(0, OPCOES_PROVA - 1);
+    if (erradas.length < OPCOES_PROVA - 1) continue;
+    usadas.add(e.jp);
+    escuta.push({ n: 0, secao: 'escuta', tipo: 'escuta', enunciado: 'Ouça a frase. O que ela quer dizer?', frase: e, opcoes: shuffle(rng, [e.pt, ...erradas]), certa: e.pt });
+  }
+
+  return [...vocab, ...gramatica, ...leitura, ...escuta].map((q, i) => ({ ...q, n: i + 1 }));
+}
+
+export interface NotaJlpt {
+  /** Vocabulário, gramática e leitura juntos, de 0 a 120 (o N5 pede ao menos 38). */
+  conhecimento: number;
+  /** Escuta, de 0 a 60 (o N5 pede ao menos 19). */
+  escuta: number;
+  /** De 0 a 180 (o N5 pede ao menos 80). */
+  total: number;
+  /** Acertos por parte. */
+  partes: Record<Secao, { acertos: number; total: number }>;
+}
+
+/**
+ * A nota do simulado na escala do JLPT. É proporcional aos acertos (a escala oficial é
+ * equalizada), então serve de referência; quem passa no curso é quem chega a 80%.
+ */
+export function notaJlpt(p: Prova, respostas: readonly (string | undefined)[]): NotaJlpt {
+  const partes = Object.fromEntries((Object.keys(SIMULADO) as Secao[]).map((s) => [s, { acertos: 0, total: 0 }])) as NotaJlpt['partes'];
+  p.questoes.forEach((q, i) => {
+    partes[q.secao].total++;
+    if (respostas[i] === q.certa) partes[q.secao].acertos++;
+  });
+  const fracao = (...ss: Secao[]) => {
+    const t = ss.reduce((a, s) => a + partes[s].total, 0);
+    return t === 0 ? 0 : ss.reduce((a, s) => a + partes[s].acertos, 0) / t;
+  };
+  const conhecimento = Math.round(fracao('vocabulario', 'gramatica', 'leitura') * 120);
+  const escuta = Math.round(fracao('escuta') * 60);
+  return { conhecimento, escuta, total: conhecimento + escuta, partes };
+}
+
+/** Os mínimos do N5: 80 de 180 no total, 38 em conhecimento e leitura, 19 em escuta. */
+export const passariaNoN5 = (n: NotaJlpt): boolean => n.total >= 80 && n.conhecimento >= 38 && n.escuta >= 19;
 
 export function provaDoCodigo(codigo: string): Prova | null {
   const c = lerCodigo(codigo);
@@ -161,18 +285,18 @@ export const NIVEL_POR_UNIDADE = 4;
 export const NIVEL_PARA_PASSAR = 3;
 
 /** As questões de nivelamento de uma unidade. */
-export function questoesDeNivelamento(u: Unidade, rng: Rng): Questao[] {
+export function questoesDeNivelamento(u: Unidade, rng: Rng): QuestaoDeItem[] {
   const ate = itensAte(u.numero);
   const anteriores = itensAte(u.numero - 1);
   const daUnidade = ate.filter((i) => !anteriores.some((x) => x.id === i.id));
-  const out: Questao[] = [];
+  const out: QuestaoDeItem[] = [];
   for (const item of shuffle(rng, daUnidade)) {
     if (out.length >= NIVEL_POR_UNIDADE) break;
     const tipo: TipoQuestao = item.tipo === 'kanji' ? 'leitura' : 'significado';
     const erradas = erradasPara(tipo, item, ate, rng);
     if (erradas.length < OPCOES_PROVA - 1) continue;
     const certa = respostaDe(tipo, item);
-    out.push({ n: out.length + 1, tipo, item, enunciado: enunciadoDe(tipo, item), opcoes: shuffle(rng, [certa, ...erradas]), certa });
+    out.push({ n: out.length + 1, secao: 'vocabulario', tipo, item, enunciado: enunciadoDe(tipo, item), opcoes: shuffle(rng, [certa, ...erradas]), certa });
   }
   return out;
 }

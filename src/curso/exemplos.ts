@@ -6,6 +6,7 @@ import { palavrasDa, UNIDADES, type Palavra, type Unidade } from '../content/cur
 import { shuffle, type Rng } from '../core/rng';
 import type { Trecho } from '../core/sequencia';
 import { EXEMPLOS, GRAMATICA_EM_KANA, NOMES, type ExemploLinha } from '../content/curso/exemplos';
+import { LEITURAS } from '../content/curso/leituras';
 
 const KANJI = /[一-鿿々]/u;
 
@@ -65,12 +66,19 @@ function montar(ponto: string, u: Unidade, linha: ExemploLinha, vocab: Map<strin
 }
 
 /** Os exemplos de um ponto, montados com o vocabulário da unidade dele. */
+const montados = new Map<string, Exemplo[]>();
+
 export function exemplosDoPonto(ponto: string): Exemplo[] {
+  const pronto = montados.get(ponto);
+  if (pronto) return pronto;
   const u = unidadeDoPonto(ponto);
   const linhas = EXEMPLOS[ponto];
   if (!u || !linhas) return [];
   const vocab = vocabularioAte(u.numero);
-  return linhas.map((l) => montar(ponto, u, l, vocab));
+  const out = linhas.map((l) => montar(ponto, u, l, vocab));
+  // Os dados não mudam: monta uma vez (a prova e o simulado pedem os mesmos exemplos muitas vezes).
+  montados.set(ponto, out);
+  return out;
 }
 
 /** Todos os exemplos da unidade, na ordem da gramática dela. */
@@ -82,21 +90,41 @@ export function exemplosDaUnidade(u: Unidade): Exemplo[] {
 export function problemasDoExemplo(ponto: string, linha: ExemploLinha): string[] {
   const u = unidadeDoPonto(ponto);
   if (!u) return [`${ponto}: ponto sem unidade`];
-  const vocab = vocabularioAte(u.numero);
-  const kanji = kanjiAte(u.numero);
+  return problemasDaLinha(ponto, u.numero, linha);
+}
+
+/** O mesmo, para uma frase que só pode usar o que foi ensinado até a unidade `numero`. */
+export function problemasDaLinha(rotulo: string, numero: number, linha: ExemploLinha): string[] {
+  const vocab = vocabularioAte(numero);
+  const kanji = kanjiAte(numero);
   const erros: string[] = [];
   for (const s of linha.pecas) {
     const { t, r, base } = lerPeca(s);
-    for (const c of t) if (KANJI.test(c) && !kanji.has(c)) erros.push(`${ponto}: kanji ${c} ainda não ensinado (em ${t})`);
+    for (const c of t) if (KANJI.test(c) && !kanji.has(c)) erros.push(`${rotulo}: kanji ${c} ainda não ensinado (em ${t})`);
     if (base) {
-      if (!vocab.has(base)) erros.push(`${ponto}: a base ${base} de ${t} não é do vocabulário até a unidade ${u.numero}`);
-      if (KANJI.test(t) && !r) erros.push(`${ponto}: ${t} tem kanji e precisa da leitura`);
+      if (!vocab.has(base)) erros.push(`${rotulo}: a base ${base} de ${t} não é do vocabulário até a unidade ${numero}`);
+      if (KANJI.test(t) && !r) erros.push(`${rotulo}: ${t} tem kanji e precisa da leitura`);
     } else if (!vocab.has(t) && !GRAMATICA_EM_KANA.has(t) && !NOMES.has(t)) {
-      erros.push(`${ponto}: ${t} não foi ensinado até a unidade ${u.numero}`);
+      erros.push(`${rotulo}: ${t} não foi ensinado até a unidade ${numero}`);
     }
-    if (r && /[^ぁ-ゖー]/u.test(r)) erros.push(`${ponto}: a leitura de ${t} tem de ser em hiragana`);
+    if (r && /[^ぁ-ゖー]/u.test(r)) erros.push(`${rotulo}: a leitura de ${t} tem de ser em hiragana`);
   }
   return erros;
+}
+
+/* ───────── Leitura graduada ───────── */
+
+export interface Leitura {
+  titulo: string;
+  frases: Exemplo[];
+}
+
+/** O texto da leitura da unidade, montado com o vocabulário dela. */
+export function leituraDa(u: Unidade): Leitura | undefined {
+  const l = LEITURAS[u.id];
+  if (!l) return undefined;
+  const vocab = vocabularioAte(u.numero);
+  return { titulo: l.titulo, frases: l.frases.map((f) => montar(`leitura:${u.id}`, u, f, vocab)) };
 }
 
 /* ───────── Falas e exercício ───────── */

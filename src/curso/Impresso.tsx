@@ -7,34 +7,49 @@
  *   ?imprimir=apostila&unidade=a1-04    a unidade para ler longe da tela
  *   ?imprimir=cartoes&unidade=a1-04     cartões de frente e verso para recortar
  *   ?imprimir=escrita&unidade=a1-04     folha de escrita dos kanji, com a ordem dos traços
+ *   ?ditado=a1-04                        o áudio do ditado da apostila (é para onde o QR dela leva)
+ *   ?escuta=U20-K7QH                     o áudio da parte de escuta do simulado impresso
+ *   ?imprimir=certificado&unidade=a1-20  o certificado do nível, depois do simulado aprovado
  */
 import qrcode from 'qrcode-generator';
-import { useEffect } from 'preact/hooks';
+import { useEffect, useState } from 'preact/hooks';
 import { GRAMATICA_N5, palavrasDa, UNIDADES, type Unidade } from '../content/curso';
 import { AULAS_DO_CURSO } from '../content/curso/aulas';
 import { TAREFAS } from '../content/curso/tarefas';
 import { Furigana, Misto } from '../core/Furigana';
 import { hashString, seededRng } from '../core/rng';
-import { exemplosDoPonto, falaEscrita, pecasParaMontar } from './exemplos';
+import { exemplosDoPonto, falaDoExemplo, falaEscrita, leituraDa, pecasParaMontar } from './exemplos';
+import { ditadoDa, lacunasDa } from './exercicios';
+import { tocarSequencia } from '../core/sequencia';
 import { carregarTracos, tracos } from '../games/pecas/Tracos';
 import { significadoDoKanji } from './cartoes';
+import { figuraDoCurso } from './figura';
+import { figuraUrl, temFigura } from '../core/figuras';
 import { outrasLeituras, palavraDoCurso, partesDoPonto } from './motor';
-import { provaDoCodigo, type Prova, type Questao } from './prova';
+import { deItem, NOME_SECAO, provaDoCodigo, type Prova, type Questao } from './prova';
+import { FraseDaQuestao, OpcaoDeFrase } from './QuestaoFrase';
+import { cursoSave } from '../core/app';
 import './impresso.css';
 
 export type Pedido =
   | { tipo: 'prova'; codigo: string }
   | { tipo: 'gabarito'; codigo: string }
-  | { tipo: 'apostila' | 'cartoes' | 'escrita'; unidade: string };
+  | { tipo: 'escuta'; codigo: string }
+  | { tipo: 'certificado'; unidade: string }
+  | { tipo: 'apostila' | 'cartoes' | 'escrita' | 'ditado'; unidade: string };
 
 /** Lê o pedido de impressão do endereço. `null`: é o site normal. */
 export function pedidoDoEndereco(busca: string): Pedido | null {
   const q = new URLSearchParams(busca);
   const gabarito = q.get('gabarito');
   if (gabarito) return { tipo: 'gabarito', codigo: gabarito };
+  const escuta = q.get('escuta');
+  if (escuta) return { tipo: 'escuta', codigo: escuta };
+  const ditado = q.get('ditado');
+  if (ditado) return { tipo: 'ditado', unidade: ditado };
   const tipo = q.get('imprimir');
   if (tipo === 'prova') return { tipo, codigo: q.get('codigo') ?? '' };
-  if (tipo === 'apostila' || tipo === 'cartoes' || tipo === 'escrita') return { tipo, unidade: q.get('unidade') ?? '' };
+  if (tipo === 'apostila' || tipo === 'cartoes' || tipo === 'escrita' || tipo === 'certificado') return { tipo, unidade: q.get('unidade') ?? '' };
   return null;
 }
 
@@ -42,6 +57,8 @@ export function pedidoDoEndereco(busca: string): Pedido | null {
 export function enderecoDe(p: Pedido): string {
   const base = `${location.origin}${location.pathname}`;
   if (p.tipo === 'gabarito') return `${base}?gabarito=${encodeURIComponent(p.codigo)}`;
+  if (p.tipo === 'escuta') return `${base}?escuta=${encodeURIComponent(p.codigo)}`;
+  if (p.tipo === 'ditado') return `${base}?ditado=${encodeURIComponent(p.unidade)}`;
   if (p.tipo === 'prova') return `${base}?imprimir=prova&codigo=${encodeURIComponent(p.codigo)}`;
   return `${base}?imprimir=${p.tipo}&unidade=${encodeURIComponent(p.unidade)}`;
 }
@@ -86,15 +103,18 @@ export function Impresso({ pedido }: { pedido: Pedido }) {
     document.body.classList.add('impresso');
     return () => document.body.classList.remove('impresso');
   }, []);
-  if (pedido.tipo === 'prova' || pedido.tipo === 'gabarito') {
+  if (pedido.tipo === 'prova' || pedido.tipo === 'gabarito' || pedido.tipo === 'escuta') {
     const p = provaDoCodigo(pedido.codigo);
     if (!p) return <Erro texto={`Não achei a prova com o código "${pedido.codigo}". Confira as letras na folha.`} />;
+    if (pedido.tipo === 'escuta') return <AudioDaEscuta prova={p} />;
     return pedido.tipo === 'prova' ? <ProvaImpressa prova={p} /> : <Gabarito prova={p} />;
   }
   const u = UNIDADES.find((x) => x.id === pedido.unidade);
   if (!u) return <Erro texto="Essa unidade não existe." />;
   if (pedido.tipo === 'apostila') return <Apostila unidade={u} />;
   if (pedido.tipo === 'cartoes') return <Cartoes unidade={u} />;
+  if (pedido.tipo === 'ditado') return <AudioDoDitado unidade={u} />;
+  if (pedido.tipo === 'certificado') return <Certificado unidade={u} />;
   return <Escrita unidade={u} />;
 }
 
@@ -102,6 +122,13 @@ export function Impresso({ pedido }: { pedido: Pedido }) {
 
 /** O enunciado na folha. No de sentido, a palavra entra no meio, com a leitura em cima. */
 function EnunciadoImpresso({ q }: { q: Questao }) {
+  if (!deItem(q))
+    return (
+      <>
+        {q.tipo === 'escuta' ? 'Ouça a frase desta questão pelo código no alto da folha. O que ela quer dizer?' : q.enunciado}
+        <FraseDaQuestao q={q} />
+      </>
+    );
   if (q.tipo !== 'significado') return <>{q.enunciado}</>;
   return (
     <>
@@ -115,6 +142,7 @@ function EnunciadoImpresso({ q }: { q: Questao }) {
 }
 
 function OpcaoTexto({ q, o }: { q: Questao; o: string }) {
+  if (!deItem(q)) return <OpcaoDeFrase q={q} o={o} />;
   if (q.tipo === 'palavra') {
     // Toda alternativa em japonês leva furigana, não só a certa.
     const p = palavraDoCurso(o);
@@ -125,6 +153,7 @@ function OpcaoTexto({ q, o }: { q: Questao; o: string }) {
 
 function ProvaImpressa({ prova }: { prova: Prova }) {
   const u = prova.unidade;
+  const temEscuta = prova.questoes.some((q) => !deItem(q) && q.tipo === 'escuta');
   return (
     <main class="im" data-testid="im-prova">
       <Barra titulo={`Prova da unidade ${u.numero}`} />
@@ -138,6 +167,12 @@ function ProvaImpressa({ prova }: { prova: Prova }) {
           </p>
           <p class="im-linhas">Nome: ______________________________ Data: ____/____/______</p>
         </div>
+        {temEscuta && (
+          <div class="im-codigo" data-testid="im-qr-escuta">
+            <Qr texto={enderecoDe({ tipo: 'escuta', codigo: prova.codigo })} />
+            <small>áudio da escuta</small>
+          </div>
+        )}
         <div class="im-codigo">
           <Qr texto={enderecoDe({ tipo: 'gabarito', codigo: prova.codigo })} />
           <b data-testid="im-codigo">{prova.codigo}</b>
@@ -146,11 +181,12 @@ function ProvaImpressa({ prova }: { prova: Prova }) {
       </header>
       <p class="im-instrucao">Marque uma alternativa em cada questão. Sem consulta. Depois confira no gabarito.</p>
       <ol class="im-questoes">
-        {prova.questoes.map((q) => (
+        {prova.questoes.map((q, i) => (
           <li key={q.n} class="im-questao">
-            <p>
+            {u.revisao && prova.questoes[i - 1]?.secao !== q.secao && <h2 class="im-secao">{NOME_SECAO[q.secao]}</h2>}
+            <div>
               <EnunciadoImpresso q={q} />
-            </p>
+            </div>
             <ul class="im-opcoes">
               {q.opcoes.map((o, i) => (
                 <li key={o}>
@@ -167,6 +203,15 @@ function ProvaImpressa({ prova }: { prova: Prova }) {
 
 /** A explicação de cada resposta: a palavra inteira, com leitura e sentido. */
 function Explicacao({ q }: { q: Questao }) {
+  if (!deItem(q))
+    return (
+      <span class="im-explica">
+        <span lang="ja">
+          <Furigana texto={q.frase.jp} leitura={q.frase.kana} />
+        </span>{' '}
+        = {q.frase.pt}
+      </span>
+    );
   return (
     <span class="im-explica">
       <span lang="ja">
@@ -217,6 +262,9 @@ function Apostila({ unidade: u }: { unidade: Unidade }) {
   const tarefas = TAREFAS[u.id] ?? [];
   const rng = seededRng(hashString(u.id));
   const montar = u.gramatica.flatMap((g) => exemplosDoPonto(g).slice(1)).map((e) => ({ e, pecas: pecasParaMontar(e, rng) }));
+  const lacunas = u.revisao ? [] : lacunasDa(u, rng);
+  const ditado = u.revisao ? [] : ditadoDa(u);
+  const leitura = leituraDa(u);
   return (
     <main class="im" data-testid="im-apostila">
       <Barra titulo={`Apostila da unidade ${u.numero}`} />
@@ -350,6 +398,61 @@ function Apostila({ unidade: u }: { unidade: Unidade }) {
         </section>
       )}
 
+      {lacunas.length > 0 && (
+        <section class="im-exercicios" data-testid="im-completar">
+          <h2>Exercício: complete</h2>
+          <p class="im-instrucao">Escreva a peça que falta. As opções estão entre parênteses.</p>
+          <ol class="im-lista">
+            {lacunas.map((l) => (
+              <li key={l.exemplo.jp} class="im-questao">
+                <p lang="ja">
+                  {l.antes.map((x, i) => (
+                    <Furigana key={i} texto={x.t} leitura={x.kana} />
+                  ))}
+                  <span class="im-lacuna">&nbsp;</span>
+                  {l.depois.map((x, i) => (
+                    <Furigana key={i} texto={x.t} leitura={x.kana} />
+                  ))}
+                  {l.exemplo.jp.slice(-1)} <span class="im-opcoes">({l.opcoes.join('・')})</span>
+                </p>
+                <p class="im-nota">{l.exemplo.pt}</p>
+              </li>
+            ))}
+          </ol>
+        </section>
+      )}
+
+      {ditado.length > 0 && (
+        <section class="im-exercicios" data-testid="im-ditado">
+          <h2>Ditado</h2>
+          <div class="im-ditado-cabeca">
+            <p class="im-instrucao">
+              Aponte a câmera para o código: ele abre o áudio das frases. Ouça cada uma quantas vezes quiser e escreva em kana.
+            </p>
+            <Qr texto={enderecoDe({ tipo: 'ditado', unidade: u.id })} />
+          </div>
+          <ol class="im-lista">
+            {ditado.map((e) => (
+              <li key={e.jp} class="im-questao">
+                <p class="im-linha-escrever">&nbsp;</p>
+              </li>
+            ))}
+          </ol>
+        </section>
+      )}
+
+      {leitura && (
+        <section data-testid="im-leitura">
+          <h2>Leitura: {leitura.titulo}</h2>
+          <p class="im-instrucao">Leia em voz alta. A tradução está no fim.</p>
+          <p lang="ja" class="im-leitura">
+            {leitura.frases.map((f) => (
+              <Furigana key={f.jp} texto={f.jp} leitura={f.kana} />
+            ))}
+          </p>
+        </section>
+      )}
+
       {notas.length > 0 && (
         <section>
           <h2>Cultura</h2>
@@ -377,20 +480,139 @@ function Apostila({ unidade: u }: { unidade: Unidade }) {
         </section>
       )}
 
-      {montar.length > 0 && (
-        <section class="im-respostas">
-          <h2>Respostas do exercício</h2>
-          <ol class="im-lista">
-            {montar.map(({ e }) => (
-              <li key={e.jp} lang="ja">
-                <Furigana texto={e.jp} leitura={e.kana} />
-              </li>
-            ))}
-          </ol>
+      {(montar.length > 0 || lacunas.length > 0 || ditado.length > 0 || leitura) && (
+        <section class="im-respostas" data-testid="im-respostas">
+          <h2>Respostas dos exercícios</h2>
+          {montar.length > 0 && (
+            <>
+              <h3>Monte a frase</h3>
+              <ol class="im-lista">
+                {montar.map(({ e }) => (
+                  <li key={e.jp} lang="ja">
+                    <Furigana texto={e.jp} leitura={e.kana} />
+                  </li>
+                ))}
+              </ol>
+            </>
+          )}
+          {lacunas.length > 0 && (
+            <>
+              <h3>Complete</h3>
+              <ol class="im-lista">
+                {lacunas.map((l) => (
+                  <li key={l.exemplo.jp} lang="ja">
+                    {l.resposta.t}
+                  </li>
+                ))}
+              </ol>
+            </>
+          )}
+          {leitura && (
+            <>
+              <h3>Tradução da leitura</h3>
+              <p>{leitura.frases.map((f) => f.pt).join(' ')}</p>
+            </>
+          )}
+          {ditado.length > 0 && (
+            <>
+              <h3>Ditado</h3>
+              <ol class="im-lista">
+                {ditado.map((e) => (
+                  <li key={e.jp} lang="ja">
+                    {e.kana} <span class="im-nota">{e.pt}</span>
+                  </li>
+                ))}
+              </ol>
+            </>
+          )}
         </section>
       )}
       {u.revisao && <p>Esta é a unidade de revisão do nível: a apostila de cada unidade tem o conteúdo.</p>}
       <p class="im-rodape">Pontos de gramática do N5 nesta unidade: {u.gramatica.map((g) => GRAMATICA_N5[g]).join(' · ') || 'nenhum'}.</p>
+    </main>
+  );
+}
+
+/* ───────── Áudio da escuta e certificado ───────── */
+
+/** A página que o QR da prova impressa abre: um botão por questão de escuta. */
+function AudioDaEscuta({ prova }: { prova: Prova }) {
+  const escuta = prova.questoes.filter((q) => !deItem(q) && q.tipo === 'escuta');
+  return (
+    <main class="im im-audio" data-testid="im-audio-escuta">
+      <h1>Escuta · {prova.codigo}</h1>
+      <p>Toque na questão para ouvir a frase. Pode ouvir mais de uma vez.</p>
+      <ol class="im-lista">
+        {escuta.map((q) => (
+          <li key={q.n}>
+            <button class="primary" onClick={() => !deItem(q) && void tocarSequencia([falaDoExemplo(q.frase)])} data-testid="im-ouvir">
+              Questão {q.n}
+            </button>
+          </li>
+        ))}
+      </ol>
+    </main>
+  );
+}
+
+const dataPorExtenso = (ms: number) => new Date(ms).toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' });
+
+/** O certificado do nível: só com o simulado aprovado neste aparelho. */
+function Certificado({ unidade: u }: { unidade: Unidade }) {
+  const save = cursoSave();
+  const p = save.provas[u.id];
+  if (!u.revisao || !p?.aprovada) return <Erro texto="O certificado sai depois do simulado do nível, com 80% ou mais." />;
+  const nivel = u.id.split('-')[0]!.toUpperCase();
+  return (
+    <main class="im im-certificado" data-testid="im-certificado">
+      <Barra titulo={`Certificado do ${nivel}`} />
+      <div class="im-cert-folha">
+        <p class="im-cert-marca">Kotoba Arcade · curso de japonês</p>
+        <h1>Certificado de conclusão</h1>
+        <p class="im-cert-texto">Certificamos que</p>
+        <p class="im-cert-nome" data-testid="im-cert-nome">
+          {save.nome || '______________________________'}
+        </p>
+        <p class="im-cert-texto">
+          concluiu o nível {nivel} do curso, equivalente ao conteúdo do JLPT N5, com aprovação no simulado final: {Math.round(p.melhor * 100)}%.
+        </p>
+        <p class="im-cert-texto">
+          {UNIDADES.filter((x) => x.id.startsWith(`${u.id.split('-')[0]}-`) && !x.revisao).length} unidades, com vocabulário, kanji, gramática, leitura, escuta e notas de cultura.
+        </p>
+        {p.quando && <p class="im-cert-data">{dataPorExtenso(p.quando)}</p>}
+        <p class="im-cert-aviso">Certificado do curso, não do JLPT. O JLPT é aplicado pela Japan Foundation e pelo JEES.</p>
+      </div>
+    </main>
+  );
+}
+
+/* ───────── Áudio do ditado ───────── */
+
+/** A página que o QR do ditado abre (no celular): um botão por frase, sem o texto. */
+function AudioDoDitado({ unidade: u }: { unidade: Unidade }) {
+  const frases = ditadoDa(u);
+  const [ver, setVer] = useState(false);
+  return (
+    <main class="im im-audio" data-testid="im-audio-ditado">
+      <h1>
+        Ditado · unidade {u.numero}
+      </h1>
+      <p>Toque numa frase para ouvir. Escreva em kana na folha.</p>
+      <ol class="im-lista">
+        {frases.map((e, i) => (
+          <li key={e.jp}>
+            <button class="primary" onClick={() => void tocarSequencia([falaDoExemplo(e)])} data-testid="im-ouvir">
+              Ouvir a frase {i + 1}
+            </button>
+            {ver && (
+              <span lang="ja" class="im-nota">
+                {e.kana}
+              </span>
+            )}
+          </li>
+        ))}
+      </ol>
+      <button onClick={() => setVer(!ver)}>{ver ? 'Esconder as respostas' : 'Ver as respostas'}</button>
     </main>
   );
 }
@@ -401,11 +623,17 @@ interface Cartao {
   frente: string;
   leitura?: string;
   verso: string;
+  /** A figura da palavra, no verso, junto do significado. */
+  img?: string;
 }
 
 function cartoesDa(u: Unidade): Cartao[] {
   return [
-    ...palavrasDa(u).map((p) => ({ frente: p.jp, leitura: p.kana, verso: p.pt })),
+    ...palavrasDa(u).map((p) => {
+      const f = figuraDoCurso(p, temFigura);
+      const img = f ? figuraUrl(f.img) : undefined;
+      return { frente: p.jp, leitura: p.kana, verso: p.pt, ...(img ? { img } : {}) };
+    }),
     ...u.kanji.map((k) => ({ frente: k.k, leitura: `${k.leitura} (${k.em})`, verso: significadoDoKanji(k.k) })),
   ];
 }
@@ -432,6 +660,7 @@ function Cartoes({ unidade: u }: { unidade: Unidade }) {
           <div class="im-folha im-cartoes im-verso">
             {f.map((c) => (
               <div key={c.frente + c.verso} class="im-cartao">
+                {c.img && <img class="im-cartao-img" src={c.img} alt="" data-testid="im-cartao-img" />}
                 <span lang="ja" class="im-cartao-leitura">
                   {c.leitura}
                 </span>

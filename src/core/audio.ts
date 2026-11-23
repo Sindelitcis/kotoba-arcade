@@ -9,6 +9,7 @@
  */
 import { app } from './app';
 import { avisarSemGravacao } from './sem-gravacao';
+import { legendar } from './legenda';
 import { acompanharVoz, esperarEfeitos, tocarEfeito } from './som/mixer';
 import { VOZ_PADRAO, VOZ_PALAVRA, type VozId } from './vozes';
 
@@ -152,6 +153,7 @@ function tocarJp(text: string, voz: VozId, alternativa: string | undefined, avis
     const a = new Audio(VOZES_URL + file);
     playing = a;
     acompanharVoz(a);
+    legendar(a, text, alternativa);
     a.play().catch(() => {});
   });
 }
