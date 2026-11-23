@@ -32,4 +32,80 @@ export const TAREFAS: Readonly<Record<string, readonly string[]>> = {
   'a1-17': ['Conte três coisas que você já fez alguma vez na vida, com 〜たことがあります.', 'Descreva o seu dia de ontem com 〜てから e 〜まえに.'],
   'a1-18': ['Ensaie o que você diria ao chegar num hospital: o que dói e desde quando.', 'Dê um conselho a um amigo resfriado, com 〜ほうがいいです.'],
   'a1-19': ['Diga como está o tempo hoje e como deve estar amanhã, com でしょう.', 'Compare duas estações do ano e diga qual é a sua preferida.'],
+  'a2-01': [
+    'Escreva três planos seus: um com 〜ようと思います, um com つもり e um com よてい.',
+    'Convide alguém, em voz alta, com a forma volitiva: いっしょに〜よう.',
+  ],
+  'a2-02': [
+    'Descreva a casa dos seus sonhos em três frases, juntando motivos com し.',
+    'Olhe três coisas à sua volta e diga, de cada uma, o que ela parece, com 〜そう.',
+  ],
+  'a2-03': [
+    'Conte três favores: um que você fez (てあげました), um que fizeram para você (てくれました) e um que você pediu (てもらいました).',
+    'Antes de dormir, diga o que vai deixar pronto para amanhã, com 〜ておきます.',
+  ],
+  'a2-04': [
+    'Escreva cinco coisas que você consegue fazer em japonês, na forma potencial.',
+    'Simule o guichê: pergunte onde fica a fila e se precisa de carimbo, com か e かどうか.',
+  ],
+  'a2-05': [
+    'Escreva três frases com たら sobre o que você vai fazer quando chegar ao Japão.',
+    'Explique a alguém, em japonês, como chegar à sua casa a partir de uma esquina, com 〜と.',
+  ],
+  'a2-06': [
+    'Lembre de uma compra que deu errado e conte em três frases, com のに e ので.',
+    'Escreva o que você diria no caixa para trocar um produto, de forma educada.',
+  ],
+  'a2-07': [
+    'Conte duas decisões suas, uma com ことにしました e outra com ことになりました.',
+    'Diga para que você estuda japonês, com ために, e uma coisa que faz para não esquecer, com ように.',
+  ],
+  'a2-08': [
+    'Prepare as respostas de uma entrevista: o seu ponto forte, o fraco e o seu passatempo.',
+    'Reescreva três frases comuns com keigo de respeito: いらっしゃる, おっしゃる e めしあがる.',
+  ],
+  'a2-09': [
+    'Escreva a sua apresentação para o primeiro dia de trabalho, com もうします e おせわになります.',
+    'Conte uma coisa que você fez sem querer, com 〜てしまいました.',
+  ],
+  'a2-10': [
+    'Escreva três regras da sua casa ou do seu trabalho: uma obrigatória, uma opcional e uma proibida.',
+    'Conte o que os seus pais faziam você fazer quando era criança, com a forma causativa.',
+  ],
+  'a2-11': [
+    'Ensaie, em voz alta, o que diria no balcão do hospital: o que sente, desde quando e o que acha que é.',
+    'Conte duas notícias que você ouviu esta semana, com そうです.',
+  ],
+  'a2-12': [
+    'Escreva a receita de um prato que você sabe fazer, passo a passo, em quatro frases.',
+    'Diga duas coisas que você costuma fazer ao mesmo tempo, com ながら.',
+  ],
+  'a2-13': [
+    'Conte o seu último fim de semana com 〜たり〜たりしました.',
+    'Convide alguém para um programa leve, com でも: お茶でも飲みませんか.',
+  ],
+  'a2-14': [
+    'Escreva três coisas que você passou a conseguir fazer em japonês, com ようになりました.',
+    'Monte o seu plano de estudo da semana com ようにしています.',
+  ],
+  'a2-15': [
+    'Apresente a sua família usando as palavras de dentro (兄, 母) e conte como chamaria a família de um amigo.',
+    'Conte uma bronca e um elogio que você já recebeu, na voz passiva.',
+  ],
+  'a2-16': [
+    'Explique, em japonês, o caminho da sua casa até um lugar perto, com とき e 〜と.',
+    'Escreva três prazos da sua semana com までに.',
+  ],
+  'a2-17': [
+    'Descreva a sua estação preferida e uma festa dela, em quatro frases.',
+    'Durante um dia, diga em voz alta em que ponto você está de cada coisa, com ところ.',
+  ],
+  'a2-18': [
+    'Leia uma notícia curta e conte o que ela diz, com と言っていました e そうです.',
+    'Compare o Brasil e o Japão em três frases, com より e com ほど〜ない.',
+  ],
+  'a2-19': [
+    'Escreva três arrependimentos leves, com 〜ばよかった.',
+    'Dê três conselhos a alguém que vai morar no Japão, com 〜たらどうですか.',
+  ],
 };

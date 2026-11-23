@@ -92,14 +92,14 @@ export function novaSemente(rng: Rng = Math.random): string {
 }
 
 export function codigoDaProva(u: Unidade, semente: string): string {
-  return `U${String(u.numero).padStart(2, '0')}-${semente}`;
+  return `U${String(u.ordem).padStart(2, '0')}-${semente}`;
 }
 
 /** "u04-k7qh", com espaço ou sem traço, também vale. */
 export function lerCodigo(texto: string): { unidade: Unidade; semente: string } | null {
   const m = /^U?(\d{1,2})[\s-]*([A-Z0-9]{4})$/.exec(texto.trim().toUpperCase());
   if (!m) return null;
-  const unidade = UNIDADES.find((u) => u.numero === Number(m[1]));
+  const unidade = UNIDADES.find((u) => u.ordem === Number(m[1]));
   const semente = m[2] as string;
   if (!unidade || [...semente].some((c) => !LETRAS.includes(c))) return null;
   return { unidade, semente };
@@ -148,10 +148,10 @@ function sortear(itens: readonly ItemPratica[], n: number, rng: Rng): ItemPratic
 /** A prova do código. Mesmo código, mesma prova. */
 export function montarProva(u: Unidade, semente: string): Prova {
   const rng = seededRng(hashString(`${u.id}:${semente}`));
-  const ate = itensAte(u.numero);
-  const anteriores = itensAte(u.numero - 1);
+  const ate = itensAte(u.ordem);
+  const anteriores = itensAte(u.ordem - 1);
   const daUnidade = ate.filter((i) => !anteriores.some((x) => x.id === i.id));
-  if (u.revisao) return { codigo: codigoDaProva(u, semente), unidade: u, questoes: questoesDoSimulado(u, anteriores, rng) };
+  if (u.revisao) return { codigo: codigoDaProva(u, semente), unidade: u, questoes: questoesDoSimulado(u, itensAte(u.ordem - 1, u.nivel), rng) };
   const escolhidos = [...sortear(daUnidade, QUESTOES_DA_UNIDADE, rng), ...sortear(anteriores, QUESTOES_DE_REVISAO, rng)];
   return { codigo: codigoDaProva(u, semente), unidade: u, questoes: questoesDeItens(escolhidos, ate, rng, 'vocabulario') };
 }
@@ -176,11 +176,11 @@ function questoesDeItens(itens: readonly ItemPratica[], pool: readonly ItemPrati
 const fraseQueConta = (e: Exemplo) => e.pt.length >= 14;
 
 function questoesDoSimulado(u: Unidade, anteriores: readonly ItemPratica[], rng: Rng): Questao[] {
-  const nivel = UNIDADES.filter((x) => x.numero < u.numero && !x.revisao);
+  const nivel = UNIDADES.filter((x) => x.nivel === u.nivel && x.ordem < u.ordem && !x.revisao);
   const vocab = questoesDeItens(shuffle(rng, anteriores), anteriores, rng, 'vocabulario', SIMULADO.vocabulario);
 
   // Gramática: completar a frase, com as peças que o nível ensinou.
-  const conhecidas = gramaticaAte(u.numero);
+  const conhecidas = gramaticaAte(u.ordem);
   const frases = nivel.flatMap(exemplosDaUnidade);
   const gramatica: QuestaoDeFrase[] = [];
   for (const e of shuffle(rng, frases)) {
@@ -222,11 +222,11 @@ function questoesDoSimulado(u: Unidade, anteriores: readonly ItemPratica[], rng:
 }
 
 export interface NotaJlpt {
-  /** Vocabulário, gramática e leitura juntos, de 0 a 120 (o N5 pede ao menos 38). */
+  /** Vocabulário, gramática e leitura juntos, de 0 a 120 (o N5 e o N4 pedem ao menos 38). */
   conhecimento: number;
-  /** Escuta, de 0 a 60 (o N5 pede ao menos 19). */
+  /** Escuta, de 0 a 60 (o N5 e o N4 pedem ao menos 19). */
   escuta: number;
-  /** De 0 a 180 (o N5 pede ao menos 80). */
+  /** De 0 a 180 (o N5 pede ao menos 80; o N4, 90). */
   total: number;
   /** Acertos por parte. */
   partes: Record<Secao, { acertos: number; total: number }>;
@@ -251,8 +251,19 @@ export function notaJlpt(p: Prova, respostas: readonly (string | undefined)[]): 
   return { conhecimento, escuta, total: conhecimento + escuta, partes };
 }
 
-/** Os mínimos do N5: 80 de 180 no total, 38 em conhecimento e leitura, 19 em escuta. */
-export const passariaNoN5 = (n: NotaJlpt): boolean => n.total >= 80 && n.conhecimento >= 38 && n.escuta >= 19;
+/**
+ * Os mínimos de cada nível do JLPT (jlpt.jp, "Scoring"): no N5, 80 de 180 no total; no N4, 90.
+ * Nos dois, 38 em conhecimento e leitura e 19 em escuta.
+ */
+export const MINIMOS_JLPT: Readonly<Record<'N5' | 'N4', { total: number; conhecimento: number; escuta: number }>> = {
+  N5: { total: 80, conhecimento: 38, escuta: 19 },
+  N4: { total: 90, conhecimento: 38, escuta: 19 },
+};
+
+export const passariaNoJlpt = (n: NotaJlpt, jlpt: 'N5' | 'N4'): boolean => {
+  const m = MINIMOS_JLPT[jlpt];
+  return n.total >= m.total && n.conhecimento >= m.conhecimento && n.escuta >= m.escuta;
+};
 
 export function provaDoCodigo(codigo: string): Prova | null {
   const c = lerCodigo(codigo);
@@ -286,8 +297,8 @@ export const NIVEL_PARA_PASSAR = 3;
 
 /** As questões de nivelamento de uma unidade. */
 export function questoesDeNivelamento(u: Unidade, rng: Rng): QuestaoDeItem[] {
-  const ate = itensAte(u.numero);
-  const anteriores = itensAte(u.numero - 1);
+  const ate = itensAte(u.ordem);
+  const anteriores = itensAte(u.ordem - 1);
   const daUnidade = ate.filter((i) => !anteriores.some((x) => x.id === i.id));
   const out: QuestaoDeItem[] = [];
   for (const item of shuffle(rng, daUnidade)) {

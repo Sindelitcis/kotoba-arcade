@@ -12,7 +12,7 @@
  *   Esc             parar aqui (no mapa: voltar ao fliperama)
  */
 import { useLayoutEffect, useMemo, useRef, useState } from 'preact/hooks';
-import { palavrasDa, UNIDADES, type Palavra, type Unidade } from '../content/curso';
+import { NIVEIS, NomeDaUnidade, nomeDaUnidade, oQueAbre, palavrasDa, seguinteDe, UNIDADES, type Palavra, type Unidade } from '../content/curso';
 import { SITUACOES } from '../content/escola';
 import { app, commit, cursoAberto, cursoSave, go } from '../core/app';
 import { cenaStyle } from '../core/arte';
@@ -104,7 +104,7 @@ export function CursoTela() {
           </button>
           <div>
             <h1>
-              Unidade {u.numero} · {u.titulo}
+              {NomeDaUnidade(u)} · {u.titulo}
             </h1>
             <small class="muted">Prova da unidade</small>
           </div>
@@ -176,7 +176,7 @@ function Mapa() {
           ← Fliperama <kbd>Esc</kbd>
         </button>
         <div>
-          <h1>Curso · A1</h1>
+          <h1>Curso · {prox ? prox.unidade.nivel : NIVEIS.map((n) => n.nivel).join(' e ')}</h1>
           <small class="muted">Uma unidade depois da outra. Cada uma libera a seguinte.</small>
         </div>
       </header>
@@ -188,7 +188,7 @@ function Mapa() {
           </span>
           <span class="jornada-faixa-txt">
             <b>
-              Unidade {prox.unidade.numero} · {prox.unidade.titulo}
+              {NomeDaUnidade(prox.unidade)} · {prox.unidade.titulo}
             </b>
             <span>
               {prox.prova ? 'As partes estão feitas. Falta a prova.' : `Parte ${prox.bloco + 1} de ${blocosDa(prox.unidade).length}: ${NOME_BLOCO[(blocosDa(prox.unidade)[prox.bloco] as Bloco).tipo]}`}
@@ -196,7 +196,7 @@ function Mapa() {
           </span>
         </button>
       ) : (
-        <p class="notice">O A1 inteiro está feito. Dá para refazer qualquer unidade.</p>
+        <p class="notice">O curso inteiro está feito, do A1 ao {NIVEIS[NIVEIS.length - 1]!.nivel}. Dá para refazer qualquer unidade.</p>
       )}
 
       {!comecou && (
@@ -210,8 +210,13 @@ function Mapa() {
 
       <ModuloZeroNoMapa feitos={save.modulo0 ?? 0} />
 
+      {NIVEIS.map((n) => (
+      <section key={n.nivel} class="cs-nivel" data-testid="cs-nivel" data-nivel={n.nivel}>
+      <h2>
+        {n.nivel} · JLPT {n.jlpt}
+      </h2>
       <ol class="cs-unidades">
-        {UNIDADES.map((x) => {
+        {UNIDADES.filter((x) => x.nivel === n.nivel).map((x) => {
           const livre = liberada(save, x.id);
           const feita = venceu(save, x.id);
           const total = blocosDa(x).length;
@@ -239,7 +244,7 @@ function Mapa() {
                     </span>
                   ) : (
                     <span class="cs-estado">
-                      <Icone nome="lock" /> Libera depois da unidade {x.numero - 1}
+                      <Icone nome="lock" /> Libera depois da {nomeDaUnidade(UNIDADES[x.ordem - 2] ?? x)}
                     </span>
                   )}
                 </span>
@@ -273,6 +278,8 @@ function Mapa() {
           );
         })}
       </ol>
+      </section>
+      ))}
 
       <Gabarito />
     </main>
@@ -345,7 +352,7 @@ function Tocador({ unidade, bloco }: { unidade: Unidade; bloco: number }) {
         </button>
         <div>
           <h1>
-            Unidade {unidade.numero} · {unidade.titulo}
+            {NomeDaUnidade(unidade)} · {unidade.titulo}
           </h1>
           <small class="muted" data-testid="cs-parte">
             Parte {bloco + 1} de {blocos.length} · {NOME_BLOCO[b.tipo]}
@@ -393,7 +400,7 @@ function BlocoView({ unidade, bloco, onFim }: { unidade: Unidade; bloco: Bloco; 
 
 /** Entre um bloco e outro: o que foi feito e o que vem. Enter segue, Esc para. */
 function Intervalo({ unidade, bloco, total, acertos, concluiu, onParar }: { unidade: Unidade; bloco: number; total: number; acertos: number; concluiu: boolean; onParar: () => void }) {
-  const seguinte = UNIDADES[unidade.numero];
+  const seguinte = seguinteDe(unidade);
   const prox = blocosDa(unidade)[bloco + 1];
   const jaVenceu = venceu(cursoSave(), unidade.id);
   const seguir = () => {
@@ -415,14 +422,14 @@ function Intervalo({ unidade, bloco, total, acertos, concluiu, onParar }: { unid
         {concluiu ? (
           <>
             <h2 class="cs-titulo" data-testid="cs-unidade-feita">
-              Partes da unidade {unidade.numero} feitas
+              Partes da {nomeDaUnidade(unidade)} feitas
             </h2>
             <p class="lc-linha">O objetivo era: “Consigo {unidade.consigo}.”</p>
             {jaVenceu ? (
               <p class="lc-linha">A prova desta unidade já foi aprovada. Pode refazê-la pelo mapa quando quiser.</p>
             ) : (
               <p class="lc-linha">
-                Agora vem a prova. Passando com 80%, {seguinte ? `a unidade ${seguinte.numero} abre` : 'o A1 fica completo'}. Pode fazer agora ou depois: o curso guarda este ponto.
+                Agora vem a prova. Passando com 80%, {oQueAbre(unidade)}. Pode fazer agora ou depois: o curso guarda este ponto.
               </p>
             )}
           </>
@@ -441,7 +448,7 @@ function Intervalo({ unidade, bloco, total, acertos, concluiu, onParar }: { unid
           Parar aqui <kbd>Esc</kbd>
         </button>
         <button class="primary" onClick={seguir} data-testid="cs-seguir">
-          {concluiu ? (!jaVenceu ? 'Ir para a prova' : seguinte ? `Unidade ${seguinte.numero}` : 'Ver o curso') : 'Seguir'} <kbd>Enter</kbd>
+          {concluiu ? (!jaVenceu ? 'Ir para a prova' : seguinte ? NomeDaUnidade(seguinte) : 'Ver o curso') : 'Seguir'} <kbd>Enter</kbd>
         </button>
       </div>
     </div>
@@ -451,7 +458,7 @@ function Intervalo({ unidade, bloco, total, acertos, concluiu, onParar }: { unid
 /* ───────── Objetivo ───────── */
 
 function Objetivo({ unidade, onFim }: { unidade: Unidade; onFim: () => void }) {
-  const anterior = UNIDADES[unidade.numero - 2];
+  const anterior = UNIDADES[unidade.ordem - 2];
   // Revisão rápida: algumas palavras da unidade anterior, para lembrar antes de começar.
   const revisar = useMemo(() => (anterior ? palavrasDa(anterior).filter((p) => app.data.cards[cartaDaPalavra(p)]).slice(0, 5) : []), [anterior]);
   useTeclado((tecla) => {
@@ -473,7 +480,7 @@ function Objetivo({ unidade, onFim }: { unidade: Unidade; onFim: () => void }) {
         )}
         {revisar.length > 0 && (
           <>
-            <p class="lc-linha">Antes, lembre da unidade {anterior?.numero}:</p>
+            <p class="lc-linha">Antes, lembre da {anterior ? nomeDaUnidade(anterior) : ''}:</p>
             <ul class="cs-revisar">
               {revisar.map((p) => (
                 <li key={p.jp}>
@@ -516,7 +523,7 @@ function Estudo({ unidade, bloco, onFim }: { unidade: Unidade; bloco: Extract<Bl
         }}
       />
     );
-  return <PraticaView itens={itensDoBloco(bloco)} conhecidos={itensAte(unidade.numero)} cartaoDe={(i) => cartaoDoItem(i, bloco, unidade)} onFim={onFim} />;
+  return <PraticaView itens={itensDoBloco(bloco)} conhecidos={itensAte(unidade.ordem)} cartaoDe={(i) => cartaoDoItem(i, bloco, unidade)} onFim={onFim} />;
 }
 
 /** O cartão da palavra, com a figura dela quando o site tem uma. */
@@ -540,13 +547,13 @@ function cartaoDoItem(i: ItemPratica, bloco: Bloco | null, unidade: Unidade) {
 function Miniteste({ unidade, onFim }: { unidade: Unidade; onFim: (acertos?: number) => void }) {
   const itens = useMemo(() => itensDoMiniteste(unidade, Math.random), [unidade]);
   if (itens.length === 0) return <Vazio texto="Esta unidade não tem palavras para o mini-teste." onFim={onFim} />;
-  return <PraticaView itens={itens} conhecidos={itensAte(unidade.numero)} cartaoDe={(i) => cartaoDoItem(i, null, unidade)} onFim={onFim} opcoes={OPCOES_PROVA} rotulo="Mini-teste" />;
+  return <PraticaView itens={itens} conhecidos={itensAte(unidade.ordem)} cartaoDe={(i) => cartaoDoItem(i, null, unidade)} onFim={onFim} opcoes={OPCOES_PROVA} rotulo="Mini-teste" />;
 }
 
 function Revisao({ unidade, onFim }: { unidade: Unidade; onFim: (acertos?: number) => void }) {
   const itens = useMemo(() => itensDaRevisao(unidade, app.data.cards, Math.random), [unidade]);
   if (itens.length === 0) return <Vazio texto="Ainda não há nada visto para revisar. Faça as unidades antes desta." onFim={onFim} />;
-  return <PraticaView itens={itens} conhecidos={itensAte(unidade.numero)} cartaoDe={(i) => cartaoDoItem(i, null, unidade)} onFim={onFim} />;
+  return <PraticaView itens={itens} conhecidos={itensAte(unidade.ordem)} cartaoDe={(i) => cartaoDoItem(i, null, unidade)} onFim={onFim} />;
 }
 
 function PraticaView({
@@ -558,7 +565,7 @@ function PraticaView({
   rotulo = 'Prática',
 }: {
   itens: ItemPratica[];
-  conhecidos: ItemPratica[];
+  conhecidos: readonly ItemPratica[];
   cartaoDe: (i: ItemPratica) => ReturnType<typeof cartaoDaPalavra> | null;
   onFim: (acertos: number) => void;
   opcoes?: number;

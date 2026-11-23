@@ -1,3 +1,5 @@
+import { AULAS_A2 } from './aulas-a2';
+
 /**
  * A aula falada de cada unidade (docs/curso.md, "A lição"): quadros curtos que o professor fala
  * na Voz 1, com o exemplo em japonês na voz japonesa. A pessoa passa de quadro com Enter.
@@ -18,7 +20,7 @@ export interface QuadroAula {
   ex?: string;
 }
 
-export const AULAS_DO_CURSO: Readonly<Record<string, readonly QuadroAula[]>> = {
+const AULAS_A1: Readonly<Record<string, readonly QuadroAula[]>> = {
   'a1-01': [
     { fala: 'Primeira unidade. O objetivo é se apresentar: dizer o nome, de onde você é e o que faz. Para isso, uma frase só já resolve quase tudo.' },
     { fala: 'A frase base do japonês é: o assunto, a partícula do assunto, a informação e, no fim, {です}, que fecha a frase com educação. É como dizer: quanto a mim, estudante, sou.', tela: 'A は B です。 → "Quanto a A, é B."', ex: 'desu' },
@@ -144,3 +146,5 @@ export const AULAS_DO_CURSO: Readonly<Record<string, readonly QuadroAula[]>> = {
     { fala: 'Para dizer que algo ficou de outro jeito, o adjetivo do primeiro tipo troca a ponta e ganha {なる}: frio vira {さむくなる}. Com substantivo, é {になる}.', tela: 'さむい → さむくなりました · はるになりました', ex: 'ku-naru' },
   ],
 };
+
+export const AULAS_DO_CURSO: Readonly<Record<string, readonly QuadroAula[]>> = { ...AULAS_A1, ...AULAS_A2 };

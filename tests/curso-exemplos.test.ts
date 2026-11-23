@@ -1,16 +1,16 @@
 // @vitest-environment node
 import { describe, expect, it } from 'vitest';
-import { GRAMATICA_N5, UNIDADES } from '../src/content/curso';
+import { GRAMATICA, UNIDADES } from '../src/content/curso';
 import { EXEMPLOS } from '../src/content/curso/exemplos';
 import { exemplosDaUnidade, exemplosDoPonto, problemasDoExemplo } from '../src/curso/exemplos';
 
 describe('exemplos de gramática do curso', () => {
-  it('todo ponto do N5 tem pelo menos dois exemplos', () => {
-    for (const id of Object.keys(GRAMATICA_N5)) expect(EXEMPLOS[id]?.length ?? 0, id).toBeGreaterThanOrEqual(2);
+  it('todo ponto do N5 e do N4 tem pelo menos dois exemplos', () => {
+    for (const id of Object.keys(GRAMATICA)) expect(EXEMPLOS[id]?.length ?? 0, id).toBeGreaterThanOrEqual(2);
   });
 
   it('não há exemplo de ponto que não existe', () => {
-    for (const id of Object.keys(EXEMPLOS)) expect(GRAMATICA_N5[id], id).toBeDefined();
+    for (const id of Object.keys(EXEMPLOS)) expect(GRAMATICA[id], id).toBeDefined();
   });
 
   // A regra de ensinar antes de cobrar vale também para o exemplo: ele não pode trazer palavra nova.

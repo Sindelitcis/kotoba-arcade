@@ -13,7 +13,7 @@
  */
 import qrcode from 'qrcode-generator';
 import { useEffect, useState } from 'preact/hooks';
-import { GRAMATICA_N5, palavrasDa, UNIDADES, type Unidade } from '../content/curso';
+import { GRAMATICA, jlptDo, NomeDaUnidade, nomeDaUnidade, palavrasDa, UNIDADES, type Unidade } from '../content/curso';
 import { AULAS_DO_CURSO } from '../content/curso/aulas';
 import { TAREFAS } from '../content/curso/tarefas';
 import { Furigana, Misto } from '../core/Furigana';
@@ -156,11 +156,11 @@ function ProvaImpressa({ prova }: { prova: Prova }) {
   const temEscuta = prova.questoes.some((q) => !deItem(q) && q.tipo === 'escuta');
   return (
     <main class="im" data-testid="im-prova">
-      <Barra titulo={`Prova da unidade ${u.numero}`} />
+      <Barra titulo={`Prova da ${nomeDaUnidade(u)}`} />
       <header class="im-cabeca">
         <div>
           <h1>
-            Kotoba Arcade · Unidade {u.numero} · {u.titulo}
+            Kotoba Arcade · {NomeDaUnidade(u)} · {u.titulo}
           </h1>
           <p>
             Prova · {prova.questoes.length} questões · para passar: {Math.ceil(prova.questoes.length * 0.8)} acertos (80%)
@@ -229,7 +229,7 @@ function Gabarito({ prova }: { prova: Prova }) {
       <header class="im-cabeca">
         <div>
           <h1>
-            Gabarito · Unidade {prova.unidade.numero} · {prova.unidade.titulo}
+            Gabarito · {NomeDaUnidade(prova.unidade)} · {prova.unidade.titulo}
           </h1>
           <p>
             Código {prova.codigo} · {prova.questoes.length} questões · passa com {Math.ceil(prova.questoes.length * 0.8)} acertos
@@ -267,11 +267,11 @@ function Apostila({ unidade: u }: { unidade: Unidade }) {
   const leitura = leituraDa(u);
   return (
     <main class="im" data-testid="im-apostila">
-      <Barra titulo={`Apostila da unidade ${u.numero}`} />
+      <Barra titulo={`Apostila da ${nomeDaUnidade(u)}`} />
       <header class="im-cabeca">
         <div>
           <h1>
-            Unidade {u.numero} · {u.titulo}
+            {NomeDaUnidade(u)} · {u.titulo}
           </h1>
           <p>Ao final: “Consigo {u.consigo}.”</p>
         </div>
@@ -308,7 +308,7 @@ function Apostila({ unidade: u }: { unidade: Unidade }) {
           <table class="im-tabela">
             <tbody>
               {u.kanji.map((k) => {
-                const outras = outrasLeituras(k).filter((o) => o.unidade !== u.numero);
+                const outras = outrasLeituras(k).filter((o) => o.unidade !== u.id);
                 return (
                   <tr key={`${k.k}${k.leitura}`}>
                     <td lang="ja" class="im-kanji">
@@ -322,7 +322,7 @@ function Apostila({ unidade: u }: { unidade: Unidade }) {
                           Outras leituras no curso:{' '}
                           {outras.map((o) => (
                             <span key={o.leitura} lang="ja">
-                              {o.leitura} ({o.em}, unidade {o.unidade}){' '}
+                              {o.leitura} ({o.em}, {o.nome}){' '}
                             </span>
                           ))}
                         </small>
@@ -528,7 +528,7 @@ function Apostila({ unidade: u }: { unidade: Unidade }) {
         </section>
       )}
       {u.revisao && <p>Esta é a unidade de revisão do nível: a apostila de cada unidade tem o conteúdo.</p>}
-      <p class="im-rodape">Pontos de gramática do N5 nesta unidade: {u.gramatica.map((g) => GRAMATICA_N5[g]).join(' · ') || 'nenhum'}.</p>
+      <p class="im-rodape">Pontos de gramática do {jlptDo(u.nivel)} nesta unidade: {u.gramatica.map((g) => GRAMATICA[g]).join(' · ') || 'nenhum'}.</p>
     </main>
   );
 }
@@ -562,7 +562,7 @@ function Certificado({ unidade: u }: { unidade: Unidade }) {
   const save = cursoSave();
   const p = save.provas[u.id];
   if (!u.revisao || !p?.aprovada) return <Erro texto="O certificado sai depois do simulado do nível, com 80% ou mais." />;
-  const nivel = u.id.split('-')[0]!.toUpperCase();
+  const nivel = u.nivel;
   return (
     <main class="im im-certificado" data-testid="im-certificado">
       <Barra titulo={`Certificado do ${nivel}`} />
@@ -574,7 +574,7 @@ function Certificado({ unidade: u }: { unidade: Unidade }) {
           {save.nome || '______________________________'}
         </p>
         <p class="im-cert-texto">
-          concluiu o nível {nivel} do curso, equivalente ao conteúdo do JLPT N5, com aprovação no simulado final: {Math.round(p.melhor * 100)}%.
+          concluiu o nível {nivel} do curso, equivalente ao conteúdo do JLPT {jlptDo(u.nivel)}, com aprovação no simulado final: {Math.round(p.melhor * 100)}%.
         </p>
         <p class="im-cert-texto">
           {UNIDADES.filter((x) => x.id.startsWith(`${u.id.split('-')[0]}-`) && !x.revisao).length} unidades, com vocabulário, kanji, gramática, leitura, escuta e notas de cultura.
@@ -595,7 +595,7 @@ function AudioDoDitado({ unidade: u }: { unidade: Unidade }) {
   return (
     <main class="im im-audio" data-testid="im-audio-ditado">
       <h1>
-        Ditado · unidade {u.numero}
+        Ditado · {nomeDaUnidade(u)}
       </h1>
       <p>Toque numa frase para ouvir. Escreva em kana na folha.</p>
       <ol class="im-lista">
@@ -646,7 +646,7 @@ function Cartoes({ unidade: u }: { unidade: Unidade }) {
   for (let i = 0; i < todos.length; i += POR_FOLHA) folhas.push(todos.slice(i, i + POR_FOLHA));
   return (
     <main class="im" data-testid="im-cartoes">
-      <Barra titulo={`Cartões da unidade ${u.numero} · imprima frente e verso, virando pela borda maior`} />
+      <Barra titulo={`Cartões da ${nomeDaUnidade(u)} · imprima frente e verso, virando pela borda maior`} />
       {folhas.map((f, i) => (
         <div key={i}>
           <div class="im-folha im-cartoes">
@@ -701,9 +701,9 @@ function Escrita({ unidade: u }: { unidade: Unidade }) {
   const kanji = [...new Set(u.kanji.map((k) => k.k))];
   return (
     <main class="im" data-testid="im-escrita">
-      <Barra titulo={`Escrita dos kanji da unidade ${u.numero}`} />
+      <Barra titulo={`Escrita dos kanji da ${nomeDaUnidade(u)}`} />
       <h1>
-        Unidade {u.numero} · escrita dos kanji
+        {NomeDaUnidade(u)} · escrita dos kanji
       </h1>
       <p class="im-instrucao">Siga a ordem dos traços. Cubra os modelos cinza e depois escreva sozinho nas caixas vazias.</p>
       {kanji.length === 0 && <p>Esta unidade não tem kanji novo.</p>}

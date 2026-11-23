@@ -6,13 +6,14 @@
  * As frases usam a mesma notação de peças dos exemplos (exemplos.ts).
  */
 import type { ExemploLinha } from './exemplos';
+import { LEITURAS_A2 } from './leituras-a2';
 
 export interface LeituraLinhas {
   titulo: string;
   frases: readonly ExemploLinha[];
 }
 
-export const LEITURAS: Readonly<Record<string, LeituraLinhas>> = {
+const LEITURAS_A1: Readonly<Record<string, LeituraLinhas>> = {
   'a1-01': {
     titulo: 'O Rafael se apresenta',
     frases: [
@@ -187,3 +188,5 @@ export const LEITURAS: Readonly<Record<string, LeituraLinhas>> = {
     ],
   },
 };
+
+export const LEITURAS: Readonly<Record<string, LeituraLinhas>> = { ...LEITURAS_A1, ...LEITURAS_A2 };

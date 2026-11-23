@@ -1,5 +1,7 @@
+import { EXEMPLOS_A2 } from './exemplos-a2';
+
 /**
- * Exemplos dos pontos de gramática do A1, feitos só com o que o curso já ensinou até a unidade
+ * Exemplos dos pontos de gramática do A1 (os do A2 ficam em exemplos-a2.ts), feitos só com o que o curso já ensinou até a unidade
  * do ponto (tests/curso-exemplos.test.ts confere peça por peça).
  *
  * Cada frase vem em peças, na ordem. A peça é:
@@ -24,12 +26,16 @@ export const GRAMATICA_EM_KANA: ReadonlySet<string> = new Set([
   '、', 'は', 'が', 'を', 'に', 'で', 'へ', 'と', 'も', 'の', 'か', 'や', 'よ', 'ね', 'より',
   'だ', 'です', 'でした', 'じゃありません', 'さん', 'します', 'しています', 'いけません', 'こと', 'ほう',
   'んです', 'なりました', 'でしょう',
+  // A2
+  'し', 'という', 'って', 'かどうか', 'なら', 'ので', 'のに', 'しか', 'ため', 'ように', 'ございます',
+  'でございます', 'かもしれません', 'はず', 'ようです', 'みたい', 'そうです', 'らしい', 'ほど', 'ぐらい',
+  'かな', 'まま', 'ところ', 'ばかり', 'までに', 'あいだ', 'うちに', 'とき', 'な',
 ]);
 
 /** Nomes que podem aparecer nos exemplos (escritos em kana: o kanji deles não é do curso). */
 export const NOMES: ReadonlySet<string> = new Set(['ラファエル', 'たなか', 'やまだ']);
 
-export const EXEMPLOS: Readonly<Record<string, readonly ExemploLinha[]>> = {
+const EXEMPLOS_A1: Readonly<Record<string, readonly ExemploLinha[]>> = {
   /* Unidade 1 */
   desu: [
     { pecas: ['わたし', 'は', '学生', 'です'], pt: 'Eu sou estudante.' },
@@ -328,3 +334,5 @@ export const EXEMPLOS: Readonly<Record<string, readonly ExemploLinha[]>> = {
     { pecas: ['はる', 'に', 'なりました'], pt: 'Chegou a primavera.' },
   ],
 };
+
+export const EXEMPLOS: Readonly<Record<string, readonly ExemploLinha[]>> = { ...EXEMPLOS_A1, ...EXEMPLOS_A2 };

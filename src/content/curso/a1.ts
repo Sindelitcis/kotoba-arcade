@@ -7,11 +7,11 @@
  * - kanji que volta com outra leitura traz `muda`, explicando a troca;
  * - todos os kanji e pontos de gramática do N5 aparecem em alguma unidade.
  */
-import type { Unidade } from './tipos';
+import type { UnidadeEscrita } from './tipos';
 
 const KEIGO = 'Agência de Assuntos Culturais do Japão (文化庁), 敬語の指針, 2007';
 
-export const A1: readonly Unidade[] = [
+export const A1: readonly UnidadeEscrita[] = [
   {
     id: 'a1-01',
     nivel: 'A1',

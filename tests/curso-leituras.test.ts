@@ -21,7 +21,7 @@ describe('leitura graduada', () => {
   it('só usa vocabulário, kanji e gramática já ensinados até a unidade', () => {
     for (const [id, l] of Object.entries(LEITURAS)) {
       const u = UNIDADES.find((x) => x.id === id)!;
-      for (const f of l.frases) expect(problemasDaLinha(id, u.numero, f)).toEqual([]);
+      for (const f of l.frases) expect(problemasDaLinha(id, u.ordem, f)).toEqual([]);
     }
   });
 
@@ -30,7 +30,7 @@ describe('leitura graduada', () => {
   });
 
   it('o problema aparece quando a frase usa o que vem depois', () => {
-    expect(problemasDaLinha('x', 1, { pecas: ['パン', 'です'], pt: '' })).toEqual(['x: パン não foi ensinado até a unidade 1']);
+    expect(problemasDaLinha('x', 1, { pecas: ['パン', 'です'], pt: '' })).toEqual(['x: パン não foi ensinado até a unidade de ordem 1']);
   });
 
   it('a leitura vem depois do ditado e antes da cultura e do mini-teste', () => {

@@ -31,10 +31,12 @@ export interface KanjiDaUnidade {
    */
   muda?: string;
   /**
-   * Kanji fora da lista do N5 que entra porque a palavra é do dia a dia (駅, 会社...).
-   * Ensinado do mesmo jeito; só não conta na cobertura do N5.
+   * Kanji fora da lista do nível (N5 no A1; N5 e N4 no A2) que entra porque a palavra é do
+   * dia a dia (駅, 会社...). Ensinado do mesmo jeito; só não conta na cobertura do nível.
    */
   extra?: true;
+  /** O significado, só para kanji que não tem ficha no Aprofundar (as fichas vão do N5 ao N3). */
+  significado?: string;
 }
 
 export interface Nota {
@@ -52,7 +54,10 @@ export interface Nota {
 export interface Unidade {
   id: string;
   nivel: Nivel;
+  /** A posição dentro do nível (a unidade 1 do A2 é a 1). */
   numero: number;
+  /** A posição no curso inteiro, contando os níveis em ordem (a unidade 1 do A2 é a 21). */
+  ordem: number;
   titulo: string;
   /** "Consigo...": o que a pessoa faz ao final, no estilo can-do dos cursos de verdade. */
   consigo: string;
@@ -65,3 +70,6 @@ export interface Unidade {
   /** Unidade só de revisão, sem conteúdo novo. */
   revisao?: true;
 }
+
+/** A unidade como é escrita no arquivo do nível: a `ordem` é posta ao juntar os níveis. */
+export type UnidadeEscrita = Omit<Unidade, 'ordem'>;

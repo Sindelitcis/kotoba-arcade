@@ -9,7 +9,7 @@
  * como feita e a seguinte é testada; não passou, o curso começa nela.
  */
 import { useLayoutEffect, useMemo, useState } from 'preact/hooks';
-import { UNIDADES, type Unidade } from '../content/curso';
+import { jlptDo, NomeDaUnidade, nomeDaUnidade, oQueAbre, seguinteDe, UNIDADES, type Unidade } from '../content/curso';
 import { app, commit, cursoAberto, cursoSave } from '../core/app';
 import { Apresentacao } from '../core/Apresentacao';
 import { apresentar, avaliar, foiApresentado } from '../core/ensino';
@@ -19,7 +19,7 @@ import { seededRng } from '../core/rng';
 import { cartaoDaPalavra, cartaoDoKanji } from './cartoes';
 import { abrirImpresso } from './Impresso';
 import { cartaDaPalavra, cartasDoKanji, ondeContinuar, palavraDoCurso, registrarProva, type ItemPratica } from './motor';
-import { corrigir, deItem, montarProva, NIVEL_PARA_PASSAR, NOME_SECAO, NOTA_MINIMA, notaJlpt, novaSemente, passariaNoN5, questoesDeNivelamento, SIMULADO, UNIDADES_DO_NIVELAMENTO, type Questao, type Resultado, type Secao } from './prova';
+import { corrigir, deItem, montarProva, NIVEL_PARA_PASSAR, NOME_SECAO, NOTA_MINIMA, MINIMOS_JLPT, notaJlpt, novaSemente, passariaNoJlpt, questoesDeNivelamento, SIMULADO, UNIDADES_DO_NIVELAMENTO, type Questao, type Resultado, type Secao } from './prova';
 import { FraseDaQuestao, OpcaoDeFrase } from './QuestaoFrase';
 import { tocarSequencia } from '../core/sequencia';
 import { falaDoExemplo } from './exemplos';
@@ -69,7 +69,7 @@ export function ProvaTela({ unidade, onSair }: { unidade: Unidade; onSair: () =>
   const [respostas, setRespostas] = useState<(string | undefined)[]>([]);
   const [resultado, setResultado] = useState<Resultado | null>(null);
   const q = prova.questoes[i];
-  const seguinte = UNIDADES[unidade.numero];
+  const seguinte = seguinteDe(unidade);
 
   const comecar = () => {
     setRespostas([]);
@@ -169,11 +169,11 @@ export function ProvaTela({ unidade, onSair }: { unidade: Unidade; onSair: () =>
     return (
       <div class="koma lc-quadro" data-testid="pv-inicio">
         <div class="lc-conteudo">
-          <span class="gr-tag">Prova da unidade {unidade.numero}</span>
-          <h2 class="cs-titulo">{unidade.revisao ? 'Simulado do A1' : unidade.titulo}</h2>
+          <span class="gr-tag">Prova da {nomeDaUnidade(unidade)}</span>
+          <h2 class="cs-titulo">{unidade.revisao ? `Simulado do ${unidade.nivel}` : unidade.titulo}</h2>
           <p class="lc-linha">
-            {unidade.revisao && `No formato do JLPT N5, em quatro partes: ${(Object.keys(SIMULADO) as Secao[]).map((s) => NOME_SECAO[s].split(' · ')[0]!.toLowerCase()).join(', ')}. Sem tempo marcado. `}
-            {prova.questoes.length} questões com quatro alternativas. Passa com {pct(NOTA_MINIMA)} ({Math.ceil(prova.questoes.length * NOTA_MINIMA)} acertos), e então {seguinte ? `a unidade ${seguinte.numero} abre` : 'o A1 fica completo'}.
+            {unidade.revisao && `No formato do JLPT ${jlptDo(unidade.nivel)}, em quatro partes: ${(Object.keys(SIMULADO) as Secao[]).map((s) => NOME_SECAO[s].split(' · ')[0]!.toLowerCase()).join(', ')}. Sem tempo marcado. `}
+            {prova.questoes.length} questões com quatro alternativas. Passa com {pct(NOTA_MINIMA)} ({Math.ceil(prova.questoes.length * NOTA_MINIMA)} acertos), e então {oQueAbre(unidade)}.
           </p>
           <p class="lc-linha">O resultado só aparece no fim. Dá para voltar e trocar uma resposta antes de entregar.</p>
           <p class="muted">
@@ -198,18 +198,20 @@ export function ProvaTela({ unidade, onSair }: { unidade: Unidade; onSair: () =>
     return (
       <div class="koma lc-quadro" data-testid="pv-resultado" data-aprovada={resultado.aprovada ? '1' : '0'}>
         <div class="lc-conteudo">
-          <span class="gr-tag">Prova da unidade {unidade.numero} · {prova.codigo}</span>
+          <span class="gr-tag">Prova da {nomeDaUnidade(unidade)} · {prova.codigo}</span>
           <h2 class="cs-titulo">
             {resultado.acertos} de {resultado.total} · {pct(resultado.nota)}
           </h2>
           <p class="lc-linha">
             {resultado.aprovada
               ? seguinte
-                ? `Passou. A unidade ${seguinte.numero}, ${seguinte.titulo}, está liberada.`
-                : 'Passou. O A1 está completo.'
+                ? seguinte.nivel === unidade.nivel
+                  ? `Passou. A unidade ${seguinte.numero}, ${seguinte.titulo}, está liberada.`
+                  : `Passou. O ${unidade.nivel} está completo, e o ${seguinte.nivel} começa: ${seguinte.titulo}.`
+                : `Passou. O ${unidade.nivel} está completo.`
               : `Faltou pouco: precisa de ${pct(NOTA_MINIMA)}. Reveja o que errou e faça outra prova, com outras questões.`}
           </p>
-          {unidade.revisao && <NotaDoSimulado prova={prova} respostas={respostas} />}
+          {unidade.revisao && <NotaDoSimulado prova={prova} respostas={respostas} jlpt={jlptDo(unidade.nivel)} />}
           {unidade.revisao && resultado.aprovada && <PedirCertificado unidade={unidade} />}
           {resultado.aprovada && (TAREFAS[unidade.id]?.length ?? 0) > 0 && (
             <>
@@ -244,7 +246,7 @@ export function ProvaTela({ unidade, onSair }: { unidade: Unidade; onSair: () =>
           </button>
           {resultado.aprovada ? (
             <button class="primary" onClick={irParaSeguinte} data-testid="pv-seguir">
-              {seguinte ? `Unidade ${seguinte.numero}` : 'Ver o curso'} <kbd>Enter</kbd>
+              {seguinte ? NomeDaUnidade(seguinte) : 'Ver o curso'} <kbd>Enter</kbd>
             </button>
           ) : (
             <button class="primary" onClick={rever} data-testid="pv-rever">
@@ -292,8 +294,9 @@ export function ProvaTela({ unidade, onSair }: { unidade: Unidade; onSair: () =>
 }
 
 /** A nota do simulado por parte e na escala do JLPT. */
-function NotaDoSimulado({ prova, respostas }: { prova: Parameters<typeof notaJlpt>[0]; respostas: readonly (string | undefined)[] }) {
+function NotaDoSimulado({ prova, respostas, jlpt }: { prova: Parameters<typeof notaJlpt>[0]; respostas: readonly (string | undefined)[]; jlpt: 'N5' | 'N4' }) {
   const n = notaJlpt(prova, respostas);
+  const m = MINIMOS_JLPT[jlpt];
   return (
     <div class="pv-jlpt" data-testid="pv-jlpt">
       <ul class="pv-erros">
@@ -305,7 +308,7 @@ function NotaDoSimulado({ prova, respostas }: { prova: Parameters<typeof notaJlp
       </ul>
       <p class="lc-linha">
         Na escala do JLPT: <b>{n.total} de 180</b> (conhecimento e leitura {n.conhecimento} de 120, escuta {n.escuta} de 60).{' '}
-        {passariaNoN5(n) ? 'Acima dos mínimos do N5 (80 no total, 38 e 19 nas partes).' : 'O N5 pede 80 no total, com ao menos 38 e 19 nas partes.'}
+        {passariaNoJlpt(n, jlpt) ? `Acima dos mínimos do ${jlpt} (${m.total} no total, ${m.conhecimento} e ${m.escuta} nas partes).` : `O ${jlpt} pede ${m.total} no total, com ao menos ${m.conhecimento} e ${m.escuta} nas partes.`}
       </p>
       <p class="muted">É uma conta proporcional aos acertos, para ter uma ideia. A nota oficial do JLPT é calculada de outro jeito.</p>
     </div>
@@ -372,7 +375,7 @@ export function NivelamentoTela({ onSair }: { onSair: () => void }) {
     if (acertos.length >= NIVEL_PARA_PASSAR) {
       passarNoNivelamento(unidade, acertos);
       const prox = UNIDADES_DO_NIVELAMENTO[ui + 1];
-      if (!prox) return terminar(UNIDADES[unidade.numero] ?? null);
+      if (!prox) return terminar(seguinteDe(unidade));
       setUi(ui + 1);
       setQi(0);
       setCertas([]);
@@ -450,14 +453,14 @@ export function NivelamentoTela({ onSair }: { onSair: () => void }) {
       <div class="koma lc-quadro" data-testid="nv-fim">
         <div class="lc-conteudo">
           <span class="gr-tag">Nivelamento</span>
-          <h2 class="cs-titulo">{paraEm ? `Você começa na unidade ${paraEm.numero}` : 'Você passou em todas as unidades'}</h2>
+          <h2 class="cs-titulo">{paraEm ? `Você começa na ${nomeDaUnidade(paraEm)}` : 'Você passou em todas as unidades'}</h2>
           <p class="lc-linha">
             {ui > 0 ? `${ui === 1 ? 'A unidade 1 ficou marcada' : `As unidades 1 a ${ui} ficaram marcadas`} como feitas. As palavras e os kanji delas entram na revisão diária, e dá para refazer qualquer uma pelo mapa.` : 'Nenhuma unidade foi pulada. O curso começa do início, com calma.'}
           </p>
         </div>
         <div class="actions center">
           <button class="primary" onClick={comecarCurso} data-testid="nv-seguir">
-            {paraEm ? `Ir para a unidade ${paraEm.numero}` : 'Ver o curso'} <kbd>Enter</kbd>
+            {paraEm ? `Ir para a ${nomeDaUnidade(paraEm)}` : 'Ver o curso'} <kbd>Enter</kbd>
           </button>
         </div>
       </div>
@@ -468,7 +471,7 @@ export function NivelamentoTela({ onSair }: { onSair: () => void }) {
     <div class="koma lc-quadro" data-testid="nv-questao" data-unidade={unidade.id}>
       <div class="lc-conteudo">
         <span class="gr-tag">
-          Nivelamento · unidade {unidade.numero} · {qi + 1} de {questoes.length}
+          Nivelamento · {nomeDaUnidade(unidade)} · {qi + 1} de {questoes.length}
         </span>
         <p class="lc-enunciado">{q.enunciado}</p>
         <Destaque q={q} />

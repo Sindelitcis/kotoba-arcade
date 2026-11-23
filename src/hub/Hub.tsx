@@ -17,6 +17,7 @@ import { BOOSTER_COST, canOpenBooster } from '../games/kanjimon/engine';
 import { etapaDa, proximaMissao } from '../jornada/etapas';
 import { continuarCurso } from '../curso/CursoTela';
 import { blocosDa, NOME_BLOCO, proximaLicao } from '../curso/motor';
+import { NomeDaUnidade } from '../content/curso';
 
 interface Tile {
   id: string;
@@ -214,13 +215,13 @@ export function Hub() {
 
       <button class="koma jornada-faixa hub-curso" style={cenaStyle('aventura-narita')} onClick={continuarCurso} data-testid="hub-curso">
         <span class="hub-rotulo">
-          <Icone nome="book-open" /> Curso · A1 <kbd>Enter</kbd>
+          <Icone nome="book-open" /> Curso · {licao ? licao.unidade.nivel : 'A1 e A2'} <kbd>Enter</kbd>
         </span>
         <span class="jornada-faixa-txt">
           {licao ? (
             <>
               <b>
-                Unidade {licao.unidade.numero} · {licao.unidade.titulo}
+                {NomeDaUnidade(licao.unidade)} · {licao.unidade.titulo}
               </b>
               <span>Ao final: “Consigo {licao.unidade.consigo}.”</span>
               <span class="jornada-faixa-prox">
@@ -228,7 +229,7 @@ export function Hub() {
               </span>
             </>
           ) : (
-            <b>O A1 está feito. Abra o curso para refazer uma unidade.</b>
+            <b>O curso está feito, do A1 ao A2. Abra o curso para refazer uma unidade.</b>
           )}
         </span>
       </button>

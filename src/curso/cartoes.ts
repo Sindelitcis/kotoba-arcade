@@ -32,9 +32,9 @@ export function cartaoDaPalavra(p: Palavra): ItemNovo {
   };
 }
 
-/** O significado do kanji, pela ficha do Aprofundar (todo kanji do curso tem ficha: tests/curso-motor.test.ts). */
+/** O significado do kanji, pela ficha do Aprofundar; o kanji sem ficha traz o dele no curso (tests/curso-motor.test.ts). */
 export function significadoDoKanji(k: string): string {
-  return fichaDe({ t: 'kanji', c: k })?.pt ?? '';
+  return fichaDe({ t: 'kanji', c: k })?.pt ?? UNIDADES.flatMap((u) => u.kanji).find((x) => x.k === k && x.significado)?.significado ?? '';
 }
 
 /** O texto do cartão: a leitura de agora, a troca (se houver) e as leituras que vêm depois. */
@@ -55,7 +55,7 @@ export function explicacaoDoKanji(k: KanjiDaUnidade): string {
   };
   if (k.muda) partes.push(k.muda);
   else partes.push(k.em === k.k ? `Sozinho, ${k.k} se lê ${k.leitura}.` : `Em ${comLeitura(k.em)}, ${k.k} se lê ${k.leitura}.`);
-  const outras = outrasLeituras(k).map((o) => `em ${comLeitura(o.em)} se lê ${o.leitura} (unidade ${o.unidade})`);
+  const outras = outrasLeituras(k).map((o) => `em ${comLeitura(o.em)} se lê ${o.leitura} (${o.nome})`);
   if (outras.length > 0) partes.push(`Outras leituras que vêm no curso: ${outras.join('; ')}.`);
   if (k.extra) partes.push('Não cai no N5, mas aparece muito no dia a dia.');
   return partes.join(' ');

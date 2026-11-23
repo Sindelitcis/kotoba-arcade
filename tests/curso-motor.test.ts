@@ -129,11 +129,11 @@ describe('cartões', () => {
 
 describe('prática: só cobra o que já foi apresentado', () => {
   /**
-   * Percorre o A1 inteiro com um save zerado, como a tela faz: apresenta o bloco e pratica,
+   * Percorre o curso inteiro (A1 e A2) com um save zerado, como a tela faz: apresenta o bloco e pratica,
    * errando de vez em quando. A cada pergunta, o alvo e todas as alternativas precisam ter
    * passado pela apresentação.
    */
-  it('o A1 inteiro, do zero', () => {
+  it('o curso inteiro, do zero', () => {
     const cards: Record<string, CardState> = {};
     const rng = seededRng(7);
     let agora = Date.UTC(2026, 10, 22);
@@ -146,7 +146,7 @@ describe('prática: só cobra o que já foi apresentado', () => {
         const itens = b.tipo === 'revisao' ? itensDaRevisao(u, cards, rng) : itensDoBloco(b);
         if (b.tipo === 'revisao') expect(itens.length).toBeGreaterThan(0);
         if (itens.length === 0) continue;
-        const conhecidos = itensAte(u.numero);
+        const conhecidos = itensAte(u.ordem);
         const pr = new Pratica(itens, conhecidos, { cards, now: () => agora, rng });
         let voltas = 0;
         while (!pr.fim) {
@@ -289,7 +289,7 @@ describe('progresso e liberação', () => {
     expect(ondeContinuar(save, u1)).toBe(0);
   });
 
-  it('com o A1 todo feito, não há próxima lição', () => {
+  it('com o curso todo feito, não há próxima lição', () => {
     const save = ensureCursoSave({});
     for (const u of UNIDADES) {
       registrarBloco(save, u, blocosDa(u).length - 1);

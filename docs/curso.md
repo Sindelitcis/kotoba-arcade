@@ -180,6 +180,26 @@ sobram estão no curso de outro jeito ou não valem a pena: sufixos e formas que
 e しっています), palavras que já estão com お (お水) e palavras antigas que a lista ainda traz
 (字引, 背広, 万年筆, 灰皿, ストーブ, 零).
 
+## Conteúdo do A2
+
+Feito na fase 6, no mesmo formato do A1. As unidades estão em `a2a.ts` a `a2d.ts` (cinco por
+arquivo), e o resto em arquivos irmãos dos do A1: `exemplos-a2.ts`, `aulas-a2.ts`,
+`leituras-a2.ts`, as tarefas em `tarefas.ts` e a gramática do N4 em `n4.ts` (76 pontos, cada um
+em exatamente uma unidade). São 589 palavras novas e 161 kanji, que fecham a lista do N4 (o que
+faltava dela já tinha entrado no A1 como extra). Os extras do A2 são 港, 働, 菜 e 園, além de 分
+ensinado de novo com outra leitura. Kanji fora das fichas do Aprofundar (que vão até o N3) traz o
+significado no próprio curso (`significado`, hoje só 菜).
+
+- **Ordem no curso:** cada unidade tem `numero` (a posição no nível: a 1 do A2 é a 1) e `ordem`
+  (a posição no curso inteiro: a 1 do A2 é a 21). Tudo que depende do que já foi ensinado
+  (exemplos, prova, prática, gramática vista) usa `ordem`. O código da prova é `U` mais a ordem.
+- **Simulado:** um por nível, na unidade 20 de cada um, só com itens e frases do próprio nível. O
+  N4 pede 90 pontos no total; os mínimos por parte são os mesmos do N5.
+- **Notas culturais:** as 19 do A2 conferidas contra a fonte em 23/11/2026 (o passe da JR, a
+  multa de bicicleta de abril de 2026, o limite de horas do estudante, o sobrenome do casal...).
+- **Tela:** o mapa do curso separa os níveis ("A1 · JLPT N5", "A2 · JLPT N4"), e os nomes de
+  unidade dizem o nível quando não é o A1 ("unidade 4 do A2").
+
 ## Provas
 
 Feitas na fase 3. A lógica está em `src/curso/prova.ts` e a tela em `src/curso/ProvaTela.tsx`.
@@ -290,12 +310,12 @@ por ele. Os jogos continuam, como exercícios das lições e como prática livre
 
 ## Fases
 
-1. **Currículo:** feito para o A1 (`src/content/curso/`), com testes. Falta cruzar o vocabulário
-   com uma lista de N5.
+1. **Currículo:** feito para o A1 e o A2 (`src/content/curso/`), com testes. O A1 foi cruzado com
+   uma lista de N5; o A2 ainda não foi cruzado com uma lista de vocabulário do N4.
 2. **Motor do curso:** feito (ver "O motor do curso", acima).
 3. **Provas e impressos:** feito, com o simulado do JLPT e o certificado (ver "Provas" e
    "Material impresso", acima).
 4. **Conteúdo do A1:** feito (ver "Conteúdo do A1", acima), com o vocabulário do N5.
 5. **Áudio de kana e legendas:** feita: legendas, Módulo 0 e kana solto gravado com a
    voz que ganhou a comparação às cegas.
-6. **A2.**
+6. **A2:** feito (ver "Conteúdo do A2", acima).

@@ -42,7 +42,7 @@ describe('aula falada do curso', () => {
 
   it('o texto escrito do quadro só usa kanji já ensinado até a unidade', () => {
     for (const u of conteudo) {
-      const ks = kanjiAte(u.numero);
+      const ks = kanjiAte(u.ordem);
       for (const q of AULAS_DO_CURSO[u.id] ?? []) for (const c of q.tela ?? '') if (/[一-鿿]/u.test(c)) expect(ks.has(c), `${u.id}: ${c} em ${q.tela}`).toBe(true);
     }
   });
@@ -91,7 +91,7 @@ describe('tarefa de uso', () => {
     for (const u of conteudo) {
       const t = TAREFAS[u.id];
       expect(t?.length ?? 0, u.id).toBeGreaterThanOrEqual(1);
-      const ks = kanjiAte(u.numero);
+      const ks = kanjiAte(u.ordem);
       for (const x of t ?? []) for (const c of x) if (/[一-鿿]/u.test(c)) expect(ks.has(c), `${u.id}: ${c}`).toBe(true);
     }
   });

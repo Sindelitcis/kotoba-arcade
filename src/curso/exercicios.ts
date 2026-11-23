@@ -20,7 +20,17 @@ const PARECIDAS: readonly (readonly string[])[] = [
   ['に', 'へ'],
   ['と', 'や'],
   // O fim da frase: おいしいです e おいしいね estão os dois certos.
-  ['か', 'よ', 'ね', 'です', 'でした', 'じゃありません', 'だ'],
+  ['か', 'よ', 'ね', 'です', 'でした', 'じゃありません', 'だ', 'かな'],
+  // Razão: 安いので e 安いし cabem os dois em muitas frases.
+  ['ので', 'し'],
+  // Suposição: o sentido muda pouco, e a frase fica certa com qualquer uma.
+  ['かもしれません', 'でしょう', 'はず'],
+  ['ようです', 'みたい', 'そうです', 'らしい'],
+  // 東京より大きくない e 東京ほど大きくない estão os dois certos.
+  ['より', 'ほど'],
+  ['ため', 'ように'],
+  ['という', 'って'],
+  ['とき', 'あいだ', 'うちに'],
 ];
 
 /** Opção errada que ficaria certa no lugar: の no fim (安いの。) e よ, ね no meio (あしたね、). */
@@ -37,12 +47,12 @@ const grupoDe = (t: string): readonly string[] => PARECIDAS.find((g) => g.includ
 /** As peças de gramática já apresentadas até a unidade (estão em algum exemplo dela ou de antes). */
 const jaVistas = new Map<number, ReadonlySet<string>>();
 
-export function gramaticaAte(numero: number): ReadonlySet<string> {
-  const pronta = jaVistas.get(numero);
+export function gramaticaAte(ordem: number): ReadonlySet<string> {
+  const pronta = jaVistas.get(ordem);
   if (pronta) return pronta;
   const s = new Set<string>();
-  for (const u of UNIDADES) if (u.numero <= numero) for (const e of exemplosDaUnidade(u)) for (const p of e.pecas) if (GRAMATICA_EM_KANA.has(p.t) && !NAO_APAGA.has(p.t)) s.add(p.t);
-  jaVistas.set(numero, s);
+  for (const u of UNIDADES) if (u.ordem <= ordem) for (const e of exemplosDaUnidade(u)) for (const p of e.pecas) if (GRAMATICA_EM_KANA.has(p.t) && !NAO_APAGA.has(p.t)) s.add(p.t);
+  jaVistas.set(ordem, s);
   return s;
 }
 
@@ -56,7 +66,7 @@ export interface Lacuna {
 }
 
 /** A frase com uma lacuna. `null` se ela não tem peça de gramática que dê para apagar. */
-export function lacunaDo(e: Exemplo, rng: Rng, conhecidas = gramaticaAte(e.unidade.numero)): Lacuna | null {
+export function lacunaDo(e: Exemplo, rng: Rng, conhecidas = gramaticaAte(e.unidade.ordem)): Lacuna | null {
   const candidatas = e.pecas.map((p, i) => ({ p, i })).filter(({ p }) => GRAMATICA_EM_KANA.has(p.t) && !NAO_APAGA.has(p.t));
   for (const { p, i } of shuffle(rng, candidatas)) {
     const grupo = grupoDe(p.t);
@@ -70,7 +80,7 @@ export function lacunaDo(e: Exemplo, rng: Rng, conhecidas = gramaticaAte(e.unida
 
 /** As lacunas da unidade: uma por exemplo que tenha peça para apagar, no máximo `max`. */
 export function lacunasDa(u: Unidade, rng: Rng, max = 6): Lacuna[] {
-  const conhecidas = gramaticaAte(u.numero);
+  const conhecidas = gramaticaAte(u.ordem);
   return exemplosDaUnidade(u)
     .map((e) => lacunaDo(e, rng, conhecidas))
     .filter((l): l is Lacuna => l !== null)

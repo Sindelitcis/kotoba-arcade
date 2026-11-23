@@ -29,7 +29,7 @@ describe('completar', () => {
     for (const u of conteudo)
       for (let s = 0; s < 5; s++)
         for (const l of lacunasDa(u, seededRng(s))) {
-          const vistas = gramaticaAte(u.numero);
+          const vistas = gramaticaAte(u.ordem);
           const grupo = PARECIDAS.find((g) => g.includes(l.resposta.t)) ?? [l.resposta.t];
           for (const o of l.opcoes.filter((x) => x !== l.resposta.t)) {
             expect(vistas.has(o), `${u.id} ${l.exemplo.jp}: ${o}`).toBe(true);

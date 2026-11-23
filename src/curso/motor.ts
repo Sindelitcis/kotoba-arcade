@@ -18,7 +18,7 @@
  * A aula falada (content/curso/aulas.ts) vem depois das palavras e dos kanji, antes dos cartões de
  * gramática; o exercício de montar frases (com o segundo exemplo de cada ponto), logo depois deles.
  */
-import { GRAMATICA_N5, palavrasDa, UNIDADES, type KanjiDaUnidade, type Nota, type Palavra, type Unidade } from '../content/curso';
+import { GRAMATICA, nomeDaUnidade, palavrasDa, UNIDADES, type KanjiDaUnidade, type Nivel, type Nota, type Palavra, type Unidade } from '../content/curso';
 import { cardKey } from '../content';
 import { AULAS_DO_CURSO } from '../content/curso/aulas';
 import { exemplosDaUnidade, leituraDa, type Exemplo, type Leitura } from './exemplos';
@@ -138,10 +138,10 @@ export const cartaDaLeitura = (k: KanjiDaUnidade): string => cardKey(`k:${k.k}`,
  * As outras leituras do kanji no curso e onde entram, para o cartão avisar:
  * "em 金曜日 se lê きん (unidade 3)".
  */
-export function outrasLeituras(k: KanjiDaUnidade): { leitura: string; em: string; unidade: number }[] {
-  const out: { leitura: string; em: string; unidade: number }[] = [];
+export function outrasLeituras(k: KanjiDaUnidade): { leitura: string; em: string; unidade: string; nome: string }[] {
+  const out: { leitura: string; em: string; unidade: string; nome: string }[] = [];
   for (const u of UNIDADES)
-    for (const x of u.kanji) if (x.k === k.k && x.leitura !== k.leitura && !out.some((o) => o.leitura === x.leitura)) out.push({ leitura: x.leitura, em: x.em, unidade: u.numero });
+    for (const x of u.kanji) if (x.k === k.k && x.leitura !== k.leitura && !out.some((o) => o.leitura === x.leitura)) out.push({ leitura: x.leitura, em: x.em, unidade: u.id, nome: nomeDaUnidade(u) });
   return out;
 }
 
@@ -178,7 +178,7 @@ export const FICHA_DA_GRAMATICA: Readonly<Record<string, string>> = {
 
 /** "horas e minutos: 〜じ, 〜ふん, はん" → o padrão grande e o que ele quer dizer. */
 export function partesDoPonto(id: string): { grande: string; pt: string } {
-  const d = GRAMATICA_N5[id] ?? id;
+  const d = GRAMATICA[id] ?? id;
   const i = d.indexOf(': ');
   if (i < 0) return { grande: d, pt: '' };
   const antes = d.slice(0, i);
@@ -339,14 +339,25 @@ export function itemDoKanji(k: KanjiDaUnidade): ItemPratica {
   return { id: `k:${k.k}:${k.leitura}`, tipo: 'kanji', carta: cartaDaLeitura(k), jp: k.em, kana: p?.kana ?? k.leitura, destaque: k.k, certa: k.leitura, evitar: [...todas] };
 }
 
-/** Todos os itens de prática do curso até a unidade `ate` (inclusive), na ordem. */
-export function itensAte(ate: number): ItemPratica[] {
+/**
+ * Todos os itens de prática do curso até a unidade de ordem `ate` (inclusive), na ordem. Com
+ * `nivel`, só os desse nível (a revisão e o simulado do A2 cobram o A2).
+ */
+const itensProntos = new Map<string, readonly ItemPratica[]>();
+
+export function itensAte(ate: number, nivel?: Nivel): readonly ItemPratica[] {
+  // Os dados não mudam: monta uma vez por corte (a prova e o simulado pedem o mesmo corte muitas vezes).
+  const chave = `${ate}:${nivel ?? ''}`;
+  const pronto = itensProntos.get(chave);
+  if (pronto) return pronto;
   const out: ItemPratica[] = [];
   for (const u of UNIDADES) {
-    if (u.numero > ate) break;
+    if (u.ordem > ate) break;
+    if (nivel && u.nivel !== nivel) continue;
     for (const p of palavrasDa(u)) out.push(itemDaPalavra(p));
     for (const k of u.kanji) out.push(itemDoKanji(k));
   }
+  itensProntos.set(chave, out);
   return out;
 }
 
@@ -366,12 +377,12 @@ export function itensDoBloco(b: Bloco): ItemPratica[] {
   return [];
 }
 
-/** Na revisão de nível, quantas perguntas. */
+/** Na revisão de nível, quantas perguntas (do próprio nível). */
 export const PERGUNTAS_DA_REVISAO = 10;
 
 /** Os itens da revisão: os já apresentados, dos menos firmes para os mais firmes. */
 export function itensDaRevisao(u: Unidade, cards: Readonly<Record<string, CardState>>, rng: Rng): ItemPratica[] {
-  const vistos = itensAte(u.numero - 1).filter((i) => foiApresentado(cards, i.carta));
+  const vistos = itensAte(u.ordem - 1, u.nivel).filter((i) => foiApresentado(cards, i.carta));
   const estab = (i: ItemPratica) => cards[i.carta]?.stability ?? 0;
   return shuffle(rng, vistos)
     .sort((a, b) => estab(a) - estab(b))

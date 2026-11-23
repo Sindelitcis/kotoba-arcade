@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { describe, expect, it } from 'vitest';
-import { UNIDADES } from '../src/content/curso';
+import { jlptDo, UNIDADES } from '../src/content/curso';
 import { seededRng } from '../src/core/rng';
 import { blocosDa, itensAte } from '../src/curso/motor';
 import { exemplosDaUnidade } from '../src/curso/exemplos';
@@ -8,7 +8,8 @@ import {
   codigoDaProva,
   deItem,
   notaJlpt,
-  passariaNoN5,
+  MINIMOS_JLPT,
+  passariaNoJlpt,
   SIMULADO,
   type Questao,
   corrigir,
@@ -86,7 +87,7 @@ describe('montagem da prova', () => {
   it('só cai o que o curso já ensinou até a unidade, até nas alternativas erradas', () => {
     for (const u of UNIDADES)
       for (const s of SEMENTES) {
-        const ate = itensAte(u.numero);
+        const ate = itensAte(u.ordem);
         const ids = new Set(ate.map((i) => i.id));
         const respostas = new Set(ate.flatMap((i) => [i.jp, i.certa]));
         for (const q of montarProva(u, s).questoes.filter(deItem)) {
@@ -99,7 +100,7 @@ describe('montagem da prova', () => {
   it('nenhuma alternativa errada é também uma resposta certa', () => {
     const sentido = (t: string | undefined) => t?.split(/[,;(]/)[0]?.trim().toLowerCase();
     for (const u of UNIDADES) {
-      const ate = itensAte(u.numero);
+      const ate = itensAte(u.ordem);
       for (const s of SEMENTES)
         for (const q of montarProva(u, s).questoes.filter(deItem)) {
           const erradas = q.opcoes.filter((o) => o !== q.certa);
@@ -115,7 +116,7 @@ describe('montagem da prova', () => {
 
   it('unidade de conteúdo: a maior parte é dela, e há revisão das anteriores', () => {
     const u = UNIDADES.find((x) => x.numero === 5 && !x.revisao)!;
-    const anteriores = new Set(itensAte(u.numero - 1).map((i) => i.id));
+    const anteriores = new Set(itensAte(u.ordem - 1).map((i) => i.id));
     const p = montarProva(u, 'K7QH');
     const daUnidade = p.questoes.filter((q) => deItem(q) && !anteriores.has(q.item.id)).length;
     expect(daUnidade).toBeGreaterThanOrEqual(QUESTOES_DA_UNIDADE * 0.75);
@@ -124,7 +125,7 @@ describe('montagem da prova', () => {
 
   it('a unidade de revisão é um simulado do que veio antes', () => {
     for (const u of UNIDADES.filter((x) => x.revisao)) {
-      const anteriores = new Set(itensAte(u.numero - 1).map((i) => i.id));
+      const anteriores = new Set(itensAte(u.ordem - 1).map((i) => i.id));
       const p = montarProva(u, 'K7QH');
       expect(p.questoes.length).toBeGreaterThanOrEqual(20);
       for (const q of p.questoes.filter(deItem)) expect(anteriores.has(q.item.id)).toBe(true);
@@ -132,8 +133,14 @@ describe('montagem da prova', () => {
   });
 
   // O simulado do JLPT: vocabulário, gramática, leitura e escuta, nessa ordem.
+  const SIMULADOS = UNIDADES.filter((x) => x.revisao);
+
+  it('há um simulado por nível, no fim dele', () => {
+    expect(SIMULADOS.map((u) => u.nivel)).toEqual(['A1', 'A2']);
+  });
+
   it('o simulado tem as quatro partes do JLPT, cheias e em ordem', () => {
-    const u = UNIDADES.find((x) => x.revisao)!;
+    for (const u of SIMULADOS)
     for (const s of SEMENTES) {
       const p = montarProva(u, s);
       const secoes = p.questoes.map((q) => q.secao);
@@ -143,18 +150,19 @@ describe('montagem da prova', () => {
   });
 
   it('no simulado, as frases só usam o que o nível ensinou, e a escuta não repete frase da gramática', () => {
-    const u = UNIDADES.find((x) => x.revisao)!;
-    const doNivel = new Set(UNIDADES.filter((x) => x.numero < u.numero).flatMap(exemplosDaUnidade).map((e) => e.jp));
+    for (const u of SIMULADOS) {
+    const doNivel = new Set(UNIDADES.filter((x) => x.nivel === u.nivel && x.ordem < u.ordem).flatMap(exemplosDaUnidade).map((e) => e.jp));
     for (const s of SEMENTES) {
       const frases = montarProva(u, s).questoes.filter((q) => !deItem(q));
       for (const q of frases) if (!deItem(q) && q.tipo !== 'texto') expect(doNivel.has(q.frase.jp), q.frase.jp).toBe(true);
       const gram = new Set(frases.filter((q) => q.secao === 'gramatica').map((q) => !deItem(q) && q.frase.jp));
       for (const q of frases.filter((x) => x.secao === 'escuta')) expect(gram.has(!deItem(q) && q.frase.jp)).toBe(false);
     }
+    }
   });
 
   it('na leitura, a certa é uma frase do texto e as erradas não estão nele', () => {
-    const u = UNIDADES.find((x) => x.revisao)!;
+    for (const u of SIMULADOS)
     for (const s of SEMENTES)
       for (const q of montarProva(u, s).questoes)
         if (!deItem(q) && q.tipo === 'texto') {
@@ -164,16 +172,27 @@ describe('montagem da prova', () => {
         }
   });
 
-  it('a nota na escala do JLPT: 120 para conhecimento e leitura, 60 para escuta, e os mínimos do N5', () => {
-    const u = UNIDADES.find((x) => x.revisao)!;
-    const p = montarProva(u, 'K7QH');
-    const tudo = notaJlpt(p, p.questoes.map((q) => q.certa));
-    expect([tudo.conhecimento, tudo.escuta, tudo.total]).toEqual([120, 60, 180]);
-    expect(passariaNoN5(tudo)).toBe(true);
-    // Tudo certo menos a escuta: passa no total, mas não no mínimo de escuta.
-    const semEscuta = notaJlpt(p, p.questoes.map((q) => (q.secao === 'escuta' ? undefined : q.certa)));
-    expect(semEscuta.escuta).toBe(0);
-    expect(passariaNoN5(semEscuta)).toBe(false);
+  it('a nota na escala do JLPT: 120 para conhecimento e leitura, 60 para escuta, e os mínimos de cada nível', () => {
+    for (const u of SIMULADOS) {
+      const jlpt = jlptDo(u.nivel);
+      const p = montarProva(u, 'K7QH');
+      const tudo = notaJlpt(p, p.questoes.map((q) => q.certa));
+      expect([tudo.conhecimento, tudo.escuta, tudo.total]).toEqual([120, 60, 180]);
+      expect(passariaNoJlpt(tudo, jlpt)).toBe(true);
+      // Tudo certo menos a escuta: passa no total, mas não no mínimo de escuta.
+      const semEscuta = notaJlpt(p, p.questoes.map((q) => (q.secao === 'escuta' ? undefined : q.certa)));
+      expect(semEscuta.escuta).toBe(0);
+      expect(passariaNoJlpt(semEscuta, jlpt)).toBe(false);
+    }
+  });
+
+  it('o N4 pede mais pontos no total que o N5, com os mesmos mínimos por parte', () => {
+    const n = (total: number) => ({ total, conhecimento: 50, escuta: 30 }) as Parameters<typeof passariaNoJlpt>[0];
+    expect(MINIMOS_JLPT.N5.total).toBe(80);
+    expect(MINIMOS_JLPT.N4.total).toBe(90);
+    expect(passariaNoJlpt(n(85), 'N5')).toBe(true);
+    expect(passariaNoJlpt(n(85), 'N4')).toBe(false);
+    expect(passariaNoJlpt(n(90), 'N4')).toBe(true);
   });
 
   it('a questão de leitura não mostra a resposta no enunciado', () => {
@@ -210,7 +229,7 @@ describe('nivelamento', () => {
 
   it('as questões de cada unidade são dela, com quatro alternativas do curso até ali', () => {
     for (const u of UNIDADES_DO_NIVELAMENTO) {
-      const anteriores = new Set(itensAte(u.numero - 1).map((i) => i.id));
+      const anteriores = new Set(itensAte(u.ordem - 1).map((i) => i.id));
       const qs = questoesDeNivelamento(u, seededRng(3));
       expect(qs.length, u.id).toBe(NIVEL_POR_UNIDADE);
       for (const q of qs) {

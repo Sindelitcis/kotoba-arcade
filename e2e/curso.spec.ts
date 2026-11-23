@@ -88,6 +88,10 @@ test('a unidade 2 só libera depois da prova da 1; com ela aprovada, abre', asyn
   const u2 = page.locator('[data-testid="cs-unidade"][data-unidade="a1-02"]');
   await expect(u2).toBeDisabled();
   await expect(u2).toContainText('Libera depois da unidade 1');
+  // O mapa separa os níveis; a primeira do A2 espera a última do A1 e diz de qual nível é.
+  await expect(page.getByTestId('cs-nivel')).toHaveCount(2);
+  await expect(page.getByTestId('cs-nivel').nth(1)).toContainText('A2 · JLPT N4');
+  await expect(page.locator('[data-testid="cs-unidade"][data-unidade="a2-02"]')).toContainText('Libera depois da unidade 1 do A2');
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/curso-mapa.png` });
 
   await page.evaluate((chave) => {

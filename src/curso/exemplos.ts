@@ -34,21 +34,32 @@ export function lerPeca(s: string): { t: string; r?: string; base?: string } {
 }
 
 /** O vocabulário até a unidade; a palavra que volta com outra leitura fica com a mais recente (何人). */
-export function vocabularioAte(numero: number): Map<string, Palavra> {
+const vocabularios = new Map<number, ReadonlyMap<string, Palavra>>();
+
+export function vocabularioAte(ordem: number): ReadonlyMap<string, Palavra> {
+  const pronto = vocabularios.get(ordem);
+  if (pronto) return pronto;
   const m = new Map<string, Palavra>();
-  for (const u of UNIDADES) if (u.numero <= numero) for (const p of palavrasDa(u)) m.set(p.jp, p);
+  for (const u of UNIDADES) if (u.ordem <= ordem) for (const p of palavrasDa(u)) m.set(p.jp, p);
+  vocabularios.set(ordem, m);
   return m;
 }
 
-export function kanjiAte(numero: number): Set<string> {
-  return new Set(UNIDADES.filter((u) => u.numero <= numero).flatMap((u) => u.kanji.map((k) => k.k)));
+const kanjis = new Map<number, ReadonlySet<string>>();
+
+export function kanjiAte(ordem: number): ReadonlySet<string> {
+  const pronto = kanjis.get(ordem);
+  if (pronto) return pronto;
+  const s = new Set(UNIDADES.filter((u) => u.ordem <= ordem).flatMap((u) => u.kanji.map((k) => k.k)));
+  kanjis.set(ordem, s);
+  return s;
 }
 
 export function unidadeDoPonto(ponto: string): Unidade | undefined {
   return UNIDADES.find((u) => u.gramatica.includes(ponto));
 }
 
-function montar(ponto: string, u: Unidade, linha: ExemploLinha, vocab: Map<string, Palavra>): Exemplo {
+function montar(ponto: string, u: Unidade, linha: ExemploLinha, vocab: ReadonlyMap<string, Palavra>): Exemplo {
   const pecas: Peca[] = linha.pecas.map((s) => {
     const { t, r, base } = lerPeca(s);
     const kana = r ?? (base ? undefined : vocab.get(t)?.kana) ?? t;
@@ -74,7 +85,7 @@ export function exemplosDoPonto(ponto: string): Exemplo[] {
   const u = unidadeDoPonto(ponto);
   const linhas = EXEMPLOS[ponto];
   if (!u || !linhas) return [];
-  const vocab = vocabularioAte(u.numero);
+  const vocab = vocabularioAte(u.ordem);
   const out = linhas.map((l) => montar(ponto, u, l, vocab));
   // Os dados não mudam: monta uma vez (a prova e o simulado pedem os mesmos exemplos muitas vezes).
   montados.set(ponto, out);
@@ -90,22 +101,22 @@ export function exemplosDaUnidade(u: Unidade): Exemplo[] {
 export function problemasDoExemplo(ponto: string, linha: ExemploLinha): string[] {
   const u = unidadeDoPonto(ponto);
   if (!u) return [`${ponto}: ponto sem unidade`];
-  return problemasDaLinha(ponto, u.numero, linha);
+  return problemasDaLinha(ponto, u.ordem, linha);
 }
 
-/** O mesmo, para uma frase que só pode usar o que foi ensinado até a unidade `numero`. */
-export function problemasDaLinha(rotulo: string, numero: number, linha: ExemploLinha): string[] {
-  const vocab = vocabularioAte(numero);
-  const kanji = kanjiAte(numero);
+/** O mesmo, para uma frase que só pode usar o que foi ensinado até a unidade de ordem `ordem`. */
+export function problemasDaLinha(rotulo: string, ordem: number, linha: ExemploLinha): string[] {
+  const vocab = vocabularioAte(ordem);
+  const kanji = kanjiAte(ordem);
   const erros: string[] = [];
   for (const s of linha.pecas) {
     const { t, r, base } = lerPeca(s);
     for (const c of t) if (KANJI.test(c) && !kanji.has(c)) erros.push(`${rotulo}: kanji ${c} ainda não ensinado (em ${t})`);
     if (base) {
-      if (!vocab.has(base)) erros.push(`${rotulo}: a base ${base} de ${t} não é do vocabulário até a unidade ${numero}`);
+      if (!vocab.has(base)) erros.push(`${rotulo}: a base ${base} de ${t} não é do vocabulário até a unidade de ordem ${ordem}`);
       if (KANJI.test(t) && !r) erros.push(`${rotulo}: ${t} tem kanji e precisa da leitura`);
     } else if (!vocab.has(t) && !GRAMATICA_EM_KANA.has(t) && !NOMES.has(t)) {
-      erros.push(`${rotulo}: ${t} não foi ensinado até a unidade ${numero}`);
+      erros.push(`${rotulo}: ${t} não foi ensinado até a unidade de ordem ${ordem}`);
     }
     if (r && /[^ぁ-ゖー]/u.test(r)) erros.push(`${rotulo}: a leitura de ${t} tem de ser em hiragana`);
   }
@@ -123,7 +134,7 @@ export interface Leitura {
 export function leituraDa(u: Unidade): Leitura | undefined {
   const l = LEITURAS[u.id];
   if (!l) return undefined;
-  const vocab = vocabularioAte(u.numero);
+  const vocab = vocabularioAte(u.ordem);
   return { titulo: l.titulo, frases: l.frases.map((f) => montar(`leitura:${u.id}`, u, f, vocab)) };
 }
 

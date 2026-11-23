@@ -30,12 +30,14 @@ completo está em [docs/curso.md](docs/curso.md) e tem seis fases:
 5. áudio de kana;
 6. A2.
 
-Estado em 23/11/2026: as fases 1 a 5 estão feitas para o A1.
+Estado em 23/11/2026: as seis fases estão feitas; o curso tem o A1 (N5) e o A2 (N4), 20 unidades cada.
 
-- **Currículo** em `src/content/curso/`: as 20 unidades, os kanji e as leituras, a gramática e as
-  notas (conferidas contra a fonte), checado por `tests/curso.test.ts`. O vocabulário cobre 655
-  das 697 palavras da lista de N5; o resto e o porquê estão em
-  [docs/curso.md](docs/curso.md#conteúdo-do-a1).
+- **Currículo** em `src/content/curso/`: as unidades, os kanji e as leituras, a gramática e as
+  notas (conferidas contra a fonte), checado por `tests/curso.test.ts`. O A1 cobre 655 das 697
+  palavras da lista de N5 e todos os kanji do N5; o A2 fecha os kanji do N4 e os 76 pontos de
+  gramática dele. Cada unidade tem `numero` (no nível) e `ordem` (no curso); o que depende do que
+  já foi ensinado usa `ordem`. Detalhes em [docs/curso.md](docs/curso.md#conteúdo-do-a1) e
+  [docs/curso.md](docs/curso.md#conteúdo-do-a2).
 - **Motor** em `src/curso/`: a tela inicial abre com "Continuar o curso" (Enter), o tocador percorre
   a unidade em partes curtas (palavras com figura, kanji, aula falada, gramática com exemplo,
   montar frases, completar, ditado, leitura com shadowing, notas, diálogo, mini-teste) e o progresso
@@ -44,10 +46,10 @@ Estado em 23/11/2026: as fases 1 a 5 estão feitas para o A1.
 - **Provas e impressos** em `src/curso/prova.ts`, `ProvaTela.tsx` e `Impresso.tsx`: cada unidade
   termina numa prova de 80% que libera a seguinte, com versão para imprimir e gabarito pelo código
   ou pelo QR. A unidade de revisão é o simulado do JLPT (vocabulário, gramática, leitura e escuta),
-  que dá o certificado do curso. Também há nivelamento, apostila (com ditado por QR), cartões para
+  que dá o certificado do nível. Também há nivelamento, apostila (com ditado por QR), cartões para
   recortar e folha de escrita dos kanji. Detalhes em [docs/curso.md](docs/curso.md#provas).
-- Falta: a fase 6, o A2. Os jogos e a Jornada continuam no fliperama, como prática
-  livre.
+- Falta: cruzar o vocabulário do A2 com uma lista de N4. Os jogos e a Jornada continuam no
+  fliperama, como prática livre.
 
 Regras de ensino que valem em tudo ([docs/ensino.md](docs/ensino.md)):
 
