@@ -33,7 +33,7 @@ cuidadosa, e em algumas palavras virou o costume (quase ninguém diz só 金 par
 dia). Em お母さん ele é respeito pela pessoa. Por isso, falando da própria mãe para alguém de fora,
 o japonês usa 母 (はは), sem お, e para a mãe dos outros usa お母さん: é a ideia de 内 e 外, o grupo
 de dentro e o de fora, que volta em todo o keigo. Regra geral: お vai em palavras de origem
-japonesa (お金, お水) e ご nas de origem chinesa (ご家族, ご住所), com exceções famosas (ご飯, お電話).
+japonesa (お金, お水) e ご nas de origem chinesa (ご家族, ご住所), com exceções famosas (お電話, お時間).
 
 Isso vira uma nota da lição em que お金 aparece (unidade 4) e é retomado na lição da família
 (unidade 9), onde 母 e お母さん entram lado a lado.
@@ -82,9 +82,8 @@ leitura usada em cada unidade, gramática e notas culturais com fonte. `tests/cu
 - toda leitura nova de um kanji já visto vem com a explicação da troca;
 - nenhuma palavra entra duas vezes e toda nota tem fonte.
 
-Kanji fora do N5 que a vida pede cedo (駅, 会社, 曜日, 病気...) entram marcados como `extra`. As notas
-culturais estão com `conferida: false`: cada uma precisa ser conferida contra a fonte antes de ir
-para a lição publicada.
+Kanji fora do N5 que a vida pede cedo (駅, 会社, 曜日, 病気...) entram marcados como `extra`. Nota
+cultural só vai para a lição com `conferida: true`, depois de conferida contra a fonte.
 
 ## A lição
 
@@ -109,14 +108,14 @@ próxima parte; a tecla U mostra o mapa das unidades.
 
 - **Partes curtas.** `motor.ts` (`blocosDa`) divide a unidade em partes de uns 5 minutos: objetivo
   (com a revisão rápida da unidade anterior), palavras de 3 a 5 por vez, os kanji dessas palavras
-  logo depois delas, a gramática, as notas culturais já conferidas, o diálogo da situação e, no
-  fim, o mini-teste (8 perguntas da unidade, com quatro alternativas, como na prova). A unidade de
-  revisão tem só o objetivo e uma prática com o que já foi visto. Os passos que dependem do
-  conteúdo da fase 4 (aula falada, exemplos de gramática, tarefa de uso) ainda não entram.
+  logo depois delas, a aula falada, a gramática, o montar frases, as notas culturais, o diálogo
+  da situação e, no fim, o mini-teste (8 perguntas da unidade, com quatro alternativas, como na
+  prova). A unidade de revisão tem só o objetivo e uma prática com o que já foi visto. Parte nova
+  entra sempre antes da posição salva de quem já começou: a pessoa pode rever uma parte, nunca pular.
 - **Cartões.** `cartoes.ts` monta a apresentação direto do currículo, no mesmo cartão dos jogos
   (`core/Apresentacao.tsx`). O do kanji mostra a leitura usada na palavra, a explicação da troca
   quando ela muda e as outras leituras do curso, com a unidade em que entram. O de gramática mostra
-  o padrão e a regra, sem exemplo até a fase 4.
+  o padrão, a regra e um exemplo falado.
 - **Prática.** `pratica.ts`: duas opções na primeira vez e três depois, todas de itens do curso já
   apresentados. Errar não tira nada: a resposta fica na tela até a pessoa seguir, o cartão aparece
   de novo e a pergunta volta no fim. A parte acaba quando cada item foi acertado uma vez.
@@ -133,6 +132,31 @@ próxima parte; a tecla U mostra o mapa das unidades.
 `tests/curso-motor.test.ts` percorre o A1 inteiro com um save zerado e confere, em cada pergunta,
 que o alvo e todas as alternativas já foram apresentados; também cobre as partes, os cartões, o
 progresso e a liberação. `e2e/curso.spec.ts` faz o caminho no navegador.
+
+## Conteúdo do A1
+
+Feito na fase 4, em `src/content/curso/`:
+
+- **Exemplos de gramática** (`exemplos.ts`): dois por ponto do N5, em peças. Cada peça é palavra do
+  vocabulário até a unidade, forma de uma delas (`食べます=たべます<食べる`), gramática em kana ou um
+  nome da lista. `tests/curso-exemplos.test.ts` barra palavra ou kanji ainda não ensinados. O
+  primeiro exemplo vai no cartão do ponto; o segundo, no montar frases. `src/curso/exemplos.ts`
+  monta a frase e a leitura inteira, e as peças levam a leitura certa ao gravador de vozes.
+- **Aula falada** (`aulas.ts`): quadros curtos por unidade, o professor na Voz 1 e o exemplo em
+  japonês com pausa para repetir. A fala não tem japonês escrito (a voz em português leria errado);
+  o japonês fica no texto da tela e no exemplo. Só regra de língua: costume e história ficam nas
+  notas, que têm fonte. Tela em `src/curso/BlocosAula.tsx`.
+- **Montar frases**: o sentido em português e as peças embaralhadas; a peça fora de ordem avisa e
+  não entra. Pronta, a frase toca e espera o Enter.
+- **Tarefa de uso** (`tarefas.ts`): aparece depois da prova aprovada e na apostila.
+- **Notas culturais:** as 16 do A1 conferidas contra a fonte em 23/11/2026 (com três correções) e
+  liberadas.
+- **Apostila:** ganhou a aula escrita, os exemplos, o exercício de montar com as respostas no fim e
+  a tarefa de uso.
+
+Ainda faltam: o simulado de fim de nível no formato do JLPT (com escuta e leitura) e o certificado;
+exercícios de completar e ditado; leitura graduada e shadowing; figura no cartão de vocabulário;
+cruzar o vocabulário com uma lista de N5. `tests/curso-aulas.test.ts` cobre aula, montar e tarefa.
 
 ## Provas
 
@@ -208,11 +232,12 @@ por ele. Os jogos continuam, como exercícios das lições e como prática livre
 
 ## Fases
 
-1. **Currículo:** feito para o A1 (`src/content/curso/`), com testes. Falta conferir as notas
-   culturais contra as fontes e cruzar o vocabulário com uma lista de N5.
-2. **Motor do curso:** feito (ver "O motor do curso", acima). Falta o que depende das fases 3 e 4.
+1. **Currículo:** feito para o A1 (`src/content/curso/`), com testes. Falta cruzar o vocabulário
+   com uma lista de N5.
+2. **Motor do curso:** feito (ver "O motor do curso", acima).
 3. **Provas e impressos:** feito (ver "Provas" e "Material impresso", acima). Falta o simulado
    de fim de nível no formato do JLPT, que depende da fase 4.
-4. **Conteúdo do A1:** aulas faladas na Voz 1, diálogos, quadros e exercícios, unidade por unidade.
+4. **Conteúdo do A1:** a maior parte feita (ver "Conteúdo do A1", acima). Falta o simulado do
+   JLPT, completar e ditado, leitura graduada e figura no vocabulário.
 5. **Áudio de kana e legendas.**
 6. **A2.**

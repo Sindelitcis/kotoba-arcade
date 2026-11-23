@@ -30,3 +30,15 @@
 .lc-opcao.escolhida { border-color: var(--brand); box-shadow: 0 0 0 3px var(--brand-soft); }
 .pv-erros { margin: 0; padding-left: 1.2em; display: grid; gap: 6px; }
 .pv-erros [lang="ja"] { font-size: 1.15rem; line-height: 1.9; }
+
+/* ───────── Aula e montar frases ───────── */
+.cs-aula-fala { font-size: 1.12rem; line-height: 1.6; }
+.cs-aula-tela { font-size: 1.25rem; line-height: 2; margin: 0; padding: 8px 12px; border-left: 3px solid var(--brand-soft); }
+.cs-aula-ex .ap-ex-jp { font-size: 1.5rem; line-height: 2; }
+.cs-montar-pt { font-size: 1.1rem; }
+.cs-montada { min-height: 3.6rem; display: flex; flex-wrap: wrap; align-items: flex-end; gap: 4px; padding: 8px 12px; border-bottom: 2px solid var(--border, #ccc); font-size: 1.5rem; line-height: 2.1; }
+.cs-cursor { width: 2px; height: 1.4em; background: var(--brand); opacity: 0.6; }
+.cs-pecas { display: flex; flex-wrap: wrap; gap: 8px; }
+.cs-peca { font-size: 1.3rem; line-height: 2; display: inline-flex; align-items: center; gap: 6px; padding: 2px 12px; border-radius: var(--r-m); }
+.cs-peca.posta { padding: 0 2px; }
+.cs-peca.errada { border-color: var(--erro-text); background: var(--erro-soft); }

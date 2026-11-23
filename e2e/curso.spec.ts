@@ -238,3 +238,62 @@ test('os jogos continuam no fliperama: Jogar agora abre o KanjiMon', async ({ pa
   await page.getByTestId('play-now').click();
   await expect(page.getByTestId('apresentacao')).toBeVisible();
 });
+
+test('aula, gramática com exemplo e montar frases: tudo no ritmo da pessoa', async ({ page }) => {
+  // Acha a parte da aula na unidade 1, abrindo o curso em cada parte até chegar nela.
+  let achou = false;
+  for (let parte = 1; parte < 30 && !achou; parte++) {
+    await comCurso(page, { feitos: { 'a1-01': parte }, concluidas: {} });
+    await page.keyboard.press('Enter');
+    await expect(page.getByTestId('cs-parte')).toBeVisible();
+    achou = ((await page.getByTestId('cs-parte').textContent()) ?? '').includes('Aula');
+  }
+  expect(achou).toBe(true);
+  const quadro = page.getByTestId('cs-aula');
+  await expect(quadro).toHaveAttribute('data-i', '0');
+  if (SHOTS) await page.screenshot({ path: `${SHOTS}/curso-aula.png` });
+  // Não passa sozinho.
+  await page.waitForTimeout(800);
+  await expect(quadro).toHaveAttribute('data-i', '0');
+  const n = Number((await quadro.locator('.gr-tag').textContent())?.match(/de (\d+)/)?.[1]);
+  for (let i = 0; i < n; i++) await page.keyboard.press('Enter');
+  await expect(page.getByTestId('cs-intervalo')).toBeVisible();
+  await page.keyboard.press('Enter');
+
+  // Gramática: o cartão traz o exemplo com furigana.
+  await expect(page.getByTestId('cs-parte')).toContainText('Gramática');
+  await expect(page.locator('.ap-exemplo ruby').first()).toBeVisible();
+  await passarApresentacao(page);
+  await expect(page.getByTestId('cs-intervalo')).toBeVisible();
+  await page.keyboard.press('Enter');
+
+  // Montar frases: peça errada avisa e não entra; a certa entra; pronta, toca e espera o Enter.
+  await expect(page.getByTestId('cs-parte')).toContainText('Montar frases');
+  if (SHOTS) await page.screenshot({ path: `${SHOTS}/curso-montar.png` });
+  for (let volta = 0; volta < 12; volta++) {
+    if (await page.getByTestId('cs-intervalo').isVisible()) break;
+    const montar = page.getByTestId('cs-montar');
+    await expect(montar).toBeVisible();
+    const pt = await montar.locator('.cs-montar-pt').textContent();
+    let primeira = true;
+    while (!(await page.getByTestId('cs-retorno').isVisible())) {
+      const pecas = page.getByTestId('cs-peca');
+      const total = await pecas.count();
+      let entrou = false;
+      for (let k = 0; k < total && !entrou; k++) {
+        const antes = await page.locator('.cs-peca.posta').count();
+        await pecas.nth(k).click();
+        entrou = (await page.locator('.cs-peca.posta').count()) > antes || (await page.getByTestId('cs-retorno').isVisible());
+        if (!entrou && primeira) {
+          await expect(montar.locator('.lc-retorno')).toBeVisible();
+          primeira = false;
+        }
+      }
+      expect(entrou).toBe(true);
+    }
+    await page.waitForTimeout(300);
+    await expect(montar.locator('.cs-montar-pt')).toHaveText(pt ?? '');
+    await page.keyboard.press('Enter');
+  }
+  await expect(page.getByTestId('cs-intervalo')).toBeVisible();
+});

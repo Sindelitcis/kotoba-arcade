@@ -43,8 +43,8 @@ export interface Nota {
   /** De onde vem a informação. Nota sem fonte não entra. */
   fontes: string[];
   /**
-   * Conferida contra a fonte por uma pessoa. Até lá a nota fica no currículo, mas a lição
-   * publicada (fase 4) só usa notas conferidas.
+   * Conferida contra a fonte. Até lá a nota fica no currículo, mas a lição só usa notas
+   * conferidas.
    */
   conferida: boolean;
 }

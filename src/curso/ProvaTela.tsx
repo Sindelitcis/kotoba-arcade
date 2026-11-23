@@ -13,7 +13,8 @@ import { UNIDADES, type Unidade } from '../content/curso';
 import { app, commit, cursoAberto, cursoSave } from '../core/app';
 import { Apresentacao } from '../core/Apresentacao';
 import { apresentar, avaliar, foiApresentado } from '../core/ensino';
-import { Furigana } from '../core/Furigana';
+import { Furigana, Misto } from '../core/Furigana';
+import { TAREFAS } from '../content/curso/tarefas';
 import { seededRng } from '../core/rng';
 import { cartaoDaPalavra, cartaoDoKanji } from './cartoes';
 import { abrirImpresso } from './Impresso';
@@ -186,6 +187,18 @@ export function ProvaTela({ unidade, onSair }: { unidade: Unidade; onSair: () =>
                 : 'Passou. O A1 está completo.'
               : `Faltou pouco: precisa de ${pct(NOTA_MINIMA)}. Reveja o que errou e faça outra prova, com outras questões.`}
           </p>
+          {resultado.aprovada && (TAREFAS[unidade.id]?.length ?? 0) > 0 && (
+            <>
+              <p class="lc-linha">Para usar fora do curso:</p>
+              <ul class="pv-erros" data-testid="pv-tarefas">
+                {TAREFAS[unidade.id]!.map((t) => (
+                  <li key={t}>
+                    <Misto texto={t} />
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
           {resultado.erradas.length > 0 && (
             <>
               <p class="lc-linha">O que errou:</p>

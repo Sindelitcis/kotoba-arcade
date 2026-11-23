@@ -30,20 +30,23 @@ completo está em [docs/curso.md](docs/curso.md) e tem seis fases:
 5. áudio de kana;
 6. A2.
 
-Estado em 23/11/2026: as fases 1, 2 e 3 estão feitas para o A1.
+Estado em 23/11/2026: as fases 1, 2 e 3 estão feitas para o A1, e a 4 está quase toda feita.
 
 - **Currículo** em `src/content/curso/`: as 20 unidades, os kanji e as leituras, a gramática e as
-  notas, conferido por `tests/curso.test.ts`. Faltam conferir as notas culturais contra as fontes
-  (até lá elas não aparecem no curso) e cruzar o vocabulário com uma lista de N5.
+  notas (conferidas contra a fonte), checado por `tests/curso.test.ts`. Falta cruzar o vocabulário
+  com uma lista de N5.
 - **Motor** em `src/curso/`: a tela inicial abre com "Continuar o curso" (Enter), o tocador percorre
-  a unidade em partes curtas (palavras, kanji, gramática, diálogo, mini-teste) e o progresso fica
-  salvo. Detalhes em [docs/curso.md](docs/curso.md#o-motor-do-curso).
+  a unidade em partes curtas (palavras, kanji, aula falada, gramática com exemplo, montar frases,
+  notas, diálogo, mini-teste) e o progresso fica salvo. Os exemplos só usam o que já foi ensinado
+  (`tests/curso-exemplos.test.ts`). Detalhes em [docs/curso.md](docs/curso.md#o-motor-do-curso).
 - **Provas e impressos** em `src/curso/prova.ts`, `ProvaTela.tsx` e `Impresso.tsx`: cada unidade
   termina numa prova de 80% que libera a seguinte, com versão para imprimir e gabarito pelo código
   ou pelo QR. Também há nivelamento, apostila, cartões para recortar e folha de escrita dos kanji.
   Detalhes em [docs/curso.md](docs/curso.md#provas).
-- A próxima é a fase 4, o conteúdo do A1 (aulas faladas, exemplos, exercícios de frase e o
-  simulado do JLPT). Os jogos e a Jornada continuam no fliperama, como prática livre.
+- Falta da fase 4: o simulado do JLPT com escuta e leitura, o certificado, completar e ditado,
+  leitura graduada e figura no vocabulário ([docs/curso.md](docs/curso.md#conteúdo-do-a1)). Depois
+  vem a fase 5, áudio de kana e legendas. Os jogos e a Jornada continuam no fliperama, como
+  prática livre.
 
 Regras de ensino que valem em tudo ([docs/ensino.md](docs/ensino.md)):
 

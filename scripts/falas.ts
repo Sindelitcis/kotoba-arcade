@@ -34,6 +34,9 @@ import { daCoisa, ETAPAS, falaDaTarefa, falaDoNome, nomeDe, PERGUNTA_NOME, taref
 import { LUGARES } from '../src/games/cena/lugares';
 import { falasDaFicha, fichaDe, todosOsAlvos } from '../src/content/aprofundar/fichas';
 import { falasDoCurso } from '../src/curso/cartoes';
+import { exemplosDaUnidade, partesDaFala } from '../src/curso/exemplos';
+import { AULAS_DO_CURSO } from '../src/content/curso/aulas';
+import { UNIDADES } from '../src/content/curso';
 
 export interface Fala {
   /** Exatamente o texto que o jogo passa para `speak()`. */
@@ -356,6 +359,17 @@ function cenaEtapas(): Fala[] {
 }
 
 /** Aprofundar: o japonês de cada ficha (quase tudo já é dos jogos; o resto é novo). */
+/** Exemplos de gramática do curso: cada peça já vem com a leitura certa. */
+function exemplosDoCurso(): Fala[] {
+  return UNIDADES.flatMap((u) =>
+    exemplosDaUnidade(u).map((e): Fala => {
+      const partes: Parte[] = e.pecas.map((p) => (hasKanji(p.t) ? { t: p.t, r: p.kana } : { t: p.t }));
+      partes.push({ t: e.jp.slice(-1) });
+      return { texto: e.jp, voz: VOZ_PADRAO, tts: e.jp, partes, origem: `curso/${u.id}/exemplo/${e.ponto}` };
+    }),
+  );
+}
+
 function aprofundar(): Fala[] {
   return todosOsAlvos().flatMap((a) => {
     const f = fichaDe(a);
@@ -407,6 +421,11 @@ export function listarFalas(): Fala[] {
     ...cena(),
     // Curso: as palavras do currículo (os cartões de palavra e de kanji falam a palavra).
     ...falasDoCurso().jp.map((f) => palavra(f.palavra, f.origem)),
+    ...exemplosDoCurso(),
+    // Aula do curso: a palavra japonesa no meio da fala do professor, na voz de palavra.
+    ...Object.entries(AULAS_DO_CURSO).flatMap(([id, aula]) =>
+      aula.flatMap((q) => partesDaFala(q.fala).flatMap((p) => ('jp' in p ? [falaDoQuadro({ texto: p.kana, voz: 'palavra', kana: p.kana }, `curso/${id}/aula`)] : []))),
+    ),
     ...cenaEtapas(),
     ...aprofundar(),
   ];

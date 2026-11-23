@@ -11,7 +11,11 @@
 import qrcode from 'qrcode-generator';
 import { useEffect } from 'preact/hooks';
 import { GRAMATICA_N5, palavrasDa, UNIDADES, type Unidade } from '../content/curso';
-import { Furigana } from '../core/Furigana';
+import { AULAS_DO_CURSO } from '../content/curso/aulas';
+import { TAREFAS } from '../content/curso/tarefas';
+import { Furigana, Misto } from '../core/Furigana';
+import { hashString, seededRng } from '../core/rng';
+import { exemplosDoPonto, falaEscrita, pecasParaMontar } from './exemplos';
 import { carregarTracos, tracos } from '../games/pecas/Tracos';
 import { significadoDoKanji } from './cartoes';
 import { outrasLeituras, palavraDoCurso, partesDoPonto } from './motor';
@@ -209,6 +213,10 @@ function Gabarito({ prova }: { prova: Prova }) {
 function Apostila({ unidade: u }: { unidade: Unidade }) {
   const palavras = palavrasDa(u);
   const notas = u.notas.filter((n) => n.conferida);
+  const aula = AULAS_DO_CURSO[u.id] ?? [];
+  const tarefas = TAREFAS[u.id] ?? [];
+  const rng = seededRng(hashString(u.id));
+  const montar = u.gramatica.flatMap((g) => exemplosDoPonto(g).slice(1)).map((e) => ({ e, pecas: pecasParaMontar(e, rng) }));
   return (
     <main class="im" data-testid="im-apostila">
       <Barra titulo={`Apostila da unidade ${u.numero}`} />
@@ -280,6 +288,22 @@ function Apostila({ unidade: u }: { unidade: Unidade }) {
         </section>
       )}
 
+      {aula.length > 0 && (
+        <section>
+          <h2>Aula</h2>
+          {aula.map((q, i) => (
+            <p key={i}>
+              <Misto texto={falaEscrita(q.fala)} />
+              {q.tela && (
+                <span class="im-nota" lang="ja">
+                  <Misto texto={q.tela} />
+                </span>
+              )}
+            </p>
+          ))}
+        </section>
+      )}
+
       {u.gramatica.length > 0 && (
         <section>
           <h2>Gramática</h2>
@@ -289,10 +313,40 @@ function Apostila({ unidade: u }: { unidade: Unidade }) {
               return (
                 <li key={g}>
                   <b lang="ja">{grande}</b> {pt && `· ${pt}`}
+                  {exemplosDoPonto(g).slice(0, 1).map((e) => (
+                    <span key={e.jp} class="im-nota">
+                      <span lang="ja">
+                        <Furigana texto={e.jp} leitura={e.kana} />
+                      </span>{' '}
+                      {e.pt}
+                    </span>
+                  ))}
                 </li>
               );
             })}
           </ul>
+        </section>
+      )}
+
+      {montar.length > 0 && (
+        <section class="im-exercicios" data-testid="im-exercicios">
+          <h2>Exercício: monte a frase</h2>
+          <p class="im-instrucao">Escreva a frase em japonês com as peças, na ordem certa. As respostas estão no fim.</p>
+          <ol class="im-lista">
+            {montar.map(({ e, pecas }) => (
+              <li key={e.jp} class="im-questao">
+                <p>“{e.pt}”</p>
+                <p lang="ja" class="im-pecas">
+                  {pecas.map((p, i) => (
+                    <span key={i} class="im-peca">
+                      <Furigana texto={p.t} leitura={p.kana} />
+                    </span>
+                  ))}
+                </p>
+                <p class="im-linha-escrever">&nbsp;</p>
+              </li>
+            ))}
+          </ol>
         </section>
       )}
 
@@ -302,10 +356,37 @@ function Apostila({ unidade: u }: { unidade: Unidade }) {
           {notas.map((n) => (
             <div key={n.titulo} class="im-cultura">
               <h3>{n.titulo}</h3>
-              <p>{n.texto}</p>
+              <p>
+                <Misto texto={n.texto} />
+              </p>
               <small>Fonte: {n.fontes.join('; ')}</small>
             </div>
           ))}
+        </section>
+      )}
+      {tarefas.length > 0 && (
+        <section>
+          <h2>Para usar fora do curso</h2>
+          <ul class="im-lista">
+            {tarefas.map((t) => (
+              <li key={t}>
+                <Misto texto={t} />
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {montar.length > 0 && (
+        <section class="im-respostas">
+          <h2>Respostas do exercício</h2>
+          <ol class="im-lista">
+            {montar.map(({ e }) => (
+              <li key={e.jp} lang="ja">
+                <Furigana texto={e.jp} leitura={e.kana} />
+              </li>
+            ))}
+          </ol>
         </section>
       )}
       {u.revisao && <p>Esta é a unidade de revisão do nível: a apostila de cada unidade tem o conteúdo.</p>}

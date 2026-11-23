@@ -11,6 +11,7 @@ import { frasePtDoSignificado, type ItemNovo } from '../content/ensino';
 import { FRASES_FIXAS, fichaDe } from '../content/aprofundar/fichas';
 import type { FalaJp, Trecho } from '../core/sequencia';
 import { cartaDaPalavra, FICHA_DA_GRAMATICA, outrasLeituras, palavraDoCurso, partesDoPonto } from './motor';
+import { exemplosDoPonto } from './exemplos';
 
 /** A palavra solta, como nos jogos: a gravação fica no kana, na voz de palavra. */
 export function falaDaPalavra(p: Pick<Palavra, 'jp' | 'kana'>): FalaJp {
@@ -98,12 +99,13 @@ function regraDoPonto(id: string): string | undefined {
 }
 
 /**
- * O cartão do ponto de gramática. Os exemplos montados só com o que já foi ensinado chegam
- * com a aula da unidade (fase 4); até lá o cartão mostra o padrão e a regra, sem exemplo.
+ * O cartão do ponto de gramática: o padrão, a regra e um exemplo feito só com o que já foi
+ * ensinado (curso/exemplos.ts), falado em japonês.
  */
 export function cartaoDoPonto(id: string, unidade: string): ItemNovo {
   const { grande, pt } = partesDoPonto(id);
   const ficha = FICHA_DA_GRAMATICA[id];
+  const [ex] = exemplosDoPonto(id);
   return {
     chaves: [`curso:${unidade}:gramatica:${id}`],
     alvo: { t: 'gramatica', id: ficha ?? id },
@@ -112,7 +114,8 @@ export function cartaoDoPonto(id: string, unidade: string): ItemNovo {
     // Sem explicação separada ("A は B です"), o padrão já diz tudo: nada repetido embaixo.
     pt,
     explicacao: regraDoPonto(id),
-    falas: [],
+    ...(ex ? { exemplo: { jp: ex.jp, kana: ex.kana, pt: ex.pt } } : {}),
+    falas: ex ? [{ tipo: 'jp', fala: { texto: ex.jp, voz: 'frase', kana: ex.kana } }] : [],
   };
 }
 

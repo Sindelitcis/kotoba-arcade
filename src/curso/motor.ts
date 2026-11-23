@@ -15,10 +15,13 @@
  *
  * Depois dos blocos vem a prova da unidade (prova.ts): ela é que libera a seguinte.
  *
- * A aula falada e a tarefa de uso dependem do conteúdo da fase 4; o motor pula o que ainda não existe.
+ * A aula falada (content/curso/aulas.ts) vem depois das palavras e dos kanji, antes dos cartões de
+ * gramática; o exercício de montar frases (com o segundo exemplo de cada ponto), logo depois deles.
  */
 import { GRAMATICA_N5, palavrasDa, UNIDADES, type KanjiDaUnidade, type Nota, type Palavra, type Unidade } from '../content/curso';
 import { cardKey } from '../content';
+import { AULAS_DO_CURSO } from '../content/curso/aulas';
+import { exemplosDaUnidade, type Exemplo } from './exemplos';
 import { foiApresentado } from '../core/ensino';
 import { shuffle, type Rng } from '../core/rng';
 import type { CardState } from '../core/srs';
@@ -29,7 +32,9 @@ export type Bloco =
   | { tipo: 'objetivo'; id: string }
   | { tipo: 'palavras'; id: string; palavras: readonly Palavra[] }
   | { tipo: 'kanji'; id: string; kanji: readonly KanjiDaUnidade[] }
+  | { tipo: 'aula'; id: string }
   | { tipo: 'gramatica'; id: string; pontos: readonly string[] }
+  | { tipo: 'frases'; id: string; exemplos: readonly Exemplo[] }
   | { tipo: 'notas'; id: string; notas: readonly Nota[] }
   | { tipo: 'dialogo'; id: string; situacao: string }
   | { tipo: 'miniteste'; id: string }
@@ -41,7 +46,9 @@ export const NOME_BLOCO: Readonly<Record<TipoBloco, string>> = {
   objetivo: 'Objetivo',
   palavras: 'Vocabulário',
   kanji: 'Kanji',
+  aula: 'Aula',
   gramatica: 'Gramática',
+  frases: 'Montar frases',
   notas: 'Cultura',
   dialogo: 'Diálogo',
   miniteste: 'Mini-teste',
@@ -88,7 +95,12 @@ export function blocosDa(u: Unidade): Bloco[] {
   });
   // Kanji cuja palavra não está nas palavras (o teste do currículo não deixa, mas o motor não perde nada).
   emLotes(restantes).forEach((kl, j) => out.push({ tipo: 'kanji', id: `${u.id}:kanji:fim.${j + 1}`, kanji: kl }));
+  // A aula vem depois das palavras e dos kanji: o exemplo dela só usa o que já foi apresentado.
+  if (AULAS_DO_CURSO[u.id]) out.push({ tipo: 'aula', id: `${u.id}:aula` });
   if (u.gramatica.length > 0) out.push({ tipo: 'gramatica', id: `${u.id}:gramatica`, pontos: u.gramatica });
+  // O primeiro exemplo de cada ponto está no cartão; o exercício usa os outros.
+  const paraMontar = u.gramatica.flatMap((g) => exemplosDaUnidade({ ...u, gramatica: [g] }).slice(1));
+  if (paraMontar.length > 0) out.push({ tipo: 'frases', id: `${u.id}:frases`, exemplos: paraMontar });
   const notas = u.notas.filter((n) => n.conferida);
   if (notas.length > 0) out.push({ tipo: 'notas', id: `${u.id}:notas`, notas });
   for (const s of u.situacoes ?? []) out.push({ tipo: 'dialogo', id: `${u.id}:dialogo:${s}`, situacao: s });

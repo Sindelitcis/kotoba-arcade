@@ -87,3 +87,7 @@ body.impresso #app { background: #fff; }
   .no-print, .help-btn, .aprofundar { display: none !important; }
   .im { padding: 0; max-width: none; }
 }
+.im-pecas { display: flex; flex-wrap: wrap; gap: 6px; margin: 2px 0; font-size: 12.5pt; line-height: 2; }
+.im-peca { border: 1px solid #999; border-radius: 4px; padding: 0 6px; }
+.im-linha-escrever { border-bottom: 1px solid #555; height: 9mm; margin: 0 0 4px; }
+.im-respostas { break-before: page; }

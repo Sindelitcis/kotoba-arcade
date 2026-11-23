@@ -15,6 +15,8 @@ import { falasPtDaFicha, fichaDe, todosOsAlvos } from '../src/content/aprofundar
 import { falasPtDoEnsino } from '../src/content/ensino';
 import { falasPtDasEtapas } from '../src/games/cena/aulas';
 import { falasDoCurso } from '../src/curso/cartoes';
+import { AULAS_DO_CURSO } from '../src/content/curso/aulas';
+import { partesDaFala } from '../src/curso/exemplos';
 
 export interface FalaPt {
   /** Exatamente o texto do trecho `{ tipo: 'pt' }`. */
@@ -39,6 +41,7 @@ export function listarFalasPt(): FalaPt[] {
     ...falasPtDoEnsino().map((texto) => ({ texto, origem: 'ensino/significado' })),
     ...falasPtDasEtapas().map((texto) => ({ texto, origem: 'cena/etapa' })),
     ...falasDoCurso().pt.map((texto) => ({ texto, origem: 'curso/significado' })),
+    ...Object.entries(AULAS_DO_CURSO).flatMap(([id, aula]) => aula.flatMap((q) => partesDaFala(q.fala).flatMap((p) => ('pt' in p ? [{ texto: p.pt, origem: `curso/${id}/aula` }] : [])))),
   ];
   const vistas = new Set<string>();
   return todas.filter((f) => {

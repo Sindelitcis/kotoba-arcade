@@ -20,7 +20,7 @@ import { Apresentacao } from '../core/Apresentacao';
 import { sfx } from '../core/audio';
 import { acertou, errou } from '../core/cor';
 import { apresentar } from '../core/ensino';
-import { Furigana } from '../core/Furigana';
+import { Furigana, Misto } from '../core/Furigana';
 import { Icone } from '../core/Icone';
 import { useAprofundar } from '../core/aprofundar/estado';
 import { tocarSequencia, type Trecho } from '../core/sequencia';
@@ -34,6 +34,7 @@ import { abrirImpresso } from './Impresso';
 import { lerCodigo, OPCOES_PROVA } from './prova';
 import { NivelamentoTela, ProvaTela } from './ProvaTela';
 import { useTeclado } from './teclado';
+import { AulaView, MontarView } from './BlocosAula';
 import { Pratica } from './pratica';
 import './curso.css';
 
@@ -321,6 +322,10 @@ function BlocoView({ unidade, bloco, onFim }: { unidade: Unidade; bloco: Bloco; 
       return <Revisao unidade={unidade} onFim={onFim} />;
     case 'miniteste':
       return <Miniteste unidade={unidade} onFim={onFim} />;
+    case 'aula':
+      return <AulaView unidade={unidade} onFim={onFim} />;
+    case 'frases':
+      return <MontarView exemplos={bloco.exemplos} onFim={onFim} />;
   }
 }
 
@@ -636,12 +641,16 @@ function Notas({ bloco, onFim }: { bloco: Extract<Bloco, { tipo: 'notas' }>; onF
     return false;
   });
   return (
-    <div class="koma lc-quadro">
+    <div class="koma lc-quadro" data-testid="cs-notas">
       <div class="lc-conteudo">
         {bloco.notas.map((n) => (
           <section key={n.titulo} class="cs-nota">
-            <h2 class="cs-titulo">{n.titulo}</h2>
-            <p class="lc-linha">{n.texto}</p>
+            <h2 class="cs-titulo">
+              <Misto texto={n.titulo} />
+            </h2>
+            <p class="lc-linha">
+              <Misto texto={n.texto} />
+            </p>
             <small class="muted">Fonte: {n.fontes.join('; ')}</small>
           </section>
         ))}
