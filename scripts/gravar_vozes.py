@@ -14,6 +14,10 @@ Para cada fala:
 
 Arquivos já gravados (mesmo texto, mesma voz, mesma entrada) não são refeitos.
 `--refazer-textos arquivo.json` (lista de textos) refaz só esses.
+
+Kana solto: o jeito de gravar fica em `scripts/kana-metodo.json` (ver `KANA_METODOS`).
+`--comparar-kana PASTA` não grava o site: grava cada jeito para alguns kana, para a comparação
+às cegas (`npm run comparar-kana`).
 """
 import argparse
 import hashlib
@@ -233,6 +237,79 @@ def processar(wav: bytes, destino: Path) -> None:
         os.unlink(bruto)
 
 
+# Os jeitos de gravar um kana sozinho (docs/curso.md, "Áudio de kana isolado"). A mora solta
+# sai curta e às vezes embolada; a escolha entre eles é do ouvido, na comparação às cegas.
+KANA_METODOS = {
+    "atual": "o motor fala o kana sozinho, como sempre foi",
+    "esticado": "o kana sozinho, mais devagar, com a vogal mais longa e silêncio em volta",
+    "recorte": "o motor fala o kana duas vezes (か、か) e fica só a primeira, recortada pelo tempo de cada mora",
+    "aivis": "a voz das frases (AivisSpeech まお) fala o kana sozinho, com silêncio em volta",
+}
+# Os kana da comparação: vogais, os que fogem da linha (し, ち, つ, ふ), o R, o ん, tenten,
+# maru, combinados e os sons de fora do katakana.
+KANA_COMPARAR = ["あ", "い", "う", "え", "お", "か", "し", "ち", "つ", "ふ", "ら", "り", "る", "ん", "を",
+                 "が", "ぜ", "ぴ", "きゃ", "しゅ", "ちょ", "りゅ", "ツ", "ファ", "ティ", "ヴ"]
+
+
+def _cortar(wav: bytes, fim: float, fade: float = 0.04) -> bytes:
+    """Corta o wav (16 bits, mono) em `fim` segundos, com um fade-out curto no fim."""
+    import array
+    with wave.open(io.BytesIO(wav)) as w:
+        taxa, largura, canais = w.getframerate(), w.getsampwidth(), w.getnchannels()
+        amostras = array.array("h", w.readframes(w.getnframes()))
+    assert largura == 2 and canais == 1, (largura, canais)
+    corte = amostras[: max(1, int(fim * taxa))]
+    n = min(len(corte), int(fade * taxa))
+    for i in range(n):
+        corte[len(corte) - n + i] = int(corte[len(corte) - n + i] * (n - i) / n)
+    out = io.BytesIO()
+    with wave.open(out, "wb") as w:
+        w.setnchannels(1)
+        w.setsampwidth(2)
+        w.setframerate(taxa)
+        w.writeframes(corte.tobytes())
+    return out.getvalue()
+
+
+def kana_isolado(metodo: str, kana: str, motores: dict, vozes: dict) -> bytes:
+    """O wav de um kana sozinho, gravado do jeito `metodo` (KANA_METODOS)."""
+    vv, est = motores["voicevox"], vozes["metan"]["estilo"]
+    if metodo == "atual":
+        return vv.sintese(vv.consulta(kana, est), est)
+    if metodo == "esticado":
+        q = vv.consulta(kana, est)
+        ultima = q["accent_phrases"][-1]["moras"][-1]
+        ultima["vowel_length"] *= 1.6
+        return vv.sintese(dict(q, speedScale=0.9, prePhonemeLength=0.2, postPhonemeLength=0.3), est)
+    if metodo == "recorte":
+        q = vv.consulta(f"{kana}、{kana}", est)
+        primeira = q["accent_phrases"][0]["moras"]
+        dur = q["prePhonemeLength"] + sum((m.get("consonant_length") or 0) + m["vowel_length"] for m in primeira)
+        return _cortar(vv.sintese(q, est), dur / q["speedScale"] + 0.06)
+    if metodo == "aivis":
+        av, est = motores["aivis"], vozes["mao"]["estilo"]
+        q = av.consulta(kana, est)
+        return av.sintese(dict(q, prePhonemeLength=0.25, postPhonemeLength=0.35), est)
+    raise ValueError(f"jeito de gravar kana desconhecido: {metodo}")
+
+
+def comparar_kana(pasta: Path, motores: dict, vozes: dict) -> None:
+    """Grava cada kana de KANA_COMPARAR de todos os jeitos, para a comparação às cegas."""
+    pasta.mkdir(parents=True, exist_ok=True)
+    lista = []
+    for i, kana in enumerate(KANA_COMPARAR):
+        arquivos = {}
+        for metodo in KANA_METODOS:
+            nome = f"{i:02d}-{metodo}.mp3"
+            processar(kana_isolado(metodo, kana, motores, vozes), pasta / nome)
+            arquivos[metodo] = nome
+        lista.append({"kana": kana, "arquivos": arquivos})
+        print(f"{kana}: {len(arquivos)} versões", flush=True)
+    corpo = {"metodos": KANA_METODOS, "kana": lista}
+    (pasta / "lista.json").write_text(json.dumps(corpo, ensure_ascii=False, indent=1), encoding="utf-8", newline="\n")
+    print(f"{len(lista)} kana em {pasta}")
+
+
 def corrigir_acento(f: dict, consulta: dict, motor: Motor, estilo: int, kanjium: dict, rel: dict) -> None:
     p = f.get("palavra")
     if not p or len(consulta["accent_phrases"]) != 1:
@@ -282,13 +359,19 @@ def main():
     ap.add_argument("--refazer", action="store_true", help="grava tudo de novo")
     ap.add_argument("--refazer-textos", help="json com a lista de textos para gravar de novo")
     ap.add_argument("--duvidas", help="json com as gravações que o Whisper não confirmou (vai sendo atualizado)")
+    ap.add_argument("--comparar-kana", help="pasta: grava os kana da comparação às cegas, e só")
     args = ap.parse_args()
 
     dados = json.loads(Path(args.falas).read_text(encoding="utf-8"))
     vozes, falas, padrao = dados["vozes"], dados["falas"], dados["padrao"]
+    motores = {"aivis": Motor(args.aivis), "voicevox": Motor(args.voicevox, voicevox=True)}
+    if args.comparar_kana:
+        comparar_kana(Path(args.comparar_kana), motores, vozes)
+        return
+    metodo_kana = json.loads((Path(__file__).parent / "kana-metodo.json").read_text(encoding="utf-8"))["metodo"]
+    assert metodo_kana in KANA_METODOS, metodo_kana
     saida = Path(args.saida)
     saida.mkdir(parents=True, exist_ok=True)
-    motores = {"aivis": Motor(args.aivis), "voicevox": Motor(args.voicevox, voicevox=True)}
     kanjium = carregar_kanjium(args.kanjium)
     ouvido = Ouvido(WhisperModel(args.whisper, device="cuda", compute_type="float16"))
     refazer = set(json.loads(Path(args.refazer_textos).read_text(encoding="utf-8"))) if args.refazer_textos else set()
@@ -306,6 +389,8 @@ def main():
         voz = vozes[f["voz"]]
         partes = "|".join(f"{p['t']}={p.get('r', '')}" for p in f["partes"])
         chave = f"{VERSAO}\n{f['voz']}\n{f['texto']}\n{partes}"
+        if f["origem"].startswith("kana/") and metodo_kana != "atual":
+            chave += f"\nkana:{metodo_kana}"
         arquivo = hashlib.sha1(chave.encode("utf-8")).hexdigest()[:16] + ".mp3"
         manifesto.setdefault(f["texto"], {})[f["voz"]] = arquivo
         usados.add(arquivo)
@@ -323,7 +408,7 @@ def main():
 
         if f["origem"].startswith("kana/"):
             # Kana solto: o Whisper não reconhece uma mora sozinha, então não dá para conferir.
-            processar(motor.sintese(consulta, estilo), destino)
+            processar(kana_isolado(metodo_kana, f["tts"], motores, vozes), destino)
             rel["gravadas"] += 1
             rel["sem_conferir"] += 1
             continue

@@ -15,6 +15,7 @@
     "local": "node local/iniciar.mjs",
     "test:local": "python -I -m unittest discover -s local -p \"test_*.py\"",
     "vozes": "python -I scripts/placa.py --nome vozes --vram 4 -- node scripts/gravar-vozes.mjs",
+    "comparar-kana": "python -I scripts/comparar-kana.py",
     "vozes-pt": "python -I scripts/placa.py --nome vozes-pt --vram 11 -- node scripts/gravar-vozes-pt.mjs",
     "furigana": "node scripts/furigana.mjs"
   },

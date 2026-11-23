@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Comparar kana</title>
+<style>
+  :root { --fundo: #f6f3ee; --texto: #1f1c18; --suave: #6b645b; --borda: #d8d1c6; --destaque: #b4432f; }
+  @media (prefers-color-scheme: dark) { :root { --fundo: #1b1a18; --texto: #eee8de; --suave: #a59d91; --borda: #3b3833; --destaque: #e0785f; } }
+  body { margin: 0; background: var(--fundo); color: var(--texto); font: 18px/1.5 system-ui, sans-serif; }
+  main { max-width: 640px; margin: 0 auto; padding: 32px 16px; }
+  h1 { font-size: 22px; margin: 0 0 8px; }
+  p { color: var(--suave); margin: 0 0 16px; }
+  .kana { font-size: 120px; text-align: center; margin: 24px 0; font-family: "Noto Sans JP", "Yu Gothic", sans-serif; }
+  .versoes { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; }
+  .versao { border: 1px solid var(--borda); border-radius: 10px; padding: 12px; text-align: center; }
+  button { font: inherit; color: inherit; background: transparent; border: 1px solid var(--borda); border-radius: 8px; padding: 8px 14px; cursor: pointer; }
+  button.escolher { margin-top: 8px; width: 100%; }
+  button:hover, button:focus-visible { border-color: var(--destaque); outline: none; }
+  .tocando { border-color: var(--destaque); }
+  .rodape { display: flex; justify-content: space-between; margin-top: 24px; color: var(--suave); }
+  .fim { text-align: center; }
+</style>
+</head>
+<body>
+<main id="app"><p>Carregando…</p></main>
+<script>
+const CHAVE = 'comparar-kana-v1';
+const app = document.getElementById('app');
+let lista, ordem, respostas, atual = new Audio();
+
+function embaralhar(a) {
+  a = a.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+function salvar() { try { localStorage.setItem(CHAVE, JSON.stringify({ ordem, respostas })); } catch {} }
+function tocar(arquivo, botao) {
+  atual.pause();
+  atual = new Audio(arquivo);
+  document.querySelectorAll('.versao').forEach((v) => v.classList.remove('tocando'));
+  botao?.closest('.versao')?.classList.add('tocando');
+  atual.play();
+}
+
+function tela() {
+  const i = respostas.length;
+  if (i >= lista.kana.length) return fim();
+  const item = lista.kana[i];
+  const metodos = ordem[i];
+  app.innerHTML = `
+    <h1>Qual soa mais claro e natural?</h1>
+    <p>Ouça as versões (teclas 1 a ${metodos.length}) e escolha a que você usaria para aprender este som. A ordem muda a cada kana.</p>
+    <div class="kana" lang="ja">${item.kana}</div>
+    <div class="versoes">${metodos.map((m, n) => `
+      <div class="versao">
+        <button class="ouvir" data-n="${n}">Ouvir ${n + 1}</button>
+        <button class="escolher" data-m="${m}">Esta</button>
+      </div>`).join('')}
+    </div>
+    <div class="rodape"><span>${i + 1} de ${lista.kana.length}</span><button id="nenhuma">Nenhuma serve</button></div>`;
+  app.querySelectorAll('.ouvir').forEach((b) => b.onclick = () => tocar(item.arquivos[metodos[b.dataset.n]], b));
+  app.querySelectorAll('.escolher').forEach((b) => b.onclick = () => escolher(b.dataset.m));
+  document.getElementById('nenhuma').onclick = () => escolher(null);
+}
+
+function escolher(metodo) {
+  atual.pause();
+  respostas.push({ kana: lista.kana[respostas.length].kana, escolha: metodo, ordem: ordem[respostas.length] });
+  salvar();
+  tela();
+}
+
+async function fim() {
+  const conta = {};
+  for (const r of respostas) conta[r.escolha ?? 'nenhuma'] = (conta[r.escolha ?? 'nenhuma'] ?? 0) + 1;
+  app.innerHTML = '<div class="fim"><h1>Pronto, obrigado!</h1><p>Enviando o resultado…</p></div>';
+  try {
+    const r = await fetch('/resultado', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ quando: new Date().toISOString(), respostas, conta }) });
+    if (!r.ok) throw new Error(String(r.status));
+    app.querySelector('p').textContent = 'Resultado salvo. Já pode fechar esta página.';
+  } catch {
+    app.querySelector('p').textContent = 'Não consegui salvar. Deixe esta página aberta e rode npm run comparar-kana de novo.';
+  }
+}
+
+document.addEventListener('keydown', (e) => {
+  const n = Number(e.key) - 1;
+  const b = app.querySelectorAll('.ouvir')[n];
+  if (b) b.click();
+});
+
+fetch('lista.json').then((r) => r.json()).then((l) => {
+  lista = l;
+  let salvo = null;
+  try { salvo = JSON.parse(localStorage.getItem(CHAVE)); } catch {}
+  if (salvo && salvo.ordem?.length === l.kana.length) ({ ordem, respostas } = salvo);
+  else { ordem = l.kana.map(() => embaralhar(Object.keys(l.metodos))); respostas = []; salvar(); }
+  tela();
+});
+</script>
+</body>
+</html>

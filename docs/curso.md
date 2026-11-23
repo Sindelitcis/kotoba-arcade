@@ -172,12 +172,13 @@ e ditado.
 **Vocabulário contra o N5 (23/11/2026).** Cruzado com a lista aberta de N5 de Jonathan Waller
 (tanos.co.uk, pela versão do repositório open-anki-jlpt-decks; cópia só local, em
 `D:\KotobaArcade\dados\brutos\n5-vocabulario.txt`, porque a licença dos dados não está clara). O
-A1 tem 306 palavras e cobre umas 240 das 697 da lista. A conta é por escrita ou kana, então é
-aproximada: 白い conta separado de 白, e várias palavras do curso são expressões (はじめまして) ou
-formas (来ます) que a lista não traz. Faltam sobretudo verbos do dia a dia (買う, 会う, 乗る, 使う,
-分かる), família estendida (兄, 姉, 弟, 妹), lugares (銀行, 公園, 図書館, 郵便局), objetos de
-casa e escola, e os contadores de coisas (一つ, 二つ..., 〜枚, 〜匹). Entrar com essas palavras
-nas unidades certas é uma tarefa de conteúdo própria, ainda não feita.
+primeiro cruzamento achou só umas 240 das 697. Entraram então 410 palavras, cada uma na unidade
+do tema dela (casa e direções na 8, roupas e cores na 11, datas do mês na 12, escola na 14...), com
+kanji só quando ele já foi ensinado. Hoje o A1 tem 716 palavras e cobre 655 das 697. As 42 que
+sobram estão no curso de outro jeito ou não valem a pena: sufixos e formas que a gramática ensina
+(〜年, 〜分, 〜時, 〜か月, ない, では), verbos que entram na forma usada (住む e 知る como すんでいます
+e しっています), palavras que já estão com お (お水) e palavras antigas que a lista ainda traz
+(字引, 背広, 万年筆, 灰皿, ストーブ, 零).
 
 ## Provas
 
@@ -253,9 +254,16 @@ A voz em japonês (AivisSpeech) pronuncia mal um kana sozinho. Duas frentes:
    embaixo da tela (`src/core/legenda.ts` e `LegendaVoz.tsx`). Quem toca o áudio liga a legenda
    (`legendar`): a fala solta, a sequência das aulas e a Conversa. No Módulo 0 ela mostra também
    o romaji.
-2. **Gravação melhor dos kana isolados (falta).** Os caminhos são: gerar dentro de uma frase e
-   recortar, testar outro modelo de voz, ou usar gravações humanas com licença livre. A escolha
-   é feita por comparação às cegas, como foi feito com as imagens, e precisa do ouvido do Rafael.
+2. **Gravação melhor dos kana isolados (falta escolher).** O gravador sabe quatro jeitos
+   (`KANA_METODOS` em `scripts/gravar_vozes.py`): o de sempre (VOICEVOX, kana sozinho); esticado
+   (mais devagar, vogal mais longa e silêncio em volta); recortado (o motor fala か、か e fica só a
+   primeira, cortada pelo tempo de cada mora); e a voz das frases (AivisSpeech まお). As versões de
+   26 kana já gravadas ficam em `D:\KotobaArcade\voz\comparacao-kana`
+   (`npm run vozes -- --comparar-kana D:/KotobaArcade/voz/comparacao-kana`). `npm run comparar-kana`
+   abre a comparação às cegas: cada kana toca em todas as versões, em ordem sorteada, e o
+   resultado vai para `resultado.json` na mesma pasta. O jeito que ganhar entra em
+   `scripts/kana-metodo.json`, e `npm run vozes` grava todos os kana de novo. Gravação humana
+   com licença livre ficou de fora por ora: precisaria baixar um banco de áudio de fora.
 
 ## Módulo 0: kana e sons
 
@@ -281,8 +289,7 @@ por ele. Os jogos continuam, como exercícios das lições e como prática livre
 2. **Motor do curso:** feito (ver "O motor do curso", acima).
 3. **Provas e impressos:** feito, com o simulado do JLPT e o certificado (ver "Provas" e
    "Material impresso", acima).
-4. **Conteúdo do A1:** feito (ver "Conteúdo do A1", acima). O vocabulário foi cruzado com o N5 e
-   ficou uma lista do que falta acrescentar.
-5. **Áudio de kana e legendas:** legendas e Módulo 0 feitos. Falta a gravação melhor dos kana
-   isolados, que depende da comparação às cegas.
+4. **Conteúdo do A1:** feito (ver "Conteúdo do A1", acima), com o vocabulário do N5.
+5. **Áudio de kana e legendas:** legendas e Módulo 0 feitos. A gravação melhor dos kana
+   isolados está pronta para a comparação às cegas; falta o Rafael ouvir e escolher.
 6. **A2.**
