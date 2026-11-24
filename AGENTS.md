@@ -34,8 +34,8 @@ Estado em 23/11/2026: as seis fases estão feitas; o curso tem o A1 (N5) e o A2 
 
 - **Currículo** em `src/content/curso/`: as unidades, os kanji e as leituras, a gramática e as
   notas (conferidas contra a fonte), checado por `tests/curso.test.ts`. O A1 cobre 655 das 697
-  palavras da lista de N5 e todos os kanji do N5; o A2 fecha os kanji do N4 e os 76 pontos de
-  gramática dele. Cada unidade tem `numero` (no nível) e `ordem` (no curso); o que depende do que
+  palavras da lista de N5 e todos os kanji do N5; o A2 cobre 637 das 668 palavras da lista de N4,
+  todos os kanji e os 76 pontos de gramática dele. Cada unidade tem `numero` (no nível) e `ordem` (no curso); o que depende do que
   já foi ensinado usa `ordem`. Detalhes em [docs/curso.md](docs/curso.md#conteúdo-do-a1) e
   [docs/curso.md](docs/curso.md#conteúdo-do-a2).
 - **Motor** em `src/curso/`: a tela inicial abre com "Continuar o curso" (Enter), o tocador percorre
@@ -48,8 +48,7 @@ Estado em 23/11/2026: as seis fases estão feitas; o curso tem o A1 (N5) e o A2 
   ou pelo QR. A unidade de revisão é o simulado do JLPT (vocabulário, gramática, leitura e escuta),
   que dá o certificado do nível. Também há nivelamento, apostila (com ditado por QR), cartões para
   recortar e folha de escrita dos kanji. Detalhes em [docs/curso.md](docs/curso.md#provas).
-- Falta: cruzar o vocabulário do A2 com uma lista de N4. Os jogos e a Jornada continuam no
-  fliperama, como prática livre.
+- Os jogos e a Jornada continuam no fliperama, como prática livre.
 
 Regras de ensino que valem em tudo ([docs/ensino.md](docs/ensino.md)):
 

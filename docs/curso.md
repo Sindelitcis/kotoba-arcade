@@ -185,7 +185,7 @@ e しっています), palavras que já estão com お (お水) e palavras antig
 Feito na fase 6, no mesmo formato do A1. As unidades estão em `a2a.ts` a `a2d.ts` (cinco por
 arquivo), e o resto em arquivos irmãos dos do A1: `exemplos-a2.ts`, `aulas-a2.ts`,
 `leituras-a2.ts`, as tarefas em `tarefas.ts` e a gramática do N4 em `n4.ts` (76 pontos, cada um
-em exatamente uma unidade). São 589 palavras novas e 161 kanji, que fecham a lista do N4 (o que
+em exatamente uma unidade). São 951 palavras novas e 161 kanji, que fecham a lista do N4 (o que
 faltava dela já tinha entrado no A1 como extra). Os extras do A2 são 港, 働, 菜 e 園, além de 分
 ensinado de novo com outra leitura. Kanji fora das fichas do Aprofundar (que vão até o N3) traz o
 significado no próprio curso (`significado`, hoje só 菜).
@@ -197,6 +197,16 @@ significado no próprio curso (`significado`, hoje só 菜).
   N4 pede 90 pontos no total; os mínimos por parte são os mesmos do N5.
 - **Notas culturais:** as 19 do A2 conferidas contra a fonte em 23/11/2026 (o passe da JR, a
   multa de bicicleta de abril de 2026, o limite de horas do estudante, o sobrenome do casal...).
+- **Vocabulário contra o N4 (23/11/2026):** cruzado com a lista aberta de N4 da mesma fonte da do
+  N5 (cópia só local, em `D:\KotobaArcade\dadosrutos
+4-vocabulario.txt`). O primeiro cruzamento
+  achou 283 das 668; entraram 362 palavras, cada uma na unidade do tema dela, com kanji só quando
+  ele já foi ensinado ali (225 ficaram em kana). Hoje o curso cobre 637 das 668. As 31 que sobram:
+  sufixos e formas que já aparecem dentro de palavras ou na gramática (〜製 em 日本製, 〜軒 em
+  一軒家, 〜式, 〜員, 建て, 〜にくい, いくら〜ても, によると e について, que a lista escreve com
+  parênteses); palavras antigas (ワープロ, ファックス, 電報, 汽車, ステレオ, タイプ, 看護婦, que
+  entra como 看護師); e repetições de sentido que confundiriam a prova (赤ん坊 ao lado de 赤ちゃん,
+  皆 de みんな, 明日 lido あす, 飛行場 de 空港, 舟 de 船), além de 毛, あ, すっと, パパ, 絹 e 木綿.
 - **Tela:** o mapa do curso separa os níveis ("A1 · JLPT N5", "A2 · JLPT N4"), e os nomes de
   unidade dizem o nível quando não é o A1 ("unidade 4 do A2").
 
@@ -311,7 +321,7 @@ por ele. Os jogos continuam, como exercícios das lições e como prática livre
 ## Fases
 
 1. **Currículo:** feito para o A1 e o A2 (`src/content/curso/`), com testes. O A1 foi cruzado com
-   uma lista de N5; o A2 ainda não foi cruzado com uma lista de vocabulário do N4.
+   uma lista de N5; o A2, com uma de N4.
 2. **Motor do curso:** feito (ver "O motor do curso", acima).
 3. **Provas e impressos:** feito, com o simulado do JLPT e o certificado (ver "Provas" e
    "Material impresso", acima).
