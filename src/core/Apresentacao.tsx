@@ -43,7 +43,9 @@ function falar(item: ItemNovo | undefined): void {
 }
 
 function Escrita({ item }: { item: ItemNovo }) {
-  const fur = item.alvo.t !== 'kana' && hasKanji(item.grande);
+  // Kanji sem leitura é de propósito (no curso, a leitura dele é a de dentro da palavra): nada em
+  // cima, senão a furigana do dado geral punha uma leitura que o cartão não está ensinando.
+  const fur = item.alvo.t !== 'kana' && hasKanji(item.grande) && (item.alvo.t !== 'kanji' || !!item.leitura);
   const longo = [...item.grande].length > 4;
   return (
     <span class={`ap-grande${longo ? ' longo' : ''}${item.alvo.t === 'kanji' ? ' kanji' : ''}`} lang="ja">

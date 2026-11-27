@@ -74,7 +74,10 @@ export function cartaoDoKanji(k: KanjiDaUnidade, unidade: string): ItemNovo {
     alvo: { t: 'kanji', c: k.k },
     tipo: 'Kanji',
     grande: k.k,
-    leitura: k.leitura,
+    // A leitura só vai em cima do kanji quando ele é a palavra sozinho. Em 日本人, 人 é じん, mas
+    // sozinho é ひと: じん em cima do 人 grande ensinava errado. A leitura de dentro da palavra fica
+    // na explicação e no exemplo, que é o que a fala diz.
+    leitura: k.em === k.k ? k.leitura : undefined,
     pt: sig,
     explicacao: explicacaoDoKanji(k),
     leituras: leiturasCitadas(explicacaoDoKanji(k)),

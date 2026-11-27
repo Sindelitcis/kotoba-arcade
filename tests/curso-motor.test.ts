@@ -90,7 +90,8 @@ describe('cartões', () => {
       for (const k of u.kanji) {
         expect(significadoDoKanji(k.k), k.k).not.toBe('');
         const c = cartaoDoKanji(k, u.id);
-        expect(c.leitura).toBe(k.leitura);
+        expect(c.leitura).toBe(k.em === k.k ? k.leitura : undefined);
+        expect(c.explicacao, k.k).toContain(k.leitura);
         expect(c.explicacao, k.k).toBeTruthy();
       }
   });
