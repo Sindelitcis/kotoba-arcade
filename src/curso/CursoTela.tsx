@@ -36,8 +36,9 @@ import { abrirImpresso } from './Impresso';
 import { lerCodigo, OPCOES_PROVA } from './prova';
 import { NivelamentoTela, ProvaTela } from './ProvaTela';
 import { useTeclado } from './teclado';
-import { LICOES_KANA, LOTES_DO_MODULO } from './modulo0';
-import { ModuloZeroTela } from './ModuloZero';
+import { kanaFeitos, LICOES_KANA, LOTES_DO_MODULO, perguntasDosKana } from './modulo0';
+import { ModuloZeroTela, TreinoKana } from './ModuloZero';
+import { ateOndeFoi, proximoPasso, revisaoDeHoje } from './hoje';
 import { AulaView, CompletarView, DitadoView, LeituraView, MontarView } from './BlocosAula';
 import { Pratica } from './pratica';
 import './curso.css';
@@ -59,10 +60,18 @@ export function abrirProva(u: Unidade): void {
 
 /** Continua o curso de onde parou (o "Continuar o curso" da tela inicial). */
 export function continuarCurso(): void {
-  const prox = proximaLicao(cursoSave());
-  if (prox?.prova) abrirProva(prox.unidade);
-  else if (prox) abrirUnidade(prox.unidade, prox.bloco);
+  const passo = proximoPasso(cursoSave(), app.data.cards, Date.now());
+  if (passo?.tipo === 'revisao') cursoAberto.value = { unidade: 'hoje', bloco: 0, modo: 'revisao' };
+  else if (passo?.tipo === 'kana') cursoAberto.value = { unidade: passo.licao.id, bloco: 0, modo: 'modulo0' };
+  else if (passo?.lugar.prova) abrirProva(passo.lugar.unidade);
+  else if (passo) abrirUnidade(passo.lugar.unidade, passo.lugar.bloco);
   else cursoAberto.value = null;
+  go('curso');
+}
+
+/** Começa pela unidade 1, para quem já lê kana (o Módulo 0 sai do caminho). */
+export function comecarPeloA1(): void {
+  abrirUnidade(UNIDADES[0]!, 0);
   go('curso');
 }
 
@@ -86,6 +95,21 @@ export function CursoTela() {
           </div>
         </header>
         <ModuloZeroTela key={licaoKana.id} licao={licaoKana} onSair={sair} />
+      </main>
+    );
+  if (aberto?.modo === 'revisao')
+    return (
+      <main class="lc cs">
+        <header class="lc-topo">
+          <button class="ghost" onClick={sair}>
+            ← Parar aqui <kbd>Esc</kbd>
+          </button>
+          <div>
+            <h1>Revisão de hoje</h1>
+            <small class="muted">O que está na hora de lembrar</small>
+          </div>
+        </header>
+        <RevisaoDeHojeTela onSair={sair} />
       </main>
     );
   if (aberto?.modo === 'nivelamento')
@@ -682,6 +706,65 @@ function PraticaView({
         </button>
         <button class="primary" disabled={!pr.resposta} onClick={seguir} data-testid="cs-seguir">
           Seguir <kbd>Enter</kbd>
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * A revisão de hoje (hoje.ts): primeiro os kana, depois as palavras e os kanji. Acabou, o Enter
+ * segue o curso de onde parou.
+ */
+function RevisaoDeHojeTela({ onSair }: { onSair: () => void }) {
+  const rev = useMemo(() => revisaoDeHoje(cursoSave(), app.data.cards, Date.now()), []);
+  const [fase, setFase] = useState<'kana' | 'itens' | 'fim'>(rev.kana.length > 0 ? 'kana' : rev.itens.length > 0 ? 'itens' : 'fim');
+  const seguir = () => {
+    commit();
+    continuarCurso();
+  };
+  useTeclado((tecla) => {
+    if (tecla === 'Escape') {
+      onSair();
+      return true;
+    }
+    if (fase === 'fim' && (tecla === 'Enter' || tecla === ' ')) {
+      seguir();
+      return true;
+    }
+    return false;
+  });
+  if (fase === 'kana')
+    return (
+      <TreinoKana
+        rotulo="Kana"
+        gerar={() => perguntasDosKana(rev.kana, kanaFeitos(cursoSave().modulo0 ?? 0), Math.random)}
+        onFim={() => {
+          commit();
+          setFase(rev.itens.length > 0 ? 'itens' : 'fim');
+        }}
+      />
+    );
+  if (fase === 'itens')
+    return (
+      <PraticaView
+        itens={rev.itens}
+        conhecidos={itensAte(Math.max(1, ateOndeFoi(cursoSave())))}
+        cartaoDe={(i) => cartaoDoItem(i, null, UNIDADES[0]!)}
+        onFim={() => setFase('fim')}
+        rotulo="Revisão"
+      />
+    );
+  return (
+    <div class="koma lc-quadro" data-testid="cs-revisao-fim">
+      <div class="lc-conteudo">
+        <span class="gr-tag">Revisão de hoje</span>
+        <h2 class="cs-titulo">Revisão feita.</h2>
+        <p class="lc-linha">O que você acabou de lembrar volta mais tarde, cada coisa no seu tempo. Agora o curso segue de onde parou.</p>
+      </div>
+      <div class="actions center">
+        <button class="primary" onClick={seguir} data-testid="cs-revisao-seguir">
+          Seguir o curso <kbd>Enter</kbd>
         </button>
       </div>
     </div>

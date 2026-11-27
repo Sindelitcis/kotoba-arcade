@@ -8,22 +8,29 @@ import { kanaItem } from '../content/kana';
 import { app, commit, cursoSave } from '../core/app';
 import { Apresentacao } from '../core/Apresentacao';
 import { speakWord } from '../core/audio';
+import { useSemLegenda } from '../core/LegendaVoz';
 import { itemNovoDe, type ItemNovo } from '../content/ensino';
 import { apresentar, avaliar, foiApresentado } from '../core/ensino';
 import { Icone } from '../core/Icone';
 import { legendaComRomaji } from '../core/legenda';
 import { Imagem } from '../games/kanaimagens/Imagem';
 import '../games/kanaimagens/kanaimagens.css';
-import { inicioDaLicao, kanaDoLote, LOTES_DO_MODULO, perguntasDoLote, type LicaoKana } from './modulo0';
+import { inicioDaLicao, kanaDoLote, LOTES_DO_MODULO, perguntasDoLote, type LicaoKana, type PerguntaKana } from './modulo0';
 import { useTeclado } from './teclado';
 
 const desenho = (item: ItemNovo) => (item.alvo.t === 'kana' ? <Imagem item={kanaItem(item.alvo.id)} letra={false} class="ki-grande" /> : null);
 
-function Treino({ posicao, onFim }: { posicao: number; onFim: () => void }) {
-  const perguntas = useMemo(() => perguntasDoLote(posicao, Math.random), [posicao]);
+/**
+ * O treino de kana: uma pergunta por kana, ouvindo ou lendo. O kana errado volta uma vez no fim
+ * da fila, e o erro mostra de novo o desenho dele. Serve ao lote do Módulo 0 e à revisão de hoje.
+ */
+export function TreinoKana({ gerar, onFim, rotulo = 'Treino' }: { gerar: () => PerguntaKana[]; onFim: () => void; rotulo?: string }) {
+  const [perguntas, setPerguntas] = useState(gerar);
+  const [voltaram, setVoltaram] = useState<ReadonlySet<string>>(new Set());
   const [i, setI] = useState(0);
   const [escolha, setEscolha] = useState<string | null>(null);
   const p = perguntas[i];
+  useSemLegenda(p?.modo === 'ouvir' && escolha === null);
   const ouvir = () => {
     if (p) void speakWord(p.kana.fala);
   };
@@ -34,6 +41,10 @@ function Treino({ posicao, onFim }: { posicao: number; onFim: () => void }) {
   const escolher = (o: string) => {
     if (!p || escolha !== null) return;
     setEscolha(o);
+    if (o !== p.certa && !voltaram.has(p.kana.id)) {
+      setVoltaram(new Set([...voltaram, p.kana.id]));
+      setPerguntas([...perguntas, { ...p, opcoes: [...p.opcoes].reverse() }]);
+    }
     const cards = app.data.cards;
     if (foiApresentado(cards, p.kana.carta)) avaliar(cards, p.kana.carta, { correct: o === p.certa }, Date.now());
     // Depois da resposta, a voz fala o kana: o som fica ligado à letra.
@@ -71,7 +82,7 @@ function Treino({ posicao, onFim }: { posicao: number; onFim: () => void }) {
     <div class="koma lc-quadro" data-testid="m0-treino" data-i={i}>
       <div class="lc-conteudo">
         <span class="gr-tag">
-          Treino · {i + 1} de {perguntas.length}
+          {rotulo} · {i + 1} de {perguntas.length}
         </span>
         {p.modo === 'ouvir' ? (
           <>
@@ -104,9 +115,13 @@ function Treino({ posicao, onFim }: { posicao: number; onFim: () => void }) {
           ))}
         </div>
         {escolha !== null && (
-          <p class={certa ? 'lc-retorno bom' : 'lc-retorno'} role="status">
-            {certa ? 'Isso.' : `É ${p.kana.char}, ${p.kana.romaji}.`} {p.kana.soa && `Soa como ${p.kana.soa}.`}
-          </p>
+          <div class={certa ? 'lc-retorno bom' : 'lc-retorno'} role="status" data-testid="m0-retorno">
+            {!certa && <Imagem item={p.kana} letra class="ki-grande" />}
+            <p>
+              {certa ? 'Isso.' : `É ${p.kana.char}, ${p.kana.romaji}.`} {p.kana.soa && `Soa: ${p.kana.soa}.`}
+            </p>
+            {!certa && <p class="muted">{p.kana.mnemonico} Ele volta no fim do treino.</p>}
+          </div>
         )}
       </div>
       <div class="actions center">
@@ -181,7 +196,7 @@ export function ModuloZeroTela({ licao, onSair }: { licao: LicaoKana; onSair: ()
         <div class="lc-conteudo">
           <span class="gr-tag">Módulo 0</span>
           <h2 class="cs-titulo">Lição feita: {licao.titulo}</h2>
-          <p class="lc-linha">Os kana desta lição entram na revisão diária. Para treinar mais, o Kana em imagens e o Kana Beat usam as mesmas cartas.</p>
+          <p class="lc-linha">Os kana desta lição voltam na revisão de hoje, no começo do curso, quando chegar a hora de cada um. Para treinar mais, o Kana em imagens e o Kana Beat usam as mesmas cartas.</p>
         </div>
         <div class="actions center">
           <button class="primary" onClick={onSair} data-testid="m0-voltar">
@@ -203,5 +218,5 @@ export function ModuloZeroTela({ licao, onSair }: { licao: LicaoKana; onSair: ()
         }}
       />
     );
-  return <Treino key={posicao} posicao={posicao} onFim={loteFeito} />;
+  return <TreinoKana key={posicao} gerar={() => perguntasDoLote(posicao, Math.random)} onFim={loteFeito} />;
 }

@@ -15,8 +15,9 @@ import { Furigana } from '../core/Furigana';
 import { teclaDe } from '../core/teclas';
 import { BOOSTER_COST, canOpenBooster } from '../games/kanjimon/engine';
 import { etapaDa, proximaMissao } from '../jornada/etapas';
-import { continuarCurso } from '../curso/CursoTela';
-import { blocosDa, NOME_BLOCO, proximaLicao } from '../curso/motor';
+import { comecarPeloA1, continuarCurso } from '../curso/CursoTela';
+import { proximoPasso } from '../curso/hoje';
+import { blocosDa, NOME_BLOCO } from '../curso/motor';
 import { NomeDaUnidade } from '../content/curso';
 
 interface Tile {
@@ -86,7 +87,8 @@ export function Hub() {
   const proxima = proximaMissao(jornada);
   const etapaProx = proxima ? etapaDa(proxima.id) : undefined;
   // Curso: a próxima lição, o caminho principal.
-  const licao = proximaLicao(cursoSave());
+  const passo = proximoPasso(cursoSave(), app.data.cards, Date.now());
+  const licao = passo?.tipo === 'unidade' ? passo.lugar : null;
   const parteLicao = licao ? blocosDa(licao.unidade)[licao.bloco] : undefined;
 
   // Ligado junto com o desenho da tela: tecla apertada logo que a tela aparece não se perde.
@@ -215,10 +217,26 @@ export function Hub() {
 
       <button class="koma jornada-faixa hub-curso" style={cenaStyle('aventura-narita')} onClick={continuarCurso} data-testid="hub-curso">
         <span class="hub-rotulo">
-          <Icone nome="book-open" /> Curso · {licao ? licao.unidade.nivel : 'A1 e A2'} <kbd>Enter</kbd>
+          <Icone nome="book-open" /> Curso · {licao ? licao.unidade.nivel : passo?.tipo === 'kana' ? 'Módulo 0' : passo?.tipo === 'revisao' ? 'Revisão' : 'A1 e A2'} <kbd>Enter</kbd>
         </span>
         <span class="jornada-faixa-txt">
-          {licao ? (
+          {passo?.tipo === 'revisao' ? (
+            <>
+              <b>Revisão de hoje</b>
+              <span>Uns minutos com o que está na hora de lembrar. Depois, o curso segue de onde parou.</span>
+              <span class="jornada-faixa-prox">
+                <Icone nome="play" /> Começar a revisão
+              </span>
+            </>
+          ) : passo?.tipo === 'kana' ? (
+            <>
+              <b>Módulo 0 · {passo.licao.titulo}</b>
+              <span>Primeiro o kana: a escrita que o curso inteiro usa.</span>
+              <span class="jornada-faixa-prox">
+                <Icone nome="play" /> Continuar o Módulo 0
+              </span>
+            </>
+          ) : licao ? (
             <>
               <b>
                 {NomeDaUnidade(licao.unidade)} · {licao.unidade.titulo}
@@ -236,6 +254,11 @@ export function Hub() {
       <button class="ghost hub-curso-mapa" onClick={() => go('curso')} data-testid="hub-curso-mapa">
         Ver as unidades <kbd>U</kbd>
       </button>
+      {passo?.tipo === 'kana' && (
+        <button class="ghost hub-curso-mapa" onClick={comecarPeloA1} data-testid="hub-ja-sei-kana">
+          Já sei ler kana: começar pela unidade 1
+        </button>
+      )}
 
       <section class="hub-hero">
         <button class="koma jornada-faixa" style={cenaStyle(etapaProx?.cena ?? 'hub-shibuya')} onClick={() => go('jornada')} data-testid="hub-jornada">

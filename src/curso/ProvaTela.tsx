@@ -24,6 +24,7 @@ import { FraseDaQuestao, OpcaoDeFrase } from './QuestaoFrase';
 import { tocarSequencia } from '../core/sequencia';
 import { falaDoExemplo } from './exemplos';
 import { Icone } from '../core/Icone';
+import { useSemLegenda } from '../core/LegendaVoz';
 import { useTeclado } from './teclado';
 import { palavrasDa } from '../content/curso';
 
@@ -108,7 +109,8 @@ export function ProvaTela({ unidade, onSair }: { unidade: Unidade; onSair: () =>
     setFase('inicio');
   };
 
-  // A escuta toca sozinha ao abrir a questão (e de novo com R); o texto nunca aparece.
+  // A escuta toca sozinha ao abrir a questão (e de novo com R); o texto nunca aparece, nem na legenda.
+  useSemLegenda(fase === 'questoes' && !!q && !deItem(q) && q.tipo === 'escuta');
   const ouvirEscuta = () => {
     if (q && !deItem(q) && q.tipo === 'escuta') void tocarSequencia([falaDoExemplo(q.frase)]);
   };

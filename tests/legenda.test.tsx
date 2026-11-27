@@ -2,7 +2,7 @@ import { render } from 'preact';
 import { act } from 'preact/test-utils';
 import { afterEach, describe, expect, it } from 'vitest';
 import { legenda, legendaComRomaji, legendar, romajiDaLegenda } from '../src/core/legenda';
-import { LegendaVoz } from '../src/core/LegendaVoz';
+import { LegendaVoz, useSemLegenda } from '../src/core/LegendaVoz';
 import { tocarSequencia, type Saida } from '../src/core/sequencia';
 import { app } from '../src/core/app';
 
@@ -64,5 +64,22 @@ describe('legenda da voz em japonês', () => {
     const fontes = async () => ({ jp: { falas: { '水です。': { x: 'a.mp3' } } } as never, pt: null });
     await tocarSequencia([{ tipo: 'jp', fala: { texto: '水です。', voz: 'frase', kana: 'みずです。' } }], { saida, fontes }).fim;
     expect(vistas).toEqual([{ texto: '水です。', kana: 'みずです。' }]);
+  });
+});
+
+describe('pergunta de ouvir sem legenda', () => {
+  // A legenda escrevia o kana do treino, a frase do ditado e a da escuta da prova: a resposta.
+  function Pergunta({ aberta }: { aberta: boolean }) {
+    useSemLegenda(aberta);
+    return <LegendaVoz />;
+  }
+
+  it('com a pergunta aberta a legenda some; respondida, volta', () => {
+    legenda.value = { texto: 'う' };
+    act(() => render(<Pergunta aberta />, document.body));
+    expect(document.querySelector('[data-testid="legenda"]')).toBeNull();
+    act(() => render(<Pergunta aberta={false} />, document.body));
+    expect(document.querySelector('[data-testid="legenda"]')?.textContent).toContain('う');
+    act(() => render(null, document.body));
   });
 });

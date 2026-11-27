@@ -106,7 +106,8 @@ test('depois de abrir pelo botão e fechar, o Enter do fliperama volta a continu
   await page.keyboard.press('Escape');
   await expect(painel(page)).toBeHidden();
   await page.keyboard.press('Enter');
-  await expect(page.getByTestId('cs-objetivo')).toBeVisible();
+  // Aluno novo: o curso começa pelo Módulo 0 (kana).
+  await expect(page.getByTestId('m0-intro')).toBeVisible();
   await expect(painel(page)).toBeHidden();
 });
 

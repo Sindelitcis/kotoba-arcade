@@ -44,12 +44,15 @@ async function praticar(page: Page, errarPrimeira: boolean): Promise<void> {
   throw new Error('a prática não terminou');
 }
 
-test('Enter na tela inicial continua o curso: objetivo, palavras, prática, e o progresso fica salvo', async ({ page }) => {
-  await expect(page.getByTestId('hub-curso')).toContainText('Unidade 1');
-  await expect(page.getByTestId('hub-curso')).toContainText('Parte 1 de');
+test('aluno do zero: o Enter abre o Módulo 0, não a unidade 1', async ({ page }) => {
+  await expect(page.getByTestId('hub-curso')).toContainText('Módulo 0');
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/curso-hub.png` });
-
   await page.keyboard.press('Enter');
+  await expect(page.getByTestId('m0-intro')).toBeVisible();
+});
+
+test('quem já lê kana começa pela unidade 1: objetivo, palavras, prática, e o progresso fica salvo', async ({ page }) => {
+  await page.getByTestId('hub-ja-sei-kana').click();
   await expect(page.getByTestId('cs-objetivo')).toContainText('me apresentar');
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/curso-objetivo.png` });
   await page.keyboard.press('Enter');
@@ -337,6 +340,9 @@ test('completar, ditado e leitura com shadowing: nada passa sem a pessoa', async
   await expect(page.getByTestId('cs-parte')).toContainText('Ditado');
   const campo = page.getByTestId('cs-ditado-campo');
   await expect(campo).toBeFocused();
+  // A frase toca, mas a legenda não aparece: ela escrevia a resposta do ditado.
+  await page.waitForTimeout(1500);
+  await expect(page.getByTestId('legenda')).toHaveCount(0);
   // Digitar em romaji vira kana na hora; o R no campo é letra, não "repetir".
   await campo.pressSequentially('watashi');
   await expect(page.getByTestId('cs-ditado-kana')).toHaveText('わたし');

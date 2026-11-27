@@ -88,18 +88,40 @@ export interface PerguntaKana {
 export function perguntasDoLote(posicao: number, rng: Rng): PerguntaKana[] {
   const lote = LOTES_DO_MODULO[posicao];
   if (lote === undefined) return [];
-  const vistos = kanaAte(posicao);
-  return shuffle(rng, kanaDoLote(lote)).flatMap((k, i): PerguntaKana[] => {
+  return perguntasDosKana(kanaDoLote(lote), kanaAte(posicao), rng);
+}
+
+/** "(pausa)", "(ya pequeno)": romaji que é descrição; entre as opções, só junto de outros iguais. */
+const descrito = (k: KanaItem) => k.romaji.startsWith('(');
+
+/** Uma pergunta para cada kana de `kanas`, com as opções erradas tiradas de `vistos`. */
+export function perguntasDosKana(kanas: readonly KanaItem[], vistos: readonly KanaItem[], rng: Rng): PerguntaKana[] {
+  return shuffle(rng, kanas).flatMap((k, i): PerguntaKana[] => {
     const modo = soaSozinho(k) && i % 2 === 0 ? 'ouvir' : 'ler';
     const outros = shuffle(
       rng,
-      vistos.filter((x) => x.id !== k.id && x.romaji !== k.romaji && (modo === 'ler' || soaSozinho(x))),
+      vistos.filter((x) => x.id !== k.id && x.romaji !== k.romaji && (modo === 'ler' ? descrito(x) === descrito(k) : soaSozinho(x))),
     );
     const vale = (x: KanaItem) => (modo === 'ouvir' ? x.char : x.romaji);
     const erradas = [...new Set(outros.map(vale))].slice(0, 3);
     if (erradas.length < 2) return [];
     return [{ modo, kana: k, opcoes: shuffle(rng, [vale(k), ...erradas]), certa: vale(k) }];
   });
+}
+
+/** Os kana que a pessoa já viu no módulo (os lotes feitos). */
+export function kanaFeitos(feitos: number): KanaItem[] {
+  return feitos > 0 ? kanaAte(Math.min(feitos, LOTES_DO_MODULO.length) - 1) : [];
+}
+
+/**
+ * A lição de kana que o "Continuar" abre: a do próximo lote, enquanto o módulo não acabou e a
+ * pessoa ainda não começou o A1 (quem já lê kana começa a unidade 1 e o módulo sai do caminho).
+ */
+export function licaoKanaPendente(save: { modulo0?: number; feitos: Readonly<Record<string, number>> }): LicaoKana | undefined {
+  const feitos = save.modulo0 ?? 0;
+  if (feitos >= LOTES_DO_MODULO.length || Object.keys(save.feitos).length > 0) return undefined;
+  return licaoDaPosicao(feitos);
 }
 
 /** Em que lição está um lote do módulo. */

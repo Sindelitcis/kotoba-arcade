@@ -34,7 +34,7 @@ export function commit(): void {
 }
 
 /** Unidade do curso aberta no tocador e o bloco em que ela está. `null`: o mapa das unidades. */
-export const cursoAberto = signal<{ unidade: string; bloco: number; modo?: 'prova' | 'nivelamento' | 'modulo0' } | null>(null);
+export const cursoAberto = signal<{ unidade: string; bloco: number; modo?: 'prova' | 'nivelamento' | 'modulo0' | 'revisao' } | null>(null);
 
 /** Lição em quadrinhos aberta e a missão da Jornada que a abriu. */
 export const licaoAberta = signal<{ licao: string; missao: string } | null>(null);

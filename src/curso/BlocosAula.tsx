@@ -12,6 +12,7 @@ import type { Unidade } from '../content/curso';
 import { AULAS_DO_CURSO } from '../content/curso/aulas';
 import { Furigana, Misto } from '../core/Furigana';
 import { Icone } from '../core/Icone';
+import { useSemLegenda } from '../core/LegendaVoz';
 import { romajiToHiragana } from '../core/kana';
 import { tocarSequencia } from '../core/sequencia';
 import { confereDitado, lacunasDa } from './exercicios';
@@ -304,6 +305,7 @@ export function DitadoView({ exemplos, onFim }: { exemplos: readonly Exemplo[]; 
   const [acertos, setAcertos] = useState(0);
   const campo = useRef<HTMLInputElement>(null);
   const e = exemplos[i];
+  useSemLegenda(conferido === null);
   const ouvir = () => {
     if (e) void tocarSequencia([falaDoExemplo(e)]);
   };
