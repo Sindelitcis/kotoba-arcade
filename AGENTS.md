@@ -52,7 +52,12 @@ Estado em 23/11/2026: as seis fases estão feitas; o curso tem o A1 (N5) e o A2 
 - **Em andamento (relatório do "aluno do zero", 27/11/2026):** feito: legenda que não entrega a
   escuta, Continuar que começa pelo Módulo 0 e pela revisão de hoje (`src/curso/hoje.ts`), prova com
   frases, diálogos só com o que foi ensinado, e tabela de formas no cartão de gramática com o
-  exercício de transformar, gramática intercalada com as palavras, Módulo 0 reorganizado, cartão do kanji só com kanji já ensinados, prática com erradas parecidas e explicação no erro. Os itens principais do relatório estão feitos.
+  exercício de transformar, gramática intercalada com as palavras, Módulo 0 reorganizado, cartão do kanji só com kanji já ensinados, prática com erradas parecidas e explicação no erro.
+- **Segunda auditoria rígida (28/11/2026):** feito: ないでください na unidade 16 (depois de ない), じゃありません
+  (unidade 1) e でした (unidade 6), Continuar do mapa pelo mesmo caminho da tela inicial. Falta: grupos
+  de verbo explicados, regra própria em cada cartão de gramática (122 de 141 vazios), completar com
+  duas certas, erro de gramática reabrindo o ponto, gramática na revisão do dia, notas com coisa não
+  vista, prática português → japonês, unidades menores e diálogo em toda unidade.
 
 Regras de ensino que valem em tudo ([docs/ensino.md](docs/ensino.md)):
 

@@ -20,7 +20,7 @@ const PARECIDAS: readonly (readonly string[])[] = [
   ['に', 'へ'],
   ['と', 'や'],
   // O fim da frase: おいしいです e おいしいね estão os dois certos.
-  ['か', 'よ', 'ね', 'です', 'でした', 'じゃありません', 'だ', 'かな'],
+  ['か', 'よ', 'ね', 'です', 'でした', 'じゃありません', 'じゃありませんでした', 'だ', 'かな'],
   // Razão: 安いので e 安いし cabem os dois em muitas frases.
   ['ので', 'し'],
   // Suposição: o sentido muda pouco, e a frase fica certa com qualquer uma.

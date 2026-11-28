@@ -24,7 +24,7 @@ export interface ExemploLinha {
 /** Pedaços de gramática que entram como peça sem estar no vocabulário. */
 export const GRAMATICA_EM_KANA: ReadonlySet<string> = new Set([
   '、', 'は', 'が', 'を', 'に', 'で', 'へ', 'と', 'も', 'の', 'か', 'や', 'よ', 'ね', 'より',
-  'だ', 'です', 'でした', 'じゃありません', 'さん', 'します', 'しています', 'いけません', 'こと', 'ほう',
+  'だ', 'です', 'でした', 'じゃありません', 'じゃありませんでした', 'さん', 'します', 'しています', 'いけません', 'こと', 'ほう',
   'んです', 'なりました', 'でしょう',
   // A2
   'し', 'という', 'って', 'かどうか', 'なら', 'ので', 'のに', 'しか', 'ため', 'ように', 'ございます',
@@ -48,6 +48,10 @@ const EXEMPLOS_A1: Readonly<Record<string, readonly ExemploLinha[]>> = {
   ka: [
     { pecas: ['たなか', 'さん', 'は', '日本人', 'です', 'か'], pt: 'O senhor Tanaka é japonês?' },
     { pecas: ['何人', 'です', 'か'], pt: 'De que nacionalidade você é?' },
+  ],
+  'ja-arimasen': [
+    { pecas: ['いいえ', '、', 'わたし', 'は', '日本人', 'じゃありません'], pt: 'Não, eu não sou japonês.' },
+    { pecas: ['わたし', 'は', '先生', 'じゃありません'], pt: 'Eu não sou professor.' },
   ],
   no: [
     { pecas: ['わたし', 'の', '名前', 'は', 'ラファエル', 'です'], pt: 'Meu nome é Rafael.' },
@@ -126,6 +130,10 @@ const EXEMPLOS_A1: Readonly<Record<string, readonly ExemploLinha[]>> = {
   'masu-negativo-passado': [
     { pecas: ['きのう', 'は', 'べんきょうしませんでした<べんきょうする'], pt: 'Ontem eu não estudei.' },
     { pecas: ['あさごはん', 'を', '食べました=たべました<食べる'], pt: 'Tomei o café da manhã.' },
+  ],
+  deshita: [
+    { pecas: ['きのう', 'は', '休み', 'でした'], pt: 'Ontem foi folga.' },
+    { pecas: ['きのう', 'は', '休み', 'じゃありませんでした'], pt: 'Ontem não foi folga.' },
   ],
   'ni-tempo': [
     { pecas: ['毎日', '六時=ろくじ<六', 'に', 'おきます<おきる'], pt: 'Todo dia eu acordo às seis.' },
@@ -237,10 +245,6 @@ const EXEMPLOS_A1: Readonly<Record<string, readonly ExemploLinha[]>> = {
     { pecas: ['ゆっくり', '話して=はなして<話す', 'ください'], pt: 'Fale devagar, por favor.' },
     { pecas: ['もう一度', '言って=いって<言う', 'ください'], pt: 'Diga mais uma vez, por favor.' },
   ],
-  'naide-kudasai': [
-    { pecas: ['ここ', 'に', 'すわらないで<すわる', 'ください'], pt: 'Não sente aqui, por favor.' },
-    { pecas: ['けさないで<けす', 'ください'], pt: 'Não desligue, por favor.' },
-  ],
 
   /* Unidade 14 */
   'te-imasu': [
@@ -266,6 +270,10 @@ const EXEMPLOS_A1: Readonly<Record<string, readonly ExemploLinha[]>> = {
   'nai-kei': [
     { pecas: ['きょう', 'は', 'コーヒー', 'を', '飲まない=のまない<飲む'], pt: 'Hoje não vou tomar café.' },
     { pecas: ['あした', 'は', '行かない=いかない<行く'], pt: 'Amanhã não vou.' },
+  ],
+  'naide-kudasai': [
+    { pecas: ['ここ', 'に', 'すわらないで<すわる', 'ください'], pt: 'Não sente aqui, por favor.' },
+    { pecas: ['けさないで<けす', 'ください'], pt: 'Não desligue, por favor.' },
   ],
   casual: [
     { pecas: ['この', 'えいが', '、', 'おもしろい'], fim: '？', pt: 'Esse filme é bom? (entre amigos)' },

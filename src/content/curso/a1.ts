@@ -18,7 +18,7 @@ export const A1: readonly UnidadeEscrita[] = [
     numero: 1,
     titulo: 'Prazer em conhecer',
     consigo: 'me apresentar: dizer meu nome, de onde sou e o que faço',
-    gramatica: ['desu', 'wa', 'ka', 'no', 'mo', 'san'],
+    gramatica: ['desu', 'wa', 'ka', 'ja-arimasen', 'no', 'mo', 'san'],
     kanji: [
       { k: '日', leitura: 'に', em: '日本' },
       { k: '本', leitura: 'ほん', em: '日本' },
@@ -407,7 +407,7 @@ export const A1: readonly UnidadeEscrita[] = [
     numero: 6,
     titulo: 'Minha rotina',
     consigo: 'contar o que faço no dia a dia e o que fiz ontem',
-    gramatica: ['masu-negativo-passado', 'ni-tempo', 'frequencia', 'de-lugar'],
+    gramatica: ['masu-negativo-passado', 'deshita', 'ni-tempo', 'frequencia', 'de-lugar'],
     kanji: [
       { k: '見', leitura: 'み', em: '見る' },
       { k: '読', leitura: 'よ', em: '読む' },
@@ -933,7 +933,7 @@ export const A1: readonly UnidadeEscrita[] = [
     numero: 13,
     titulo: 'Pedir algo',
     consigo: 'pedir que alguém faça algo e entender instruções',
-    gramatica: ['te-forma', 'te-kudasai', 'naide-kudasai'],
+    gramatica: ['te-forma', 'te-kudasai'],
     kanji: [
       { k: '話', leitura: 'はな', em: '話す' },
       { k: '言', leitura: 'い', em: '言う', extra: true },
@@ -1143,7 +1143,7 @@ export const A1: readonly UnidadeEscrita[] = [
     numero: 16,
     titulo: 'Com amigos',
     consigo: 'conversar no jeito casual com amigos',
-    gramatica: ['jisho-kei', 'nai-kei', 'casual', 'yo-ne', 'ga-contraste'],
+    gramatica: ['jisho-kei', 'nai-kei', 'naide-kudasai', 'casual', 'yo-ne', 'ga-contraste'],
     kanji: [],
     palavras: [
       'うん|うん|é, sim (casual)',

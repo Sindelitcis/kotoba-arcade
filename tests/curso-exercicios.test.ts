@@ -41,7 +41,7 @@ describe('completar', () => {
   });
 
   it('a primeira unidade só usa o que ela apresenta', () => {
-    expect([...gramaticaAte(1)].sort()).toEqual(['か', 'です', 'の', 'は', 'も'].sort());
+    expect([...gramaticaAte(1)].sort()).toEqual(['か', 'じゃありません', 'です', 'の', 'は', 'も'].sort());
   });
 
   it('frase sem peça de gramática para apagar não vira lacuna', () => {

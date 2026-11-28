@@ -26,6 +26,7 @@ const AULAS_A1: Readonly<Record<string, readonly QuadroAula[]>> = {
     { fala: 'A frase base do japonês é: o assunto, a partícula do assunto, a informação e, no fim, {です}, que fecha a frase com educação. É como dizer: quanto a mim, estudante, sou.', tela: 'A は B です。 → "Quanto a A, é B."', ex: 'desu' },
     { fala: 'A partícula do assunto se escreve com a letra {は}, mas se fala {わ}. É uma exceção antiga da escrita, e vale sempre que ela é partícula.', tela: 'は como partícula soa わ.', ex: 'wa' },
     { fala: 'Para perguntar, a ordem das palavras não muda: só entra {か} no fim. No japonês escrito com cuidado, a pergunta termina com ponto final, e não com ponto de interrogação.', tela: '〜ですか。', ex: 'ka' },
+    { fala: 'Para dizer que não é, troque {です} por {じゃありません}. Com {いいえ} na frente, você nega: não, não sou japonês.', tela: '日本人です → 日本人じゃありません', ex: 'ja-arimasen' },
     { fala: 'A partícula {の} liga duas palavras, como o nosso de. Mas a ordem é a contrária: primeiro o dono, depois a coisa. Meu nome fica assim: {わたしのなまえ}.', tela: 'わたしの名前 = "o nome de mim" = meu nome.', ex: 'no' },
     { fala: 'A partícula {も} quer dizer também. Ela entra no lugar da partícula do assunto, e não junto com ela.', tela: 'わたしは → わたしも', ex: 'mo' },
     { fala: 'E {さん} vai depois do nome dos outros, nunca do seu. Serve para homem e mulher, e é o jeito normal de chamar alguém.', ex: 'san' },
@@ -59,6 +60,7 @@ const AULAS_A1: Readonly<Record<string, readonly QuadroAula[]>> = {
   'a1-06': [
     { fala: 'Unidade seis: a rotina. Você vai dizer o que faz, o que não faz e o que já fez.' },
     { fala: 'A forma educada do verbo tem quatro pontas. {ます}: faço. {ません}: não faço. {ました}: fiz. {ませんでした}: não fiz. O começo do verbo não muda.', tela: '食べます · 食べません · 食べました · 食べませんでした', ex: 'masu-negativo-passado' },
+    { fala: 'Sem verbo, quem muda é o {です}. O passado dele é {でした}: era, foi. E não era fica {じゃありませんでした}.', tela: '休みです → 休みでした · 休みじゃありませんでした', ex: 'deshita' },
     { fala: 'A partícula {に} marca o momento exato: às seis, no domingo. Palavras como hoje, amanhã e todo dia não levam essa partícula.', tela: '六時に ✓ · 毎日 (sem に)', ex: 'ni-tempo' },
     { fala: 'Palavras de frequência vão antes do verbo. Atenção: {あまり} e {ぜんぜん} só aparecem com o verbo no negativo. A primeira é não muito, a segunda é nada.', ex: 'frequencia' },
     { fala: 'A partícula {で} marca onde a ação acontece: em casa, na escola, na loja.', tela: 'うち で べんきょうします。', ex: 'de-lugar' },
@@ -105,7 +107,6 @@ const AULAS_A1: Readonly<Record<string, readonly QuadroAula[]>> = {
     { fala: 'Unidade treze: pedir algo. Aqui entra a forma te, a mais importante do japonês básico, porque ela abre muitas outras.' },
     { fala: 'A forma te liga ações em sequência: faço isto e depois aquilo. Cada grupo de verbo forma de um jeito. Os da família de comer só trocam a ponta: {たべる} vira {たべて}.', tela: '食べる → 食べて · かえる → かえって', ex: 'te-forma' },
     { fala: 'A forma te mais {ください} é um pedido educado: faça, por favor.', tela: '話す → 話して ください', ex: 'te-kudasai' },
-    { fala: 'Para pedir que não faça, use a forma do não, mais {でください}.', tela: 'すわる → すわらないで ください', ex: 'naide-kudasai' },
   ],
   'a1-14': [
     { fala: 'Unidade catorze: o que estou fazendo. Com uma peça nova, você diz o que está acontecendo agora e como as coisas estão.' },
@@ -119,7 +120,8 @@ const AULAS_A1: Readonly<Record<string, readonly QuadroAula[]>> = {
   'a1-16': [
     { fala: 'Unidade dezesseis: falar com amigos. Até aqui, tudo foi na forma educada. Entre amigos, o japonês usa formas mais curtas.' },
     { fala: 'A forma do dicionário é também o presente da fala casual. {たべる} quer dizer comer e também eu como, entre amigos.', ex: 'jisho-kei' },
-    { fala: 'A forma do não, como {のまない}, é o não da fala casual. Ela também serve de base para outras formas, como o não faça da unidade treze.', tela: '飲む → 飲まない · 行く → 行かない', ex: 'nai-kei' },
+    { fala: 'A forma do não, como {のまない}, é o não da fala casual. Ela também serve de base para outras formas.', tela: '飲む → 飲まない · 行く → 行かない', ex: 'nai-kei' },
+    { fala: 'Uma delas é o pedido para não fazer: a forma do não, mais {でください}. Não sente aqui, por favor.', tela: 'すわる → すわらない → すわらないで ください', ex: 'naide-kudasai' },
     { fala: 'Na fala casual, {です} some ou vira {だ}, e a pergunta muitas vezes perde o {か}: basta subir a voz no fim.', ex: 'casual' },
     { fala: 'As pontas {よ} e {ね} mudam o tom da frase. A segunda pede concordância: né? A primeira traz uma informação nova: viu, fica sabendo.', ex: 'yo-ne' },
     { fala: 'A partícula {が}, depois de uma frase inteira, quer dizer mas. É diferente da que marca o sujeito.', ex: 'ga-contraste' },

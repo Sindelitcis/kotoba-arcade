@@ -172,11 +172,11 @@ function ModuloZeroNoMapa({ feitos }: { feitos: number }) {
 function Mapa() {
   const save = cursoSave();
   const prox = proximaLicao(save);
+  // O Continuar do mapa segue o mesmo caminho do da tela inicial: revisão de hoje, Módulo 0, unidade.
+  const passo = proximoPasso(save, app.data.cards, Date.now());
   const comecou = UNIDADES.some((x) => (save.feitos[x.id] ?? 0) > 0 || save.provas[x.id]);
   const ir = () => {
-    if (!prox) return;
-    if (prox.prova) abrirProva(prox.unidade);
-    else abrirUnidade(prox.unidade, prox.bloco);
+    if (passo) continuarCurso();
   };
 
   useTeclado((tecla) => {
@@ -184,7 +184,7 @@ function Mapa() {
       voltarAoHub();
       return true;
     }
-    if ((tecla === 'Enter' || tecla === ' ') && prox) {
+    if ((tecla === 'Enter' || tecla === ' ') && passo) {
       ir();
       return true;
     }
@@ -203,8 +203,18 @@ function Mapa() {
         </div>
       </header>
 
-      {prox ? (
-        <button class="koma jornada-faixa cs-continuar" style={cenaStyle('aventura-narita')} onClick={ir} data-testid="cs-continuar">
+      {passo && passo.tipo !== 'unidade' ? (
+        <button class="koma jornada-faixa cs-continuar" style={cenaStyle('aventura-narita')} onClick={ir} data-testid="cs-continuar" data-passo={passo.tipo}>
+          <span class="hub-rotulo">
+            <Icone nome="play" /> Continuar <kbd>Enter</kbd>
+          </span>
+          <span class="jornada-faixa-txt">
+            <b>{passo.tipo === 'revisao' ? 'Revisão de hoje' : `Módulo 0 · ${passo.licao.titulo}`}</b>
+            <span>{passo.tipo === 'revisao' ? 'Primeiro, o que está na hora de rever.' : 'Os kana vêm antes da unidade 1.'}</span>
+          </span>
+        </button>
+      ) : prox ? (
+        <button class="koma jornada-faixa cs-continuar" style={cenaStyle('aventura-narita')} onClick={ir} data-testid="cs-continuar" data-passo="unidade">
           <span class="hub-rotulo">
             <Icone nome="play" /> Continuar <kbd>Enter</kbd>
           </span>

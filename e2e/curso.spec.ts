@@ -56,6 +56,17 @@ test('aluno do zero: o Enter abre o Módulo 0, não a unidade 1', async ({ page 
   await expect(page.getByTestId('m0-intro')).toBeVisible();
 });
 
+// Quem saía da lição de kana com Esc caía no mapa, e o Continuar dali pulava para a unidade 1.
+test('aluno do zero: o Continuar do mapa também leva ao Módulo 0', async ({ page }) => {
+  await page.keyboard.press('Enter');
+  await expect(page.getByTestId('m0-intro')).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(page.getByTestId('cs-continuar')).toHaveAttribute('data-passo', 'kana');
+  await expect(page.getByTestId('cs-continuar')).toContainText('Módulo 0');
+  await page.keyboard.press('Enter');
+  await expect(page.getByTestId('m0-intro')).toBeVisible();
+});
+
 test('quem já lê kana começa pela unidade 1: objetivo, palavras, prática, e o progresso fica salvo', async ({ page }) => {
   await page.getByTestId('hub-ja-sei-kana').click();
   await expect(page.getByTestId('cs-objetivo')).toContainText('me apresentar');

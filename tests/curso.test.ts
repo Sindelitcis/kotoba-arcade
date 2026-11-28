@@ -103,6 +103,36 @@ describe('currículo do curso', () => {
     }
   });
 
+  // ないでください estava na unidade 13 e a forma ない só vinha na 16: o aluno não tinha como formar すわらない.
+  it('um ponto que se forma a partir de outro vem depois dele', () => {
+    const PRECISA: Record<string, string[]> = {
+      'ja-arimasen': ['desu'],
+      deshita: ['desu', 'ja-arimasen'],
+      'masu-negativo-passado': ['masu'],
+      masenka: ['masu-negativo-passado'],
+      mashou: ['masu'],
+      tai: ['masu'],
+      'adj-negativo-passado': ['adj-i', 'adj-na'],
+      'te-kudasai': ['te-forma'],
+      'te-imasu': ['te-forma'],
+      'temo-ii': ['te-forma'],
+      'tewa-ikenai': ['te-forma'],
+      'te-kara': ['te-forma'],
+      'naide-kudasai': ['nai-kei'],
+      'ta-kei': ['te-forma'],
+      'ta-koto-ga-aru': ['ta-kei'],
+      'mae-ni-ato-de': ['ta-kei', 'jisho-kei'],
+      'hou-ga-ii': ['ta-kei'],
+    };
+    const pos = new Map<string, number>();
+    for (const u of UNIDADES) u.gramatica.forEach((g, i) => pos.set(g, u.ordem * 100 + i));
+    for (const [ponto, antes] of Object.entries(PRECISA))
+      for (const b of antes) {
+        expect(pos.has(ponto) && pos.has(b), `${ponto} ou ${b} sumiu`).toBe(true);
+        expect(pos.get(b)!, `${b} antes de ${ponto}`).toBeLessThan(pos.get(ponto)!);
+      }
+  });
+
   it('toda nota cultural tem fonte', () => {
     for (const u of UNIDADES) for (const n of u.notas) expect(n.fontes.length, `${u.id} ${n.titulo}`).toBeGreaterThan(0);
   });
