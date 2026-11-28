@@ -1,6 +1,7 @@
 // @vitest-environment node
 import { describe, expect, it } from 'vitest';
 import { palavrasDa, UNIDADES } from '../src/content/curso';
+import { VERSAO_DO_MODULO0 } from '../src/curso/modulo0';
 import { DIALOGOS } from '../src/content/curso/dialogos';
 import { exemplosDoPonto, partesDaFala } from '../src/curso/exemplos';
 import { tabelaDoPonto } from '../src/curso/formas';
@@ -391,8 +392,8 @@ describe('progresso e liberação', () => {
   it('save estragado ou de unidade que não existe é limpo', () => {
     const games: Record<string, unknown> = { curso: { feitos: { 'a1-01': 3, 'x-99': 2, 'a1-02': 'muito' }, concluidas: { 'a1-01': -1 } } };
     const save = ensureCursoSave(games);
-    expect(save).toEqual({ feitos: { 'a1-01': 3 }, concluidas: {}, provas: {}, partes: VERSAO_DAS_PARTES });
-    expect(ensureCursoSave({ curso: 'lixo' })).toEqual({ feitos: {}, concluidas: {}, provas: {}, partes: VERSAO_DAS_PARTES });
+    expect(save).toEqual({ feitos: { 'a1-01': 3 }, concluidas: {}, provas: {}, partes: VERSAO_DAS_PARTES, modulo0Ordem: VERSAO_DO_MODULO0 });
+    expect(ensureCursoSave({ curso: 'lixo' })).toEqual({ feitos: {}, concluidas: {}, provas: {}, partes: VERSAO_DAS_PARTES, modulo0Ordem: VERSAO_DO_MODULO0 });
     const comProva = ensureCursoSave({ curso: { provas: { 'a1-01': { melhor: 2, aprovada: 'sim', tentativas: -3 }, 'x-99': { melhor: 1, aprovada: true, tentativas: 1 } } } });
     expect(comProva.provas).toEqual({ 'a1-01': { melhor: 1, aprovada: false, tentativas: 0 } });
   });

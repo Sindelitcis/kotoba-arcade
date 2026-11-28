@@ -42,7 +42,7 @@ Isso vira uma nota da lição em que お金 aparece (unidade 4) e é retomado na
 
 | Nível | JLPT | Unidades | Ao final |
 |---|---|---|---|
-| Módulo 0: kana e sons | | 6 lições | lê e escreve hiragana e katakana, sons longos, duplos e pequenos |
+| Módulo 0: kana e sons | | 11 lições | lê e escreve hiragana e katakana, sons longos, duplos e pequenos |
 | A1 | N5 | 20 unidades | se vira em situações simples: apresentação, compras, horários, transporte, comida |
 | A2 | N4 | 20 unidades | trabalho de meio período, moradia, prefeitura, banco, médico, keigo básico |
 | Depois | N3 | a definir | |
@@ -317,14 +317,19 @@ A voz em japonês (AivisSpeech) pronuncia mal um kana sozinho. Duas frentes:
 
 ## Módulo 0: kana e sons
 
-Feito na fase 5, em `src/curso/modulo0.ts` (lógica) e `ModuloZero.tsx` (tela). Seis lições no alto
-do mapa, antes do A1, com os mesmos kana, desenhos e cartas do Kana em imagens: vogais e linhas do K
-e do S; T, N e H; M, Y, R, W e ん; tenten, maru, combinados, っ e vogal longa; katakana básico;
-katakana com tenten, combinados e sons de fora. Cada lição abre com o que o desenho não mostra
-(し é shi, o R é um toque, っ é uma pausa) e segue por lotes de 3 a 6 kana: apresentação e um
-treino curto, ouvindo (qual kana é este som) ou lendo (como se lê). As opções erradas só vêm de kana
-já apresentados no módulo. O módulo não tranca o A1: quem já lê kana vai direto para a unidade 1. O
-progresso fica em `games.curso.modulo0` (lotes feitos).
+Feito na fase 5, em `src/curso/modulo0.ts` (lógica) e `ModuloZero.tsx` (tela). Onze lições no alto
+do mapa, antes do A1, de 3 a 7 lotes cada, com os mesmos kana, desenhos e cartas do Kana em imagens.
+No hiragana: vogais, K e S; T, N e H; M, Y, R, W e ん; tenten e maru; pequenos, combinados e sons
+longos. No katakana, as mesmas, com o traço longo (ー) junto dos pequenos, e no fim os sons de fora.
+Os kana pequenos (っゃゅょ, ッャュョー) vêm num lote só deles antes dos combinados, que são feitos com
+eles, e a vogal longa tem um cartão (おばさん e おばあさん). Cada lição abre com o que o desenho não
+mostra (し é shi, o R é um toque, っ é uma pausa) e segue por lotes de 3 a 6 kana: apresentação e um
+treino curto, ouvindo (qual kana é este som) ou lendo (como se lê). O exemplo de cada kana é a
+palavra mais curta, do curso ou do Kana em imagens, escrita só com kana já vistos (sem kanji); sem
+nenhuma, o cartão fica sem exemplo. As opções erradas só vêm de kana já apresentados no módulo. O
+módulo não tranca o A1: quem já lê kana vai direto para a unidade 1. O progresso fica em
+`games.curso.modulo0` (lotes feitos); quando a ordem dos lotes muda, `VERSAO_DO_MODULO0` sobe e quem
+fez na ordem antiga fica só com os lotes cujos kana já viu.
 
 ## O que já existe
 

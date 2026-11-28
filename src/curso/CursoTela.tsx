@@ -34,7 +34,7 @@ import { lerCodigo, OPCOES_PROVA } from './prova';
 import { falaDoExemplo, type Dialogo } from './exemplos';
 import { NivelamentoTela, ProvaTela } from './ProvaTela';
 import { useTeclado } from './teclado';
-import { kanaFeitos, LICOES_KANA, LOTES_DO_MODULO, perguntasDosKana } from './modulo0';
+import { kanaFeitos, LICOES_KANA, perguntasDosKana, posicaoDoLote } from './modulo0';
 import { ModuloZeroTela, TreinoKana } from './ModuloZero';
 import { ateOndeFoi, proximoPasso, revisaoDeHoje } from './hoje';
 import { AulaView, CompletarView, DitadoView, FormasView, LeituraView, MontarView } from './BlocosAula';
@@ -148,7 +148,7 @@ function ModuloZeroNoMapa({ feitos }: { feitos: number }) {
       <p class="muted">Para quem ainda não lê hiragana e katakana. Já lê? Pode ir direto para a unidade 1.</p>
       <ol class="cs-licoes-kana">
         {LICOES_KANA.map((l) => {
-          const posicoes = l.lotes.map((x) => LOTES_DO_MODULO.indexOf(x));
+          const posicoes = l.lotes.map(posicaoDoLote);
           const feitosAqui = posicoes.filter((p) => p < feitos).length;
           const feita = feitosAqui === posicoes.length;
           return (

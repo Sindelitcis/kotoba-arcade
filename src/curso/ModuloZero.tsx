@@ -9,13 +9,13 @@ import { app, commit, cursoSave } from '../core/app';
 import { Apresentacao } from '../core/Apresentacao';
 import { speakWord } from '../core/audio';
 import { useSemLegenda } from '../core/LegendaVoz';
-import { itemNovoDe, type ItemNovo } from '../content/ensino';
+import type { ItemNovo } from '../content/ensino';
 import { apresentar, avaliar, foiApresentado } from '../core/ensino';
 import { Icone } from '../core/Icone';
 import { legendaComRomaji } from '../core/legenda';
 import { Imagem } from '../games/kanaimagens/Imagem';
 import '../games/kanaimagens/kanaimagens.css';
-import { inicioDaLicao, kanaDoLote, LOTES_DO_MODULO, perguntasDoLote, type LicaoKana, type PerguntaKana } from './modulo0';
+import { inicioDaLicao, itensDoLote, LOTES_DO_MODULO, perguntasDoLote, posicaoDoLote, type LicaoKana, type PerguntaKana } from './modulo0';
 import { useTeclado } from './teclado';
 
 const desenho = (item: ItemNovo) => (item.alvo.t === 'kana' ? <Imagem item={kanaItem(item.alvo.id)} letra={false} class="ki-grande" /> : null);
@@ -135,10 +135,9 @@ export function TreinoKana({ gerar, onFim, rotulo = 'Treino' }: { gerar: () => P
 
 export function ModuloZeroTela({ licao, onSair }: { licao: LicaoKana; onSair: () => void }) {
   const [posicao, setPosicao] = useState(() => inicioDaLicao(licao, cursoSave().modulo0 ?? 0));
-  const comecoDaLicao = LOTES_DO_MODULO.indexOf(licao.lotes[0] as number);
+  const comecoDaLicao = posicaoDoLote(licao.lotes[0] as string);
   const [fase, setFase] = useState<'intro' | 'apresentar' | 'treino' | 'fim'>(posicao === comecoDaLicao ? 'intro' : 'apresentar');
-  const lote = LOTES_DO_MODULO[posicao] as number;
-  const itens = useMemo(() => kanaDoLote(lote).map((k) => itemNovoDe(k.carta)).filter((x): x is ItemNovo => !!x), [lote]);
+  const itens = useMemo(() => itensDoLote(posicao), [posicao]);
 
   // A legenda mostra o romaji só aqui.
   useEffect(() => {
@@ -153,7 +152,8 @@ export function ModuloZeroTela({ licao, onSair }: { licao: LicaoKana; onSair: ()
     save.modulo0 = Math.max(save.modulo0 ?? 0, posicao + 1);
     commit();
     const prox = posicao + 1;
-    if (licao.lotes.includes(LOTES_DO_MODULO[prox] as number)) {
+    const seguinte = LOTES_DO_MODULO[prox];
+    if (seguinte && licao.lotes.includes(seguinte.id)) {
       setPosicao(prox);
       setFase('apresentar');
     } else setFase('fim');
@@ -212,7 +212,8 @@ export function ModuloZeroTela({ licao, onSair }: { licao: LicaoKana; onSair: ()
         itens={itens}
         visual={desenho}
         onFim={() => {
-          apresentar(app.data.cards, itens.flatMap((x) => x.chaves), Date.now());
+          // Só os kana viram carta: o cartão da vogal longa é explicação.
+          apresentar(app.data.cards, itens.filter((x) => x.alvo.t === 'kana').flatMap((x) => x.chaves), Date.now());
           commit();
           setFase('treino');
         }}

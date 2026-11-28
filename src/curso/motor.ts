@@ -26,6 +26,7 @@
 import { GRAMATICA, nomeDaUnidade, palavrasDa, UNIDADES, type KanjiDaUnidade, type Nivel, type Nota, type Palavra, type Unidade } from '../content/curso';
 import { cardKey } from '../content';
 import { AULAS_DO_CURSO, type QuadroAula } from '../content/curso/aulas';
+import { migrarModulo0, VERSAO_DO_MODULO0 } from './modulo0';
 import { perguntasDeForma, tabelaDoPonto } from './formas';
 import { dialogoDa, exemplosDaUnidade, exemplosDoPonto, leituraDa, partesDaFala, type Dialogo, type Exemplo, type Leitura } from './exemplos';
 import { ditadoDa, lacunasDa } from './exercicios';
@@ -296,6 +297,8 @@ export interface CursoSave {
   modulo0?: number;
   /** A ordem das partes com que `feitos` foi contado (VERSAO_DAS_PARTES). */
   partes?: number;
+  /** A ordem dos lotes com que `modulo0` foi contado (VERSAO_DO_MODULO0). */
+  modulo0Ordem?: number;
 }
 
 /**
@@ -338,10 +341,11 @@ export function ensureCursoSave(games: Record<string, unknown>): CursoSave {
       provas[k] = { melhor, aprovada: p.aprovada === true, tentativas, ...(p.nivelamento ? { nivelamento: true as const } : {}), ...(quando ? { quando } : {}) };
     }
   const nome = typeof raw?.nome === 'string' ? raw.nome.trim().slice(0, 60) : '';
-  const m0 = typeof raw?.modulo0 === 'number' && Number.isFinite(raw.modulo0) ? Math.max(0, Math.floor(raw.modulo0)) : 0;
+  const m0lido = typeof raw?.modulo0 === 'number' && Number.isFinite(raw.modulo0) ? Math.max(0, Math.floor(raw.modulo0)) : 0;
+  const m0 = m0lido > 0 && raw?.modulo0Ordem !== VERSAO_DO_MODULO0 ? migrarModulo0(m0lido) : m0lido;
   const feitos = limpar(raw?.feitos);
   if (raw && raw.partes !== VERSAO_DAS_PARTES) migrarPartes(feitos);
-  const save: CursoSave = { feitos, concluidas: limpar(raw?.concluidas), provas, ...(nome ? { nome } : {}), ...(m0 ? { modulo0: m0 } : {}), partes: VERSAO_DAS_PARTES };
+  const save: CursoSave = { feitos, concluidas: limpar(raw?.concluidas), provas, ...(nome ? { nome } : {}), ...(m0 ? { modulo0: m0 } : {}), partes: VERSAO_DAS_PARTES, modulo0Ordem: VERSAO_DO_MODULO0 };
   games.curso = save;
   return save;
 }
