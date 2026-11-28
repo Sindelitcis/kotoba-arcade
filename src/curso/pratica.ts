@@ -2,7 +2,8 @@
  * A prática guiada de um bloco do curso, sem tela (docs/ensino.md):
  *
  * - só pergunta o que já foi apresentado, e as alternativas erradas também já foram vistas;
- * - duas opções na primeira vez, três depois;
+ * - duas opções na primeira vez, três depois, quatro quando o item já está em cobrança;
+ * - as erradas são as mais parecidas com a certa, e a que a pessoa marcou errado volta como opção;
  * - errar não tira nada: a resposta certa fica na tela até a pessoa seguir, o item é
  *   mostrado de novo e a pergunta volta no fim da fila;
  * - o bloco acaba quando cada item foi acertado uma vez.
@@ -23,8 +24,8 @@ export interface RespostaPratica {
   certa: boolean;
 }
 
-/** Na prática, o máximo de opções. A cobrança com todas fica para a prova (fase 3). */
-export const OPCOES_MAX = 3;
+/** Na prática, o máximo de opções (só o item já em cobrança chega a ele). */
+export const OPCOES_MAX = 4;
 
 export class Pratica {
   private fila: ItemPratica[];
@@ -34,6 +35,9 @@ export class Pratica {
   acertos = 0;
   feitas = 0;
   private errados = new Set<string>();
+  /** Por item: erradas que a pessoa marcou e erradas que já apareceram. */
+  private confundidas = new Map<string, string[]>();
+  private usadas = new Map<string, string[]>();
 
   constructor(
     readonly itens: readonly ItemPratica[],
@@ -64,7 +68,13 @@ export class Pratica {
       return;
     }
     const n = this.opcoesFixas ?? Math.min(OPCOES_MAX, opcoesPara(this.deps.cards, item.carta, OPCOES_MAX));
-    this.pergunta = montarPergunta(item, this.itens, this.conhecidos, this.deps.cards, n, this.deps.rng);
+    this.pergunta = montarPergunta(item, this.itens, this.conhecidos, this.deps.cards, n, this.deps.rng, {
+      confundidas: this.confundidas.get(item.id),
+      usadas: this.usadas.get(item.id),
+    });
+    const usadas = this.usadas.get(item.id) ?? [];
+    for (const o of this.pergunta.opcoes) if (o !== item.certa && !usadas.includes(o)) usadas.push(o);
+    this.usadas.set(item.id, usadas);
   }
 
   /** A primeira resposta é a que vale. */
@@ -79,6 +89,9 @@ export class Pratica {
     avaliar(cards, p.item.carta, emPratica(cards, p.item.carta) ? notaDaPratica(certa) : { correct: certa }, now());
     if (!certa) {
       this.errados.add(p.item.id);
+      const c = this.confundidas.get(p.item.id) ?? [];
+      if (!c.includes(opcao)) c.push(opcao);
+      this.confundidas.set(p.item.id, c);
       this.fila.push(p.item);
     }
     return this.resposta;

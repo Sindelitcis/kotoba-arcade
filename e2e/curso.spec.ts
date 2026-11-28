@@ -27,16 +27,21 @@ async function praticar(page: Page, errarPrimeira: boolean): Promise<void> {
     const opcoes = page.getByTestId('cs-opcao');
     const n = await opcoes.count();
     expect(n).toBeGreaterThanOrEqual(2);
-    expect(n).toBeLessThanOrEqual(3);
+    expect(n).toBeLessThanOrEqual(4);
     const certas = await opcoes.evaluateAll((els) => els.map((e) => e.hasAttribute('data-certa')));
     let i = certas.indexOf(true);
-    if (!errou) {
+    const errando = !errou;
+    if (errando) {
       i = certas.indexOf(false);
       errou = true;
     }
+    const marcada = (await opcoes.nth(i).locator('span').textContent()) ?? '';
     await page.keyboard.press(String(i + 1));
     // A resposta fica na tela até a pessoa seguir.
     await expect(page.getByTestId('cs-retorno')).toBeVisible();
+    // No erro, diz o que é a alternativa marcada.
+    if (errando) await expect(page.getByTestId('cs-explica-erro')).toContainText(marcada);
+    else await expect(page.getByTestId('cs-explica-erro')).toHaveCount(0);
     await page.waitForTimeout(300);
     await expect(page.getByTestId('cs-retorno')).toBeVisible();
     await page.keyboard.press('Enter');

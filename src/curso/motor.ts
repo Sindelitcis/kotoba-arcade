@@ -30,7 +30,7 @@ import { migrarModulo0, VERSAO_DO_MODULO0 } from './modulo0';
 import { perguntasDeForma, tabelaDoPonto } from './formas';
 import { dialogoDa, exemplosDaUnidade, exemplosDoPonto, leituraDa, partesDaFala, type Dialogo, type Exemplo, type Leitura } from './exemplos';
 import { ditadoDa, lacunasDa } from './exercicios';
-import { foiApresentado } from '../core/ensino';
+import { foiApresentado, itemDe, itensApresentados } from '../core/ensino';
 import { shuffle, type Rng } from '../core/rng';
 import type { CardState } from '../core/srs';
 
@@ -518,28 +518,134 @@ export function itensDaRevisao(u: Unidade, cards: Readonly<Record<string, CardSt
 export interface Pergunta {
   item: ItemPratica;
   opcoes: string[];
+  /** De onde veio cada alternativa errada: para explicar o erro ("essa é a de 〇〇"). */
+  origem: Readonly<Record<string, ItemPratica>>;
+}
+
+/** O que mais pesa para uma alternativa errada parecer com a certa. */
+export interface HistoricoDaPergunta {
+  /** Erradas que a pessoa já marcou neste item: voltam primeiro. */
+  confundidas?: readonly string[];
+  /** Erradas que já apareceram neste item: perdem peso, para variar. */
+  usadas?: readonly string[];
+}
+
+const KANJI = /[一-鿿々]/u;
+
+/** Quanto `o` se parece com `item`, do ponto de vista de quem está aprendendo. */
+export function parecenca(item: ItemPratica, o: ItemPratica): number {
+  return medirParecenca(item)(o);
+}
+
+interface Tracos {
+  /** Caracteres de `jp` (sem repetir), cada um com o peso: kanji pesa mais. */
+  jp: Map<string, number>;
+  kana: Set<string>;
+  tamanhoKana: number;
+  certa: Set<string>;
+  tamanhoCerta: number;
+}
+
+const TRACOS = new WeakMap<ItemPratica, Tracos>();
+function tracosDe(i: ItemPratica): Tracos {
+  let t = TRACOS.get(i);
+  if (!t) {
+    t = {
+      jp: new Map([...new Set(i.jp)].map((c) => [c, KANJI.test(c) ? 3 : 1])),
+      kana: new Set(i.kana),
+      tamanhoKana: [...i.kana].length,
+      certa: new Set(i.certa),
+      tamanhoCerta: [...i.certa].length,
+    };
+    TRACOS.set(i, t);
+  }
+  return t;
+}
+
+/** `parecenca` com o lado do item já calculado, para comparar com muitos de uma vez. */
+function medirParecenca(item: ItemPratica): (o: ItemPratica) => number {
+  const a = tracosDe(item);
+  if (item.tipo === 'palavra')
+    // A pergunta mostra a palavra: confunde mais a que tem o mesmo kanji, os mesmos kana, o mesmo tamanho.
+    return (o) => {
+      const b = tracosDe(o);
+      let s = 0;
+      for (const [c, peso] of b.jp) if (a.jp.has(c)) s += peso;
+      for (const c of b.kana) if (a.kana.has(c)) s += 0.5;
+      if (Math.abs(b.tamanhoKana - a.tamanhoKana) <= 1) s += 1;
+      return s;
+    };
+  // A pergunta é a leitura: confunde mais a leitura com os mesmos kana e o mesmo tamanho (にち e にん).
+  return (o) => {
+    const b = tracosDe(o);
+    let s = 0;
+    for (const c of b.certa) if (a.certa.has(c)) s += 1.5;
+    if (o.certa[0] === item.certa[0]) s += 1;
+    if (b.tamanhoCerta === a.tamanhoCerta) s += 1;
+    if (o.destaque && o.destaque === item.destaque) s += 1;
+    return s;
+  };
 }
 
 /**
  * Monta a pergunta do item. As alternativas erradas saem só de itens do mesmo tipo já
- * apresentados (as do mesmo bloco primeiro) e nunca são outra resposta certa. `n` é quantas
- * opções no total (2 na primeira vez, 3 depois: `opcoesPara` do core/ensino.ts).
+ * apresentados e nunca são outra resposta certa. Entre essas, vão as mais parecidas com a certa
+ * (`parecenca`), as do bloco e as que a pessoa já confundiu; as que já apareceram perdem peso e um
+ * pouco de sorte varia o resto. `n` é quantas opções no total (`opcoesPara` do core/ensino.ts).
  */
-export function montarPergunta(item: ItemPratica, doBloco: readonly ItemPratica[], conhecidos: readonly ItemPratica[], cards: Readonly<Record<string, CardState>>, n: number, rng: Rng): Pergunta {
+export function montarPergunta(
+  item: ItemPratica,
+  doBloco: readonly ItemPratica[],
+  conhecidos: readonly ItemPratica[],
+  cards: Readonly<Record<string, CardState>>,
+  n: number,
+  rng: Rng,
+  historico: HistoricoDaPergunta = {},
+): Pergunta {
   const proibidas = new Set([item.certa, ...item.evitar]);
+  const noBloco = new Set(doBloco.map((o) => o.id));
+  const confundidas = new Set(historico.confundidas ?? []);
+  const usadas = new Set(historico.usadas ?? []);
+  const medir = medirParecenca(item);
+  const vistos = new Set<string>();
+  const candidatos: { o: ItemPratica; peso: number }[] = [];
+  for (const o of [...doBloco, ...conhecidos]) {
+    if (vistos.has(o.id)) continue;
+    vistos.add(o.id);
+    if (o.tipo !== item.tipo || o.id === item.id || proibidas.has(o.certa)) continue;
+    let peso = medir(o) + rng() * 2;
+    if (noBloco.has(o.id)) peso += 1.5;
+    if (confundidas.has(o.certa)) peso += 10;
+    if (usadas.has(o.certa)) peso -= 2;
+    candidatos.push({ o, peso });
+  }
   const sentidos = new Set(item.tipo === 'palavra' ? [sentido(item.certa)] : []);
   const erradas: string[] = [];
-  const tentar = (lista: readonly ItemPratica[]) => {
-    for (const o of shuffle(rng, lista)) {
-      if (erradas.length >= n - 1) return;
-      if (o.tipo !== item.tipo || o.id === item.id || !foiApresentado(cards, o.carta)) continue;
-      if (proibidas.has(o.certa) || erradas.includes(o.certa)) continue;
-      if (item.tipo === 'palavra' && sentidos.has(sentido(o.certa))) continue;
-      erradas.push(o.certa);
-      if (item.tipo === 'palavra') sentidos.add(sentido(o.certa));
-    }
-  };
-  tentar(doBloco);
-  tentar(conhecidos);
-  return { item, opcoes: shuffle(rng, [item.certa, ...erradas]) };
+  const origem: Record<string, ItemPratica> = {};
+  // "Já apresentado" sem a carta exata varre as cartas: varre uma vez só, e só se precisar.
+  let apresentados: Set<string> | null = null;
+  const foiVisto = (carta: string) => !!cards[carta] || (apresentados ??= itensApresentados(cards)).has(itemDe(carta));
+  // Tira sempre o de maior peso (são poucas as erradas: mais barato que ordenar tudo).
+  while (erradas.length < n - 1 && candidatos.length > 0) {
+    let m = 0;
+    for (let i = 1; i < candidatos.length; i++) if (candidatos[i]!.peso > candidatos[m]!.peso) m = i;
+    const { o } = candidatos[m]!;
+    candidatos[m] = candidatos[candidatos.length - 1]!;
+    candidatos.pop();
+    if (erradas.includes(o.certa)) continue;
+    if (item.tipo === 'palavra' && sentidos.has(sentido(o.certa))) continue;
+    if (!foiVisto(o.carta)) continue;
+    erradas.push(o.certa);
+    origem[o.certa] = o;
+    if (item.tipo === 'palavra') sentidos.add(sentido(o.certa));
+  }
+  return { item, opcoes: shuffle(rng, [item.certa, ...erradas]), origem };
+}
+
+/** A frase que explica a alternativa errada marcada: o que ela é de verdade. */
+export function explicacaoDoErro(p: Pergunta, escolhida: string): string | null {
+  const o = p.origem[escolhida];
+  if (!o) return null;
+  if (o.tipo === 'palavra') return `Você marcou “${escolhida}”, que é ${o.jp === o.kana ? o.jp : `${o.jp} (${o.kana})`}.`;
+  return o.jp === o.destaque ? `Você marcou ${escolhida}, que é a leitura de ${o.destaque}.` : `Você marcou ${escolhida}, que é a leitura de ${o.destaque} em ${o.jp} (${o.kana}).`;
 }

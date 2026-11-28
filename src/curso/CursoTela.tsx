@@ -28,7 +28,7 @@ import { MOEDAS_LICAO, XP_ACERTO, XP_LICAO } from '../jornada/andamento';
 import { cartaoDaPalavra, cartaoDoKanji, cartaoDoPonto, falaDaPalavra } from './cartoes';
 import { figuraDoCurso } from './figura';
 import { figuraUrl, temFigura } from '../core/figuras';
-import { blocosDa, cartaDaPalavra, cartasDoKanji, concluiuBlocos, itensAte, itensDaRevisao, itensDoBloco, itensDoMiniteste, liberada, NOME_BLOCO, ondeContinuar, proximaLicao, registrarBloco, unidadePorId, venceu, type Bloco, type ItemPratica } from './motor';
+import { blocosDa, cartaDaPalavra, cartasDoKanji, concluiuBlocos, explicacaoDoErro, itensAte, itensDaRevisao, itensDoBloco, itensDoMiniteste, liberada, NOME_BLOCO, ondeContinuar, proximaLicao, registrarBloco, unidadePorId, venceu, type Bloco, type ItemPratica } from './motor';
 import { abrirImpresso } from './Impresso';
 import { lerCodigo, OPCOES_PROVA } from './prova';
 import { falaDoExemplo, type Dialogo } from './exemplos';
@@ -697,6 +697,11 @@ function PraticaView({
               <Furigana texto={item.jp} leitura={item.kana} />
             </span>{' '}
             {item.tipo === 'kanji' ? `: ${item.destaque} = ${item.certa}` : `= ${item.certa}`}
+          </p>
+        )}
+        {pr.resposta && !pr.resposta.certa && explicacaoDoErro(p, pr.resposta.escolhida) && (
+          <p class="lc-retorno" data-testid="cs-explica-erro">
+            {explicacaoDoErro(p, pr.resposta.escolhida)}
           </p>
         )}
       </div>

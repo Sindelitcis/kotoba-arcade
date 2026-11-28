@@ -15,6 +15,9 @@ import {
   cartasDoKanji,
   concluiuBlocos,
   emLotes,
+  explicacaoDoErro,
+  montarPergunta,
+  parecenca,
   ensureCursoSave,
   itensAte,
   itensDaRevisao,
@@ -213,7 +216,8 @@ describe('prática: só cobra o que já foi apresentado', () => {
           expect(apresentadas.has(p.item.carta), `${b.id}: ${p.item.id}`).toBe(true);
           expect(p.opcoes, b.id).toContain(p.item.certa);
           expect(new Set(p.opcoes).size).toBe(p.opcoes.length);
-          expect(p.opcoes.length).toBeLessThanOrEqual(3);
+          expect(p.opcoes.length).toBeLessThanOrEqual(4);
+          for (const o of p.opcoes) if (o !== p.item.certa) expect(explicacaoDoErro(p, o), `${p.item.id}: ${o}`).toBeTruthy();
           for (const o of p.opcoes) {
             if (o === p.item.certa) continue;
             // A alternativa errada é resposta de um item do mesmo tipo já apresentado.
@@ -288,6 +292,72 @@ describe('prática: só cobra o que já foi apresentado', () => {
       for (const o of pr.pergunta!.opcoes) expect(doBloco.has(o)).toBe(true);
     }
     expect(foiApresentado(cards, 'w:先生#meaning')).toBe(itensDoBloco(b1!).some((i) => i.id === 'w:先生'));
+  });
+
+  // As erradas eram sorteadas: "pessoa" contra "cachorro" não ensina nada. Agora vão as parecidas.
+  it('as alternativas erradas tendem a ser as mais parecidas com a certa', () => {
+    const cards: Record<string, CardState> = {};
+    for (const u of UNIDADES.slice(0, 6)) for (const b of blocosDa(u)) apresentar(cards, cartasDoBloco(b), 0);
+    const conhecidos = itensAte(UNIDADES[5]!.ordem);
+    let escolhidas = 0;
+    let todas = 0;
+    let nE = 0;
+    let nT = 0;
+    for (const item of conhecidos) {
+      const elegiveis = conhecidos.filter((o) => o.tipo === item.tipo && o.id !== item.id && o.certa !== item.certa && !item.evitar.includes(o.certa));
+      if (elegiveis.length < 6) continue;
+      for (const o of elegiveis) (todas += parecenca(item, o)), nT++;
+      const p = montarPergunta(item, [], conhecidos, cards, 3, seededRng(item.id.length));
+      for (const o of p.opcoes) if (o !== item.certa) (escolhidas += parecenca(item, p.origem[o]!)), nE++;
+    }
+    expect(nE).toBeGreaterThan(50);
+    expect(escolhidas / nE).toBeGreaterThan((todas / nT) * 1.5);
+  });
+
+  it('na leitura de kanji, a errada parecida vem antes da sorteada (にち contra にん, não contra やま)', () => {
+    const item = { id: 'k:x', tipo: 'kanji', carta: 'x', jp: '日', kana: 'にち', destaque: '日', certa: 'にち', evitar: [] } as ItemPratica;
+    const o = (certa: string): ItemPratica => ({ ...item, id: `k:${certa}`, carta: `c:${certa}`, certa, destaque: certa });
+    const cards: Record<string, CardState> = {};
+    const outros = [o('やま'), o('にん'), o('かわ'), o('みず')];
+    apresentar(cards, outros.map((x) => x.carta), 0);
+    for (let s = 0; s < 20; s++) expect(montarPergunta(item, [], outros, cards, 2, seededRng(s)).opcoes).toContain('にん');
+  });
+
+  it('a errada que a pessoa marcou volta como opção quando o item volta, e as outras variam', () => {
+    const u = UNIDADES[2]!;
+    const cards: Record<string, CardState> = {};
+    for (const x of UNIDADES.slice(0, 3)) for (const b of blocosDa(x)) apresentar(cards, cartasDoBloco(b), 0);
+    const conhecidos = itensAte(u.ordem);
+    const alvo = conhecidos.find((i) => i.tipo === 'palavra')!;
+    const pr = new Pratica([alvo], conhecidos, { cards, now: () => 1000, rng: seededRng(5) });
+    const conjuntos = new Set<string>();
+    let marcada = '';
+    for (let v = 0; v < 4; v++) {
+      const p = pr.pergunta!;
+      if (marcada) expect(p.opcoes).toContain(marcada);
+      conjuntos.add(p.opcoes.filter((o) => o !== alvo.certa && o !== marcada).sort().join('|'));
+      marcada = p.opcoes.find((o) => o !== alvo.certa)!;
+      pr.responder(marcada);
+      pr.seguir();
+    }
+    expect(conjuntos.size).toBeGreaterThan(1);
+  });
+
+  it('o erro explica o que é a alternativa marcada', () => {
+    const cards: Record<string, CardState> = {};
+    for (const b of blocosDa(UNIDADES[0]!)) apresentar(cards, cartasDoBloco(b), 0);
+    const conhecidos = itensAte(1);
+    const palavra = conhecidos.find((i) => i.tipo === 'palavra')!;
+    const p = montarPergunta(palavra, [], conhecidos, cards, 3, seededRng(1));
+    const errada = p.opcoes.find((o) => o !== palavra.certa)!;
+    const dono = p.origem[errada]!;
+    expect(explicacaoDoErro(p, errada)).toContain(dono.jp);
+    expect(explicacaoDoErro(p, errada)).toContain(errada);
+    expect(explicacaoDoErro(p, palavra.certa)).toBeNull();
+    const kanji = conhecidos.find((i) => i.tipo === 'kanji')!;
+    const pk = montarPergunta(kanji, [], conhecidos, cards, 3, seededRng(1));
+    const ek = pk.opcoes.find((o) => o !== kanji.certa)!;
+    expect(explicacaoDoErro(pk, ek)).toContain(`leitura de ${pk.origem[ek]!.destaque}`);
   });
 });
 

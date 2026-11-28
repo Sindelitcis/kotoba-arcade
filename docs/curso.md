@@ -125,9 +125,12 @@ próxima parte; a tecla U mostra o mapa das unidades.
   o padrão, a regra e um exemplo falado; nos pontos de forma (ます, て, ない, potencial...), também
   "como se forma" e uma tabela com os verbos ou adjetivos já ensinados, um de cada grupo
   (`src/curso/formas.ts`).
-- **Prática.** `pratica.ts`: duas opções na primeira vez e três depois, todas de itens do curso já
-  apresentados. Errar não tira nada: a resposta fica na tela até a pessoa seguir, o cartão aparece
-  de novo e a pergunta volta no fim. A parte acaba quando cada item foi acertado uma vez.
+- **Prática.** `pratica.ts`: duas opções na primeira vez, três depois e quatro com o item já em
+  cobrança, todas de itens do curso já apresentados. As erradas são as mais parecidas com a certa
+  (`parecenca` no motor: mesmo kanji, mesmos kana, mesmo tamanho), a que a pessoa já marcou errado
+  volta e as já usadas perdem peso, para variar. Errar não tira nada: a resposta fica na tela até a
+  pessoa seguir, com a explicação do que é a alternativa marcada (`explicacaoDoErro`), o cartão
+  aparece de novo e a pergunta volta no fim. A parte acaba quando cada item foi acertado uma vez.
 - **Memória.** As palavras e os kanji entram nas mesmas cartas do FSRS dos jogos (`w:<palavra>#meaning`,
   `k:<kanji>#meaning` e `#reading`). O que foi visto no curso os jogos já podem praticar.
 - **Progresso.** Fica em `games.curso` no save: quantas partes de cada unidade foram feitas, quais
