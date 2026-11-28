@@ -120,7 +120,8 @@ async function comCurso(page: Page, curso: unknown): Promise<void> {
       // Sem a versão, o site descarta o save: o da página nova pode ainda não ter sido gravado.
       const save = JSON.parse(localStorage.getItem(chave as string) ?? '{"v":2}');
       save.games ??= {};
-      save.games.curso = c;
+      // A ordem das partes atual: sem ela, o site trata o save como antigo e recua quem está no meio.
+      save.games.curso = { partes: 2, ...(c as object) };
       localStorage.setItem(chave as string, JSON.stringify(save));
     },
     [SAVE_KEY, curso],

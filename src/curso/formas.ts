@@ -521,9 +521,9 @@ function errosParecidos(p: Palavra, f: Forma, formasDoPonto: readonly Forma[]): 
 }
 
 /** As perguntas de transformar de uma unidade: de cada linha das tabelas dela, até `teto`. */
-export function perguntasDeForma(u: Unidade, rng: Rng, teto = 8): PerguntaDeForma[] {
+export function perguntasDeForma(u: Unidade, rng: Rng, teto = 8, pontos: readonly string[] = u.gramatica): PerguntaDeForma[] {
   const out: PerguntaDeForma[] = [];
-  for (const ponto of u.gramatica) {
+  for (const ponto of pontos) {
     const t = TABELAS[ponto];
     const tabela = tabelaDoPonto(ponto, u);
     if (!t || !tabela) continue;

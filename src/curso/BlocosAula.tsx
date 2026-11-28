@@ -10,7 +10,7 @@
  */
 import { useLayoutEffect, useMemo, useRef, useState } from 'preact/hooks';
 import type { Unidade } from '../content/curso';
-import { AULAS_DO_CURSO } from '../content/curso/aulas';
+import type { QuadroAula } from '../content/curso/aulas';
 import { Furigana, Misto } from '../core/Furigana';
 import { Icone } from '../core/Icone';
 import { useSemLegenda } from '../core/LegendaVoz';
@@ -32,8 +32,7 @@ function ExemploNaTela({ e }: { e: Exemplo }) {
   );
 }
 
-export function AulaView({ unidade, onFim }: { unidade: Unidade; onFim: () => void }) {
-  const quadros = AULAS_DO_CURSO[unidade.id] ?? [];
+export function AulaView({ quadros, onFim }: { quadros: readonly QuadroAula[]; onFim: () => void }) {
   const [i, setI] = useState(0);
   const q = quadros[i];
   const ex = q?.ex ? exemplosDoPonto(q.ex)[0] : undefined;
@@ -215,8 +214,8 @@ export function MontarView({ exemplos, onFim }: { exemplos: readonly Exemplo[]; 
  * Transformar a forma: a palavra numa forma, a pessoa escolhe a outra. Errou: aparece a forma certa
  * escrita, a regra, e a pergunta volta uma vez no fim (como no treino de kana).
  */
-export function FormasView({ unidade, onFim }: { unidade: Unidade; onFim: (acertos: number) => void }) {
-  const [fila, setFila] = useState(() => perguntasDeForma(unidade, Math.random));
+export function FormasView({ unidade, pontos, onFim }: { unidade: Unidade; pontos: readonly string[]; onFim: (acertos: number) => void }) {
+  const [fila, setFila] = useState(() => perguntasDeForma(unidade, Math.random, 8, pontos));
   const [i, setI] = useState(0);
   const [escolha, setEscolha] = useState<string | null>(null);
   const [acertos, setAcertos] = useState(0);

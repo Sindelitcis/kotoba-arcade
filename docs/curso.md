@@ -108,11 +108,15 @@ próxima parte; a tecla U mostra o mapa das unidades.
 
 - **Partes curtas.** `motor.ts` (`blocosDa`) divide a unidade em partes de uns 5 minutos: objetivo
   (com a revisão rápida da unidade anterior), palavras de 3 a 5 por vez, os kanji dessas palavras
-  logo depois delas, a aula falada, a gramática, as formas, o montar frases, o completar, o ditado, a
+  logo depois delas e, intercalada com elas, a gramática: cada ponto entra logo depois do lote que
+  traz a última palavra ou kanji de que os exemplos, a tabela e a aula dele precisam, nunca antes
+  do ponto anterior, com a aula falada dele, o cartão, as formas e o montar frases. Depois de todas
+  as palavras vêm o completar, o ditado, a
   leitura graduada com shadowing, as notas culturais, o diálogo da situação (`content/curso/dialogos.ts`, feito só com o que já
   foi ensinado, conferido em `tests/curso-leituras.test.ts`) e, no fim, o mini-teste (8 perguntas da unidade, com quatro alternativas, como na
-  prova). A unidade de revisão tem só o objetivo e uma prática com o que já foi visto. Parte nova
-  entra sempre antes da posição salva de quem já começou: a pessoa pode rever uma parte, nunca pular.
+  prova). A unidade de revisão tem só o objetivo e uma prática com o que já foi visto. O progresso
+  conta as partes feitas; quando a ordem delas muda, `VERSAO_DAS_PARTES` sobe e quem estava no meio
+  de uma unidade volta para a primeira parte que não é de palavras: pode rever, nunca pular.
 - **Cartões.** `cartoes.ts` monta a apresentação direto do currículo, no mesmo cartão dos jogos
   (`core/Apresentacao.tsx`). O do kanji mostra a leitura usada na palavra, a explicação da troca
   quando ela muda e as outras leituras do curso, com a unidade em que entram. O de gramática mostra

@@ -408,13 +408,13 @@ function BlocoView({ unidade, bloco, onFim }: { unidade: Unidade; bloco: Bloco; 
     case 'miniteste':
       return <Miniteste unidade={unidade} onFim={onFim} />;
     case 'aula':
-      return <AulaView unidade={unidade} onFim={onFim} />;
+      return <AulaView quadros={bloco.quadros} onFim={onFim} />;
     case 'frases':
       return <MontarView exemplos={bloco.exemplos} onFim={onFim} />;
     case 'completar':
       return <CompletarView unidade={unidade} onFim={onFim} />;
     case 'formas':
-      return <FormasView unidade={unidade} onFim={onFim} />;
+      return <FormasView unidade={unidade} pontos={bloco.pontos} onFim={onFim} />;
     case 'ditado':
       return <DitadoView exemplos={bloco.exemplos} onFim={onFim} />;
     case 'leitura':

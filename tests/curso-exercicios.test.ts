@@ -73,10 +73,11 @@ describe('ditado', () => {
     expect(confereDitado('こんびにであるばいとおしています', k)).toBe(true);
   });
 
-  it('completar e ditado vêm depois do montar frases, antes da cultura', () => {
+  it('completar e ditado vêm depois de todas as palavras e de toda a gramática, antes da cultura', () => {
     for (const u of conteudo) {
       const tipos = blocosDa(u).map((b) => b.tipo);
-      expect(tipos.indexOf('completar'), u.id).toBe(tipos.indexOf('frases') + 1);
+      const ultimaGramatica = Math.max(...(['gramatica', 'formas', 'frases', 'palavras', 'kanji'] as const).map((t) => tipos.lastIndexOf(t)));
+      expect(tipos.indexOf('completar'), u.id).toBe(ultimaGramatica + 1);
       expect(tipos.indexOf('ditado')).toBe(tipos.indexOf('completar') + 1);
       if (tipos.includes('notas')) expect(tipos.indexOf('notas')).toBeGreaterThan(tipos.indexOf('ditado'));
     }

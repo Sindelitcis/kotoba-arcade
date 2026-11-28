@@ -53,15 +53,34 @@ describe('aula falada do curso', () => {
     expect(trechosDoQuadro('Oi.').map((t) => t.tipo)).toEqual(['pt']);
   });
 
-  it('a aula vem depois das palavras e dos kanji, e o montar frases depois da gramática', () => {
+  it('a aula de cada ponto vem logo antes do cartão dele, e cada quadro aparece uma vez, em ordem', () => {
     for (const u of conteudo) {
-      const tipos = blocosDa(u).map((b) => b.tipo);
-      const aula = tipos.indexOf('aula');
-      expect(aula, u.id).toBeGreaterThan(tipos.lastIndexOf('palavras'));
-      expect(aula).toBeGreaterThan(tipos.lastIndexOf('kanji'));
-      expect(tipos.indexOf('gramatica')).toBe(aula + 1);
-      // Entre a gramática e o montar frases, só o exercício de formas (quando o ponto tem tabela).
-      expect(tipos.indexOf('frases')).toBe(aula + (tipos.includes('formas') ? 3 : 2));
+      const bs = blocosDa(u);
+      const quadros = bs.flatMap((b) => (b.tipo === 'aula' ? b.quadros : []));
+      // Todos os quadros, na ordem em que a aula foi escrita, só repartidos entre os pontos.
+      expect(quadros, u.id).toEqual(AULAS_DO_CURSO[u.id] ?? []);
+      bs.forEach((b, i) => {
+        if (b.tipo !== 'aula') return;
+        const cartao = bs[i + 1];
+        expect(cartao?.tipo, b.id).toBe('gramatica');
+        // O exemplo de cada quadro é de um ponto do cartão que vem logo depois.
+        if (cartao?.tipo === 'gramatica') for (const q of b.quadros) if (q.ex) expect(cartao.pontos, `${b.id} ${q.ex}`).toContain(q.ex);
+      });
+    }
+  });
+
+  it('depois do cartão vêm as formas (se houver) e o montar frases dos mesmos pontos', () => {
+    for (const u of conteudo) {
+      const bs = blocosDa(u);
+      bs.forEach((b, i) => {
+        if (b.tipo !== 'frases') return;
+        const antes = bs[i - 1];
+        const cartao = antes?.tipo === 'formas' ? bs[i - 2] : antes;
+        expect(cartao?.tipo, b.id).toBe('gramatica');
+        if (cartao?.tipo !== 'gramatica') return;
+        const pontos = new Set(cartao.pontos);
+        for (const e of b.exemplos) expect(pontos.has(e.ponto), `${b.id} ${e.jp}`).toBe(true);
+      });
     }
   });
 

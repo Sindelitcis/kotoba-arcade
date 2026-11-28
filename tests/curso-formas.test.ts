@@ -110,13 +110,19 @@ describe('o exercício de transformar', () => {
         }
   });
 
-  it('vem logo depois do cartão de gramática e antes de montar frases', () => {
+  it('vem logo depois do cartão dos mesmos pontos', () => {
     let com = 0;
     for (const u of UNIDADES) {
-      const tipos = blocosDa(u).map((b) => b.tipo);
-      if (!tipos.includes('formas')) continue;
-      com++;
-      expect(tipos.indexOf('formas'), u.id).toBe(tipos.indexOf('gramatica') + 1);
+      const bs = blocosDa(u);
+      bs.forEach((b, i) => {
+        if (b.tipo !== 'formas') return;
+        com++;
+        const cartao = bs[i - 1];
+        expect(cartao?.tipo, b.id).toBe('gramatica');
+        if (cartao?.tipo === 'gramatica') expect(b.pontos).toEqual(cartao.pontos);
+        // Só pontos que têm tabela entram no exercício.
+        expect(perguntasDeForma(u, seededRng(1), 8, b.pontos).every((q) => b.pontos.includes(q.ponto))).toBe(true);
+      });
     }
     expect(com).toBeGreaterThanOrEqual(15);
   });

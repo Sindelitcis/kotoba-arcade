@@ -39,8 +39,8 @@ Estado em 23/11/2026: as seis fases estão feitas; o curso tem o A1 (N5) e o A2 
   já foi ensinado usa `ordem`. Detalhes em [docs/curso.md](docs/curso.md#conteúdo-do-a1) e
   [docs/curso.md](docs/curso.md#conteúdo-do-a2).
 - **Motor** em `src/curso/`: a tela inicial abre com "Continuar o curso" (Enter), o tocador percorre
-  a unidade em partes curtas (palavras com figura, kanji, aula falada, gramática com exemplo,
-  formas, montar frases, completar, ditado, leitura com shadowing, notas, diálogo, mini-teste) e o progresso
+  a unidade em partes curtas (palavras com figura, kanji e, intercalados com eles, aula falada, gramática com
+  exemplo, formas e montar frases; no fim, completar, ditado, leitura com shadowing, notas, diálogo, mini-teste) e o progresso
   fica salvo. O Módulo 0 (kana e sons, seis lições) fica no alto do mapa e não tranca o A1. Os exemplos só usam o que já foi ensinado
   (`tests/curso-exemplos.test.ts`). Detalhes em [docs/curso.md](docs/curso.md#o-motor-do-curso).
 - **Provas e impressos** em `src/curso/prova.ts`, `ProvaTela.tsx` e `Impresso.tsx`: cada unidade
@@ -52,7 +52,7 @@ Estado em 23/11/2026: as seis fases estão feitas; o curso tem o A1 (N5) e o A2 
 - **Em andamento (relatório do "aluno do zero", 27/11/2026):** feito: legenda que não entrega a
   escuta, Continuar que começa pelo Módulo 0 e pela revisão de hoje (`src/curso/hoje.ts`), prova com
   frases, diálogos só com o que foi ensinado, e tabela de formas no cartão de gramática com o
-  exercício de transformar. Falta: gramática intercalada com as palavras; Módulo 0 com
+  exercício de transformar, gramática intercalada com as palavras. Falta: Módulo 0 com
   ゃゅょっ e vogal longa mais cedo e lição 4 menor; "outras leituras" do kanji sem kanji não
   ensinado; prática com distratores mais difíceis e explicação no erro.
 

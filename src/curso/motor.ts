@@ -7,7 +7,10 @@
  *   objetivo    "Ao final, você consegue..." e uma revisão rápida da unidade anterior
  *   palavras    de 3 a 5 palavras: apresentação e, logo depois, prática com apoio
  *   kanji       os kanji das palavras que acabaram de entrar, com a leitura usada ali
- *   gramatica   os pontos da unidade
+ *   aula        a aula falada dos pontos que entram agora
+ *   gramatica   os cartões desses pontos
+ *   formas      transformar a forma (ます, て...), quando o ponto tem tabela
+ *   frases      montar frases com os outros exemplos desses pontos
  *   notas       notas culturais já conferidas contra a fonte (as outras ficam de fora)
  *   dialogo     a situação da unidade: escuta, leitura com furigana e repetição
  *   miniteste   小テスト: perguntas da unidade com todas as alternativas, sem perder nada
@@ -15,14 +18,16 @@
  *
  * Depois dos blocos vem a prova da unidade (prova.ts): ela é que libera a seguinte.
  *
- * A aula falada (content/curso/aulas.ts) vem depois das palavras e dos kanji, antes dos cartões de
- * gramática; o exercício de montar frases (com o segundo exemplo de cada ponto), logo depois deles.
+ * A gramática vem intercalada com as palavras: cada ponto entra logo depois do lote que traz a
+ * última palavra (ou o último kanji) de que os exemplos, a tabela e a aula dele precisam, com a
+ * aula, o cartão, as formas e o montar frases dele juntos. Completar, ditado, leitura, notas e
+ * diálogo vêm no fim, quando tudo já foi visto.
  */
 import { GRAMATICA, nomeDaUnidade, palavrasDa, UNIDADES, type KanjiDaUnidade, type Nivel, type Nota, type Palavra, type Unidade } from '../content/curso';
 import { cardKey } from '../content';
-import { AULAS_DO_CURSO } from '../content/curso/aulas';
-import { perguntasDeForma } from './formas';
-import { dialogoDa, exemplosDaUnidade, leituraDa, type Dialogo, type Exemplo, type Leitura } from './exemplos';
+import { AULAS_DO_CURSO, type QuadroAula } from '../content/curso/aulas';
+import { perguntasDeForma, tabelaDoPonto } from './formas';
+import { dialogoDa, exemplosDaUnidade, exemplosDoPonto, leituraDa, partesDaFala, type Dialogo, type Exemplo, type Leitura } from './exemplos';
 import { ditadoDa, lacunasDa } from './exercicios';
 import { foiApresentado } from '../core/ensino';
 import { shuffle, type Rng } from '../core/rng';
@@ -34,9 +39,9 @@ export type Bloco =
   | { tipo: 'objetivo'; id: string }
   | { tipo: 'palavras'; id: string; palavras: readonly Palavra[] }
   | { tipo: 'kanji'; id: string; kanji: readonly KanjiDaUnidade[] }
-  | { tipo: 'aula'; id: string }
+  | { tipo: 'aula'; id: string; quadros: readonly QuadroAula[] }
   | { tipo: 'gramatica'; id: string; pontos: readonly string[] }
-  | { tipo: 'formas'; id: string }
+  | { tipo: 'formas'; id: string; pontos: readonly string[] }
   | { tipo: 'frases'; id: string; exemplos: readonly Exemplo[] }
   | { tipo: 'completar'; id: string }
   | { tipo: 'ditado'; id: string; exemplos: readonly Exemplo[] }
@@ -87,6 +92,57 @@ export function emLotes<T>(lista: readonly T[], max = POR_LOTE): T[][] {
   return out;
 }
 
+/**
+ * Os quadros da aula: a abertura (os quadros antes do primeiro exemplo, que apresentam a unidade)
+ * e os de cada ponto. O quadro sem exemplo fica com o ponto do quadro anterior (é a continuação
+ * dele). Aula sem exemplo nenhum é toda abertura.
+ */
+export function quadrosPorPonto(u: Unidade): { abertura: QuadroAula[]; porPonto: Map<string, QuadroAula[]> } {
+  const quadros = AULAS_DO_CURSO[u.id] ?? [];
+  const abertura: QuadroAula[] = [];
+  const porPonto = new Map<string, QuadroAula[]>();
+  let atual: string | undefined;
+  for (const q of quadros) {
+    if (q.ex) atual = q.ex;
+    if (atual === undefined) abertura.push(q);
+    else porPonto.set(atual, [...(porPonto.get(atual) ?? []), q]);
+  }
+  return { abertura, porPonto };
+}
+
+const KANJI_RE = /[一-鿿々]/gu;
+
+/**
+ * Depois de quantos lotes de palavras o ponto pode entrar: todas as palavras e todos os kanji da
+ * unidade que os exemplos, a tabela e a aula dele usam já foram apresentados. No mínimo um lote.
+ */
+function lotesAntesDoPonto(u: Unidade, ponto: string, loteDe: ReadonlyMap<string, number>, quadros: readonly QuadroAula[]): number {
+  const loteDoKanji = new Map(u.kanji.map((k) => [k.k, loteDe.get(k.em)]));
+  let m = 0;
+  const conta = (palavra: string | undefined) => {
+    const l = palavra === undefined ? undefined : loteDe.get(palavra);
+    if (l !== undefined) m = Math.max(m, l + 1);
+  };
+  const contaTexto = (t: string) => {
+    conta(t);
+    for (const c of t.match(KANJI_RE) ?? []) {
+      const l = loteDoKanji.get(c);
+      if (l !== undefined) m = Math.max(m, l + 1);
+    }
+  };
+  for (const e of exemplosDoPonto(ponto))
+    for (const p of e.pecas) {
+      contaTexto(p.t);
+      conta(p.base);
+    }
+  for (const l of tabelaDoPonto(ponto, u)?.linhas ?? []) {
+    conta(l.palavra.jp);
+    for (const f of l.formas) contaTexto(f.jp);
+  }
+  for (const q of quadros) for (const p of partesDaFala(q.fala)) if ('jp' in p) contaTexto(p.jp);
+  return Math.max(1, m);
+}
+
 /** Os blocos da unidade, na ordem. O kanji entra logo depois do lote em que a palavra dele apareceu. */
 export function blocosDa(u: Unidade): Bloco[] {
   const out: Bloco[] = [{ tipo: 'objetivo', id: `${u.id}:objetivo` }];
@@ -95,6 +151,32 @@ export function blocosDa(u: Unidade): Bloco[] {
     return out;
   }
   const lotes = emLotes(palavrasDa(u));
+  const loteDe = new Map<string, number>();
+  lotes.forEach((l, i) => l.forEach((p) => loteDe.set(p.jp, i)));
+  const { abertura, porPonto: quadros } = quadrosPorPonto(u);
+  let semAbertura = abertura.length === 0;
+  // Ponto → depois de quantos lotes ele entra (a abertura da aula vai com os primeiros). Nunca antes
+  // do ponto anterior do currículo: a aula foi escrita em sequência e um quadro cita o de antes.
+  const quando = new Map<string, number>();
+  let anterior = 1;
+  for (const g of u.gramatica) {
+    anterior = Math.max(anterior, Math.min(lotes.length, lotesAntesDoPonto(u, g, loteDe, quadros.get(g) ?? [])));
+    quando.set(g, anterior);
+  }
+  // A aula, o cartão, as formas e o montar frases dos pontos que entram juntos.
+  const gramatica = (pontos: readonly string[]) => {
+    if (pontos.length === 0) return;
+    const chave = `${u.id}:${pontos[0]}`;
+    const aula = [...(semAbertura ? [] : abertura), ...pontos.flatMap((g) => quadros.get(g) ?? [])];
+    semAbertura = true;
+    if (aula.length > 0) out.push({ tipo: 'aula', id: `${chave}:aula`, quadros: aula });
+    out.push({ tipo: 'gramatica', id: `${chave}:gramatica`, pontos });
+    // Logo depois do cartão com a tabela: transformar a forma, antes de usar na frase.
+    if (perguntasDeForma(u, () => 0.5, 8, pontos).length > 0) out.push({ tipo: 'formas', id: `${chave}:formas`, pontos });
+    // O primeiro exemplo de cada ponto está no cartão; o exercício usa os outros.
+    const paraMontar = pontos.flatMap((g) => exemplosDaUnidade({ ...u, gramatica: [g] }).slice(1));
+    if (paraMontar.length > 0) out.push({ tipo: 'frases', id: `${chave}:frases`, exemplos: paraMontar });
+  };
   const restantes = [...u.kanji];
   lotes.forEach((lote, i) => {
     out.push({ tipo: 'palavras', id: `${u.id}:palavras:${i + 1}`, palavras: lote });
@@ -102,17 +184,12 @@ export function blocosDa(u: Unidade): Bloco[] {
     const daqui = restantes.filter((k) => jps.has(k.em));
     for (const k of daqui) restantes.splice(restantes.indexOf(k), 1);
     emLotes(daqui).forEach((kl, j) => out.push({ tipo: 'kanji', id: `${u.id}:kanji:${i + 1}.${j + 1}`, kanji: kl }));
+    if (i < lotes.length - 1) gramatica(u.gramatica.filter((g) => quando.get(g) === i + 1));
   });
   // Kanji cuja palavra não está nas palavras (o teste do currículo não deixa, mas o motor não perde nada).
   emLotes(restantes).forEach((kl, j) => out.push({ tipo: 'kanji', id: `${u.id}:kanji:fim.${j + 1}`, kanji: kl }));
-  // A aula vem depois das palavras e dos kanji: o exemplo dela só usa o que já foi apresentado.
-  if (AULAS_DO_CURSO[u.id]) out.push({ tipo: 'aula', id: `${u.id}:aula` });
-  if (u.gramatica.length > 0) out.push({ tipo: 'gramatica', id: `${u.id}:gramatica`, pontos: u.gramatica });
-  // Logo depois do cartão com a tabela: transformar a forma, antes de usar na frase.
-  if (perguntasDeForma(u, () => 0.5).length > 0) out.push({ tipo: 'formas', id: `${u.id}:formas` });
-  // O primeiro exemplo de cada ponto está no cartão; o exercício usa os outros.
-  const paraMontar = u.gramatica.flatMap((g) => exemplosDaUnidade({ ...u, gramatica: [g] }).slice(1));
-  if (paraMontar.length > 0) out.push({ tipo: 'frases', id: `${u.id}:frases`, exemplos: paraMontar });
+  // Unidade sem palavras: a gramática toda aqui. Com palavras, os pontos que precisam do último lote.
+  gramatica(u.gramatica.filter((g) => lotes.length === 0 || quando.get(g) === lotes.length));
   // Completar e ditado usam todos os exemplos (os do cartão também): ali a frase já foi vista.
   if (lacunasDa(u, () => 0.5).length > 0) out.push({ tipo: 'completar', id: `${u.id}:completar` });
   const ditado = ditadoDa(u);
@@ -217,6 +294,29 @@ export interface CursoSave {
   nome?: string;
   /** Módulo 0: quantos lotes de kana já foram feitos, em ordem. */
   modulo0?: number;
+  /** A ordem das partes com que `feitos` foi contado (VERSAO_DAS_PARTES). */
+  partes?: number;
+}
+
+/**
+ * Sobe quando a ordem das partes de uma unidade muda. `feitos` é uma contagem: com outra ordem,
+ * quem estava no meio de uma unidade podia pular uma parte que passou para antes. Na troca, quem
+ * estava no meio volta para a primeira parte que não é de palavras: revê algumas palavras, mas não
+ * perde nada (as palavras e os kanji continuam na mesma ordem entre si).
+ *
+ * 2: a gramática passou a vir intercalada com as palavras.
+ */
+export const VERSAO_DAS_PARTES = 2;
+
+function migrarPartes(feitos: Record<string, number>): void {
+  for (const [id, f] of Object.entries(feitos)) {
+    const u = unidadePorId(id);
+    if (!u) continue;
+    const bs = blocosDa(u);
+    if (f >= bs.length) continue;
+    const primeira = bs.findIndex((b) => b.tipo !== 'objetivo' && b.tipo !== 'palavras' && b.tipo !== 'kanji');
+    if (primeira >= 0) feitos[id] = Math.min(f, primeira);
+  }
 }
 
 export function ensureCursoSave(games: Record<string, unknown>): CursoSave {
@@ -239,7 +339,9 @@ export function ensureCursoSave(games: Record<string, unknown>): CursoSave {
     }
   const nome = typeof raw?.nome === 'string' ? raw.nome.trim().slice(0, 60) : '';
   const m0 = typeof raw?.modulo0 === 'number' && Number.isFinite(raw.modulo0) ? Math.max(0, Math.floor(raw.modulo0)) : 0;
-  const save: CursoSave = { feitos: limpar(raw?.feitos), concluidas: limpar(raw?.concluidas), provas, ...(nome ? { nome } : {}), ...(m0 ? { modulo0: m0 } : {}) };
+  const feitos = limpar(raw?.feitos);
+  if (raw && raw.partes !== VERSAO_DAS_PARTES) migrarPartes(feitos);
+  const save: CursoSave = { feitos, concluidas: limpar(raw?.concluidas), provas, ...(nome ? { nome } : {}), ...(m0 ? { modulo0: m0 } : {}), partes: VERSAO_DAS_PARTES };
   games.curso = save;
   return save;
 }

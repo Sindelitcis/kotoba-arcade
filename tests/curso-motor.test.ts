@@ -2,6 +2,8 @@
 import { describe, expect, it } from 'vitest';
 import { palavrasDa, UNIDADES } from '../src/content/curso';
 import { DIALOGOS } from '../src/content/curso/dialogos';
+import { exemplosDoPonto, partesDaFala } from '../src/curso/exemplos';
+import { tabelaDoPonto } from '../src/curso/formas';
 import { apresentar, foiApresentado } from '../src/core/ensino';
 import { seededRng } from '../src/core/rng';
 import type { CardState } from '../src/core/srs';
@@ -26,6 +28,8 @@ import {
   venceu,
   type Bloco,
   type ItemPratica,
+  unidadePorId,
+  VERSAO_DAS_PARTES,
 } from '../src/curso/motor';
 import { Pratica } from '../src/curso/pratica';
 
@@ -57,9 +61,47 @@ describe('blocos da unidade', () => {
       expect(kanji.length, u.id).toBe(u.kanji.length);
       for (const k of u.kanji) expect(kanji, `${u.id} ${k.k}`).toContain(k);
       for (const b of bs) if (b.tipo === 'palavras' || b.tipo === 'kanji') expect(itensDoBloco(b).length, b.id).toBeLessThanOrEqual(5);
-      expect(bs.filter((b) => b.tipo === 'gramatica').length, u.id).toBe(u.gramatica.length > 0 ? 1 : 0);
+      // Cada ponto num cartão só, na ordem do currículo (a aula cita o ponto de antes).
+      const pontos = bs.flatMap((b) => (b.tipo === 'gramatica' ? b.pontos : []));
+      expect(pontos, u.id).toEqual(u.gramatica);
       expect(bs.filter((b) => b.tipo === 'dialogo').length, u.id).toBe(DIALOGOS[u.id] ? 1 : 0);
     }
+  });
+
+  // Ensinar antes de cobrar: o ponto entra quando tudo o que os exemplos, a tabela e a aula dele
+  // usam desta unidade já foi apresentado (as palavras de unidades anteriores já foram vistas).
+  it('a gramática entra intercalada, só depois das palavras e dos kanji de que precisa', () => {
+    let intercaladas = 0;
+    for (const u of UNIDADES) {
+      const daUnidade = new Set(palavrasDa(u).map((p) => p.jp));
+      const kanjiDaUnidade = new Set(u.kanji.map((k) => k.k));
+      const vistas = new Set<string>();
+      const kanjiVistos = new Set<string>();
+      const bs = blocosDa(u);
+      const confere = (rotulo: string, t: string | undefined) => {
+        if (!t) return;
+        if (daUnidade.has(t)) expect(vistas.has(t), `${rotulo}: ${t}`).toBe(true);
+        for (const c of t.match(/[一-鿿々]/gu) ?? []) if (kanjiDaUnidade.has(c)) expect(kanjiVistos.has(c), `${rotulo}: kanji ${c}`).toBe(true);
+      };
+      bs.forEach((b, i) => {
+        if (b.tipo === 'palavras') for (const p of b.palavras) vistas.add(p.jp);
+        if (b.tipo === 'kanji') for (const k of b.kanji) kanjiVistos.add(k.k);
+        if (b.tipo === 'gramatica') {
+          if (bs.slice(i).some((x) => x.tipo === 'palavras')) intercaladas++;
+          for (const g of b.pontos) {
+            for (const e of exemplosDoPonto(g))
+              for (const p of e.pecas) {
+                confere(`${b.id} ${g}`, p.t);
+                confere(`${b.id} ${g}`, p.base);
+              }
+            for (const l of tabelaDoPonto(g, u)?.linhas ?? []) for (const f of l.formas) confere(`${b.id} ${g} tabela`, f.jp);
+          }
+        }
+        if (b.tipo === 'aula') for (const q of b.quadros) for (const p of partesDaFala(q.fala)) if ('jp' in p) confere(`${b.id} aula`, p.jp);
+      });
+    }
+    // Antes, toda a gramática vinha depois de todas as palavras: agora a maioria entra no meio.
+    expect(intercaladas).toBeGreaterThanOrEqual(40);
   });
 
   it('o kanji vem logo depois da palavra dele, nunca antes', () => {
@@ -330,11 +372,27 @@ describe('progresso e liberação', () => {
     }
   });
 
+  // A gramática mudou de lugar: com `feitos` contado na ordem antiga, quem estava no meio pulava
+  // o cartão que passou para antes. Agora volta para a primeira parte que não é de palavras.
+  it('save da ordem antiga das partes: quem estava no meio volta, sem pular a gramática', () => {
+    const u = unidadePorId('a1-05')!;
+    const bs = blocosDa(u);
+    const primeira = bs.findIndex((b) => b.tipo === 'aula' || b.tipo === 'gramatica');
+    const antigo = ensureCursoSave({ curso: { feitos: { 'a1-05': primeira + 4, 'a1-01': 999 } } });
+    expect(antigo.feitos['a1-05']).toBe(primeira);
+    expect(antigo.feitos['a1-01']).toBe(999);
+    expect(antigo.partes).toBe(VERSAO_DAS_PARTES);
+    // Tudo antes dela é palavra e kanji, que a ordem nova mantém: nada que a pessoa não viu.
+    for (const b of bs.slice(1, primeira)) expect(['palavras', 'kanji']).toContain(b.tipo);
+    const atual = ensureCursoSave({ curso: { feitos: { 'a1-05': primeira + 4 }, partes: VERSAO_DAS_PARTES } });
+    expect(atual.feitos['a1-05']).toBe(primeira + 4);
+  });
+
   it('save estragado ou de unidade que não existe é limpo', () => {
     const games: Record<string, unknown> = { curso: { feitos: { 'a1-01': 3, 'x-99': 2, 'a1-02': 'muito' }, concluidas: { 'a1-01': -1 } } };
     const save = ensureCursoSave(games);
-    expect(save).toEqual({ feitos: { 'a1-01': 3 }, concluidas: {}, provas: {} });
-    expect(ensureCursoSave({ curso: 'lixo' })).toEqual({ feitos: {}, concluidas: {}, provas: {} });
+    expect(save).toEqual({ feitos: { 'a1-01': 3 }, concluidas: {}, provas: {}, partes: VERSAO_DAS_PARTES });
+    expect(ensureCursoSave({ curso: 'lixo' })).toEqual({ feitos: {}, concluidas: {}, provas: {}, partes: VERSAO_DAS_PARTES });
     const comProva = ensureCursoSave({ curso: { provas: { 'a1-01': { melhor: 2, aprovada: 'sim', tentativas: -3 }, 'x-99': { melhor: 1, aprovada: true, tentativas: 1 } } } });
     expect(comProva.provas).toEqual({ 'a1-01': { melhor: 1, aprovada: false, tentativas: 0 } });
   });
