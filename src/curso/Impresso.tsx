@@ -173,7 +173,7 @@ function ProvaImpressa({ prova }: { prova: Prova }) {
             <small>áudio da escuta</small>
           </div>
         )}
-        <div class="im-codigo">
+        <div class="im-codigo" data-testid="im-qr-gabarito">
           <Qr texto={enderecoDe({ tipo: 'gabarito', codigo: prova.codigo })} />
           <b data-testid="im-codigo">{prova.codigo}</b>
           <small>gabarito: aponte o celular ou digite o código no curso</small>
@@ -183,7 +183,7 @@ function ProvaImpressa({ prova }: { prova: Prova }) {
       <ol class="im-questoes">
         {prova.questoes.map((q, i) => (
           <li key={q.n} class="im-questao">
-            {u.revisao && prova.questoes[i - 1]?.secao !== q.secao && <h2 class="im-secao">{NOME_SECAO[q.secao]}</h2>}
+            {prova.questoes[i - 1]?.secao !== q.secao && <h2 class="im-secao">{NOME_SECAO[q.secao]}</h2>}
             <div>
               <EnunciadoImpresso q={q} />
             </div>

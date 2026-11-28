@@ -21,7 +21,7 @@
 import { GRAMATICA, nomeDaUnidade, palavrasDa, UNIDADES, type KanjiDaUnidade, type Nivel, type Nota, type Palavra, type Unidade } from '../content/curso';
 import { cardKey } from '../content';
 import { AULAS_DO_CURSO } from '../content/curso/aulas';
-import { exemplosDaUnidade, leituraDa, type Exemplo, type Leitura } from './exemplos';
+import { dialogoDa, exemplosDaUnidade, leituraDa, type Dialogo, type Exemplo, type Leitura } from './exemplos';
 import { ditadoDa, lacunasDa } from './exercicios';
 import { foiApresentado } from '../core/ensino';
 import { shuffle, type Rng } from '../core/rng';
@@ -40,7 +40,7 @@ export type Bloco =
   | { tipo: 'ditado'; id: string; exemplos: readonly Exemplo[] }
   | { tipo: 'leitura'; id: string; leitura: Leitura }
   | { tipo: 'notas'; id: string; notas: readonly Nota[] }
-  | { tipo: 'dialogo'; id: string; situacao: string }
+  | { tipo: 'dialogo'; id: string; dialogo: Dialogo }
   | { tipo: 'miniteste'; id: string }
   | { tipo: 'revisao'; id: string };
 
@@ -116,7 +116,8 @@ export function blocosDa(u: Unidade): Bloco[] {
   if (leitura) out.push({ tipo: 'leitura', id: `${u.id}:leitura`, leitura });
   const notas = u.notas.filter((n) => n.conferida);
   if (notas.length > 0) out.push({ tipo: 'notas', id: `${u.id}:notas`, notas });
-  for (const s of u.situacoes ?? []) out.push({ tipo: 'dialogo', id: `${u.id}:dialogo:${s}`, situacao: s });
+  const dialogo = dialogoDa(u);
+  if (dialogo) out.push({ tipo: 'dialogo', id: `${u.id}:dialogo`, dialogo });
   out.push({ tipo: 'miniteste', id: `${u.id}:miniteste` });
   return out;
 }

@@ -2,7 +2,8 @@
 import { describe, expect, it } from 'vitest';
 import { UNIDADES } from '../src/content/curso';
 import { LEITURAS } from '../src/content/curso/leituras';
-import { leituraDa, problemasDaLinha } from '../src/curso/exemplos';
+import { DIALOGOS } from '../src/content/curso/dialogos';
+import { dialogoDa, leituraDa, problemasDaLinha } from '../src/curso/exemplos';
 import { blocosDa } from '../src/curso/motor';
 
 const conteudo = UNIDADES.filter((u) => !u.revisao);
@@ -38,6 +39,30 @@ describe('leitura graduada', () => {
       const tipos = blocosDa(u).map((b) => b.tipo);
       expect(tipos.indexOf('leitura'), u.id).toBe(tipos.indexOf('ditado') + 1);
       expect(tipos.indexOf('miniteste')).toBeGreaterThan(tipos.indexOf('leitura'));
+    }
+  });
+});
+
+// O diálogo da escola trazia と申します e keigo na unidade 1: o do curso só usa o que já foi ensinado.
+describe('diálogo da unidade', () => {
+  it('só usa vocabulário, kanji e gramática já ensinados até a unidade', () => {
+    for (const [id, d] of Object.entries(DIALOGOS)) {
+      const u = UNIDADES.find((x) => x.id === id);
+      expect(u, id).toBeDefined();
+      for (const f of d.falas) expect(problemasDaLinha(`dialogo:${id}`, u!.ordem, f)).toEqual([]);
+    }
+  });
+
+  it('cada fala tem quem fala, leitura só em kana e vem depois da leitura graduada', () => {
+    for (const u of UNIDADES) {
+      const d = dialogoDa(u);
+      if (!d) continue;
+      for (const f of d.falas) {
+        expect(f.quem.length, f.jp).toBeGreaterThan(0);
+        expect(f.kana, f.jp).toMatch(/^[ぁ-ゖァ-ヺー、。？]+$/u);
+      }
+      const tipos = blocosDa(u).map((b) => b.tipo);
+      expect(tipos.indexOf('dialogo'), u.id).toBeGreaterThan(tipos.indexOf('leitura'));
     }
   });
 });

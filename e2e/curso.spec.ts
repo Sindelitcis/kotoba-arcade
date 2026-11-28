@@ -193,7 +193,9 @@ test('reprovou: mostra o que errou, revê os cartões e faz outra prova; a unida
 test('a prova impressa e o gabarito do mesmo código batem', async ({ page }) => {
   await page.goto('/?imprimir=prova&codigo=U04-K7QH');
   await expect(page.getByTestId('im-codigo')).toHaveText('U04-K7QH');
-  await expect(page.locator('.im-qr svg')).toBeVisible();
+  await expect(page.getByTestId('im-qr-gabarito').locator('svg')).toBeVisible();
+  // A prova da unidade 4 já tem escuta: o áudio dela vem num QR à parte.
+  await expect(page.getByTestId('im-qr-escuta').locator('svg')).toBeVisible();
   const questoes = await page.locator('.im-questao').count();
   expect(questoes).toBeGreaterThanOrEqual(10);
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/curso-prova-impressa.png`, fullPage: true });

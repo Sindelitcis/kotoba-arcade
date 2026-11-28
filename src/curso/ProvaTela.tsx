@@ -174,6 +174,7 @@ export function ProvaTela({ unidade, onSair }: { unidade: Unidade; onSair: () =>
           <span class="gr-tag">Prova da {nomeDaUnidade(unidade)}</span>
           <h2 class="cs-titulo">{unidade.revisao ? `Simulado do ${unidade.nivel}` : unidade.titulo}</h2>
           <p class="lc-linha">
+            {!unidade.revisao && 'Palavras e kanji da unidade, frases para completar e frases para entender só ouvindo. '}
             {unidade.revisao && `No formato do JLPT ${jlptDo(unidade.nivel)}, em quatro partes: ${(Object.keys(SIMULADO) as Secao[]).map((s) => NOME_SECAO[s].split(' · ')[0]!.toLowerCase()).join(', ')}. Sem tempo marcado. `}
             {prova.questoes.length} questões com quatro alternativas. Passa com {pct(NOTA_MINIMA)} ({Math.ceil(prova.questoes.length * NOTA_MINIMA)} acertos), e então {oQueAbre(unidade)}.
           </p>
@@ -266,7 +267,7 @@ export function ProvaTela({ unidade, onSair }: { unidade: Unidade; onSair: () =>
       <div class="lc-conteudo">
         <span class="gr-tag">
           Questão {q.n} de {prova.questoes.length}
-          {unidade.revisao && ` · ${NOME_SECAO[q.secao]}`}
+          {` · ${NOME_SECAO[q.secao]}`}
         </span>
         <p class="lc-enunciado">{q.enunciado}</p>
         <Destaque q={q} />

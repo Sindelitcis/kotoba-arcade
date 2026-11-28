@@ -65,8 +65,6 @@ export interface Unidade {
   kanji: KanjiDaUnidade[];
   palavras: PalavraLinha[];
   notas: Nota[];
-  /** Situações do conteúdo da escola (src/content/escola/situacoes.ts) usadas como diálogo. */
-  situacoes?: string[];
   /** Unidade só de revisão, sem conteúdo novo. */
   revisao?: true;
 }

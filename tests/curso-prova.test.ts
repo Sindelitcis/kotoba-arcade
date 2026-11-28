@@ -120,7 +120,7 @@ describe('montagem da prova', () => {
     const p = montarProva(u, 'K7QH');
     const daUnidade = p.questoes.filter((q) => deItem(q) && !anteriores.has(q.item.id)).length;
     expect(daUnidade).toBeGreaterThanOrEqual(QUESTOES_DA_UNIDADE * 0.75);
-    expect(p.questoes.length - daUnidade).toBeLessThanOrEqual(QUESTOES_DE_REVISAO);
+    expect(p.questoes.filter(deItem).length - daUnidade).toBeLessThanOrEqual(QUESTOES_DE_REVISAO);
   });
 
   it('a unidade de revisão é um simulado do que veio antes', () => {
@@ -242,5 +242,20 @@ describe('nivelamento', () => {
 
   it('toda unidade de conteúdo tem prova depois do mini-teste', () => {
     for (const u of UNIDADES_DO_NIVELAMENTO) expect(blocosDa(u).some((b) => b.tipo === 'miniteste')).toBe(true);
+  });
+});
+
+describe('prova da unidade: além do vocabulário', () => {
+  // A prova só cobrava palavra e leitura de kanji: o objetivo da unidade (frases) nunca era testado.
+  it('a partir da unidade 4, toda prova tem frase para completar e frase para ouvir, da própria unidade', () => {
+    for (const u of UNIDADES.filter((x) => !x.revisao && x.ordem >= 4))
+      for (const s of SEMENTES) {
+        const p = montarProva(u, s);
+        const frases = p.questoes.filter((q) => !deItem(q));
+        const daqui = new Set(exemplosDaUnidade(u).map((e) => e.jp));
+        expect(frases.some((q) => q.tipo === 'completar') || frases.some((q) => q.tipo === 'escuta'), u.id).toBe(true);
+        for (const q of frases) expect(daqui.has(!deItem(q) ? q.frase.jp : ''), `${u.id} ${q.tipo}`).toBe(true);
+        expect(p.questoes.map((q) => q.n)).toEqual(p.questoes.map((_, i) => i + 1));
+      }
   });
 });

@@ -22,9 +22,14 @@ import { itensAte, type ItemPratica } from './motor';
 export const NOTA_MINIMA = 0.8;
 /** Alternativas por questão na prova (a prática usa 2 ou 3). */
 export const OPCOES_PROVA = 4;
-/** Questões da própria unidade e de revisão das anteriores. */
-export const QUESTOES_DA_UNIDADE = 16;
+/** Questões de vocabulário da própria unidade e de revisão das anteriores. */
+export const QUESTOES_DA_UNIDADE = 12;
 export const QUESTOES_DE_REVISAO = 4;
+/**
+ * Frases da unidade na prova dela: completar com a gramática e entender ouvindo. Sem isso a prova
+ * só cobrava vocabulário, e o "consigo me apresentar" da unidade nunca era testado.
+ */
+export const FRASES_DA_UNIDADE = { gramatica: 3, escuta: 3 } as const;
 /**
  * O simulado do nível, na unidade de revisão, nas quatro partes do JLPT: vocabulário (文字・語彙),
  * gramática (文法), leitura (読解) e escuta (聴解).
@@ -55,7 +60,7 @@ export interface QuestaoDeItem extends QuestaoBase {
 }
 
 /**
- * Questão de frase (só no simulado):
+ * Questão de frase (na prova da unidade e no simulado):
  * - completar: a frase com a lacuna; as opções são peças em japonês (`leituras` tem o kana delas);
  * - texto: um texto da leitura graduada; as opções dizem o que ele conta, em português;
  * - escuta: a frase só no áudio; as opções são o sentido, em português.
@@ -153,7 +158,41 @@ export function montarProva(u: Unidade, semente: string): Prova {
   const daUnidade = ate.filter((i) => !anteriores.some((x) => x.id === i.id));
   if (u.revisao) return { codigo: codigoDaProva(u, semente), unidade: u, questoes: questoesDoSimulado(u, itensAte(u.ordem - 1, u.nivel), rng) };
   const escolhidos = [...sortear(daUnidade, QUESTOES_DA_UNIDADE, rng), ...sortear(anteriores, QUESTOES_DE_REVISAO, rng)];
-  return { codigo: codigoDaProva(u, semente), unidade: u, questoes: questoesDeItens(escolhidos, ate, rng, 'vocabulario') };
+  const vocab = questoesDeItens(escolhidos, ate, rng, 'vocabulario');
+  // As frases são da unidade; as opções erradas da escuta podem vir das unidades de antes, no nível.
+  const daqui = exemplosDaUnidade(u);
+  const doNivel = UNIDADES.filter((x) => x.nivel === u.nivel && x.ordem <= u.ordem && !x.revisao).flatMap(exemplosDaUnidade);
+  const gramatica = questoesDeCompletar(daqui, doNivel, gramaticaAte(u.ordem), FRASES_DA_UNIDADE.gramatica, rng);
+  const escuta = questoesDeEscuta(daqui, doNivel, new Set(gramatica.map((q) => q.frase.jp)), FRASES_DA_UNIDADE.escuta, rng);
+  return { codigo: codigoDaProva(u, semente), unidade: u, questoes: [...vocab, ...gramatica, ...escuta].map((q, i) => ({ ...q, n: i + 1 })) };
+}
+
+/** Completar a frase com a peça de gramática que falta; as opções são peças já vistas. */
+function questoesDeCompletar(frases: readonly Exemplo[], todas: readonly Exemplo[], conhecidas: ReadonlySet<string>, max: number, rng: Rng): QuestaoDeFrase[] {
+  const out: QuestaoDeFrase[] = [];
+  for (const e of shuffle(rng, frases)) {
+    if (out.length >= max) break;
+    const l = lacunaDo(e, rng, conhecidas);
+    if (!l || l.opcoes.length < OPCOES_PROVA) continue;
+    const leituras = Object.fromEntries(todas.flatMap((f) => f.pecas).filter((p) => l.opcoes.includes(p.t)).map((p) => [p.t, p.kana]));
+    out.push({ n: 0, secao: 'gramatica', tipo: 'completar', enunciado: 'Qual peça completa a frase?', frase: e, antes: l.antes, depois: l.depois, leituras, opcoes: l.opcoes, certa: l.resposta.t });
+  }
+  return out;
+}
+
+/** A frase só no áudio; qual é o sentido. As erradas são sentidos de outras frases. */
+function questoesDeEscuta(frases: readonly Exemplo[], todas: readonly Exemplo[], usadas: Set<string>, max: number, rng: Rng): QuestaoDeFrase[] {
+  const out: QuestaoDeFrase[] = [];
+  for (const e of shuffle(rng, frases)) {
+    if (out.length >= max) break;
+    if (usadas.has(e.jp) || !fraseQueConta(e)) continue;
+    const outras = shuffle(rng, todas).filter((f) => f.jp !== e.jp && f.pt !== e.pt && fraseQueConta(f));
+    const erradas = [...new Set(outras.map((f) => f.pt))].slice(0, OPCOES_PROVA - 1);
+    if (erradas.length < OPCOES_PROVA - 1) continue;
+    usadas.add(e.jp);
+    out.push({ n: 0, secao: 'escuta', tipo: 'escuta', enunciado: 'Ouça a frase. O que ela quer dizer?', frase: e, opcoes: shuffle(rng, [e.pt, ...erradas]), certa: e.pt });
+  }
+  return out;
 }
 
 function questoesDeItens(itens: readonly ItemPratica[], pool: readonly ItemPratica[], rng: Rng, secao: Secao, max = Infinity): QuestaoDeItem[] {
@@ -180,16 +219,8 @@ function questoesDoSimulado(u: Unidade, anteriores: readonly ItemPratica[], rng:
   const vocab = questoesDeItens(shuffle(rng, anteriores), anteriores, rng, 'vocabulario', SIMULADO.vocabulario);
 
   // Gramática: completar a frase, com as peças que o nível ensinou.
-  const conhecidas = gramaticaAte(u.ordem);
   const frases = nivel.flatMap(exemplosDaUnidade);
-  const gramatica: QuestaoDeFrase[] = [];
-  for (const e of shuffle(rng, frases)) {
-    if (gramatica.length >= SIMULADO.gramatica) break;
-    const l = lacunaDo(e, rng, conhecidas);
-    if (!l || l.opcoes.length < OPCOES_PROVA) continue;
-    const leituras = Object.fromEntries(frases.flatMap((f) => f.pecas).filter((p) => l.opcoes.includes(p.t)).map((p) => [p.t, p.kana]));
-    gramatica.push({ n: 0, secao: 'gramatica', tipo: 'completar', enunciado: 'Qual peça completa a frase?', frase: e, antes: l.antes, depois: l.depois, leituras, opcoes: l.opcoes, certa: l.resposta.t });
-  }
+  const gramatica = questoesDeCompletar(frases, frases, gramaticaAte(u.ordem), SIMULADO.gramatica, rng);
 
   // Leitura: um texto do nível e o que ele conta; as opções erradas vêm de outros textos.
   const textos = nivel.map(leituraDa).filter((l): l is Leitura => !!l);
@@ -206,17 +237,7 @@ function questoesDoSimulado(u: Unidade, anteriores: readonly ItemPratica[], rng:
   }
 
   // Escuta: a frase só no áudio; qual é o sentido.
-  const escuta: QuestaoDeFrase[] = [];
-  const usadas = new Set(gramatica.map((q) => q.frase.jp));
-  for (const e of shuffle(rng, frases)) {
-    if (escuta.length >= SIMULADO.escuta) break;
-    if (usadas.has(e.jp) || !fraseQueConta(e)) continue;
-    const outras = shuffle(rng, frases).filter((f) => f.jp !== e.jp && f.pt !== e.pt && fraseQueConta(f));
-    const erradas = [...new Set(outras.map((f) => f.pt))].slice(0, OPCOES_PROVA - 1);
-    if (erradas.length < OPCOES_PROVA - 1) continue;
-    usadas.add(e.jp);
-    escuta.push({ n: 0, secao: 'escuta', tipo: 'escuta', enunciado: 'Ouça a frase. O que ela quer dizer?', frase: e, opcoes: shuffle(rng, [e.pt, ...erradas]), certa: e.pt });
-  }
+  const escuta = questoesDeEscuta(frases, frases, new Set(gramatica.map((q) => q.frase.jp)), SIMULADO.escuta, rng);
 
   return [...vocab, ...gramatica, ...leitura, ...escuta].map((q, i) => ({ ...q, n: i + 1 }));
 }

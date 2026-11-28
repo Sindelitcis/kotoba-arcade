@@ -13,7 +13,6 @@
  */
 import { useLayoutEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { NIVEIS, NomeDaUnidade, nomeDaUnidade, oQueAbre, palavrasDa, seguinteDe, UNIDADES, type Palavra, type Unidade } from '../content/curso';
-import { SITUACOES } from '../content/escola';
 import { app, commit, cursoAberto, cursoSave, go } from '../core/app';
 import { cenaStyle } from '../core/arte';
 import { Apresentacao } from '../core/Apresentacao';
@@ -23,10 +22,8 @@ import { apresentar } from '../core/ensino';
 import { Furigana, Misto } from '../core/Furigana';
 import { Icone } from '../core/Icone';
 import { useAprofundar } from '../core/aprofundar/estado';
-import { tocarSequencia, type Trecho } from '../core/sequencia';
+import { tocarSequencia } from '../core/sequencia';
 import type { Alvo } from '../content/aprofundar/alvo';
-import { falaFrase } from '../jornada/licoes';
-import { Marcado } from '../jornada/Marcado';
 import { MOEDAS_LICAO, XP_ACERTO, XP_LICAO } from '../jornada/andamento';
 import { cartaoDaPalavra, cartaoDoKanji, cartaoDoPonto, falaDaPalavra } from './cartoes';
 import { figuraDoCurso } from './figura';
@@ -34,6 +31,7 @@ import { figuraUrl, temFigura } from '../core/figuras';
 import { blocosDa, cartaDaPalavra, cartasDoKanji, concluiuBlocos, itensAte, itensDaRevisao, itensDoBloco, itensDoMiniteste, liberada, NOME_BLOCO, ondeContinuar, proximaLicao, registrarBloco, unidadePorId, venceu, type Bloco, type ItemPratica } from './motor';
 import { abrirImpresso } from './Impresso';
 import { lerCodigo, OPCOES_PROVA } from './prova';
+import { falaDoExemplo, type Dialogo } from './exemplos';
 import { NivelamentoTela, ProvaTela } from './ProvaTela';
 import { useTeclado } from './teclado';
 import { kanaFeitos, LICOES_KANA, LOTES_DO_MODULO, perguntasDosKana } from './modulo0';
@@ -404,7 +402,7 @@ function BlocoView({ unidade, bloco, onFim }: { unidade: Unidade; bloco: Bloco; 
     case 'notas':
       return <Notas bloco={bloco} onFim={onFim} />;
     case 'dialogo':
-      return <Dialogo situacao={bloco.situacao} onFim={onFim} />;
+      return <DialogoView dialogo={bloco.dialogo} onFim={onFim} />;
     case 'revisao':
       return <Revisao unidade={unidade} onFim={onFim} />;
     case 'miniteste':
@@ -826,14 +824,13 @@ function Notas({ bloco, onFim }: { bloco: Extract<Bloco, { tipo: 'notas' }>; onF
 /* ───────── Diálogo ───────── */
 
 /** Uma fala por vez: ela toca, dá um tempo para repetir em voz alta (shadowing) e toca de novo. */
-function Dialogo({ situacao, onFim }: { situacao: string; onFim: () => void }) {
-  const s = SITUACOES.find((x) => x.id === situacao);
+function DialogoView({ dialogo: s, onFim }: { dialogo: Dialogo; onFim: () => void }) {
   const [i, setI] = useState(0);
-  const falas = s?.falas ?? [];
+  const falas = s.falas;
   const tocar = (n: number) => {
     const f = falas[n];
     if (!f) return;
-    const jp: Trecho = { tipo: 'jp', fala: falaFrase(f.jp) };
+    const jp = falaDoExemplo(f);
     void tocarSequencia([jp, { tipo: 'pausa', vezes: 1.2 }, jp]);
   };
   useLayoutEffect(() => tocar(i), [i]);
@@ -852,8 +849,6 @@ function Dialogo({ situacao, onFim }: { situacao: string; onFim: () => void }) {
     }
     return false;
   });
-  useAprofundar(s ? [{ t: 'cena', id: `situacao:${s.id}` }] : []);
-  if (!s) return <Vazio texto="Este diálogo não existe mais." onFim={onFim} />;
   return (
     <div class="koma lc-quadro" data-testid="cs-dialogo">
       <div class="lc-conteudo">
@@ -864,7 +859,9 @@ function Dialogo({ situacao, onFim }: { situacao: string; onFim: () => void }) {
           {falas.slice(0, i + 1).map((f, n) => (
             <li key={n} class={n === i ? 'agora' : ''}>
               <span class="lc-quem">{f.quem}</span>
-              <Marcado texto={f.jp} class="lc-fala" />
+              <span class="lc-fala">
+                <Furigana texto={f.jp} leitura={f.kana} />
+              </span>
               <span class="lc-ex-pt">{f.pt}</span>
             </li>
           ))}

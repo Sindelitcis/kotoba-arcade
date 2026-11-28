@@ -7,6 +7,7 @@ import { shuffle, type Rng } from '../core/rng';
 import type { Trecho } from '../core/sequencia';
 import { EXEMPLOS, GRAMATICA_EM_KANA, NOMES, type ExemploLinha } from '../content/curso/exemplos';
 import { LEITURAS } from '../content/curso/leituras';
+import { DIALOGOS } from '../content/curso/dialogos';
 
 const KANJI = /[一-鿿々]/u;
 
@@ -136,6 +137,26 @@ export function leituraDa(u: Unidade): Leitura | undefined {
   if (!l) return undefined;
   const vocab = vocabularioAte(u.ordem);
   return { titulo: l.titulo, frases: l.frases.map((f) => montar(`leitura:${u.id}`, u, f, vocab)) };
+}
+
+/* ───────── Diálogo ───────── */
+
+export interface FalaDoDialogoMontada extends Exemplo {
+  quem: string;
+}
+
+export interface Dialogo {
+  titulo: string;
+  contexto: string;
+  falas: FalaDoDialogoMontada[];
+}
+
+/** O diálogo da unidade (content/curso/dialogos.ts), montado com o vocabulário dela. */
+export function dialogoDa(u: Unidade): Dialogo | undefined {
+  const d = DIALOGOS[u.id];
+  if (!d) return undefined;
+  const vocab = vocabularioAte(u.ordem);
+  return { titulo: d.titulo, contexto: d.contexto, falas: d.falas.map((f) => ({ ...montar(`dialogo:${u.id}`, u, f, vocab), quem: f.quem })) };
 }
 
 /* ───────── Falas e exercício ───────── */

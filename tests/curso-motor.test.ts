@@ -1,6 +1,7 @@
 // @vitest-environment node
 import { describe, expect, it } from 'vitest';
 import { palavrasDa, UNIDADES } from '../src/content/curso';
+import { DIALOGOS } from '../src/content/curso/dialogos';
 import { apresentar, foiApresentado } from '../src/core/ensino';
 import { seededRng } from '../src/core/rng';
 import type { CardState } from '../src/core/srs';
@@ -57,7 +58,7 @@ describe('blocos da unidade', () => {
       for (const k of u.kanji) expect(kanji, `${u.id} ${k.k}`).toContain(k);
       for (const b of bs) if (b.tipo === 'palavras' || b.tipo === 'kanji') expect(itensDoBloco(b).length, b.id).toBeLessThanOrEqual(5);
       expect(bs.filter((b) => b.tipo === 'gramatica').length, u.id).toBe(u.gramatica.length > 0 ? 1 : 0);
-      expect(bs.filter((b) => b.tipo === 'dialogo').length, u.id).toBe(u.situacoes?.length ?? 0);
+      expect(bs.filter((b) => b.tipo === 'dialogo').length, u.id).toBe(DIALOGOS[u.id] ? 1 : 0);
     }
   });
 

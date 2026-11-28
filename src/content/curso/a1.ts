@@ -88,7 +88,6 @@ export const A1: readonly UnidadeEscrita[] = [
         conferida: true,
       },
     ],
-    situacoes: ['s-apresentacao'],
   },
   {
     id: 'a1-02',
@@ -338,7 +337,6 @@ export const A1: readonly UnidadeEscrita[] = [
         conferida: true,
       },
     ],
-    situacoes: ['s-konbini'],
   },
   {
     id: 'a1-05',
@@ -402,7 +400,6 @@ export const A1: readonly UnidadeEscrita[] = [
         conferida: true,
       },
     ],
-    situacoes: ['s-restaurante'],
   },
   {
     id: 'a1-06',
@@ -542,7 +539,6 @@ export const A1: readonly UnidadeEscrita[] = [
         conferida: true,
       },
     ],
-    situacoes: ['s-direcoes'],
   },
   {
     id: 'a1-08',
@@ -930,7 +926,6 @@ export const A1: readonly UnidadeEscrita[] = [
         conferida: true,
       },
     ],
-    situacoes: ['s-reuniao'],
   },
   {
     id: 'a1-13',
@@ -1080,7 +1075,6 @@ export const A1: readonly UnidadeEscrita[] = [
       'コピーする|コピーする|copiar, tirar xerox',
     ],
     notas: [],
-    situacoes: ['s-saida', 's-telefone'],
   },
   {
     id: 'a1-15',
@@ -1283,7 +1277,6 @@ export const A1: readonly UnidadeEscrita[] = [
         conferida: true,
       },
     ],
-    situacoes: ['s-farmacia'],
   },
   {
     id: 'a1-19',

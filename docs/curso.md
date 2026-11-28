@@ -109,7 +109,8 @@ próxima parte; a tecla U mostra o mapa das unidades.
 - **Partes curtas.** `motor.ts` (`blocosDa`) divide a unidade em partes de uns 5 minutos: objetivo
   (com a revisão rápida da unidade anterior), palavras de 3 a 5 por vez, os kanji dessas palavras
   logo depois delas, a aula falada, a gramática, o montar frases, o completar, o ditado, a
-  leitura graduada com shadowing, as notas culturais, o diálogo da situação e, no fim, o mini-teste (8 perguntas da unidade, com quatro alternativas, como na
+  leitura graduada com shadowing, as notas culturais, o diálogo da situação (`content/curso/dialogos.ts`, feito só com o que já
+  foi ensinado, conferido em `tests/curso-leituras.test.ts`) e, no fim, o mini-teste (8 perguntas da unidade, com quatro alternativas, como na
   prova). A unidade de revisão tem só o objetivo e uma prática com o que já foi visto. Parte nova
   entra sempre antes da posição salva de quem já começou: a pessoa pode rever uma parte, nunca pular.
 - **Cartões.** `cartoes.ts` monta a apresentação direto do currículo, no mesmo cartão dos jogos
@@ -214,8 +215,10 @@ significado no próprio curso (`significado`, hoje só 菜).
 
 Feitas na fase 3. A lógica está em `src/curso/prova.ts` e a tela em `src/curso/ProvaTela.tsx`.
 
-- **Fim de unidade:** 16 questões da unidade e 4 de revisão das anteriores, quatro alternativas
-  cada (sentido da palavra, palavra pelo sentido, leitura do kanji). Passa com 80%. O resultado só
+- **Fim de unidade:** 12 questões de vocabulário e kanji da unidade (sentido da palavra, palavra
+  pelo sentido, leitura do kanji), 4 de revisão das anteriores e, quando a unidade tem exemplos,
+  3 de gramática (completar a frase) e 3 de escuta (ouvir a frase e achar o sentido), todas com
+  quatro alternativas e separadas por seção. Passa com 80%. O resultado só
   aparece no fim, e dá para voltar e trocar uma resposta antes de entregar. Cada resposta conta como
   revisão no FSRS. Quem não passa vê o que errou, revê os cartões disso e faz outra prova, com
   outras questões. A aprovação nunca se perde com uma tentativa pior depois.

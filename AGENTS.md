@@ -49,6 +49,12 @@ Estado em 23/11/2026: as seis fases estão feitas; o curso tem o A1 (N5) e o A2 
   que dá o certificado do nível. Também há nivelamento, apostila (com ditado por QR), cartões para
   recortar e folha de escrita dos kanji. Detalhes em [docs/curso.md](docs/curso.md#provas).
 - Os jogos e a Jornada continuam no fliperama, como prática livre.
+- **Em andamento (relatório do "aluno do zero", 27/11/2026):** feito: legenda que não entrega a
+  escuta, Continuar que começa pelo Módulo 0 e pela revisão de hoje (`src/curso/hoje.ts`), prova com
+  frases e diálogos só com o que foi ensinado. Falta: regra e tabela de formas em cada cartão de
+  gramática, com exercício de transformar; gramática intercalada com as palavras; Módulo 0 com
+  ゃゅょっ e vogal longa mais cedo e lição 4 menor; "outras leituras" do kanji sem kanji não
+  ensinado; prática com distratores mais difíceis e explicação no erro.
 
 Regras de ensino que valem em tudo ([docs/ensino.md](docs/ensino.md)):
 

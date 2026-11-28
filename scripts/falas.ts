@@ -34,7 +34,7 @@ import { daCoisa, ETAPAS, falaDaTarefa, falaDoNome, nomeDe, PERGUNTA_NOME, taref
 import { LUGARES } from '../src/games/cena/lugares';
 import { falasDaFicha, fichaDe, todosOsAlvos } from '../src/content/aprofundar/fichas';
 import { falasDoCurso } from '../src/curso/cartoes';
-import { exemplosDaUnidade, leituraDa, partesDaFala, type Exemplo } from '../src/curso/exemplos';
+import { dialogoDa, exemplosDaUnidade, leituraDa, partesDaFala, type Exemplo } from '../src/curso/exemplos';
 import { AULAS_DO_CURSO } from '../src/content/curso/aulas';
 import { UNIDADES } from '../src/content/curso';
 
@@ -371,6 +371,7 @@ function exemplosDoCurso(): Fala[] {
   return UNIDADES.flatMap((u) => [
     ...exemplosDaUnidade(u).map((e) => falaDoExemploDoCurso(e, `curso/${u.id}/exemplo/${e.ponto}`)),
     ...(leituraDa(u)?.frases ?? []).map((e) => falaDoExemploDoCurso(e, `curso/${u.id}/leitura`)),
+    ...(dialogoDa(u)?.falas ?? []).map((e) => falaDoExemploDoCurso(e, `curso/${u.id}/dialogo`)),
   ]);
 }
 

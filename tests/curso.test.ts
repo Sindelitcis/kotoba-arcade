@@ -1,7 +1,6 @@
 // @vitest-environment node
 import { describe, expect, it } from 'vitest';
 import { NIVEIS, UNIDADES, palavrasDa } from '../src/content/curso';
-import { SITUACOES } from '../src/content/escola';
 import { N4 } from '../src/games/pecas/dados/n4';
 import { N5 } from '../src/games/pecas/dados/n5';
 
@@ -106,11 +105,6 @@ describe('currículo do curso', () => {
 
   it('toda nota cultural tem fonte', () => {
     for (const u of UNIDADES) for (const n of u.notas) expect(n.fontes.length, `${u.id} ${n.titulo}`).toBeGreaterThan(0);
-  });
-
-  it('as situações citadas existem', () => {
-    const ids = new Set(SITUACOES.map((s) => s.id));
-    for (const u of UNIDADES) for (const s of u.situacoes ?? []) expect(ids.has(s), `${u.id} ${s}`).toBe(true);
   });
 
   it('só a unidade de revisão vem sem conteúdo novo', () => {
