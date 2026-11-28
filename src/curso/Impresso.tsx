@@ -22,7 +22,7 @@ import { exemplosDoPonto, falaDoExemplo, falaEscrita, leituraDa, pecasParaMontar
 import { ditadoDa, lacunasDa } from './exercicios';
 import { tocarSequencia } from '../core/sequencia';
 import { carregarTracos, tracos } from '../games/pecas/Tracos';
-import { significadoDoKanji } from './cartoes';
+import { palavraAte, significadoDoKanji } from './cartoes';
 import { figuraDoCurso } from './figura';
 import { figuraUrl, temFigura } from '../core/figuras';
 import { outrasLeituras, palavraDoCurso, partesDoPonto } from './motor';
@@ -322,7 +322,7 @@ function Apostila({ unidade: u }: { unidade: Unidade }) {
                           Outras leituras no curso:{' '}
                           {outras.map((o) => (
                             <span key={o.leitura} lang="ja">
-                              {o.leitura} ({o.em}, {o.nome}){' '}
+                              {o.leitura} ({palavraAte(o.em, u.ordem)}, {o.nome}){' '}
                             </span>
                           ))}
                         </small>

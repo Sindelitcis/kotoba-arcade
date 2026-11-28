@@ -222,11 +222,25 @@ export const cartaDaLeitura = (k: KanjiDaUnidade): string => cardKey(`k:${k.k}`,
  * As outras leituras do kanji no curso e onde entram, para o cartão avisar:
  * "em 金曜日 se lê きん (unidade 3)".
  */
-export function outrasLeituras(k: KanjiDaUnidade): { leitura: string; em: string; unidade: string; nome: string }[] {
-  const out: { leitura: string; em: string; unidade: string; nome: string }[] = [];
+export interface OutraLeitura {
+  leitura: string;
+  em: string;
+  unidade: string;
+  nome: string;
+  ordem: number;
+}
+
+export function outrasLeituras(k: KanjiDaUnidade): OutraLeitura[] {
+  const out: OutraLeitura[] = [];
   for (const u of UNIDADES)
-    for (const x of u.kanji) if (x.k === k.k && x.leitura !== k.leitura && !out.some((o) => o.leitura === x.leitura)) out.push({ leitura: x.leitura, em: x.em, unidade: u.id, nome: nomeDaUnidade(u) });
+    for (const x of u.kanji)
+      if (x.k === k.k && x.leitura !== k.leitura && !out.some((o) => o.leitura === x.leitura)) out.push({ leitura: x.leitura, em: x.em, unidade: u.id, nome: nomeDaUnidade(u), ordem: u.ordem });
   return out;
+}
+
+/** A unidade em que o kanji (esta entrada, com esta leitura) é ensinado. */
+export function unidadeDoKanji(k: KanjiDaUnidade): Unidade | undefined {
+  return UNIDADES.find((u) => u.kanji.includes(k));
 }
 
 /** A palavra do curso escrita assim (para mostrar a leitura e o significado da palavra do kanji). */

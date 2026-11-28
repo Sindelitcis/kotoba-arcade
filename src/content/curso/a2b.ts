@@ -114,7 +114,7 @@ export const A2_6_10: readonly UnidadeEscrita[] = [
         k: '作',
         leitura: 'さ',
         em: '作業',
-        muda: 'Sozinho, 作 é つく, de 作る. Em 作業, o trabalho de mão, vem uma leitura chinesa curta, さ. Há outra, さく, que aparece em 作文.',
+        muda: 'Sozinho, 作 é つく, de 作る. Em 作業, o trabalho de mão, vem uma leitura chinesa curta, さ. Há outra, さく, que aparece em さくぶん (redação).',
       },
       { k: '業', leitura: 'ぎょう', em: '作業' },
       { k: '工', leitura: 'こう', em: '工場' },

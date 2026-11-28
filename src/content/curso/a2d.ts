@@ -39,7 +39,7 @@ export const A2_16_20: readonly UnidadeEscrita[] = [
         k: '書',
         leitura: 'しょ',
         em: '図書館',
-        muda: 'No A1, 書 era か, de 書く. Em 図書館 vem a leitura chinesa しょ, a mesma de 辞書 (dicionário).',
+        muda: 'No A1, 書 era か, de 書く. Em 図書館 vem a leitura chinesa しょ, a mesma de じしょ (dicionário).',
       },
       { k: '館', leitura: 'かん', em: '図書館' },
       { k: '公', leitura: 'こう', em: '公園' },

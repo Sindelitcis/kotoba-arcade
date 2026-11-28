@@ -105,7 +105,7 @@ export const A2_11_15: readonly UnidadeEscrita[] = [
         k: '牛',
         leitura: 'ぎゅう',
         em: '牛肉',
-        muda: 'Sozinho, 牛 é うし, o boi. Em 牛肉 e 牛乳 (o leite) vem a leitura chinesa ぎゅう.',
+        muda: 'Sozinho, 牛 é うし, o boi. Em 牛肉 e em ぎゅうにゅう (o leite) vem a leitura chinesa ぎゅう.',
       },
       { k: '魚', leitura: 'さかな', em: '魚' },
       { k: '鳥', leitura: 'とり', em: '鳥' },
@@ -417,7 +417,7 @@ export const A2_11_15: readonly UnidadeEscrita[] = [
         k: '兄',
         leitura: 'にい',
         em: 'お兄さん',
-        muda: 'O meu irmão é 兄 (あに). O dos outros, ou o meu quando falo com ele, é お兄さん, e aí 兄 soa にい. É a ideia de 内 e 外, do A1.',
+        muda: 'O meu irmão é 兄 (あに). O dos outros, ou o meu quando falo com ele, é お兄さん, e aí 兄 soa にい. É a ideia de うち e そと (dentro e fora), do A1.',
       },
       { k: '姉', leitura: 'あね', em: '姉' },
       {

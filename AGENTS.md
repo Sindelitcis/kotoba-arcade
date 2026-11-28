@@ -52,9 +52,7 @@ Estado em 23/11/2026: as seis fases estão feitas; o curso tem o A1 (N5) e o A2 
 - **Em andamento (relatório do "aluno do zero", 27/11/2026):** feito: legenda que não entrega a
   escuta, Continuar que começa pelo Módulo 0 e pela revisão de hoje (`src/curso/hoje.ts`), prova com
   frases, diálogos só com o que foi ensinado, e tabela de formas no cartão de gramática com o
-  exercício de transformar, gramática intercalada com as palavras, Módulo 0 reorganizado. Falta:
-  "outras leituras" do kanji sem kanji não
-  ensinado; prática com distratores mais difíceis e explicação no erro.
+  exercício de transformar, gramática intercalada com as palavras, Módulo 0 reorganizado, cartão do kanji só com kanji já ensinados. Falta: prática com distratores mais difíceis e explicação no erro.
 
 Regras de ensino que valem em tudo ([docs/ensino.md](docs/ensino.md)):
 

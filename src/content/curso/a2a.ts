@@ -18,7 +18,7 @@ export const A2_1_5: readonly UnidadeEscrita[] = [
         k: '行',
         leitura: 'こう',
         em: '旅行',
-        muda: 'No A1, 行 era い, de 行く: a leitura japonesa, a do kanji sozinho com o resto em hiragana. Junto de outro kanji ele usa a leitura chinesa, こう: 旅行, e logo mais 銀行.',
+        muda: 'No A1, 行 era い, de 行く: a leitura japonesa, a do kanji sozinho com o resto em hiragana. Junto de outro kanji ele usa a leitura chinesa, こう: 旅行, e logo mais ぎんこう (banco).',
       },
       { k: '思', leitura: 'おも', em: '思う' },
       { k: '考', leitura: 'かんが', em: '考える' },

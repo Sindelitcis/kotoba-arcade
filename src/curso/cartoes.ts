@@ -10,8 +10,8 @@ import { palavrasDa, UNIDADES, type KanjiDaUnidade, type Palavra } from '../cont
 import { frasePtDoSignificado, type ItemNovo } from '../content/ensino';
 import { FRASES_FIXAS, fichaDe } from '../content/aprofundar/fichas';
 import type { FalaJp, Trecho } from '../core/sequencia';
-import { cartaDaPalavra, FICHA_DA_GRAMATICA, outrasLeituras, palavraDoCurso, partesDoPonto } from './motor';
-import { exemplosDoPonto } from './exemplos';
+import { cartaDaPalavra, FICHA_DA_GRAMATICA, outrasLeituras, palavraDoCurso, partesDoPonto, unidadeDoKanji } from './motor';
+import { exemplosDoPonto, kanjiAte } from './exemplos';
 import { NOME_DO_TIPO, tabelaDoPonto } from './formas';
 
 /** A palavra solta, como nos jogos: a gravação fica no kana, na voz de palavra. */
@@ -47,6 +47,12 @@ export function leiturasCitadas(texto: string): Record<string, string> {
   return out;
 }
 
+/** A palavra como a pessoa consegue ler até a unidade de ordem `ordem`: com kanji, se todos já foram ensinados; senão, em kana. */
+export function palavraAte(jp: string, ordem: number): string {
+  const ensinados = kanjiAte(ordem);
+  return [...jp].every((c) => !/[一-鿿々]/u.test(c) || ensinados.has(c)) ? jp : (palavraDoCurso(jp)?.kana ?? jp);
+}
+
 export function explicacaoDoKanji(k: KanjiDaUnidade): string {
   const partes: string[] = [];
   // Toda palavra citada leva a leitura junto: nenhum kanji fica sem leitura na tela.
@@ -56,8 +62,18 @@ export function explicacaoDoKanji(k: KanjiDaUnidade): string {
   };
   if (k.muda) partes.push(k.muda);
   else partes.push(k.em === k.k ? `Sozinho, ${k.k} se lê ${k.leitura}.` : `Em ${comLeitura(k.em)}, ${k.k} se lê ${k.leitura}.`);
-  const outras = outrasLeituras(k).map((o) => `em ${comLeitura(o.em)} se lê ${o.leitura} (${o.nome})`);
-  if (outras.length > 0) partes.push(`Outras leituras que vêm no curso: ${outras.join('; ')}.`);
+  // Separa o que a pessoa já viu do que vem depois. Do que vem depois, a palavra só vai com kanji se
+  // todos os kanji dela já foram ensinados; senão, vai em kana (三人 na unidade 1 é さんにん).
+  const ordem = unidadeDoKanji(k)?.ordem ?? Number.MAX_SAFE_INTEGER;
+  const todas = outrasLeituras(k);
+  const vistas = todas.filter((o) => o.ordem < ordem).map((o) => `em ${comLeitura(o.em)} se lê ${o.leitura}`);
+  const agora = todas.filter((o) => o.ordem === ordem).map((o) => `em ${comLeitura(o.em)} se lê ${o.leitura}`);
+  const depois = todas
+    .filter((o) => o.ordem > ordem)
+    .map((o) => `${o.leitura} na ${o.nome}, em ${palavraAte(o.em, ordem) === o.em ? comLeitura(o.em) : palavraAte(o.em, ordem)}`);
+  if (vistas.length > 0) partes.push(`Você já viu: ${vistas.join('; ')}.`);
+  if (agora.length > 0) partes.push(`Nesta unidade, também: ${agora.join('; ')}.`);
+  if (depois.length > 0) partes.push(`Mais adiante, ${k.k} também se lê ${depois.join('; ')}.`);
   if (k.extra) partes.push('Não cai no N5, mas aparece muito no dia a dia.');
   return partes.join(' ');
 }

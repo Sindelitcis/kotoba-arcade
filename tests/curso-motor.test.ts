@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { palavrasDa, UNIDADES } from '../src/content/curso';
 import { VERSAO_DO_MODULO0 } from '../src/curso/modulo0';
 import { DIALOGOS } from '../src/content/curso/dialogos';
-import { exemplosDoPonto, partesDaFala } from '../src/curso/exemplos';
+import { exemplosDoPonto, kanjiAte, partesDaFala } from '../src/curso/exemplos';
 import { tabelaDoPonto } from '../src/curso/formas';
 import { apresentar, foiApresentado } from '../src/core/ensino';
 import { seededRng } from '../src/core/rng';
@@ -143,8 +143,22 @@ describe('cartões', () => {
   it('o cartão do kanji avisa das outras leituras e de quando elas entram', () => {
     const kin = UNIDADES.flatMap((u) => u.kanji).find((k) => k.k === '金' && k.leitura === 'きん');
     expect(kin).toBeDefined();
-    const texto = explicacaoDoKanji(kin!);
-    expect(texto).toMatch(/お金 \(おかね\) se lê かね \(unidade \d+\)/);
+    expect(explicacaoDoKanji(kin!)).toMatch(/かね na unidade \d+, em (お金 \(おかね\)|おかね)/);
+  });
+
+  // O cartão de 人 na unidade 1 citava 三人, e o de 日, 曜 e 月: kanji que só vêm depois.
+  it('o cartão do kanji só escreve com kanji o que já foi ensinado; o resto vai em kana', () => {
+    for (const u of UNIDADES)
+      for (const k of u.kanji) {
+        const ensinados = kanjiAte(u.ordem);
+        for (const c of explicacaoDoKanji(k).match(/[一-鿿々]/gu) ?? []) expect(ensinados.has(c), `${u.id} ${k.k}: ${c}`).toBe(true);
+      }
+    const hito = UNIDADES[0]!.kanji.find((k) => k.k === '人' && k.leitura === 'じん')!;
+    const texto = explicacaoDoKanji(hito);
+    expect(texto).toContain('さんにん');
+    // A leitura da mesma unidade não é "mais adiante".
+    expect(texto).toMatch(/Nesta unidade, também: em 人 \(ひと\) se lê ひと/);
+    expect(texto).not.toMatch(/Mais adiante[^.]*ひと/);
   });
 
   it('kanji que muda de leitura traz a explicação da troca no cartão', () => {

@@ -119,7 +119,9 @@ próxima parte; a tecla U mostra o mapa das unidades.
   de uma unidade volta para a primeira parte que não é de palavras: pode rever, nunca pular.
 - **Cartões.** `cartoes.ts` monta a apresentação direto do currículo, no mesmo cartão dos jogos
   (`core/Apresentacao.tsx`). O do kanji mostra a leitura usada na palavra, a explicação da troca
-  quando ela muda e as outras leituras do curso, com a unidade em que entram. O de gramática mostra
+  quando ela muda e as outras leituras do curso, separadas em já vistas, desta unidade e mais
+  adiante (com a unidade). A palavra de uma leitura que vem depois só aparece com kanji se todos
+  os kanji dela já foram ensinados; senão, em kana (三人 na unidade 1 aparece como さんにん). O de gramática mostra
   o padrão, a regra e um exemplo falado; nos pontos de forma (ます, て, ない, potencial...), também
   "como se forma" e uma tabela com os verbos ou adjetivos já ensinados, um de cada grupo
   (`src/curso/formas.ts`).
