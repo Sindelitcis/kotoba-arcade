@@ -12,6 +12,7 @@ import { FRASES_FIXAS, fichaDe } from '../content/aprofundar/fichas';
 import type { FalaJp, Trecho } from '../core/sequencia';
 import { cartaDaPalavra, FICHA_DA_GRAMATICA, outrasLeituras, palavraDoCurso, partesDoPonto } from './motor';
 import { exemplosDoPonto } from './exemplos';
+import { NOME_DO_TIPO, tabelaDoPonto } from './formas';
 
 /** A palavra solta, como nos jogos: a gravação fica no kana, na voz de palavra. */
 export function falaDaPalavra(p: Pick<Palavra, 'jp' | 'kana'>): FalaJp {
@@ -109,6 +110,7 @@ export function cartaoDoPonto(id: string, unidade: string): ItemNovo {
   const { grande, pt } = partesDoPonto(id);
   const ficha = FICHA_DA_GRAMATICA[id];
   const [ex] = exemplosDoPonto(id);
+  const tabela = tabelaDoPonto(id);
   return {
     chaves: [`curso:${unidade}:gramatica:${id}`],
     alvo: { t: 'gramatica', id: ficha ?? id },
@@ -118,6 +120,7 @@ export function cartaoDoPonto(id: string, unidade: string): ItemNovo {
     pt,
     explicacao: regraDoPonto(id),
     ...(ex ? { exemplo: { jp: ex.jp, kana: ex.kana, pt: ex.pt } } : {}),
+    ...(tabela ? { tabela: { como: tabela.como, colunas: tabela.colunas, linhas: tabela.linhas.map((l) => ({ rotulo: NOME_DO_TIPO[l.palavra.tipo], formas: l.formas })) } } : {}),
     falas: ex ? [{ tipo: 'jp', fala: { texto: ex.jp, voz: 'frase', kana: ex.kana } }] : [],
   };
 }

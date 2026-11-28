@@ -309,16 +309,58 @@ test('aula, gramática com exemplo e montar frases: tudo no ritmo da pessoa', as
   await expect(page.getByTestId('cs-intervalo')).toBeVisible();
 });
 
-/** Abre a unidade 1 na parte cujo nome contém `nome`, abrindo o curso em cada parte até chegar nela. */
-async function irParaParte(page: Page, nome: string): Promise<void> {
+/**
+ * Abre a unidade na parte cujo nome contém `nome`, abrindo o curso em cada parte até chegar nela.
+ * As unidades antes dela ficam com a prova aprovada.
+ */
+async function irParaParte(page: Page, nome: string, unidade = 'a1-01'): Promise<void> {
+  const n = Number(unidade.slice(-2));
+  const provas = Object.fromEntries(Array.from({ length: n - 1 }, (_, i) => [`a1-${String(i + 1).padStart(2, '0')}`, { melhor: 1, aprovada: true, tentativas: 1 }]));
   for (let parte = 1; parte < 40; parte++) {
-    await comCurso(page, { feitos: { 'a1-01': parte }, concluidas: {} });
+    await comCurso(page, { feitos: { [unidade]: parte }, concluidas: {}, provas, modulo0: 99 });
     await page.keyboard.press('Enter');
     await expect(page.getByTestId('cs-parte')).toBeVisible();
     if (((await page.getByTestId('cs-parte').textContent()) ?? '').includes(nome)) return;
   }
   throw new Error(`parte ${nome} não encontrada`);
 }
+
+test('gramática com a tabela de formas e o exercício de transformar', async ({ page }) => {
+  test.setTimeout(60_000);
+  // Unidade 5: o primeiro cartão é o da forma ます.
+  await irParaParte(page, 'Gramática', 'a1-05');
+  const tabela = page.getByTestId('ap-formas');
+  await expect(tabela).toBeVisible();
+  await expect(tabela).toContainText('Como se forma');
+  await expect(tabela.locator('tbody tr')).toHaveCount(4);
+  await expect(tabela.locator('rt').first()).toBeAttached();
+  if (SHOTS) await page.screenshot({ path: `${SHOTS}/curso-tabela-formas.png` });
+  await passarApresentacao(page);
+  await expect(page.getByTestId('cs-intervalo')).toBeVisible();
+  await page.keyboard.press('Enter');
+
+  await expect(page.getByTestId('cs-parte')).toContainText('Formas');
+  const formas = page.getByTestId('cs-formas');
+  const total = () => formas.locator('.gr-tag').textContent().then((t) => Number(t?.match(/de (\d+)/)?.[1]));
+  const n = await total();
+  // Errar a primeira: a forma certa e a regra aparecem, e a pergunta volta no fim.
+  await page.keyboard.press('Enter');
+  await expect(formas).toHaveAttribute('data-i', '0');
+  let marcas = await page.getByTestId('cs-opcao').evaluateAll((els) => els.map((e) => e.hasAttribute('data-certa')));
+  await page.keyboard.press(String(marcas.indexOf(false) + 1));
+  await expect(page.getByTestId('cs-retorno')).toContainText('Esta volta no fim');
+  if (SHOTS) await page.screenshot({ path: `${SHOTS}/curso-formas-erro.png` });
+  expect(await total()).toBe(n + 1);
+  await page.keyboard.press('Enter');
+  for (let i = 1; i <= n; i++) {
+    await expect(formas).toHaveAttribute('data-i', String(i));
+    marcas = await page.getByTestId('cs-opcao').evaluateAll((els) => els.map((e) => e.hasAttribute('data-certa')));
+    await page.keyboard.press(String(marcas.indexOf(true) + 1));
+    await expect(page.getByTestId('cs-retorno')).toContainText('Isso');
+    await page.keyboard.press('Enter');
+  }
+  await expect(page.getByTestId('cs-intervalo')).toBeVisible();
+});
 
 test('completar, ditado e leitura com shadowing: nada passa sem a pessoa', async ({ page }) => {
   test.setTimeout(60_000);

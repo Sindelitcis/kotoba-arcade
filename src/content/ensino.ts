@@ -28,6 +28,14 @@ export interface ItemNovo {
   leituras?: Readonly<Record<string, string>>;
   /** O que toca ao aparecer: o japonês, o português e o exemplo. */
   falas: Trecho[];
+  /** Como se forma (cartão de gramática do curso): a regra e a tabela das formas. */
+  tabela?: TabelaDeFormas;
+}
+
+export interface TabelaDeFormas {
+  como: string;
+  colunas: readonly string[];
+  linhas: readonly { rotulo: string; formas: readonly { jp: string; kana: string }[] }[];
 }
 
 const NUMEROS = ['zero', 'um', 'dois', 'três', 'quatro', 'cinco', 'seis', 'sete', 'oito', 'nove', 'dez', 'onze', 'doze', 'treze', 'catorze', 'quinze', 'dezesseis', 'dezessete', 'dezoito', 'dezenove'];

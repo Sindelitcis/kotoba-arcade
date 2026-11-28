@@ -108,7 +108,7 @@ próxima parte; a tecla U mostra o mapa das unidades.
 
 - **Partes curtas.** `motor.ts` (`blocosDa`) divide a unidade em partes de uns 5 minutos: objetivo
   (com a revisão rápida da unidade anterior), palavras de 3 a 5 por vez, os kanji dessas palavras
-  logo depois delas, a aula falada, a gramática, o montar frases, o completar, o ditado, a
+  logo depois delas, a aula falada, a gramática, as formas, o montar frases, o completar, o ditado, a
   leitura graduada com shadowing, as notas culturais, o diálogo da situação (`content/curso/dialogos.ts`, feito só com o que já
   foi ensinado, conferido em `tests/curso-leituras.test.ts`) e, no fim, o mini-teste (8 perguntas da unidade, com quatro alternativas, como na
   prova). A unidade de revisão tem só o objetivo e uma prática com o que já foi visto. Parte nova
@@ -116,7 +116,9 @@ próxima parte; a tecla U mostra o mapa das unidades.
 - **Cartões.** `cartoes.ts` monta a apresentação direto do currículo, no mesmo cartão dos jogos
   (`core/Apresentacao.tsx`). O do kanji mostra a leitura usada na palavra, a explicação da troca
   quando ela muda e as outras leituras do curso, com a unidade em que entram. O de gramática mostra
-  o padrão, a regra e um exemplo falado.
+  o padrão, a regra e um exemplo falado; nos pontos de forma (ます, て, ない, potencial...), também
+  "como se forma" e uma tabela com os verbos ou adjetivos já ensinados, um de cada grupo
+  (`src/curso/formas.ts`).
 - **Prática.** `pratica.ts`: duas opções na primeira vez e três depois, todas de itens do curso já
   apresentados. Errar não tira nada: a resposta fica na tela até a pessoa seguir, o cartão aparece
   de novo e a pergunta volta no fim. A parte acaba quando cada item foi acertado uma vez.
@@ -147,6 +149,11 @@ Feito na fase 4, em `src/content/curso/`:
   japonês com pausa para repetir. A fala não tem japonês escrito (a voz em português leria errado);
   o japonês fica no texto da tela e no exemplo. Só regra de língua: costume e história ficam nas
   notas, que têm fonte. Tela em `src/curso/BlocosAula.tsx`.
+- **Formas** (`src/curso/formas.ts`): logo depois do cartão, transformar a palavra (食べる →
+  食べます) entre quatro opções em kana. As erradas são os erros de verdade: o grupo trocado
+  (かえる como たべる), o て de outro final (のいて), outra forma do mesmo ponto. Errou, aparece a
+  forma certa, o grupo e a regra, e a pergunta volta uma vez no fim. A lista de verbos e adjetivos
+  das tabelas é conferida à mão, com o grupo escrito.
 - **Montar frases**: o sentido em português e as peças embaralhadas; a peça fora de ordem avisa e
   não entra. Pronta, a frase toca e espera o Enter.
 - **Completar e ditado** (`src/curso/exercicios.ts`): no completar, a frase vem com uma peça de

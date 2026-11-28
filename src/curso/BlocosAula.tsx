@@ -3,6 +3,7 @@
  * - a aula falada: um quadro por vez, o professor na Voz 1 e o exemplo em japonês;
  * - montar frases: as peças embaralhadas de um exemplo, a pessoa põe na ordem;
  * - completar: a frase com uma peça apagada, quatro opções;
+ * - formas: transformar o verbo ou o adjetivo (食べる → 食べます), quatro opções em kana;
  * - ditado: a frase só no áudio, a pessoa escreve em kana;
  * - leitura graduada: o texto inteiro e, depois, o shadowing frase por frase.
  * Nada passa sozinho: Enter segue, R repete (docs/ensino.md, "Calma").
@@ -16,6 +17,7 @@ import { useSemLegenda } from '../core/LegendaVoz';
 import { romajiToHiragana } from '../core/kana';
 import { tocarSequencia } from '../core/sequencia';
 import { confereDitado, lacunasDa } from './exercicios';
+import { FORMAS, NOME_DO_TIPO, perguntasDeForma } from './formas';
 import { exemplosDoPonto, falaDoExemplo, falaEscrita, pecasParaMontar, trechosDoQuadro, type Exemplo, type Leitura } from './exemplos';
 import { useTeclado } from './teclado';
 
@@ -200,6 +202,93 @@ export function MontarView({ exemplos, onFim }: { exemplos: readonly Exemplo[]; 
           <Icone nome="volume-2" /> Ouvir <kbd>R</kbd>
         </button>
         <button class="primary" disabled={!pronta} onClick={seguir} data-testid="cs-seguir">
+          Seguir <kbd>Enter</kbd>
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* ───────── Formas ───────── */
+
+/**
+ * Transformar a forma: a palavra numa forma, a pessoa escolhe a outra. Errou: aparece a forma certa
+ * escrita, a regra, e a pergunta volta uma vez no fim (como no treino de kana).
+ */
+export function FormasView({ unidade, onFim }: { unidade: Unidade; onFim: (acertos: number) => void }) {
+  const [fila, setFila] = useState(() => perguntasDeForma(unidade, Math.random));
+  const [i, setI] = useState(0);
+  const [escolha, setEscolha] = useState<string | null>(null);
+  const [acertos, setAcertos] = useState(0);
+  const [voltou] = useState(() => new Set<number>());
+  const q = fila[i];
+
+  const escolher = (o: string) => {
+    if (!q || escolha !== null) return;
+    setEscolha(o);
+    if (o === q.para.kana) setAcertos((a) => a + 1);
+    else if (!voltou.has(i)) {
+      voltou.add(fila.length);
+      setFila((f) => [...f, { ...q, opcoes: [...q.opcoes].reverse() }]);
+    }
+  };
+  const seguir = () => {
+    if (escolha === null) return;
+    if (i + 1 < fila.length) {
+      setI(i + 1);
+      setEscolha(null);
+    } else onFim(acertos);
+  };
+  useTeclado((tecla) => {
+    if (q && /^[1-4]$/.test(tecla)) {
+      const o = q.opcoes[Number(tecla) - 1];
+      if (o) escolher(o);
+      return true;
+    }
+    if (tecla === 'Enter' || tecla === ' ') {
+      seguir();
+      return true;
+    }
+    return false;
+  });
+
+  if (!q) return null;
+  const certa = escolha === q.para.kana;
+  return (
+    <div class="koma lc-quadro" data-testid="cs-formas" data-i={i}>
+      <div class="lc-conteudo">
+        <span class="gr-tag">
+          Formas · {i + 1} de {fila.length}
+        </span>
+        <p class="lc-enunciado">
+          Passe para a forma <b lang={/[぀-ヿ]/u.test(FORMAS[q.para.forma]) ? 'ja' : 'pt-BR'}>{FORMAS[q.para.forma]}</b>:
+        </p>
+        <p class="cs-montada" lang="ja">
+          <Furigana texto={q.de.jp} leitura={q.de.kana} /> → <span class={`cs-lacuna${escolha === null ? '' : certa ? ' certa' : ' errada'}`}>{escolha === null ? '　' : <Furigana texto={q.para.jp} leitura={q.para.kana} />}</span>
+        </p>
+        <p class="lc-linha cs-montar-pt">{q.palavra.pt}</p>
+        <div class="cs-pecas" lang="ja">
+          {q.opcoes.map((o, n) => (
+            <button
+              key={o}
+              class={`cs-peca${escolha !== null && o === q.para.kana ? ' certa' : ''}${escolha === o && !certa ? ' errada' : ''}`}
+              disabled={escolha !== null}
+              onClick={() => escolher(o)}
+              data-testid="cs-opcao"
+              data-certa={o === q.para.kana ? '1' : undefined}
+            >
+              <kbd>{n + 1}</kbd> {o}
+            </button>
+          ))}
+        </div>
+        {escolha !== null && (
+          <p class={certa ? 'lc-retorno bom' : 'lc-retorno'} role="status" data-testid="cs-retorno">
+            {certa ? 'Isso.' : <>É {q.para.kana} (<Furigana texto={q.de.jp} leitura={q.de.kana} /> é {NOME_DO_TIPO[q.palavra.tipo]}). <Misto texto={q.como} />{voltou.has(i) ? '' : ' Esta volta no fim.'}</>}
+          </p>
+        )}
+      </div>
+      <div class="actions center">
+        <button class="primary" disabled={escolha === null} onClick={seguir} data-testid="cs-seguir">
           Seguir <kbd>Enter</kbd>
         </button>
       </div>

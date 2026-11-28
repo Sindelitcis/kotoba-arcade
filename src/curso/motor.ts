@@ -21,6 +21,7 @@
 import { GRAMATICA, nomeDaUnidade, palavrasDa, UNIDADES, type KanjiDaUnidade, type Nivel, type Nota, type Palavra, type Unidade } from '../content/curso';
 import { cardKey } from '../content';
 import { AULAS_DO_CURSO } from '../content/curso/aulas';
+import { perguntasDeForma } from './formas';
 import { dialogoDa, exemplosDaUnidade, leituraDa, type Dialogo, type Exemplo, type Leitura } from './exemplos';
 import { ditadoDa, lacunasDa } from './exercicios';
 import { foiApresentado } from '../core/ensino';
@@ -35,6 +36,7 @@ export type Bloco =
   | { tipo: 'kanji'; id: string; kanji: readonly KanjiDaUnidade[] }
   | { tipo: 'aula'; id: string }
   | { tipo: 'gramatica'; id: string; pontos: readonly string[] }
+  | { tipo: 'formas'; id: string }
   | { tipo: 'frases'; id: string; exemplos: readonly Exemplo[] }
   | { tipo: 'completar'; id: string }
   | { tipo: 'ditado'; id: string; exemplos: readonly Exemplo[] }
@@ -52,6 +54,7 @@ export const NOME_BLOCO: Readonly<Record<TipoBloco, string>> = {
   kanji: 'Kanji',
   aula: 'Aula',
   gramatica: 'Gramática',
+  formas: 'Formas',
   frases: 'Montar frases',
   completar: 'Completar',
   ditado: 'Ditado',
@@ -105,6 +108,8 @@ export function blocosDa(u: Unidade): Bloco[] {
   // A aula vem depois das palavras e dos kanji: o exemplo dela só usa o que já foi apresentado.
   if (AULAS_DO_CURSO[u.id]) out.push({ tipo: 'aula', id: `${u.id}:aula` });
   if (u.gramatica.length > 0) out.push({ tipo: 'gramatica', id: `${u.id}:gramatica`, pontos: u.gramatica });
+  // Logo depois do cartão com a tabela: transformar a forma, antes de usar na frase.
+  if (perguntasDeForma(u, () => 0.5).length > 0) out.push({ tipo: 'formas', id: `${u.id}:formas` });
   // O primeiro exemplo de cada ponto está no cartão; o exercício usa os outros.
   const paraMontar = u.gramatica.flatMap((g) => exemplosDaUnidade({ ...u, gramatica: [g] }).slice(1));
   if (paraMontar.length > 0) out.push({ tipo: 'frases', id: `${u.id}:frases`, exemplos: paraMontar });

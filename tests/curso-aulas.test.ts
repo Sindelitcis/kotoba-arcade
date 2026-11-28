@@ -60,7 +60,8 @@ describe('aula falada do curso', () => {
       expect(aula, u.id).toBeGreaterThan(tipos.lastIndexOf('palavras'));
       expect(aula).toBeGreaterThan(tipos.lastIndexOf('kanji'));
       expect(tipos.indexOf('gramatica')).toBe(aula + 1);
-      expect(tipos.indexOf('frases')).toBe(aula + 2);
+      // Entre a gramática e o montar frases, só o exercício de formas (quando o ponto tem tabela).
+      expect(tipos.indexOf('frases')).toBe(aula + (tipos.includes('formas') ? 3 : 2));
     }
   });
 

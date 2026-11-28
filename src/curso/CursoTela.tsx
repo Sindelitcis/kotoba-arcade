@@ -37,7 +37,7 @@ import { useTeclado } from './teclado';
 import { kanaFeitos, LICOES_KANA, LOTES_DO_MODULO, perguntasDosKana } from './modulo0';
 import { ModuloZeroTela, TreinoKana } from './ModuloZero';
 import { ateOndeFoi, proximoPasso, revisaoDeHoje } from './hoje';
-import { AulaView, CompletarView, DitadoView, LeituraView, MontarView } from './BlocosAula';
+import { AulaView, CompletarView, DitadoView, FormasView, LeituraView, MontarView } from './BlocosAula';
 import { Pratica } from './pratica';
 import './curso.css';
 
@@ -413,6 +413,8 @@ function BlocoView({ unidade, bloco, onFim }: { unidade: Unidade; bloco: Bloco; 
       return <MontarView exemplos={bloco.exemplos} onFim={onFim} />;
     case 'completar':
       return <CompletarView unidade={unidade} onFim={onFim} />;
+    case 'formas':
+      return <FormasView unidade={unidade} onFim={onFim} />;
     case 'ditado':
       return <DitadoView exemplos={bloco.exemplos} onFim={onFim} />;
     case 'leitura':

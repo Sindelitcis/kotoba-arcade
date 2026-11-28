@@ -12,7 +12,7 @@
  */
 import type { ComponentChildren } from 'preact';
 import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
-import type { ItemNovo } from '../content/ensino';
+import type { ItemNovo, TabelaDeFormas } from '../content/ensino';
 import { useAprofundar } from './aprofundar/estado';
 import { fichaDe } from '../content/aprofundar/fichas';
 import { camadaAberta } from './help/ajuda';
@@ -51,6 +51,43 @@ function Escrita({ item }: { item: ItemNovo }) {
     <span class={`ap-grande${longo ? ' longo' : ''}${item.alvo.t === 'kanji' ? ' kanji' : ''}`} lang="ja">
       {fur ? <Furigana texto={item.grande} leitura={item.leitura} /> : item.grande}
     </span>
+  );
+}
+
+/** Como se forma: a regra e a tabela, uma linha por palavra já ensinada. */
+export function TabelaFormas({ tabela }: { tabela: TabelaDeFormas }) {
+  return (
+    <div class="ap-formas" data-testid="ap-formas">
+      <p class="ap-como">
+        <b>Como se forma.</b> <Misto texto={tabela.como} />
+      </p>
+      <div class="ap-tabela-rola">
+        <table class="ap-tabela" lang="ja">
+          <thead>
+            <tr>
+              <th />
+              {tabela.colunas.map((c) => (
+                <th key={c} lang={/[぀-ヿ]/u.test(c) ? 'ja' : 'pt-BR'}>
+                  {c}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {tabela.linhas.map((l, n) => (
+              <tr key={n}>
+                <th lang="pt-BR">{l.rotulo}</th>
+                {l.formas.map((f, k) => (
+                  <td key={k}>
+                    <Furigana texto={f.jp} leitura={f.kana} />
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
   );
 }
 
@@ -141,6 +178,7 @@ export function Apresentacao({ itens, onFim, modo = 'novos', fim, visual, onItem
               <span class="ap-ex-pt">{item.exemplo.pt}</span>
             </p>
           )}
+          {item.tabela && <TabelaFormas tabela={item.tabela} />}
         </div>
       </div>
 
